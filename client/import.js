@@ -9,8 +9,21 @@
 //
 
 // CONFIG
-var uri = "https://pagermon-hrng.c9users.io/api/capcodes";
-var apikey = "TM6UC6O4L6O64KPNM9M1JS0";
+// create config file if it does not exist, and set defaults
+var conf_defaults = require('./config/default.json');
+var conf_file = './config/config.json';
+if( ! fs.existsSync(conf_file) ) {
+    fs.writeFileSync( conf_file, JSON.stringify(conf_defaults,null, 2) );
+}
+// load the config file
+var nconf = require('nconf');
+    nconf.file({file: conf_file});
+    nconf.load();
+
+var hostname = nconf.get('hostname');
+var apikey = nconf.get('apikey');
+
+var uri = hostname+"/api/capcodes";
 // Now scroll down and set the agency and color config according to your needs
 
 var http = require('http');
@@ -19,7 +32,7 @@ var request = require('request');
 require('request').debug = true
 var rp = require('request-promise-native');
 
-var colors = require('colors/safe'); // does not alter string prototype
+var colors = require('colors/safe');
 colors.setTheme({
   success: ['green', 'bold'],
   error: 'red'

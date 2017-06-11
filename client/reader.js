@@ -12,9 +12,21 @@
 //
 
 // CONFIG
-var uri ="https://pagermon-hrng.c9users.io/api/messages";
-var apikey = "562SBQ2XR3O05P79YAMIV840";
-// Make sure you generate a new key when bringing to production
+// create config file if it does not exist, and set defaults
+var conf_defaults = require('./config/default.json');
+var conf_file = './config/config.json';
+if( ! fs.existsSync(conf_file) ) {
+    fs.writeFileSync( conf_file, JSON.stringify(conf_defaults,null, 2) );
+}
+// load the config file
+var nconf = require('nconf');
+    nconf.file({file: conf_file});
+    nconf.load();
+
+var hostname = nconf.get('hostname');
+var apikey = nconf.get('apikey');
+
+var uri = hostname+"/api/messages";
 
 var http = require('http');
 var request = require('request');
@@ -22,7 +34,7 @@ require('request').debug = true
 var rp = require('request-promise-native');
 var moment = require('moment');
 
-var colors = require('colors/safe'); // does not alter string prototype
+var colors = require('colors/safe');
 colors.setTheme({
   success: ['white', 'bold', 'bgBlue'],
   error: ['red', 'bold', 'bgwhite']
