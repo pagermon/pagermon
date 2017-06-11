@@ -6,6 +6,33 @@ It is built around POCSAG messages, but should easily support other message type
 
 The UI is built around a Node/Express/Angular/Bootstrap stack, while the client scripts are Node scripts that receive piped input.
 
+## Features
+
+* Capcode aliasing with colors and [FontAwesome](https://fontawesome.io/icons/) icons
+* API driven extensible architecture
+* Single user, multiple API keys
+* SQLite database backing
+* Configurable via UI
+* Pagination and searching
+* Filtering by capcode or agency
+* Duplicate message filtering
+* Keyword highlighting
+* WebSockets support - messages are delivered to clients in near realtime
+* Pretty HTML5
+* May or may not contain cute puppies
+
+### Planned Features
+
+* Multi-user support
+* Other database support (MongoDB and DynamoDB planned)
+* Horizontal scaling
+* Enhanced message filtering
+* Bootstrap 4 + Angular 2 support
+* Enhanced alias control
+* Graphing
+* Push notifications
+* Non-sucky documentation
+
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
@@ -13,6 +40,7 @@ These instructions will get you a copy of the project up and running on your loc
 ### Prerequisites
 
 * [nodejs](https://nodejs.org/)
+* sqlite3
 * Probably some other stuff
 
 ## Running the server
