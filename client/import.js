@@ -10,10 +10,13 @@
 
 // CONFIG
 // create config file if it does not exist, and set defaults
+var fs = require('fs');
 var conf_defaults = require('./config/default.json');
 var conf_file = './config/config.json';
 if( ! fs.existsSync(conf_file) ) {
     fs.writeFileSync( conf_file, JSON.stringify(conf_defaults,null, 2) );
+    console.log('created config file - set your api key in '+conf_file);
+    return;
 }
 // load the config file
 var nconf = require('nconf');

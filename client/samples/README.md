@@ -1,4 +1,4 @@
-    $ cat filters.ini | node ../import.js
+    $ cat samples/filters.ini | node ./import.js
 
 Should provide output similar to:
 
@@ -20,7 +20,7 @@ Should provide output similar to:
 	Success! 1519
 	Success! 1519080
 
-    $ multimon-ng -b2 -q -c -t wav -a POCSAG512 -f alpha sample-2017-06-01.wav | node ../reader.js
+    $ multimon-ng -b2 -q -c -t wav -a POCSAG512 -f alpha samples/sample-2017-06-01.wav | node ./reader.js
 
 Should provide output similar to:
 
