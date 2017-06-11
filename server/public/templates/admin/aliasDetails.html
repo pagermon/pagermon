@@ -1,0 +1,82 @@
+<div class="row" style="padding-top: 11px;">
+</div>
+<div ng-if="loading" class="loading"><i class="fa fa-spinner fa-spin"></i></div>
+<div class="alert {{alertMessage.type}} alert-dismissable alert-fixed fade in" ng-if="alertMessage.show">
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="alertMessage.show = false">&times;</button>
+  <strong>{{alertMessage.text}}</strong>
+</div>
+<div class="row" style="padding-top: 10px">
+  <div class="col-sm-6 col-xs-12">
+          <h4 style="padding-left: 15px;"><a href="/admin/">Admin</a> / <a href="/admin/aliases/">Aliases</a> / {{alias.originalAddress || 'New'}} {{alias.newMessage}}</div>
+  <div class="col-sm-6 col-xs-12">
+            <div class="hidden-xs btn-group pull-right" style="margin-top: 11.5px" role="group" aria-label="Actions">
+              <button ng-if="!isNew" type="button" ng-click="newButton('new');" class="btn btn-success">Add New</button>
+            </div>
+            <div class="visible-xs btn-group" style="padding-left: 15px;" role="group" aria-label="Actions">
+              <button ng-if="!isNew" type="button" ng-click="newButton('new');" class="btn btn-success">Add New</button>
+            </div>
+          </h4>
+  </div>
+  <div class="col-xs-12">
+          <hr />
+          <form ng-submit="aliasSubmit()" class="form-horizontal" name="alias">
+          <h5>Alias Details</h5>
+            <div class="form-group has-feedback" ng-class="!alias.address || existingAddress ? 'has-error' : 'has-success'">
+              <label for="alias.address" class="col-xs-4 col-sm-3 control-label">Address</label>
+              <div class="col-xs-8 col-sm-9">
+                <input class="form-control" type="number" name="alias.address" ng-model="alias.address" ng-change="checkAddress()" ng-model-options="{updateOn: 'blur'}" required>
+                <span ng-if="aliasLoading" class="fa fa-refresh fa-spin fa-2x fa-fw form-control-feedback" aria-hidden="true"></span>
+                <span id="helpBlock" class="help-block">Capcode address matches loosely, e.g. '200' will match messages from '0000200', '2009999', or '0002001'.</span>
+                <span ng-if="existingAddress" class="text-danger pull-left">Address already exists! </span>
+                <div ng-if="existingAddress" class="btn-group pull-right" role="group" aria-label="Replace existing alias?">
+                  <button type="button" ng-click="newButton(alias.address)" class="btn btn-danger">Replace Existing</button>
+                  <button type="button" ng-click="alias.address = alias.originalAddress; checkAddress()" class="btn btn-danger">Reset<span ng-if="alias.originalAddress"> to {{alias.originalAddress}}</span></button>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="alias.agency" class="col-xs-4 col-sm-3 control-label">Agency</label>
+              <div class="col-xs-8 col-sm-9">
+              <input class="form-control" type="text" name="alias.agency" ng-model="alias.agency" required>
+              <span id="helpBlock" class="help-block">Agency or a high level group for aliases.</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="alias.icon" class="col-xs-4 col-sm-3 control-label">Icon</label>
+              <div class="col-xs-8 col-sm-9">
+                <div class="input-group">
+                  <span class="input-group-addon" id="alias.icon.addon">
+                    <span class="fa-stack fa-lg fa-fw" style="color: {{alias.color || 'black'}};">
+                      <i class="fa fa-circle fa-stack-2x"></i>
+                      <i class="fa fa-{{alias.icon || 'question'}} fa-stack-1x fa-inverse"></i>
+                    </span>
+                  </span>
+                  <input class="form-control" type="text" name="alias.icon" ng-model="alias.icon" required>
+                </div>
+              <span id="helpBlock" class="help-block">Fontawesome icon to display with the alias. <a href="http://fontawesome.io/icons/" target="_blank">Available icons.</a></span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="alias.color" class="col-xs-4 col-sm-3 control-label">Color</label>
+              <div class="col-xs-8 col-sm-9">
+              <color-picker ng-model="alias.color" options="colorOptions"></color-picker>
+              <!-- <input class="form-control" type="text" name="alias.color" ng-model="alias.color" required> -->
+              <span id="helpBlock" class="help-block">HTML color to use for the icon and address. Can be a named color or a # color code.</span>
+              </div>
+            </div>
+            <div class="form-group" ng-class="!alias.alias ? 'has-error' : 'has-success'">
+              <label for="alias.alias" class="col-xs-4 col-sm-3 control-label">Alias</label>
+              <div class="col-xs-8 col-sm-9">
+              <input class="form-control" type="text" name="alias.alias" ng-model="alias.alias" required>
+              <span id="helpBlock" class="help-block">Text description of the alias.</span>
+              </div>
+            </div>
+            <div class="btn-group pull-right" style="padding-right: 10px; padding-bottom: 10px;"role="group" aria-label="Actions">
+              <button type="button" ng-if="!isNew" ng-click="aliasDelete()" class="btn btn-danger">Delete</button>
+              <button type="button" ng-click="aliasLoad()" class="btn btn-default">Reset</button>
+              <button type="submit" class="btn btn-default">Save</button>
+            </div>
+            
+          </form>
+        </div>
+</div>

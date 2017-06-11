@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html ng-app=app lang="en">
+<% include global/header.ejs %>
+<base href="/">
+</head>
+
+<body id="home-body">
+
+<% include global/menu.ejs %>
+
+<div id="content" class="container-fluid" ng-cloak>
+  
+  <ng-view></ng-view>
+
+  <!-- Template -->
+  
+  <script type="text/ng-template" id="/messages.html">
+  <div ng-show="loading" class="loading"><i class="fa fa-spinner fa-spin"></i></div>
+    <p></p>
+    <div class="row">
+      <table class="table table-condensed table-hover table-striped valign">
+        <thead class="thead-default">
+          <tr>
+            <th colspan="2">
+                <button type="button" class="btn btn-default btn-sm" ng-click="updateData();" aria-label="Refresh"><i class="fa fa-refresh {{spinner}}" aria-hidden="true"></i></button>
+                <span class="dropdown">
+                  <button class="btn btn-default btn-sm dropdown-toggle" type="button" data-toggle="dropdown">{{init.limit}}
+                  <span class="caret"></span></button>
+                  <ul class="dropdown-menu" role="menu">
+                    <li ng-class="{disabled:init.limit == 10}"><a href="#" ng-click="setCookie('messageLimit', 10);">10</a></li>
+                    <li ng-class="{disabled:init.limit == 20}"><a href="#" ng-click="setCookie('messageLimit', 20);">20</a></li>
+                    <li ng-class="{disabled:init.limit == 50}"><a href="#" ng-click="setCookie('messageLimit', 50);">50</a></li>
+                    <li ng-class="{disabled:init.limit == 100}"><a href="#" ng-click="setCookie('messageLimit', 100);">100</a></li>
+                  </ul>
+                </span>
+            </th>
+            <th class="noTiny" style="text-align: center;">Capcode</th>
+            <th class="noMobile"></th>
+            <th class="noMobile"></th>
+            <th style="text-align: center;">Message<span ng-if="filter" class="pull-left" style="vertical-align: middle; padding-right: 10px;"><strong>Filter:</strong> <a ng-href="/" style="margin-bottom: 3px;" class="btn btn-primary btn-xs">{{filter}} <i class="fa fa-fw fa-times"></i></a></span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="message in messages | filter: search">
+            <td class="shrink noMobile">{{message.date}}</td>
+            <td class="shrink">{{message.timestamp}}</td>
+            <td class="shrink noMobile" ng-click="addressFilter(message.address || '')" style="background-color: {{message.color || 'grey'}}; text-align: center;">
+              <span class="small" style="color: white; font-family: monospace;"><strong>{{message.padAddress}}</strong></span>
+              </td>
+            <td class="shrink" ng-click="agencyFilter(message.agency || '')">
+              <span ng-if="message.icon" class="fa-stack fa-lg fa-fw" style="color: {{message.color || 'transparent'}};">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-{{message.icon}} fa-stack-1x fa-inverse"></i>
+              </span>
+              <span ng-if="!message.icon" class="fa-stack fa-lg fa-fw" style="color: {{message.color || 'grey'}};">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-question fa-stack-1x fa-inverse"></i>
+              </span>
+              <strong style="vertical-align: middle;">{{message.agency || ''}}</strong>
+            </td>
+            <td class="shrink noTiny">
+              <a ng-if="user" data-toggle="tooltip" title="{{message['MAX(capcodes.address)'] || ''}}" ng-href="/admin/aliases/{{message['MAX(capcodes.address)'] || ''}}">{{message.alias || ''}}</a>
+              <span ng-if="!user" data-toggle="tooltip" title="{{message['MAX(capcodes.address)'] || ''}}">{{message.alias || ''}}</span>
+            </td>
+            <td class="expand" data-toggle="tooltip" title="{{message.id}}"><div highlight="message.message" keywords="init.highlightText" class="pagerMessage"></td>
+        </tbody>
+      </table>
+      </div>
+    <div class="row" ng-if="messages.length == 0">
+      <div class="col-sm-8 col-sm-offset-2" style="text-align: center; vertical-align: middle;">
+        <h4>No messages found!</h4>
+        <div ng-if="hasQuery"><p>Consider broadening your search terms and try again.</p></div>
+        <div ng-if="!hasQuery"><p>Have you loaded any message data yet?</p></div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-xs-offset-1 col-xs-10">
+      <form action="/" method="get">
+        <div class="input-group">
+          <input id="query" type="text" class="form-control" name="q" placeholder="Search" ng-model="query">
+          <span class="input-group-btn">
+            <button type="submit" class="btn btn-default" ng-disabled="!query" ng-class="{disabledLink: !query}"><i class="fa fa-fw fa-search"></i></button>
+            <button ng-if="!hasQuery" ng-click="clearSearch()" class="btn btn-default" ng-class="{disabledLink: !query}" ng-disabled="!query"><i class="fa fa-fw fa-times"></i></button>
+            <a ng-href="/" ng-if="hasQuery" class="btn btn-default"><i class="fa fa-fw fa-times"></i></a>
+          </span>
+        </div>
+      </form>
+      </div>
+    </div>
+    <!-- filter bar, currently disabled
+    <div class="row">
+      <div class="col-xs-offset-1 col-xs-10">
+      <div class="input-group">
+        <span class="input-group-addon"><i class="glyphicon glyphicon-filter"></i></span>
+        <input id="search" type="text" class="form-control" name="search" placeholder="Filter" ng-model="search">
+      </div>
+      </div>
+    </div> -->
+
+    <% include global/pagination.ejs %>
+
+    </div>
+  </script>
+  
+  <script type="text/ng-template" id="/messageDetails.html">
+    <h1>{{ message.address }}</h1>
+    note: <textarea>{{ message.message }}</textarea>
+  </script>
+  
+  <script>
+var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-highlight'])
+    
+    // Service
+    
+    .factory('socket', function ($rootScope) {
+      var socket = io({transports: ['websocket'], upgrade: false});
+      return {
+        on: function (eventName, callback) {
+          socket.on(eventName, function () {  
+            var args = arguments;
+            $rootScope.$apply(function () {
+              callback.apply(socket, args);
+            });
+          });
+        },
+        emit: function (eventName, data, callback) {
+          socket.emit(eventName, data, function () {
+            var args = arguments;
+            $rootScope.$apply(function () {
+              if (callback) {
+                callback.apply(socket, args);
+              }
+            });
+          })
+        }
+      };
+    })
+    
+    .factory('Api', ['$resource',
+     function($resource) {
+      return {
+        Messages: $resource('/api/messages/'),
+        NewMessage: $resource('/api/messages/:id', {id: '@id'}),
+        MessageSearch: $resource('/api/messageSearch/')
+    //    Init:  $resource('/api/messages/init/?page=:page', {page: '@page'})
+      };
+    }])
+    
+    //.factory('Messages', ['$resource', function($resource){
+    //  return $resource('/messages/:id', null, {
+    //    'get': { method:'GET' }
+    //  });
+    //}])
+    
+    //.factory('Init', ['$resource', function($resource){
+    //  return $resource('/messages/init', null, {
+    //    'get': { method:'GET' }
+    //  });
+    //}])
+    
+    // Controller
+    .controller('MessageController', ['$scope', '$routeParams', 'Api', 'socket', '$cookies', '$location', function ($scope, $routeParams, Api, socket, $cookies, $location) {
+      // get new message on socket event
+      <% if(typeof user != 'undefined'){ %>
+        $scope.user="<%=user%>";
+      <% }else{ %>
+        $scope.user="";
+      <% } %>
+      socket.on('messagePost', function(message) {
+        // only bother getting the new message if we're on page 1
+        if ($scope.init.currentPage === 1) {
+          console.log('New Message ID: '+message + ' currentPage: '+$scope.init.currentPage);
+          Api.NewMessage.get({id: message }).$promise.then(function(result) {
+            var datetime = moment.unix(result.timestamp);
+            result.date = datetime.format("YYYY-MM-DD")
+            result.timestamp = datetime.format("HH:mm");
+            result.padAddress = $scope.padZeroes('0000000',result.address,true);
+            $scope.messages.unshift(result);
+            $scope.messages.pop();
+          }, function(error) {
+            console.log('Error on Api.NewMessage.get!', error);
+          });
+        }
+      });
+      
+      socket.on('reconnect', function() {
+        console.log('socket reconnected', new Date().toISOString());
+      })
+      
+      $scope.agencyFilter = function(agency){
+        $location.url('/?agency='+agency);
+      };
+      
+      $scope.addressFilter = function(address){
+        $location.url('/?address='+address);
+      };
+      
+      $scope.clearSearch = function(){
+        $scope.query = '';
+      };
+      
+      $scope.updateData = function(page, query){
+        // spinner start
+        $scope.spinner = 'fa-spin';
+        $scope.loading = true;
+        // get limit from cookiestore
+        var curPage = page || $routeParams.page || '1';
+        var limit = $cookies.get('messageLimit') || '';
+        
+        var queryObj = {};
+            queryObj.page = curPage;
+            queryObj.limit = limit;
+            
+        if ($routeParams.q || query) {
+          $scope.query = query || $routeParams.q;
+          $scope.hasQuery = true;
+          queryObj.q = query || $routeParams.q;
+        } else {
+          $scope.query = '';
+          $scope.hasQuery = false;
+        }
+        
+        if ($routeParams.agency || $routeParams.address) {
+          $scope.filter = $routeParams.agency || $routeParams.address;
+          $scope.hasQuery = true;
+          if ($routeParams.agency) {
+            queryObj.agency = $routeParams.agency;
+          } else if ($routeParams.address) {
+            queryObj.address = $routeParams.address;
+          }
+        }
+        
+        if (queryObj.q || queryObj.agency || queryObj.address) {
+          Api.MessageSearch.get(queryObj).$promise.then(function(results) {
+            //console.log(results);
+              results.init.currentPage++;
+              var startPage, endPage;
+              if (results.init.pageCount <= 10) {
+                  // less than 10 total pages so show all
+                  startPage = 1;
+                  endPage = results.init.pageCount;
+              } else {
+                  // more than 10 total pages so calculate start and end pages
+                  if (results.init.currentPage <= 6) {
+                      startPage = 1;
+                      endPage = 10;
+                  } else if (results.init.currentPage + 4 >= results.init.pageCount) {
+                      startPage = results.init.pageCount - 9;
+                      endPage = results.init.pageCount;
+                  } else {
+                      startPage = results.init.currentPage - 5;
+                      endPage = results.init.currentPage + 4;
+                  }
+              }
+              var pages = $scope.range(startPage, endPage);
+              results.init.pages = pages;
+              $scope.init = results.init;
+              angular.forEach(results.messages, function(result) {
+                var datetime = moment.unix(result.timestamp);
+                result.date = datetime.format("YYYY-MM-DD");
+                result.timestamp = datetime.format("HH:mm");
+                result.message = $scope.htmlEntities(result.message);
+                result.padAddress = $scope.padZeroes('0000000',result.address,true);
+              });
+              $scope.spinner = '';
+              $scope.loading = false;
+              $scope.messages = results.messages;
+              // spinner end
+          }, function(error) {
+            console.log('Error on Api.MessageSearch.query!', error);
+            $scope.spinner = '';
+            $scope.loading = false;
+          });
+        } else {
+          Api.Messages.get({page: curPage, limit: limit }).$promise.then(function(results) {
+            //console.log(results);
+            results.init.currentPage++;
+            var startPage, endPage;
+            if (results.init.pageCount <= 10) {
+                // less than 10 total pages so show all
+                startPage = 1;
+                endPage = results.init.pageCount;
+            } else {
+                // more than 10 total pages so calculate start and end pages
+                if (results.init.currentPage <= 6) {
+                    startPage = 1;
+                    endPage = 10;
+                } else if (results.init.currentPage + 4 >= results.init.pageCount) {
+                    startPage = results.init.pageCount - 9;
+                    endPage = results.init.pageCount;
+                } else {
+                    startPage = results.init.currentPage - 5;
+                    endPage = results.init.currentPage + 4;
+                }
+            }
+            var pages = $scope.range(startPage, endPage);
+            results.init.pages = pages;
+            $scope.init = results.init;          
+            angular.forEach(results.messages, function(result) {
+              var datetime = moment.unix(result.timestamp);
+              result.date = datetime.format("YYYY-MM-DD");
+              result.timestamp = datetime.format("HH:mm");
+              result.message = $scope.htmlEntities(result.message);
+              result.padAddress = $scope.padZeroes('0000000',result.address,true);
+            });
+            $scope.spinner = '';
+            $scope.loading = false;
+            $scope.messages = results.messages;
+            // spinner end
+          }, function(error) {
+            console.log('Error on Api.Messages.query!', error);
+            $scope.spinner = '';
+            $scope.loading = false;
+          });
+        }
+      };
+      
+      $scope.updateData();
+      
+      $scope.range = function(min, max, step) {
+          step = step || 1;
+          var input = [];
+          for (var i = min; i <= max; i += step) {
+              input.push(i);
+          }
+          return input;
+      };
+      
+      $scope.htmlEntities = function(str) {
+          return String(str).replace(/&/g, '&amp;').replace(/</g, ' ').replace(/>/g, ' ').replace(/"/g, '&quot;');
+      }
+      
+      $scope.padZeroes = function(pad, str, padLeft) {
+          if (typeof str === 'undefined') 
+            return pad;
+          if (padLeft) {
+            return (pad + str).slice(-pad.length);
+          } else {
+            return (str + pad).substring(0, pad.length);
+          }
+      };
+      
+      $scope.setCookie = function(cookie, value) {
+          $cookies.put(cookie, value);
+          $scope.updateData($scope.init.currentPage);
+      };
+      
+      //$scope.messages = Messages.query();
+      //angular.forEach($scope.messages, function (value, key) {
+      //  console.log(key + ': ' + value);
+      //});
+    }])
+    
+    //.controller('MessageDetailCtrl', ['$scope', '$routeParams', 'Messages', function ($scope, $routeParams, Messages) {
+    //  $scope.message = Api.Messages.get({page: $routeParams.id });
+    //}])
+    // Routes
+    .config(['$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider) {
+      $routeProvider
+        .when('/', {
+          templateUrl: '/messages.html',
+          controller: 'MessageController'
+        })
+        .when('/:page', {
+          templateUrl: '/messages.html',
+          controller: 'MessageController'
+       });
+      $locationProvider.html5Mode({ enabled: true, requireBase: false, rewriteLinks: false});
+    }]);
+    
+  </script>
+
+</div>
+
+<% include global/footer.ejs %>

@@ -1,0 +1,219 @@
+<div class="row" style="padding-top: 11px;">
+</div>
+<div ng-if="loading" class="loading"><i class="fa fa-spinner fa-spin"></i></div>
+<div class="alert {{alertMessage.type}} alert-dismissable alert-fixed fade in" ng-if="alertMessage.show">
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="alertMessage.show = false">&times;</button>
+  <strong>{{alertMessage.text}}</strong>
+</div>
+<div class="row" style="padding-top: 10px">
+  <div class="col-xs-12">
+          <h4 style="padding-left: 15px;"><a href="/admin/">Admin</a> / Settings</h4>
+          <hr />
+          <form ng-submit="settingsSubmit()" class="form-horizontal">
+            
+            <h5>Global</h5>
+            <div class="form-group">
+              <label for="global.loglevel" class="col-xs-4 col-sm-3 control-label">Log level</label>
+              <div class="col-xs-8 col-sm-9">
+                <select name="global.loglevel" ng-model="settings.global.loglevel" class="form-control">
+                  <option value="debug">Debug</option>
+                  <option value="info">Info</option>
+                  <option value="warn">Warning</option>
+                </select>
+                <span id="helpBlock" class="help-block">Sets the level of information available in log files.</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="global.sessionSecret" class="col-xs-4 col-sm-3 control-label">Session Secret</label>
+              <div class="col-xs-8 col-sm-9">
+                <div class="input-group">
+                  <input class="form-control" type="text" name="global.sessionSecret" ng-model="settings.global.sessionSecret" required readonly>
+                  <span class="input-group-addon" id="global.sessionSecret.addon">
+                    <button class="btn btn-default" ng-click="generateKey('sessionSecret')" type="button">Generate</button>
+                  </span>
+                </div>
+                <span id="helpBlock" class="help-block">Secret key for cookie sessions, should be changed before deploying the application. Changing this will invalidate existing sessions.</span>
+              </div>
+            </div>
+            
+            <h5>Database</h5>
+            <fieldset disabled>
+            <div class="form-group">
+              <label for="database.type" class="col-xs-4 col-sm-3 control-label">Type</label>
+              <div class="col-xs-8 col-sm-9">
+                <select name="database.type" ng-model="settings.database.type" class="form-control" readonly>
+                  <option value="sqlite">SQLite</option>
+                  <option value="mongo">MongoDB</option>
+                  <option value="dynamo">DynamoDB</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="database.file" class="col-xs-4 col-sm-3 control-label">File</label>
+              <div class="col-xs-8 col-sm-9">
+              <input class="form-control" type="text" name="database.file" ng-model="settings.database.file" readonly>
+              <span class="text-warning">Database configuration is not yet implemented.</span>
+              </div>
+            </div>
+            </fieldset>
+            
+            <h5>Messages</h5>
+            <div class="form-group">
+              <label for="messages.maxLimit" class="col-xs-4 col-sm-3 control-label">Max limit per page</label>
+              <div class="col-xs-8 col-sm-9">
+              <input type="number" class="form-control" name="messages.maxLimit" ng-model="settings.messages.maxLimit">
+              <span id="helpBlock" class="help-block">The maximum number of messages a user can display per page.</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="messages.defaultLimit" class="col-xs-4 col-sm-3 control-label">Default limit per page</label>
+              <div class="col-xs-8 col-sm-9">
+              <input type="number" class="form-control" name="messages.defaultLimit" ng-model="settings.messages.defaultLimit">
+              <span id="helpBlock" class="help-block">Default number of messages to show per page.</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="messages.highlightText" class="col-xs-4 col-sm-3 control-label">Text highlight list</label>
+              <div class="col-xs-8 col-sm-9">
+              <input type="text" class="form-control" name="messages.highlightText" ng-model="settings.messages.highlightText">
+              <span id="helpBlock" class="help-block">Applies the angular-highlight class to strings matching the comma separated list (e.g. 'firecall, alert'). List is not case sensitive.</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="col-xs-8 col-xs-offset-2 col-sm-9 col-sm-offset-3">
+                <div class="checkbox">
+                <label>
+                  <input type="checkbox" name="messages.duplicateFiltering" ng-model="settings.messages.duplicateFiltering"> Filter out duplicate messages
+                </label>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="messages.duplicateLimit" class="col-xs-4 col-sm-3 control-label">Duplicate limit</label>
+              <div class="col-xs-8 col-sm-9">
+              <input type="number" class="form-control" name="messages.duplicateLimit" ng-model="settings.messages.duplicateLimit" ng-disabled="!settings.messages.duplicateFiltering">
+              <span id="helpBlock" class="help-block">Ignore a message if one of the last {{settings.messages.duplicateLimit}} messages contains the same address and content.</span>
+              </div>
+            </div>
+            <fieldset disabled>
+            <div class="form-group">
+              <div class="col-xs-8 col-xs-offset-2 col-sm-9 col-sm-offset-3">
+                <div class="checkbox">
+                <label>
+                  <input type="checkbox" name="messages.rotationEnabled" ng-model="settings.messages.rotationEnabled"> Rotate out old messages
+                </label>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="messages.rotateDays" class="col-xs-4 col-sm-3 control-label">Rotation interval</label>
+              <div class="col-xs-8 col-sm-9">
+              <input type="number" class="form-control" name="messages.rotateDays" ng-model="settings.messages.rotateDays" ng-disabled="!settings.messages.rotationEnabled">
+              <span id="helpBlock" class="help-block">Rotate the messages database every {{settings.messages.rotateDays}} days.</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="messages.rotateKeep" class="col-xs-4 col-sm-3 control-label">Rotation retention</label>
+              <div class="col-xs-8 col-sm-9">
+              <input type="number" class="form-control" name="messages.rotateKeep" ng-model="settings.messages.rotateKeep" ng-disabled="!settings.messages.rotationEnabled">
+              <span id="helpBlock" class="help-block">Keep {{settings.messages.rotateKeep}} rotated database files.</span>
+              <span class="text-warning">Message rotation is not yet implemented</span>
+              </div>
+            </div>
+            </fieldset>
+            
+            <h5>Auth</h5>
+            <div class="form-group">
+            <fieldset disabled>
+              <label for="auth.type" class="col-xs-4 col-sm-3 control-label">Type</label>
+              <div class="col-xs-8 col-sm-9">
+                <select name="auth.type" ng-model="settings.auth.type" class="form-control" readonly>
+                  <option value="local">Local</option>
+                  <option value="database">Database</option>
+                </select>
+                <span class="text-warning">Authentication methods are not yet implemented</span>
+              </div>
+            </fieldset>  
+            </div>
+            <div class="row">
+            <label class="col-xs-4 col-sm-3 control-label">API Keys</label>
+            </div>
+            <div class="form-group">
+              <div class="col-sm-11 col-sm-offset-1">
+              <table class="table table-striped table-condensed">
+                <thead>
+                  <tr>
+                    <th width="1%"></th>
+                    <th width="25%">Name</th>
+                    <th width="99%">Key</th>
+                    <th width="1%"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="key in settings.auth.keys track by $index">
+                    <td style="text-align: center; vertical-align: middle;">
+                      <input type="checkbox" ng-model="key.selected"/></td>
+                    <td>
+                      <input type="text" class="form-control" placeholder="Name" ng-model="key.name" required></td>
+                    <td colspan="{{key.key ? '2' : '1'}}">
+                      <input type="text" class="form-control" placeholder="Key" ng-model="key.key" readonly required></td>
+                    <td ng-if="key.key == ''">
+                      <button class="btn btn-default" ng-click="generateKey($index)" type="button">Generate</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="text-align: left;">
+                      <input ng-disabled="!keySelected()" type="button" class="btn btn-sm btn-danger" ng-click="removeKey()" value="&times;">
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td>
+                      <input type="button" class="btn btn-success btn-sm addnew pull-right" ng-click="addKey()" value="&plus;">
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              </div>
+            </div>
+            
+            <button type="submit" class="btn btn-default pull-right">Save</button>
+            
+          </form>
+        </div>
+</div>
+
+
+<!---
+{
+  "global": {
+    "loglevel": "info"
+  },
+  "database": {
+    "file": "./messages.db",
+    "type": "sqlite"
+  },
+  "messages": {
+    "maxLimit": 100,
+    "defaultLimit": 20,
+    "duplicateFiltering": true,
+    "duplicateLimit": 10,
+    "rotationEnabled": true,
+    "rotateDays": 7,
+    "rotateKeep": 4
+  },
+  "auth": {
+    "type": "local",
+    "user": "admin",
+    "encPass": "$2a$08$6cWJQ6GXIro1owtSAcmPG.J7M90YWVjV.G8Ct8.c2jnFPdt9kSuvy",
+    "keys": [
+      {
+        "name": "client1",
+        "key": "longkey"
+      },
+      {
+        "name": "client2",
+        "key": "test2"
+      }
+    ]
+  }
+}-->

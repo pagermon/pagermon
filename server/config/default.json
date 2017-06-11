@@ -1,0 +1,37 @@
+{
+  "global": {
+    "loglevel": "debug",
+    "sessionSecret": "1DVETLX8VE007RYQN9TN9Z00",
+    "version": "0.1.0-alpha"
+  },
+  "database": {
+    "file": "./messages.db",
+    "type": "sqlite"
+  },
+  "messages": {
+    "maxLimit": 120,
+    "defaultLimit": 20,
+    "duplicateFiltering": true,
+    "duplicateLimit": 10,
+    "rotationEnabled": true,
+    "rotateDays": 7,
+    "rotateKeep": 4,
+    "highlightText": "firecall, alert"
+  },
+  "auth": {
+    "type": "local",
+    "user": "admin",
+    "encPass": "$2a$08$De/aXnQkZIEbQ9p8J22tHuzLltqIbsAxE2CGgRMPLaaIwwHmVrpsu",
+    "keys": [
+      {
+        "name": "example1",
+        "key": "reallylongkeythatneedstobechanged",
+        "selected": false
+      },
+      {
+        "name": "example2",
+        "key": "whydoyouneedtwokeys"
+      }
+    ]
+  }
+}
