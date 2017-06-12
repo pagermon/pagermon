@@ -67,11 +67,11 @@
               </span>
               <strong style="vertical-align: middle;"></strong>
             </td>
-            <td class="shrink noTiny clickable-td" ng-if="user && message.alias" ng-click="editAlias(message.aliasMatch)">
+            <td class="shrink noTiny clickable-td" ng-if="user" ng-click="editAlias(message.aliasMatch || message.address)">
             <!-- <td class="shrink noTiny clickable-td" ng-if="user && message.alias" ng-click="editAlias(message['MAX(capcodes.address)'] || '')"> -->
-              <span data-toggle="tooltip" title="{{message['MAX(capcodes.address)'] || ''}}" style="color: Maroon;">{{message.alias || ''}}</span>
+              <span data-toggle="tooltip" title="{{message['MAX(capcodes.address)'] || ''}}" style="color: Maroon;">{{message.alias || 'Unknown'}}</span>
             </td>
-            <td class="shrink noTiny" ng-if="!user || !message.alias">
+            <td class="shrink noTiny" ng-if="!user">
               <span data-toggle="tooltip" title="{{message['MAX(capcodes.address)'] || ''}}">{{message.alias || ''}}</span>
             </td>
             <td class="expand" data-toggle="tooltip" title="{{message.id}}"><div highlight="message.message" keywords="init.highlightText" class="pagerMessage"></td>
