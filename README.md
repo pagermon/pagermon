@@ -50,7 +50,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 ## Running the server
 
-1) Edit server/process.json according to your environment - make sure you set the working directory
+1) Copy server/process-default.json to server/process.json and modify according to your environment
 2) Launch the app from the Terminal:
 ```
     $ sudo apt-get install npm sqlite3

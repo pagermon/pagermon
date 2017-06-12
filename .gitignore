@@ -66,6 +66,7 @@ typings/
 
 # environment specific
 
+server/process.json
 server/config/config.json
 server/config/backup.json
 server/bin/
