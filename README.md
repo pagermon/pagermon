@@ -64,7 +64,8 @@ These instructions will get you a copy of the project up and running on your loc
     $ pm2 install pm2-logrotate
     $ sudo pm2 logrotate -u user
 ```
-5) Now login via the website, change your password, and generate some API keys
+5) Now login via the website, default credentials are 'admin' / 'changeme'
+6) Head to /admin, change your password, and generate some API keys
 6) Grab your API keys and drop them in the PagerMon client, then you're good to go!
 
 ## Contributing
