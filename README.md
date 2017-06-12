@@ -43,11 +43,17 @@ These instructions will get you a copy of the project up and running on your loc
 * sqlite3
 * Probably some other stuff
 
+#### Recommended
+
+* [nvm](https://github.com/creationix/nvm#installation)
+* nginx or some kind of reverse proxy for SSL offloading
+
 ## Running the server
 
-1) Edit server/process.json according to your environment
+1) Edit server/process.json according to your environment - make sure you set the working directory
 2) Launch the app from the Terminal:
 ```
+    $ sudo apt-get install npm sqlite3
     $ npm install npm@latest -g
     $ npm install pm2 -g
     $ npm install 
