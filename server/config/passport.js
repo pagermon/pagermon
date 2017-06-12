@@ -7,7 +7,7 @@ var LocalAPIKeyStrategy   = require('passport-localapikey-update').Strategy;
 var bcrypt = require('bcryptjs');
 var nconf = require('nconf');
 // don't forget to change this
-var conf_file = './config/default.json';
+var conf_file = './config/config.json';
 nconf.file({file: conf_file});
 
 var getAuth = function() {

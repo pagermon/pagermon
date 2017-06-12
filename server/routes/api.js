@@ -10,7 +10,7 @@ require('../config/passport')(passport); // pass passport for configuration
 
 var nconf = require('nconf');
 // don't forget to change this
-var conf_file = './config/default.json';
+var conf_file = './config/config.json';
 nconf.file({file: conf_file});
 nconf.load();
 
@@ -31,8 +31,8 @@ var db = new sqlite3.Database('./messages.db');
   /////////////////////
   //
   // DB Schema
+  //
   // Table: messages
-  // id (primary key), address (int), message (txt), timestamp (int)
   /*
    CREATE TABLE messages ( 
    id integer PRIMARY KEY, 
@@ -41,7 +41,6 @@ var db = new sqlite3.Database('./messages.db');
    timestamp INTEGER);
   */ 
   // Table: capcodes
-  // address (primary key), alias (txt), agency (txt), icon (txt), color (txt)
   /*
    CREATE TABLE capcodes (
    address integer NOT NULL,
@@ -130,7 +129,7 @@ router.get('/messages', function(req, res, next) {
                 db.close((e) => {
                     if (e) console.log(e);
                 });                 
-            } else {
+            } else if (row) {
                 initData.msgCount = parseInt(row['id'], 10);
                 //console.log(initData.msgCount);
                 initData.pageCount = Math.ceil(initData.msgCount/initData.limit);
@@ -151,8 +150,10 @@ router.get('/messages', function(req, res, next) {
                 // var sql = "SELECT * from messages ORDER BY timestamp";
                 db.all(sql,function(err,rows){
                     if (err) return next(err);
-                    res.json({'init': initData, 'messages': rows});
+                    res.status(200).json({'init': initData, 'messages': rows});
                 });
+            } else {
+                res.status(200).json({'init': {}, 'messages': []});
             }
         });
     });
@@ -420,7 +421,7 @@ router.get('/capcodes/agency/:id', function(req, res, next) {
 //
 // POST calls below
 // 
-// require basic auth for post
+// require API key or auth session
 //
 //////////////////////////////////
 

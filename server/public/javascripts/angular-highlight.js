@@ -6,7 +6,7 @@ angular.module('angular-highlight', []).directive('highlight', function() {
 		}
 		
 		var replacer = function(match, item) {
-			return '<span class="'+attrs.highlightClass+'">'+match+'</span>';
+			return '<a href="/?q='+match+'" class="'+attrs.highlightClass+'">'+match+'</a>';
 		}
 		var tokenize = function(keywords) {
 			keywords = keywords.replace(new RegExp(',$','g'), '').split(',');

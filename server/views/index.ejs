@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html ng-app=app lang="en">
 <% include global/header.ejs %>
+<script src="/javascripts/angular-highlight.js"></script>
 <base href="/">
 </head>
 
@@ -37,30 +38,40 @@
             <th class="noTiny" style="text-align: center;">Capcode</th>
             <th class="noMobile"></th>
             <th class="noMobile"></th>
-            <th style="text-align: center;">Message<span ng-if="filter" class="pull-left" style="vertical-align: middle; padding-right: 10px;"><strong>Filter:</strong> <a ng-href="/" style="margin-bottom: 3px;" class="btn btn-primary btn-xs">{{filter}} <i class="fa fa-fw fa-times"></i></a></span></th>
+            <th style="text-align: center;">Message
+              <span ng-if="filter || hasQuery" class="pull-left" style="vertical-align: middle; padding-right: 10px;">
+                  <strong>Filter:</strong> <a ng-href="/" style="margin-bottom: 3px;" class="btn btn-primary btn-xs">{{filter || origQuery}} <i class="fa fa-fw fa-times"></i></a>
+              </span></th>
           </tr>
         </thead>
         <tbody>
           <tr ng-repeat="message in messages | filter: search">
             <td class="shrink noMobile">{{message.date}}</td>
             <td class="shrink">{{message.timestamp}}</td>
-            <td class="shrink noMobile" ng-click="addressFilter(message.address || '')" style="background-color: {{message.color || 'grey'}}; text-align: center;">
+            <td class="shrink noMobile clickable-td" ng-click="addressFilter(message.address || '')" style="background-color: {{message.color || 'grey'}}; text-align: center;">
               <span class="small" style="color: white; font-family: monospace;"><strong>{{message.padAddress}}</strong></span>
               </td>
-            <td class="shrink" ng-click="agencyFilter(message.agency || '')">
-              <span ng-if="message.icon" class="fa-stack fa-lg fa-fw" style="color: {{message.color || 'transparent'}};">
+            <td class="shrink clickable-td" ng-if="message.agency" ng-click="agencyFilter(message.agency || '')">
+              <span class="fa-stack fa-lg fa-fw" style="color: {{message.color || 'grey'}};">
                 <i class="fa fa-circle fa-stack-2x"></i>
-                <i class="fa fa-{{message.icon}} fa-stack-1x fa-inverse"></i>
-              </span>
-              <span ng-if="!message.icon" class="fa-stack fa-lg fa-fw" style="color: {{message.color || 'grey'}};">
-                <i class="fa fa-circle fa-stack-2x"></i>
-                <i class="fa fa-question fa-stack-1x fa-inverse"></i>
+                <i ng-if="message.icon" class="fa fa-{{message.icon}} fa-stack-1x fa-inverse"></i>
+                <i ng-if="!message.icon" class="fa fa-question fa-stack-1x fa-inverse"></i>
               </span>
               <strong style="vertical-align: middle;">{{message.agency || ''}}</strong>
             </td>
-            <td class="shrink noTiny">
-              <a ng-if="user" data-toggle="tooltip" title="{{message['MAX(capcodes.address)'] || ''}}" ng-href="/admin/aliases/{{message['MAX(capcodes.address)'] || ''}}">{{message.alias || ''}}</a>
-              <span ng-if="!user" data-toggle="tooltip" title="{{message['MAX(capcodes.address)'] || ''}}">{{message.alias || ''}}</span>
+            <td class="shrink" ng-if="!message.agency">
+              <span class="fa-stack fa-lg fa-fw" style="color: {{message.color || 'grey'}};">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i ng-if="message.icon" class="fa fa-{{message.icon}} fa-stack-1x fa-inverse"></i>
+                <i ng-if="!message.icon" class="fa fa-question fa-stack-1x fa-inverse"></i>
+              </span>
+              <strong style="vertical-align: middle;"></strong>
+            </td>
+            <td class="shrink noTiny clickable-td" ng-if="user && message.alias" ng-click="editAlias(message['MAX(capcodes.address)'] || '')">
+              <span data-toggle="tooltip" title="{{message['MAX(capcodes.address)'] || ''}}" style="color: Maroon;">{{message.alias || ''}}</span>
+            </td>
+            <td class="shrink noTiny" ng-if="!user || !message.alias">
+              <span data-toggle="tooltip" title="{{message['MAX(capcodes.address)'] || ''}}">{{message.alias || ''}}</span>
             </td>
             <td class="expand" data-toggle="tooltip" title="{{message.id}}"><div highlight="message.message" keywords="init.highlightText" class="pagerMessage"></td>
         </tbody>
@@ -70,7 +81,9 @@
       <div class="col-sm-8 col-sm-offset-2" style="text-align: center; vertical-align: middle;">
         <h4>No messages found!</h4>
         <div ng-if="hasQuery"><p>Consider broadening your search terms and try again.</p></div>
-        <div ng-if="!hasQuery"><p>Have you loaded any message data yet?</p></div>
+        <div ng-if="!hasQuery"><p>Have you loaded any message data yet?</p>
+          <p>If you believe you reached this message by error, <a href="https://github.com/davidmckenzie/pagermon/issues" target="_blank">log an issue.</a></p>
+        </div>
       </div>
     </div>
     <div class="row">
@@ -87,15 +100,6 @@
       </form>
       </div>
     </div>
-    <!-- filter bar, currently disabled
-    <div class="row">
-      <div class="col-xs-offset-1 col-xs-10">
-      <div class="input-group">
-        <span class="input-group-addon"><i class="glyphicon glyphicon-filter"></i></span>
-        <input id="search" type="text" class="form-control" name="search" placeholder="Filter" ng-model="search">
-      </div>
-      </div>
-    </div> -->
 
     <% include global/pagination.ejs %>
 
@@ -109,8 +113,6 @@
   
   <script>
 var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-highlight'])
-    
-    // Service
     
     .factory('socket', function ($rootScope) {
       var socket = io({transports: ['websocket'], upgrade: false});
@@ -142,30 +144,19 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
         Messages: $resource('/api/messages/'),
         NewMessage: $resource('/api/messages/:id', {id: '@id'}),
         MessageSearch: $resource('/api/messageSearch/')
-    //    Init:  $resource('/api/messages/init/?page=:page', {page: '@page'})
       };
     }])
     
-    //.factory('Messages', ['$resource', function($resource){
-    //  return $resource('/messages/:id', null, {
-    //    'get': { method:'GET' }
-    //  });
-    //}])
-    
-    //.factory('Init', ['$resource', function($resource){
-    //  return $resource('/messages/init', null, {
-    //    'get': { method:'GET' }
-    //  });
-    //}])
-    
     // Controller
+    // TODO: optimise this whole section, consider popping this entire controller out to a separate file
     .controller('MessageController', ['$scope', '$routeParams', 'Api', 'socket', '$cookies', '$location', function ($scope, $routeParams, Api, socket, $cookies, $location) {
-      // get new message on socket event
+      // I hate ejs
       <% if(typeof user != 'undefined'){ %>
         $scope.user="<%=user%>";
       <% }else{ %>
         $scope.user="";
       <% } %>
+      // get new message on socket event
       socket.on('messagePost', function(message) {
         // only bother getting the new message if we're on page 1
         if ($scope.init.currentPage === 1) {
@@ -183,22 +174,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
         }
       });
       
-      socket.on('reconnect', function() {
-        console.log('socket reconnected', new Date().toISOString());
-      })
-      
-      $scope.agencyFilter = function(agency){
-        $location.url('/?agency='+agency);
-      };
-      
-      $scope.addressFilter = function(address){
-        $location.url('/?address='+address);
-      };
-      
-      $scope.clearSearch = function(){
-        $scope.query = '';
-      };
-      
+      // this should be popped out into a separate file
       $scope.updateData = function(page, query){
         // spinner start
         $scope.spinner = 'fa-spin';
@@ -213,6 +189,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
             
         if ($routeParams.q || query) {
           $scope.query = query || $routeParams.q;
+          $scope.origQuery = query || $routeParams.q;
           $scope.hasQuery = true;
           queryObj.q = query || $routeParams.q;
         } else {
@@ -314,9 +291,10 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
           });
         }
       };
-      
+      // run the updateData function on load
       $scope.updateData();
       
+      // helper functions below
       $scope.range = function(min, max, step) {
           step = step || 1;
           var input = [];
@@ -345,15 +323,24 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
           $scope.updateData($scope.init.currentPage);
       };
       
-      //$scope.messages = Messages.query();
-      //angular.forEach($scope.messages, function (value, key) {
-      //  console.log(key + ': ' + value);
-      //});
+      // this bit sucks, rewrite
+      $scope.agencyFilter = function(agency){
+        $location.url('/?agency='+agency);
+      };
+      
+      $scope.addressFilter = function(address){
+        $location.url('/?address='+address);
+      };
+      
+      $scope.editAlias = function(alias){
+        $location.url('/admin/aliases/'+alias);
+      };
+      
+      $scope.clearSearch = function(){
+        $scope.query = '';
+      };
+      
     }])
-    
-    //.controller('MessageDetailCtrl', ['$scope', '$routeParams', 'Messages', function ($scope, $routeParams, Messages) {
-    //  $scope.message = Api.Messages.get({page: $routeParams.id });
-    //}])
     // Routes
     .config(['$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider) {
       $routeProvider

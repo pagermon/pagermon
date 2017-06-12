@@ -17,21 +17,9 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
         })
       };
     }])
-    //.factory('Messages', ['$resource', function($resource){
-    //  return $resource('/messages/:id', null, {
-    //    'get': { method:'GET' }
-    //  });
-    //}])
-    
-    //.factory('Init', ['$resource', function($resource){
-    //  return $resource('/messages/init', null, {
-    //    'get': { method:'GET' }
-    //  });
-    //}])
     
     // Controller
     .controller('AliasController', ['$scope', '$routeParams', 'Api', '$uibModal', '$filter', '$location', function ($scope, $routeParams, Api, $uibModal, $filter, $location) {
-      //window.MY_SCOPE = $scope;
       $scope.loading = true;
       $scope.alertMessage = {};
       Api.Aliases.query(null, function(results) {
@@ -73,7 +61,6 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
       };
       
       $scope.aliasDeleteConfirmed = function () {
-        
         var deleteList = [];
         $scope.loading = true;
         $scope.selectedAll = false;
@@ -130,7 +117,6 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
           saturation: true,
           alpha: false
       };
-      
       $scope.newButton = function(address) {
           $location.url('/aliases/'+address);
       };
@@ -155,7 +141,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
           }
         });
       };
-      
+      // controls the form validation on the address field
       $scope.checkAddress = function() {
         $scope.aliasLoading = true;
         if ($scope.alias.address) {
@@ -211,15 +197,12 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
       
       $scope.aliasDelete = function () {
         var modalHtml =  '<div class="modal-header"><h5 class="modal-title" id="modal-title">Delete Alias</h5></div>';
-        var message   =  '<p>Are you sure you want to delete this alias?</p><p>Aliases cannot be restored after deletion.</p>';
-            modalHtml += '<div class="modal-body">' + message + '</div>';
+            modalHtml += '<div class="modal-body"><p>Are you sure you want to delete this alias?</p><p>Aliases cannot be restored after deletion.</p></div>';
             modalHtml += '<div class="modal-footer"><button class="btn btn-danger" ng-click="confirmDelete()">OK</button><button class="btn btn-primary" ng-click="cancelDelete()">Cancel</button></div>';
-        
         var modalInstance = $uibModal.open({
           template: modalHtml,
           controller: ConfirmController
         });
-    
         modalInstance.result.then(function() {
           $scope.aliasDeleteConfirmed();
         }, function () {
@@ -257,16 +240,15 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
         $scope.confirmDelete = function() {
           $uibModalInstance.close();
         };
-      
         $scope.cancelDelete = function() {
           $uibModalInstance.dismiss('cancel');
         };
       };
-      
+      // get data on load
       $scope.aliasLoad();
-      
     }])
     
+    // handles password resets, needs cleanup
     .controller('ResetController', ['$scope', '$routeParams', 'Api', function ($scope, $routeParams, Api) {
       $scope.form = {};
       $scope.alertMessage = {};
@@ -297,6 +279,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
         };
     }])
     
+    // needs cleanup
     .controller('SettingsController', ['$scope', '$routeParams', 'Api', 'uuid', '$uibModal', '$filter', function ($scope, $routeParams, Api, uuid, $uibModal, $filter) {
       $scope.alertMessage = {};
       $scope.settings = Api.Settings.get();
@@ -327,6 +310,9 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
       $scope.page = 'settings';
       console.log($scope.settings);
       
+      // this function generates the long API keys
+      // gets two 36 char UUIDs, removes the dashes, base36 encodes them, then joins together half of each string
+      // for increased key length, uncomment the h2/k2 lines, and swap the kf lines
       $scope.generateKey = function(index) {
         var hash = uuid.v4().replace(/-/g,"");
         var hash2 = uuid.v4().replace(/-/g,"");
@@ -364,8 +350,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
       
       $scope.removeKey = function () {
         var modalHtml =  '<div class="modal-header"><h5 class="modal-title" id="modal-title">Remove API Keys</h5></div>';
-        var message   =  '<p>Are you sure you want to delete these keys?</p><p>Keys cannot be restored after saving.</p>';
-            modalHtml += '<div class="modal-body">' + message + '</div>';
+            modalHtml += '<div class="modal-body"><p>Are you sure you want to delete these keys?</p><p>Keys cannot be restored after saving.</p></div>';
             modalHtml += '<div class="modal-footer"><button class="btn btn-danger" ng-click="confirmDelete()">OK</button><button class="btn btn-primary" ng-click="cancelDelete()">Cancel</button></div>';
         
         var modalInstance = $uibModal.open({
@@ -398,7 +383,6 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
         $scope.confirmDelete = function() {
           $uibModalInstance.close();
         };
-      
         $scope.cancelDelete = function() {
           $uibModalInstance.dismiss('cancel');
         };
@@ -447,5 +431,4 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
         };
       });
       $locationProvider.html5Mode({ enabled: true, requireBase: false, rewriteLinks: true});
-      //$locationProvider.hashPrefix('!');
     }]);

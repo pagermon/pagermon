@@ -12,7 +12,34 @@ var session = require('express-session');
 var SQLiteStore = require('connect-sqlite3')(session);
 var passport = require('passport');
 var flash    = require('connect-flash');
-require('./config/passport')(passport); // pass passport for configuration
+require('./config/passport')(passport);
+
+// initialize the database if it does not already exist
+var sqlite3 = require('sqlite3').verbose();
+var db = new sqlite3.Database('./messages.db', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, function (err) {
+    if (err) { console.log(err.message); } else {
+      var sql = "CREATE TABLE IF NOT EXISTS messages ( ";
+          sql += "id integer PRIMARY KEY, ";
+          sql += "address integer NOT NULL, ";
+          sql += "message text NOT NULL ";
+          sql += ", timestamp INTEGER); ";
+          sql += "CREATE TABLE IF NOT EXISTS capcodes ( ";
+          sql += "address integer NOT NULL, ";
+          sql += "alias text NOT NULL, ";
+          sql += "agency TEXT, ";
+          sql += "icon TEXT, ";
+          sql += "color TEXT, ";
+          sql += "PRIMARY KEY (address) ); ";
+      db.serialize(() => {
+          db.exec(sql, function(err) {
+              if (err) { console.log(err); }
+              //db.close((e) => {
+              //    if (e) console.log(e);
+              //});
+          });
+      });
+    }
+});
 
 // routes
 var index = require('./routes/index');
@@ -112,10 +139,6 @@ app.use(function(err, req, res, next) {
 });
 
 module.exports = app;
-    
-/**
- * Normalize a port into a number, string, or false.
- */
 
 function normalizePort(val) {
   var port = parseInt(val, 10);
@@ -132,10 +155,6 @@ function normalizePort(val) {
 
   return false;
 }
-
-/**
- * Event listener for HTTP server "error" event.
- */
 
 function onError(error) {
   if (error.syscall !== 'listen') {
@@ -160,10 +179,6 @@ function onError(error) {
       throw error;
   }
 }
-
-/**
- * Event listener for HTTP server "listening" event.
- */
 
 function onListening() {
   var addr = server.address();
