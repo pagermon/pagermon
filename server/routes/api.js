@@ -104,6 +104,7 @@ router.get('/messages/init', function(req, res, next) {
 /* GET message listing. */
 router.get('/messages', function(req, res, next) {
     nconf.load();
+    var pdwMode = nconf.get('messages:pdwMode');
     var maxLimit = nconf.get('messages:maxLimit');
     var defaultLimit = nconf.get('messages:defaultLimit');
     initData.highlightText = nconf.get('messages:highlightText');
@@ -133,7 +134,11 @@ router.get('/messages', function(req, res, next) {
                 if (e) console.log(e);
             });                 
         } else if (rows) {
-            var result = rows.filter(function(x){return x.ignore==0});
+            var result;
+            if (pdwMode)
+                result = rows.filter(function(x){return x.ignore==0});
+            else
+                result = rows.filter(function(x){return !x.ignore || x.ignore==0});
             initData.msgCount = result.length;
             initData.pageCount = Math.ceil(initData.msgCount/initData.limit);
             if (initData.currentPage > initData.pageCount) {
@@ -186,6 +191,8 @@ router.get('/messages', function(req, res, next) {
 
 
 router.get('/messages/:id', function(req, res, next) {
+    nconf.load();
+    var pdwMode = nconf.get('messages:pdwMode');
     var id = req.params.id;
     var sql = "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, MAX(capcodes.address) ";
     sql += " FROM messages";
@@ -199,7 +206,11 @@ router.get('/messages/:id', function(req, res, next) {
                 if(row.ignore == 1) {
                     res.status(200).json({});
                 } else {
-                    res.status(200).json(row);
+                    if(pdwMode && !row.alias) {
+                        res.status(200).json({});
+                    } else {
+                        res.status(200).json(row);
+                    }
                 }
             }
         });
@@ -224,6 +235,7 @@ router.get('/messages/address/:id', function(req, res, next) {
 /* GET message search */
 router.get('/messageSearch', function(req, res, next) {
     nconf.load();
+    var pdwMode = nconf.get('messages:pdwMode');
     var maxLimit = nconf.get('messages:maxLimit');
     var defaultLimit = nconf.get('messages:defaultLimit');
     initData.highlightText = nconf.get('messages:highlightText');
@@ -287,8 +299,11 @@ router.get('/messageSearch', function(req, res, next) {
 	            sResult = search.search();
 	        }
 	    }
-	    
-	    var result = sResult.filter(function(x){return x.ignore==0});
+        var result;
+        if (pdwMode)
+	        result = sResult.filter(function(x){return x.ignore==0});
+	    else
+	        result = sResult.filter(function(x){return !x.ignore || x.ignore==0});
 	    
         // sort by value
         result.sort(function (a, b) {

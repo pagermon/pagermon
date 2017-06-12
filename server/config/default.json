@@ -16,7 +16,8 @@
     "rotationEnabled": true,
     "rotateDays": 7,
     "rotateKeep": 4,
-    "highlightText": "firecall, alert"
+    "highlightText": "firecall, alert",
+    "pdwMode": false
   },
   "auth": {
     "type": "local",

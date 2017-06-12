@@ -56,45 +56,6 @@
               </div>
             </div>
             </fieldset>
-            
-            <h5>Messages</h5>
-            <div class="form-group">
-              <label for="messages.maxLimit" class="col-xs-4 col-sm-3 control-label">Max limit per page</label>
-              <div class="col-xs-8 col-sm-9">
-              <input type="number" class="form-control" name="messages.maxLimit" ng-model="settings.messages.maxLimit">
-              <span id="helpBlock" class="help-block">The maximum number of messages a user can display per page.</span>
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="messages.defaultLimit" class="col-xs-4 col-sm-3 control-label">Default limit per page</label>
-              <div class="col-xs-8 col-sm-9">
-              <input type="number" class="form-control" name="messages.defaultLimit" ng-model="settings.messages.defaultLimit">
-              <span id="helpBlock" class="help-block">Default number of messages to show per page.</span>
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="messages.highlightText" class="col-xs-4 col-sm-3 control-label">Text highlight list</label>
-              <div class="col-xs-8 col-sm-9">
-              <input type="text" class="form-control" name="messages.highlightText" ng-model="settings.messages.highlightText">
-              <span id="helpBlock" class="help-block">Applies the angular-highlight class to strings matching the comma separated list (e.g. 'firecall, alert'). List is not case sensitive.</span>
-              </div>
-            </div>
-            <div class="form-group">
-              <div class="col-xs-8 col-xs-offset-2 col-sm-9 col-sm-offset-3">
-                <div class="checkbox">
-                <label>
-                  <input type="checkbox" name="messages.duplicateFiltering" ng-model="settings.messages.duplicateFiltering"> Filter out duplicate messages
-                </label>
-                </div>
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="messages.duplicateLimit" class="col-xs-4 col-sm-3 control-label">Duplicate limit</label>
-              <div class="col-xs-8 col-sm-9">
-              <input type="number" class="form-control" name="messages.duplicateLimit" ng-model="settings.messages.duplicateLimit" ng-disabled="!settings.messages.duplicateFiltering">
-              <span id="helpBlock" class="help-block">Ignore a message if one of the last {{settings.messages.duplicateLimit}} messages contains the same address and content.</span>
-              </div>
-            </div>
             <fieldset disabled>
             <div class="form-group">
               <div class="col-xs-8 col-xs-offset-2 col-sm-9 col-sm-offset-3">
@@ -121,6 +82,57 @@
               </div>
             </div>
             </fieldset>
+            
+            <h5>Messages</h5>
+            <div class="form-group">
+              <label for="messages.maxLimit" class="col-xs-4 col-sm-3 control-label">Max limit per page</label>
+              <div class="col-xs-8 col-sm-9">
+              <input type="number" class="form-control" name="messages.maxLimit" ng-model="settings.messages.maxLimit">
+              <span id="helpBlock" class="help-block">The maximum number of messages a user can display per page.</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="messages.defaultLimit" class="col-xs-4 col-sm-3 control-label">Default limit per page</label>
+              <div class="col-xs-8 col-sm-9">
+              <input type="number" class="form-control" name="messages.defaultLimit" ng-model="settings.messages.defaultLimit">
+              <span id="helpBlock" class="help-block">Default number of messages to show per page.</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="messages.highlightText" class="col-xs-4 col-sm-3 control-label">Text highlight list</label>
+              <div class="col-xs-8 col-sm-9">
+              <input type="text" class="form-control" name="messages.highlightText" ng-model="settings.messages.highlightText">
+              <span id="helpBlock" class="help-block">Applies the angular-highlight class to strings matching the comma separated list (e.g. 'firecall, alert'). List is not case sensitive.</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="messages.pdwMode" class="col-xs-4 col-sm-3 control-label">Duplicate filtering</label>
+              <div class="col-xs-8 col-sm-9">
+                <div class="checkbox">
+                <label>
+                  <input type="checkbox" name="messages.duplicateFiltering" ng-model="settings.messages.duplicateFiltering"> Filter out duplicate messages
+                </label>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="messages.duplicateLimit" class="col-xs-4 col-sm-3 control-label">Duplicate limit</label>
+              <div class="col-xs-8 col-sm-9">
+              <input type="number" class="form-control" name="messages.duplicateLimit" ng-model="settings.messages.duplicateLimit" ng-disabled="!settings.messages.duplicateFiltering">
+              <span id="helpBlock" class="help-block">Ignore a message if one of the last {{settings.messages.duplicateLimit}} messages contains the same address and content.</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="messages.pdwMode" class="col-xs-4 col-sm-3 control-label">PDW mode</label>
+              <div class="col-xs-8 col-sm-9">
+              <div class="checkbox">
+                <label>
+                <input type="checkbox" name="messages.pdwMode" ng-model="settings.messages.pdwMode">
+                Hide any messages that don't have a matching alias.
+                </label>
+              </div>
+              </div>
+            </div>
             
             <h5>Auth</h5>
             <div class="form-group">
