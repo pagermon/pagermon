@@ -1,7 +1,6 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var router = express.Router();
-//var basicAuth = require('express-basic-auth');
 var bcrypt = require('bcryptjs');
 var fs = require('fs');
 var passport = require('passport');
@@ -23,18 +22,6 @@ router.use( bodyParser.json() );       // to support JSON-encoded bodies
 router.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: true
 }));
-
-//router.use(basicAuth({
-//    users: { 'admin': 'supersecret' },
-//    challenge: true,
-//    unauthorizedResponse: getUnauthorizedResponse
-//}));
- 
-//function getUnauthorizedResponse(req) {
-//    return req.auth ?
-//        ('Credentials ' + req.auth.user + ':' + req.auth.password + ' rejected') :
-//        'No credentials provided';
-//}
 
 router.route('/login')
     .get(function(req, res, next) {
@@ -91,11 +78,6 @@ router.route('/settingsData')
         } else {
             res.status(500).send({error: 'request body empty'});
         }
-
-      // just an example of maybe updating the user
-      //req.user.name = req.params.name;
-      // save user ... etc
-      //res.json(req.user);
     });
 
 router.get('*', isLoggedIn, function(req, res, next) {

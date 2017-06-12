@@ -40,6 +40,7 @@
             <th style="text-align: center;">Color</th>
             <th style="text-align: center;">Icon</th>
             <th style="text-align: center;">Agency</th>
+            <th style="text-align: center;">Filter</th>
             <th style="text-align: center;">Alias</th>
           </tr>
         </thead>
@@ -60,6 +61,7 @@
               <span style="vertical-align: middle;">{{alias.icon}}</span>
             </td>
             <td class="shrink"><strong>{{alias.agency || ''}}</strong></td>
+            <td class="shrink"><i ng-if="alias.ignore == 0" class="fa fa-circle text-success"></i><i ng-if="alias.ignore == 1" class="fa fa-exclamation-circle text-danger"></i></td>
             <td class="expand clickable-td" ng-click="messageDetail(alias.address);" style="color: Maroon;">{{alias.alias || ''}}</td>
         </tbody>
       </table>

@@ -67,7 +67,8 @@
               </span>
               <strong style="vertical-align: middle;"></strong>
             </td>
-            <td class="shrink noTiny clickable-td" ng-if="user && message.alias" ng-click="editAlias(message['MAX(capcodes.address)'] || '')">
+            <td class="shrink noTiny clickable-td" ng-if="user && message.alias" ng-click="editAlias(message.aliasMatch)">
+            <!-- <td class="shrink noTiny clickable-td" ng-if="user && message.alias" ng-click="editAlias(message['MAX(capcodes.address)'] || '')"> -->
               <span data-toggle="tooltip" title="{{message['MAX(capcodes.address)'] || ''}}" style="color: Maroon;">{{message.alias || ''}}</span>
             </td>
             <td class="shrink noTiny" ng-if="!user || !message.alias">
@@ -149,7 +150,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
     
     // Controller
     // TODO: optimise this whole section, consider popping this entire controller out to a separate file
-    .controller('MessageController', ['$scope', '$routeParams', 'Api', 'socket', '$cookies', '$location', function ($scope, $routeParams, Api, socket, $cookies, $location) {
+    .controller('MessageController', ['$scope', '$routeParams', 'Api', 'socket', '$cookies', '$location', '$window', function ($scope, $routeParams, Api, socket, $cookies, $location, $window) {
       // I hate ejs
       <% if(typeof user != 'undefined'){ %>
         $scope.user="<%=user%>";
@@ -166,6 +167,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
             result.date = datetime.format("YYYY-MM-DD")
             result.timestamp = datetime.format("HH:mm");
             result.padAddress = $scope.padZeroes('0000000',result.address,true);
+            result.aliasMatch = result['MAX(capcodes.address)'];
             $scope.messages.unshift(result);
             $scope.messages.pop();
           }, function(error) {
@@ -238,6 +240,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
                 result.timestamp = datetime.format("HH:mm");
                 result.message = $scope.htmlEntities(result.message);
                 result.padAddress = $scope.padZeroes('0000000',result.address,true);
+                result.aliasMatch = result['MAX(capcodes.address)'];
               });
               $scope.spinner = '';
               $scope.loading = false;
@@ -279,6 +282,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
               result.timestamp = datetime.format("HH:mm");
               result.message = $scope.htmlEntities(result.message);
               result.padAddress = $scope.padZeroes('0000000',result.address,true);
+              result.aliasMatch = result['MAX(capcodes.address)'];
             });
             $scope.spinner = '';
             $scope.loading = false;
@@ -333,7 +337,8 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
       };
       
       $scope.editAlias = function(alias){
-        $location.url('/admin/aliases/'+alias);
+        // admin urls need to use $window since they don't use this route
+        $window.location.href = '/admin/aliases/'+alias;
       };
       
       $scope.clearSearch = function(){

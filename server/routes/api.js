@@ -48,6 +48,7 @@ var db = new sqlite3.Database('./messages.db');
    agency TEXT, 
    icon TEXT, 
    color TEXT, 
+   ignore INTEGER DEFAULT 0, 
    PRIMARY KEY (address)
    );
   */
@@ -102,7 +103,6 @@ router.get('/messages/init', function(req, res, next) {
 
 /* GET message listing. */
 router.get('/messages', function(req, res, next) {
-    
     nconf.load();
     var maxLimit = nconf.get('messages:maxLimit');
     var defaultLimit = nconf.get('messages:defaultLimit');
@@ -121,41 +121,34 @@ router.get('/messages', function(req, res, next) {
     } else {
         initData.limit = parseInt(defaultLimit, 10);
     }
-    
-    db.serialize(() => {
-        db.get("SELECT id FROM messages ORDER BY id DESC LIMIT 1", [], function(err, row) {
-            if (err) {
-                console.log(err);
-                db.close((e) => {
-                    if (e) console.log(e);
-                });                 
-            } else if (row) {
-                initData.msgCount = parseInt(row['id'], 10);
-                //console.log(initData.msgCount);
-                initData.pageCount = Math.ceil(initData.msgCount/initData.limit);
-                if (initData.currentPage > initData.pageCount) {
-                    initData.currentPage = 0;
-                }
-                var offset = initData.limit * initData.currentPage;
-                initData.offset = initData.msgCount - offset;
-                if (initData.offset < 0) {
-                    initData.offset = 0;
-                }
-                var sql = "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, MAX(capcodes.address) ";
-                    sql += " FROM messages";
-                    sql += " LEFT JOIN capcodes ON messages.address LIKE (capcodes.address || '%')";
-                    sql += " WHERE messages.id <= "+initData.offset;
-                    sql += " GROUP BY messages.id ORDER BY messages.id DESC";
-                    sql += " LIMIT "+initData.limit;
-                // var sql = "SELECT * from messages ORDER BY timestamp";
-                db.all(sql,function(err,rows){
-                    if (err) return next(err);
-                    res.status(200).json({'init': initData, 'messages': rows});
-                });
-            } else {
-                res.status(200).json({'init': {}, 'messages': []});
+
+    var sql = "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, MAX(capcodes.address) ";
+        sql += " FROM messages";
+        sql += " LEFT JOIN capcodes ON messages.address LIKE (capcodes.address || '%')";
+        sql += " GROUP BY messages.id ORDER BY messages.id DESC";
+    db.all(sql,function(err,rows){
+        if (err) {
+            console.log(err);
+            db.close((e) => {
+                if (e) console.log(e);
+            });                 
+        } else if (rows) {
+            var result = rows.filter(function(x){return x.ignore==0});
+            initData.msgCount = result.length;
+            initData.pageCount = Math.ceil(initData.msgCount/initData.limit);
+            if (initData.currentPage > initData.pageCount) {
+                initData.currentPage = 0;
             }
-        });
+            initData.offset = initData.limit * initData.currentPage;
+            if (initData.offset < 0) {
+                initData.offset = 0;
+            }
+            initData.offsetEnd = initData.offset + initData.limit;
+            var limitResults = result.slice(initData.offset, initData.offsetEnd);
+            res.status(200).json({'init': initData, 'messages': limitResults});
+        } else {
+            res.status(200).json({'init': {}, 'messages': []});
+        }
     });
 });
 
@@ -194,18 +187,20 @@ router.get('/messages', function(req, res, next) {
 
 router.get('/messages/:id', function(req, res, next) {
     var id = req.params.id;
-    var sql = "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, MAX(capcodes.address) ";
+    var sql = "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, MAX(capcodes.address) ";
     sql += " FROM messages";
     sql += " LEFT JOIN capcodes ON messages.address LIKE (capcodes.address || '%')";
     sql += " WHERE messages.id = "+id;
     db.serialize(() => {
         db.get(sql,function(err,row){
             if (err) {
-                res.status(500);
-                res.send(err);
+                res.status(500).send(err);
             } else {
-                res.status(200);
-                res.json(row);
+                if(row.ignore == 1) {
+                    res.status(200).json({});
+                } else {
+                    res.status(200).json(row);
+                }
             }
         });
     });
@@ -248,38 +243,25 @@ router.get('/messageSearch', function(req, res, next) {
     }
     
     var query;
-    if (typeof req.query.q !== 'undefined') {
-        query = req.query.q;
-    } else {
-        query = '';
-    }
-    
     var agency;
-    if (typeof req.query.agency !== 'undefined') {
-        agency = req.query.agency;
-    } else {
-        agency = '';
-    }
-    
     var address;
-    if (typeof req.query.address !== 'undefined') {
-        address = req.query.address;
-    } else {
-        address = '';
-    }
+    // dodgy handling for unexpected results
+    if (typeof req.query.q !== 'undefined') { query = req.query.q;
+    } else { query = ''; }
+    if (typeof req.query.agency !== 'undefined') { agency = req.query.agency;
+    } else { agency = ''; }
+    if (typeof req.query.address !== 'undefined') { address = req.query.address;
+    } else { address = ''; }
     
-    var sql = "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, MAX(capcodes.address) ";
+    var sql = "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, MAX(capcodes.address) ";
         sql += " FROM messages";
         sql += " LEFT JOIN capcodes ON messages.address LIKE (capcodes.address || '%')";
-    //    sql += " WHERE messages.id <= "+initData.offset;
         sql += " GROUP BY messages.id ORDER BY messages.id DESC";
-    //    sql += " LIMIT "+initData.limit;
     db.all(sql,function(err,rows){
         if (err) return next(err);
         // get the search results - js-search
         var search = new JsSearch.Search('id');
             search.searchIndex = new JsSearch.UnorderedSearchIndex();
-        //    search.searchIndex = new JsSearch.TfIdfSearchIndex('address');
             search.tokenizer = new JsSearch.StopWordsTokenizer(
     	        new JsSearch.SimpleTokenizer());
     	if (agency || address) {
@@ -293,18 +275,20 @@ router.get('/messageSearch', function(req, res, next) {
             search.addIndex('agency');
     	}
 	        search.addDocuments(rows);
-	    var result;
+	    var sResult;
 	    if (query) {
-	        result = search.search(query);
+	        sResult = search.search(query);
 	    } else {
 	        if (agency) {
-	            result = search.search(agency);
+	            sResult = search.search(agency);
 	        } else if (address) {
-	            result = search.search(address);
+	            sResult = search.search(address);
 	        } else {
-	            result = search.search();
+	            sResult = search.search();
 	        }
 	    }
+	    
+	    var result = sResult.filter(function(x){return x.ignore==0});
 	    
         // sort by value
         result.sort(function (a, b) {
@@ -521,14 +505,16 @@ router.post('/capcodes', function(req, res, next) {
         var agency = req.body.agency || 'null';
         var color = req.body.color || 'black';
         var icon = req.body.icon || 'question';
+        var ignore = req.body.ignore || 0;
         db.serialize(() => {
             //db.run("UPDATE tbl SET name = ? WHERE id = ?", [ "bar", 2 ]);
-            db.run("REPLACE INTO capcodes (address, alias, agency, color, icon) VALUES ($mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon);", {
+            db.run("REPLACE INTO capcodes (address, alias, agency, color, icon, ignore) VALUES ($mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore);", {
               $mesAddress: address,
               $mesAlias: alias,
               $mesAgency: agency,
               $mesColor: color,
-              $mesIcon: icon
+              $mesIcon: icon,
+              $mesIgnore: ignore
             }, function(err){
                 if (err) {
                     res.status(500);
@@ -572,14 +558,16 @@ router.post('/capcodes/:id', function(req, res, next) {
         var agency = req.body.agency || 'null';
         var color = req.body.color || 'black';
         var icon = req.body.icon || 'question';
+        var ignore = req.body.ignore || 0;
         db.serialize(() => {
             //db.run("UPDATE tbl SET name = ? WHERE id = ?", [ "bar", 2 ]);
-            db.run("REPLACE INTO capcodes (address, alias, agency, color, icon) VALUES ($mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon);", {
+            db.run("REPLACE INTO capcodes (address, alias, agency, color, icon, ignore) VALUES ($mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore);", {
               $mesAddress: address,
               $mesAlias: alias,
               $mesAgency: agency,
               $mesColor: color,
-              $mesIcon: icon
+              $mesIcon: icon,
+              $mesIgnore: ignore
             }, function(err){
                 if (err) {
                     res.status(500).send(err, this);

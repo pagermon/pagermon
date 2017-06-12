@@ -29,6 +29,7 @@ var db = new sqlite3.Database('./messages.db', sqlite3.OPEN_READWRITE | sqlite3.
           sql += "agency TEXT, ";
           sql += "icon TEXT, ";
           sql += "color TEXT, ";
+          sql += "ignore INTEGER DEFAULT 0, ";
           sql += "PRIMARY KEY (address) ); ";
       db.serialize(() => {
           db.exec(sql, function(err) {
