@@ -1,4 +1,5 @@
 {
   "apikey": "changeme",
-  "hostname": "http://127.0.0.1"
+  "hostname": "http://127.0.0.1",
+  "identifier": "TEST"
 }

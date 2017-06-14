@@ -99,13 +99,6 @@
               </div>
             </div>
             <div class="form-group">
-              <label for="messages.highlightText" class="col-xs-4 col-sm-3 control-label">Text highlight list</label>
-              <div class="col-xs-8 col-sm-9">
-              <input type="text" class="form-control" name="messages.highlightText" ng-model="settings.messages.highlightText">
-              <span id="helpBlock" class="help-block">Applies the angular-highlight class to strings matching the comma separated list (e.g. 'firecall, alert'). List is not case sensitive.</span>
-              </div>
-            </div>
-            <div class="form-group">
               <label for="messages.pdwMode" class="col-xs-4 col-sm-3 control-label">Duplicate filtering</label>
               <div class="col-xs-8 col-sm-9">
                 <div class="checkbox">
@@ -131,6 +124,49 @@
                 Hide any messages that don't have a matching alias.
                 </label>
               </div>
+              </div>
+            </div>
+            <div class="row">
+            <label class="col-xs-4 col-sm-3 control-label">Text Matching</label>
+            <div class="col-xs-8 col-sm-9">
+            <span id="helpBlock" class="help-block">Highlights or labels text. If Label is present, then it will be displayed as a tooltip when hovering over the matched text. Text Match field can be regex.</span>
+            </div>
+            </div>
+            <div class="form-group">
+              <div class="col-sm-11 col-sm-offset-1">
+              <table class="table table-striped table-condensed">
+                <thead>
+                  <tr>
+                    <th width="1%"></th>
+                    <th width="25%">Text Match</th>
+                    <th width="1%">Highlight</th>
+                    <th width="99%">Label</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="text in settings.messages.replaceText track by $index">
+                    <td style="text-align: center; vertical-align: middle;">
+                      <input type="checkbox" ng-model="text.selected"/></td>
+                    <td>
+                      <input type="text" class="form-control" placeholder="Text Match" ng-model="text.match" required></td>
+                    <td style="text-align: center; vertical-align: middle;">
+                      <input type="checkbox" ng-model="text.highlight"/></td>
+                    <td>
+                      <input type="text" class="form-control" placeholder="Text Replace" ng-model="text.replace" ></td>
+                  </tr>
+                  <tr>
+                    <td style="text-align: left;">
+                      <input ng-disabled="!matchSelected()" type="button" class="btn btn-sm btn-danger" ng-click="removeMatch()" value="&times;">
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>
+                      <input type="button" class="btn btn-success btn-sm addnew pull-right" ng-click="addMatch()" value="&plus;">
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
               </div>
             </div>
             

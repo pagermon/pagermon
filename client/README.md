@@ -18,7 +18,10 @@ These instructions will get you a copy of the project up and running on your loc
 ```
 cd client
 npm install
+cp config/default.json config/config.json
 ```
+
+Edit config/config.json to suit your environment. Identifier should be a small string that will show up in the 'source' column of the messages display.
 
 Check the samples dir for example usage.
 
