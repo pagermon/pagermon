@@ -57,7 +57,7 @@ var db = new sqlite3.Database('./messages.db');
 // defaults
 var initData = {};
     initData.limit = nconf.get('messages:defaultLimit');
-    initData.highlightText = nconf.get('messages:highlightText');
+    initData.replaceText = nconf.get('messages:replaceText');
     initData.currentPage = 0;
     initData.pageCount = 0;
     initData.msgCount = 0;
@@ -107,7 +107,7 @@ router.get('/messages', function(req, res, next) {
     var pdwMode = nconf.get('messages:pdwMode');
     var maxLimit = nconf.get('messages:maxLimit');
     var defaultLimit = nconf.get('messages:defaultLimit');
-    initData.highlightText = nconf.get('messages:highlightText');
+    initData.replaceText = nconf.get('messages:replaceText');
     
     if (typeof req.query.page !== 'undefined') {
         var page = parseInt(req.query.page, 10);
@@ -238,7 +238,7 @@ router.get('/messageSearch', function(req, res, next) {
     var pdwMode = nconf.get('messages:pdwMode');
     var maxLimit = nconf.get('messages:maxLimit');
     var defaultLimit = nconf.get('messages:defaultLimit');
-    initData.highlightText = nconf.get('messages:highlightText');
+    initData.replaceText = nconf.get('messages:replaceText');
     
     if (typeof req.query.page !== 'undefined') {
         var page = parseInt(req.query.page, 10);

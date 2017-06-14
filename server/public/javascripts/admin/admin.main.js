@@ -282,7 +282,16 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
     // needs cleanup
     .controller('SettingsController', ['$scope', '$routeParams', 'Api', 'uuid', '$uibModal', '$filter', function ($scope, $routeParams, Api, uuid, $uibModal, $filter) {
       $scope.alertMessage = {};
-      $scope.settings = Api.Settings.get();
+      Api.Settings.get(null, function(results) {
+        if (!results.messages.replaceText) {
+          results.messages.replaceText = [{}];
+        }
+        if (!results.auth.keys) {
+          results.auth.keys = [{}];
+        }
+        $scope.settings = results;
+      });
+
       $scope.settingsSubmit = function() {
         $scope.loading = true;
         Api.Settings.save(null, $scope.settings).$promise.then(function (response) {
@@ -308,7 +317,6 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
       };
       
       $scope.page = 'settings';
-      console.log($scope.settings);
       
       // this function generates the long API keys
       // gets two 36 char UUIDs, removes the dashes, base36 encodes them, then joins together half of each string
@@ -339,9 +347,25 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
         });
       };
       
+      $scope.addMatch = function () {
+        $scope.settings.messages.replaceText.push({
+          'match': "",
+          'replace': ""
+        });
+      };
+      
       $scope.keySelected = function() {
-        if ($scope.settings.auth) {
+        if ($scope.settings && $scope.settings.auth) {
           var trues = $filter("filter")($scope.settings.auth.keys, {
+              selected: true
+          });
+          return trues.length;
+        }
+      };
+      
+      $scope.matchSelected = function() {
+        if ($scope.settings && $scope.settings.messages) {
+          var trues = $filter("filter")($scope.settings.messages.replaceText, {
               selected: true
           });
           return trues.length;
@@ -377,6 +401,20 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
             }
         });
         $scope.settings.auth.keys = newDataList;
+      };
+      
+      $scope.removeMatch = function () {
+        var newDataList=[];
+        $scope.selectedAll = false;
+        angular.forEach($scope.settings.messages.replaceText, function(selected){
+            if(!selected.selected){
+                newDataList.push(selected);
+            }
+            else {
+              console.log('Deleting key '+selected.name);
+            }
+        });
+        $scope.settings.messages.replaceText = newDataList;
       };
       
       var ConfirmController = function($scope, $uibModalInstance) {

@@ -16,7 +16,17 @@
     "rotationEnabled": true,
     "rotateDays": 7,
     "rotateKeep": 4,
-    "highlightText": "firecall, alert",
+    "replaceText": [
+      {
+        "match": "firecall",
+        "replace": "This is a call about fires"
+      },
+      {
+        "match": "alert",
+        "highlight": true,
+        "replace": ""
+      }
+    ],
     "pdwMode": false
   },
   "auth": {
