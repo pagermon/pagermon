@@ -28,6 +28,7 @@ var nconf = require('nconf');
 
 var hostname = nconf.get('hostname');
 var apikey = nconf.get('apikey');
+var identifier = nconf.get('identifier');
 
 var uri = hostname+"/api/messages";
 
@@ -85,7 +86,8 @@ rl.on('line', (line) => {
 		form: {
 			address: address,
 			message: trimMessage,
-			datetime: datetime
+			datetime: datetime,
+			source: identifier
 		}
 	};
 	rp(options)

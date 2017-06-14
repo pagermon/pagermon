@@ -36,6 +36,7 @@
                   </ul>
                 </span>
             </th>
+            <th class="noMobile" style="text-align: center;">Src</th>
             <th class="noTiny" style="text-align: center;">Capcode</th>
             <th class="noMobile"></th>
             <th class="noMobile"></th>
@@ -49,6 +50,9 @@
           <tr ng-repeat="message in messages | filter: search">
             <td class="shrink noMobile">{{message.date}}</td>
             <td class="shrink">{{message.timestamp}}</td>
+            <td class="shrink noMobile clickable-td" ng-click="addressFilter(message.source || '')" style="background-color: {{message.color || 'grey'}}; text-align: center;">
+              <span class="small" style="color: white; font-family: monospace;"><strong>{{message.source}}</strong></span>
+              </td>
             <td class="shrink noMobile clickable-td" ng-click="addressFilter(message.address || '')" style="background-color: {{message.color || 'grey'}}; text-align: center;">
               <span class="small" style="color: white; font-family: monospace;"><strong>{{message.padAddress}}</strong></span>
               </td>
@@ -334,6 +338,10 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
       
       $scope.addressFilter = function(address){
         $location.url('/?address='+address);
+      };
+      
+      $scope.searchFilter = function(search){
+        $location.url('/?q='+search);
       };
       
       $scope.editAlias = function(alias){

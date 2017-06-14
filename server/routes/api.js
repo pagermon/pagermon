@@ -280,11 +280,13 @@ router.get('/messageSearch', function(req, res, next) {
             search.addIndex('agency');
             search.addIndex('address');
             search.addIndex('alias');
+            search.addIndex('source');
     	} else {
             search.addIndex('message');
             search.addIndex('address');
             search.addIndex('alias');
             search.addIndex('agency');
+            search.addIndex('source');
     	}
 	        search.addDocuments(rows);
 	    var sResult;
@@ -472,6 +474,7 @@ router.post('/messages', function(req, res, next) {
             var address = req.body.address || 0;
             var message = req.body.message || 'null';
             var datetime = req.body.datetime || 1;
+            var source = req.body.source || 'UNK';
             var dupeCheck = "SELECT * FROM messages WHERE id IN ( SELECT id FROM messages ORDER BY id DESC LIMIT "+dupeLimit;
                 dupeCheck += " ) AND message LIKE '"+message+"' AND address="+address;
             db.get(dupeCheck, [], function (err, row) {
@@ -484,10 +487,11 @@ router.post('/messages', function(req, res, next) {
                         res.status(200);
                         res.send('Ignoring duplicate');
                     } else {
-                        db.run("INSERT INTO messages (address, message, timestamp) VALUES ($mesAddress, $mesBody, $mesDT);", {
+                        db.run("INSERT INTO messages (address, message, timestamp, source) VALUES ($mesAddress, $mesBody, $mesDT, $mesSource);", {
                           $mesAddress: address,
                           $mesBody: message,
-                          $mesDT: datetime
+                          $mesDT: datetime,
+                          $mesSource: source
                         }, function(err){
                             if (err) {
                                 res.status(500);
