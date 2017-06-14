@@ -170,7 +170,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
             var datetime = moment.unix(result.timestamp);
             result.date = datetime.format("YYYY-MM-DD")
             result.timestamp = datetime.format("HH:mm");
-            result.padAddress = $scope.padZeroes('0000000',result.address,true);
+            result.padAddress = $scope.padDigits(result.address,7);
             result.aliasMatch = result['MAX(capcodes.address)'];
             $scope.messages.unshift(result);
             $scope.messages.pop();
@@ -243,7 +243,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
                 result.date = datetime.format("YYYY-MM-DD");
                 result.timestamp = datetime.format("HH:mm");
                 result.message = $scope.htmlEntities(result.message);
-                result.padAddress = $scope.padZeroes('0000000',result.address,true);
+                result.padAddress = $scope.padDigits(result.address,7);
                 result.aliasMatch = result['MAX(capcodes.address)'];
               });
               $scope.spinner = '';
@@ -285,7 +285,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
               result.date = datetime.format("YYYY-MM-DD");
               result.timestamp = datetime.format("HH:mm");
               result.message = $scope.htmlEntities(result.message);
-              result.padAddress = $scope.padZeroes('0000000',result.address,true);
+              result.padAddress = $scope.padDigits(result.address,7);
               result.aliasMatch = result['MAX(capcodes.address)'];
             });
             $scope.spinner = '';
@@ -316,15 +316,9 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
           return String(str).replace(/&/g, '&amp;').replace(/</g, ' ').replace(/>/g, ' ').replace(/"/g, '&quot;');
       }
       
-      $scope.padZeroes = function(pad, str, padLeft) {
-          if (typeof str === 'undefined') 
-            return pad;
-          if (padLeft) {
-            return (pad + str).slice(-pad.length);
-          } else {
-            return (str + pad).substring(0, pad.length);
-          }
-      };
+      $scope.padDigits = function(number, digits) {
+          return Array(Math.max(digits - String(number).length + 1, 0)).join(0) + number;
+      }
       
       $scope.setCookie = function(cookie, value) {
           $cookies.put(cookie, value);
