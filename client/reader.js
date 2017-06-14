@@ -61,19 +61,31 @@ rl.on('line', (line) => {
   // TODO: pad address with zeros for better address matching
   if (line.indexOf('POCSAG512: Address:') > -1) {
   	address = line.match(/POCSAG512: Address:(.*?)Function/)[1].trim();
+    if (line.indexOf('Alpha:') > -1) {
+    	message = line.match(/Alpha:(.*?)$/)[1].trim();
+    	trimMessage = message.replace(/<EOT>/g,'');
+    } else {
+    	message = false;
+    	trimMessage = '';
+    }
+  } else if (line.indexOf('FLEX: ') > -1) {
+    address = line.match(/FLEX:.*\[(.*?)\] /)[1].trim();
+    if (line.match( /( ALN | GPN | NUM)/ )) {
+      message = line.match(/FLEX:.*\[.*\] ... (.*?)$/)[1].trim();
+      trimMessage = message;
+    } else {
+      message = false;
+      trimMessage = '';
+    }
   } else {
   	address = '';
-  }
-  if (line.indexOf('Alpha:') > -1) {
-  	message = line.match(/Alpha:(.*?)$/)[1].trim();
-  	trimMessage = message.replace(/<EOT>/g,'');
-  } else {
   	message = false;
   	trimMessage = '';
   }
+
   // filter out most false hits
   // if too much junk data, make sure '-p' option isn't enabled in multimon
-  if (address.length > 5 && message) {
+  if (address.length > 4 && message) {
   	console.log(colors.red(time+': ')+colors.yellow(address+': ')+colors.success(trimMessage));
   	// now send the message
 	var options = {
