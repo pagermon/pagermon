@@ -174,21 +174,21 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
               result.aliasMatch = result['MAX(capcodes.address)'];
               if ($routeParams.q || $routeParams.agency || $routeParams.address) {
                 if ($routeParams.q) {
-                  var patt = new RegExp('/'+$routeParams.q+'/i');
+                  var patt = new RegExp($routeParams.q, 'i');
                   if (patt.test(result.message) || patt.test(result.agency) || patt.test(result.padAddress) || patt.test(result.alias) || patt.test(result.source)) {
                     $scope.messages.unshift(result);
                     $scope.messages.pop();
                   }
                 }
                 if ($routeParams.agency) {
-                  var patt = new RegExp('/'+$routeParams.agency+'/i');
+                  var patt = new RegExp($routeParams.agency, 'i');
                   if (patt.test(result.agency)) {
                     $scope.messages.unshift(result);
                     $scope.messages.pop();
                   }
                 }
                 if ($routeParams.address) {
-                  var patt = new RegExp('/'+$routeParams.address+'/i');
+                  var patt = new RegExp($routeParams.address, 'i');
                   if (patt.test(result.padAddress) || patt.test(result.alias) || patt.test(result.source)) {
                     $scope.messages.unshift(result);
                     $scope.messages.pop();
