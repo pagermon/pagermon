@@ -277,9 +277,9 @@ router.get('/messageSearch', function(req, res, next) {
             search.tokenizer = new JsSearch.StopWordsTokenizer(
     	        new JsSearch.SimpleTokenizer());
     	if (agency || address) {
-            search.addIndex('agency');
             search.addIndex('address');
             search.addIndex('alias');
+            search.addIndex('agency');
             search.addIndex('source');
     	} else {
             search.addIndex('message');
