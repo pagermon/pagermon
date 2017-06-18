@@ -472,15 +472,14 @@ router.post('/messages', function(req, res, next) {
         db.serialize(() => {
             //db.run("UPDATE tbl SET name = ? WHERE id = ?", [ "bar", 2 ]);
             var address = req.body.address || 0;
-            var message = req.body.message || 'null';
+            var message = req.body.message.replace(/["]+/g, '') || 'null';
             var datetime = req.body.datetime || 1;
             var source = req.body.source || 'UNK';
-            var dupeCheck = "SELECT * FROM messages WHERE id IN ( SELECT id FROM messages ORDER BY id DESC LIMIT "+dupeLimit;
-                dupeCheck += " ) AND message LIKE '"+message+"' AND address="+address;
+            var dupeCheck = 'SELECT * FROM messages WHERE id IN ( SELECT id FROM messages ORDER BY id DESC LIMIT '+dupeLimit;
+                dupeCheck +=' ) AND message LIKE "'+message+'" AND address='+address;
             db.get(dupeCheck, [], function (err, row) {
                 if (err) {
-                    res.status(500);
-                    res.send(err, this);                
+                    res.status(500).send(err);                
                 } else {
                     if (row && filterDupes) {
                         console.log('Ignoring duplicate: ', message);
@@ -494,9 +493,7 @@ router.post('/messages', function(req, res, next) {
                           $mesSource: source
                         }, function(err){
                             if (err) {
-                                res.status(500);
-                                //console.log(this);
-                                res.send(err, this);
+                                res.status(500).send(err);
                             } else {
                                 res.status(200);
                                 //console.log(this);
@@ -536,8 +533,7 @@ router.post('/capcodes', function(req, res, next) {
               $mesIgnore: ignore
             }, function(err){
                 if (err) {
-                    res.status(500);
-                    res.send(err, this);
+                    res.status(500).send(err);
                 } else {
                     res.status(200);
                     res.send(''+this.lastID);
@@ -560,7 +556,7 @@ router.post('/capcodes/:id', function(req, res, next) {
             db.serialize(() => {
                 db.run(inParam('DELETE FROM capcodes WHERE address IN (?#)', idList), idList, function(err){
                     if (err) {
-                        res.status(500).send(err, this);
+                        res.status(500).send(err);
                     } else {
                         res.status(200).send({'status': 'ok'});
                     }
@@ -589,7 +585,7 @@ router.post('/capcodes/:id', function(req, res, next) {
               $mesIgnore: ignore
             }, function(err){
                 if (err) {
-                    res.status(500).send(err, this);
+                    res.status(500).send(err);
                 } else {
                     res.status(200).send({'status': 'ok'});
                 }
@@ -611,7 +607,7 @@ router.delete('/capcodes/:id', function(req, res, next) {
         //db.run("UPDATE tbl SET name = ? WHERE id = ?", [ "bar", 2 ]);
         db.run("DELETE FROM capcodes WHERE address=?", id, function(err){
             if (err) {
-                res.status(500).send(err, this);
+                res.status(500).send(err);
             } else {
                 res.status(200).send({'status': 'ok'});
             }
