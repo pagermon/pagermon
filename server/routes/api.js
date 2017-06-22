@@ -83,9 +83,6 @@ router.get('/messages/init', function(req, res, next) {
         db.get("SELECT id FROM messages ORDER BY id DESC LIMIT 1", [], function(err, row) {
             if (err) {
                 console.log(err);
-                db.close((e) => {
-                    if (e) console.log(e);
-                });                 
             } else {
                 initData.msgCount = parseInt(row['id'], 10);
                 //console.log(initData.msgCount);
@@ -130,9 +127,6 @@ router.get('/messages', function(req, res, next) {
     db.all(sql,function(err,rows){
         if (err) {
             console.log(err);
-            db.close((e) => {
-                if (e) console.log(e);
-            });                 
         } else if (rows) {
             var result;
             if (pdwMode)
