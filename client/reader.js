@@ -59,8 +59,9 @@ rl.on('line', (line) => {
   var message;
   var trimMessage;
   // TODO: pad address with zeros for better address matching
-  if (line.indexOf('POCSAG512: Address:') > -1) {
-  	address = line.match(/POCSAG512: Address:(.*?)Function/)[1].trim();
+//  if (line.indexOf('POCSAG512: Address:') > -1) {	
+  if (/^POCSAG(\d+): Address: /.test(line) ) {
+  	address = line.match(/POCSAG(\d+): Address:(.*?)Function/)[2].trim();
     if (line.indexOf('Alpha:') > -1) {
     	message = line.match(/Alpha:(.*?)$/)[1].trim();
     	trimMessage = message.replace(/<EOT>/g,'');
