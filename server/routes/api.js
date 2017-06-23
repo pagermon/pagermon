@@ -151,39 +151,6 @@ router.get('/messages', function(req, res, next) {
     });
 });
 
-/*    db.serialize(() => {
-        db.get("SELECT id FROM messages ORDER BY id DESC LIMIT 1", [], function(err, row) {
-            if (err) {
-                console.log(err);
-                db.close((e) => {
-                    if (e) console.log(e);
-                });
-            } else {
-                initData.msgCount = parseInt(row['id'], 10);
-                //console.log(initData.msgCount);
-                initData.pageCount = Math.ceil(initData.msgCount/initData.limit);
-                var offset = initData.limit * initData.currentPage;
-                initData.offset = initData.msgCount - offset;
-                if (initData.offset < 0) {
-                    initData.offset = 0;
-                }
-                
-                var sql = "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, MAX(capcodes.address) ";
-                    sql += " FROM messages";
-                    sql += " LEFT JOIN capcodes ON messages.address LIKE (capcodes.address || '%')";
-                    sql += " WHERE messages.id <= "+initData.offset;
-                    sql += " GROUP BY messages.id ORDER BY messages.id DESC";
-                    sql += " LIMIT "+initData.limit;
-                // var sql = "SELECT * from messages ORDER BY timestamp";
-                db.all(sql,function(err,rows){
-                    if (err) return next(err);
-                    res.json(rows);
-                });
-            }
-        });
-    }); */
-
-
 router.get('/messages/:id', function(req, res, next) {
     nconf.load();
     var pdwMode = nconf.get('messages:pdwMode');
@@ -419,32 +386,6 @@ router.get('/capcodes/agency/:id', function(req, res, next) {
 // require API key or auth session
 //
 //////////////////////////////////
-
-/*
-router.all('/authenticate',
-  passport.authenticate('localapikey', { session: false, failWithError: true }),
-  function(req, res, next) {
-      next();
-  },
-  function(err, req, res, next) {
-      isLoggedIn(req, res, next);
-  });
-  
-router.all('/authenticate', function(req,res, next) {
-    return res.status(200).json({ message: "Authenticated as "+req.user });
-});
-
-router.use(basicAuth({
-    users: { 'admin': 'supersecret' },
-    challenge: true,
-    unauthorizedResponse: getUnauthorizedResponse
-}));
- 
-function getUnauthorizedResponse(req) {
-    return req.auth ?
-        ('Credentials ' + req.auth.user + ':' + req.auth.password + ' rejected') :
-        'No credentials provided';
-} */
 
 router.all('*',
   passport.authenticate('localapikey', { session: false, failWithError: true }),
