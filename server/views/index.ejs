@@ -159,6 +159,20 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
       };
     }])
     
+    .run(function($anchorScroll, $window) {
+      // hack to scroll to top when navigating to new URLS but not back/forward
+      var wrap = function(method) {
+        var orig = $window.window.history[method];
+        $window.window.history[method] = function() {
+          var retval = orig.apply(this, Array.prototype.slice.call(arguments));
+          $anchorScroll();
+          return retval;
+        };
+      };
+      wrap('pushState');
+      wrap('replaceState');
+    })
+    
     // Controller
     // TODO: optimise this whole section, consider popping this entire controller out to a separate file
     .controller('MessageController', ['$scope', '$routeParams', 'Api', 'socket', '$cookies', '$location', '$window', function ($scope, $routeParams, Api, socket, $cookies, $location, $window) {
