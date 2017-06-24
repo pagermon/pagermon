@@ -122,6 +122,10 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
     .factory('socket', function ($rootScope) {
       var socket = io({transports: ['websocket'], upgrade: false});
       return {
+        open: function() {
+          socket = io({transports: ['websocket'], upgrade: false});
+          socket.open();
+        },
         on: function (eventName, callback) {
           socket.on(eventName, function () {  
             var args = arguments;
@@ -139,6 +143,9 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
               }
             });
           })
+        },
+        close: function () {
+          socket.close();
         }
       };
     })
@@ -161,51 +168,53 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
       <% }else{ %>
         $scope.user="";
       <% } %>
-      // get new message on socket event
-      socket.on('messagePost', function(message) {
-        // only bother getting the new message if we're on page 1
-        if ($scope.init.currentPage === 1) {
-          console.log('New Message ID: '+message + ' currentPage: '+$scope.init.currentPage);
-            Api.NewMessage.get({id: message }).$promise.then(function(result) {
-              if (!result.id) {
-                console.info('ignoring empty result');
-              } else {
-                var datetime = moment.unix(result.timestamp);
-                result.date = datetime.format("YYYY-MM-DD")
-                result.timestamp = datetime.format("HH:mm");
-                result.padAddress = $scope.padDigits(result.address,7);
-                result.aliasMatch = result['MAX(capcodes.address)'];
-                if ($routeParams.q || $routeParams.agency || $routeParams.address) {
-                  if ($routeParams.q) {
-                    var patt = new RegExp($routeParams.q, 'i');
-                    if (patt.test(result.message) || patt.test(result.agency) || patt.test(result.padAddress) || patt.test(result.alias) || patt.test(result.source)) {
-                      $scope.messages.unshift(result);
-                      $scope.messages.pop();
-                    }
+      
+      $scope.$on('$viewContentLoaded', function() {
+        // register a new socket when scope changes
+        socket.open();
+        // get new message on socket event
+        socket.on('messagePost', function(result) {
+          //console.log(result);
+          // only bother getting the new message if we're on page 1
+          if ($scope.init.currentPage === 1) {
+            if (!result.id) {
+              console.info('ignoring empty message');
+            } else {
+              console.info('New Message ID: '+result.id + ' currentPage: '+$scope.init.currentPage);
+              var datetime = moment.unix(result.timestamp);
+              result.date = datetime.format("YYYY-MM-DD")
+              result.timestamp = datetime.format("HH:mm");
+              result.padAddress = $scope.padDigits(result.address,7);
+              result.aliasMatch = result['MAX(capcodes.address)'];
+              if ($routeParams.q || $routeParams.agency || $routeParams.address) {
+                if ($routeParams.q) {
+                  var patt = new RegExp($routeParams.q, 'i');
+                  if (patt.test(result.message) || patt.test(result.agency) || patt.test(result.padAddress) || patt.test(result.alias) || patt.test(result.source)) {
+                    $scope.messages.unshift(result);
+                    $scope.messages.pop();
                   }
-                  if ($routeParams.agency) {
-                    var patt = new RegExp($routeParams.agency, 'i');
-                    if (patt.test(result.agency)) {
-                      $scope.messages.unshift(result);
-                      $scope.messages.pop();
-                    }
-                  }
-                  if ($routeParams.address) {
-                    var patt = new RegExp($routeParams.address, 'i');
-                    if (patt.test(result.padAddress) || patt.test(result.alias) || patt.test(result.source)) {
-                      $scope.messages.unshift(result);
-                      $scope.messages.pop();
-                    }
-                  }
-                } else {
-                  $scope.messages.unshift(result);
-                  $scope.messages.pop();
                 }
+                if ($routeParams.agency) {
+                  var patt = new RegExp($routeParams.agency, 'i');
+                  if (patt.test(result.agency)) {
+                    $scope.messages.unshift(result);
+                    $scope.messages.pop();
+                  }
+                }
+                if ($routeParams.address) {
+                  var patt = new RegExp($routeParams.address, 'i');
+                  if (patt.test(result.padAddress) || patt.test(result.alias) || patt.test(result.source)) {
+                    $scope.messages.unshift(result);
+                    $scope.messages.pop();
+                  }
+                }
+              } else {
+                $scope.messages.unshift(result);
+                $scope.messages.pop();
               }
-            }, function(error) {
-              console.log('Error on Api.NewMessage.get!', error);
-            });
-        }
+            }
+          }
+        });
       });
       
       // this should be popped out into a separate file
@@ -374,6 +383,11 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
       $scope.clearSearch = function(){
         $scope.query = '';
       };
+      
+      // destroy socket when we navigate away
+      $scope.$on('$destroy', function() {
+        socket.close();
+      });
       
     }])
     // Routes

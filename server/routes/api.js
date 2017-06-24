@@ -227,8 +227,7 @@ router.get('/messageSearch', function(req, res, next) {
     } else { address = ''; }
     
     var sql = "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, MAX(capcodes.address) ";
-        sql += " FROM messages";
-        sql += " LEFT JOIN capcodes ON messages.address LIKE (capcodes.address || '%')";
+        sql += " FROM messages LEFT JOIN capcodes ON messages.address LIKE (capcodes.address || '%')";
         sql += " GROUP BY messages.id ORDER BY messages.id DESC";
     db.all(sql,function(err,rows){
         if (err) return next(err);
@@ -398,12 +397,11 @@ router.all('*',
   });
 
 router.post('/messages', function(req, res, next) {
-//    db = new sqlite3.Database('./messages.db');
-//    db.configure("busyTimeout", 30000);
     nconf.load();
     if (req.body.address && req.body.message) {
         var filterDupes = nconf.get('messages:duplicateFiltering');
         var dupeLimit = nconf.get('messages:duplicateLimit');
+        var pdwMode = nconf.get('messages:pdwMode');
         db.serialize(() => {
             //db.run("UPDATE tbl SET name = ? WHERE id = ?", [ "bar", 2 ]);
             var address = req.body.address || 0;
@@ -430,10 +428,25 @@ router.post('/messages', function(req, res, next) {
                             if (err) {
                                 res.status(500).send(err);
                             } else {
-                                res.status(200);
-                                //console.log(this);
-                                req.io.emit('messagePost', ''+this.lastID);
-                                res.send(''+this.lastID);
+                                // emit the full message
+                                var sql = "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, MAX(capcodes.address) ";
+                                    sql += " FROM messages LEFT JOIN capcodes ON messages.address LIKE (capcodes.address || '%')";
+                                    sql += " WHERE messages.id = "+this.lastID;
+                                db.get(sql,function(err,row){
+                                    if (err) {
+                                        res.status(500).send(err);
+                                    } else {
+                                        if(row.ignore != 1) {
+                                            if(pdwMode && !row.alias) {
+                                                // do nothing
+                                            } else {
+                                                req.io.emit('messagePost', row);
+                                            }
+                                        }
+                                        res.status(200).send(''+this.lastID);
+                                    }
+                                });
+                                //res.status(200).send(''+this.lastID);
                             }
                         });
                     }
