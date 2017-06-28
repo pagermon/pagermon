@@ -17,6 +17,9 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
         }),
         AliasDupeCheck: $resource('/api/capcodeCheck/:id', {id: '@id'}, {
           'post': { method:'POST', isArray: false }
+        }),
+        AliasRefresh: $resource('/api/capcodeRefresh', null, {
+          'post': { method:'POST', isArray: false }
         })
       };
     }])
@@ -30,6 +33,42 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
         $scope.page = 'aliases';
         $scope.loading = false;
       });
+      Api.Settings.get(null, function(results) {
+        if (results) {
+          if (results.database && results.database.aliasRefreshRequired == 1) {
+            $scope.aliasRefreshRequired = 1;
+            $scope.alertMessage.text = 'Alias refresh required!';
+            $scope.alertMessage.type = 'alert-warning';
+            $scope.alertMessage.show = true;
+          }
+        }
+      });
+      
+      $scope.aliasRefresh = function () {
+        $scope.loading = true;
+        $scope.alertMessage = {};
+        Api.AliasRefresh.post(null, null).$promise.then(function (response) {
+          console.log(response);
+          if (response.status == 'ok') {
+            $scope.alertMessage.text = 'Alias refresh complete!';
+            $scope.alertMessage.type = 'alert-success';
+            $scope.alertMessage.show = true;
+            $scope.loading = false;
+            $scope.aliasRefreshRequired = 0;
+          } else {
+            $scope.alertMessage.text = 'Error refreshing aliases: '+response.data.error;
+            $scope.alertMessage.type = 'alert-danger';
+            $scope.alertMessage.show = true;
+            $scope.loading = false;
+          }
+        }, function(response) {
+          console.log(response);
+          $scope.alertMessage.text = 'Error refreshing aliases: '+response.data.error;
+          $scope.alertMessage.type = 'alert-danger';
+          $scope.alertMessage.show = true;
+          $scope.loading = false;          
+        });
+      };
       
       $scope.messageDetail = function(address) {
           $location.url('/aliases/'+address);
@@ -81,6 +120,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
             $scope.alertMessage.type = 'alert-success';
             $scope.alertMessage.show = true;
             $scope.loading = false;
+            $scope.aliasRefreshRequired = 1;
             $location.url('/aliases/');
           } else {
             $scope.alertMessage.text = 'Error deleting alias: '+response.data.error;
@@ -123,6 +163,33 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
       $scope.newButton = function(address) {
           $location.url('/aliases/'+address);
       };
+      
+      $scope.aliasRefresh = function () {
+        $scope.loading = true;
+        $scope.alertMessage = {};
+        Api.AliasRefresh.post(null, null).$promise.then(function (response) {
+          console.log(response);
+          if (response.status == 'ok') {
+            $scope.alertMessage.text = 'Alias refresh complete!';
+            $scope.alertMessage.type = 'alert-success';
+            $scope.alertMessage.show = true;
+            $scope.loading = false;
+            $scope.aliasRefreshRequired = 0;
+          } else {
+            $scope.alertMessage.text = 'Error refreshing aliases: '+response.data.error;
+            $scope.alertMessage.type = 'alert-danger';
+            $scope.alertMessage.show = true;
+            $scope.loading = false;
+          }
+        }, function(response) {
+          console.log(response);
+          $scope.alertMessage.text = 'Error refreshing aliases: '+response.data.error;
+          $scope.alertMessage.type = 'alert-danger';
+          $scope.alertMessage.show = true;
+          $scope.loading = false;          
+        });
+      };
+      
       $scope.aliasLoad = function() {
         $scope.loading = true;
         Api.AliasDetail.get({id: $routeParams.id }, function(results) {
@@ -188,6 +255,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
             $scope.alertMessage.type = 'alert-success';
             $scope.alertMessage.show = true;
             $scope.loading = false;
+            $scope.aliasRefreshRequired = 1;
             if ($scope.isNew) {
               $location.url('/aliases/'+response.id);
             }
@@ -256,6 +324,13 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
         };
       };
       // get data on load
+      Api.Settings.get(null, function(results) {
+        if (results) {
+          if (results.database && results.database.aliasRefreshRequired == 1) {
+            $scope.aliasRefreshRequired = 1;
+          }
+        }
+      });
       $scope.aliasLoad();
     }])
     

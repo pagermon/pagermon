@@ -15,10 +15,12 @@
           <h4 style="padding-left: 15px;"><a href="/admin/">Admin</a> / Aliases</div>
   <div class="col-sm-6 col-xs-12">
             <div class="btn-group pull-right hidden-xs" style="margin-top: 11.5px" role="group" aria-label="Actions">
+              <button ng-if="aliasRefreshRequired == 1" type="button" ng-click="aliasRefresh();" class="btn btn-warning">Refresh Alias/Message Map</button>
               <button type="button" ng-disabled="!aliasSelected()" ng-click="aliasDelete()" class="btn btn-danger">Delete Selected</button>
               <button type="button" ng-click="messageDetail('new');" class="btn btn-success">Add New</button>
             </div>
             <div class="btn-group visible-xs" style="padding-left: 15px;" role="group" aria-label="Actions">
+              <button ng-if="aliasRefreshRequired == 1" type="button" ng-click="aliasRefresh();" class="btn btn-warning">Refresh Alias/Message Map</button>
               <button type="button" ng-disabled="!aliasSelected()" ng-click="aliasDelete()" class="btn btn-danger">Delete Selected</button>
               <button type="button" ng-click="messageDetail('new');" class="btn btn-success">Add New</button>
             </div>

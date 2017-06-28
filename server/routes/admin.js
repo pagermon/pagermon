@@ -12,7 +12,6 @@ router.use(function (req, res, next) {
 });
 
 var nconf = require('nconf');
-// don't forget to change this
 var conf_file = './config/config.json';
 var conf_backup = './config/backup.json';
 nconf.file({file: conf_file});
@@ -69,7 +68,7 @@ router.route('/settingsData')
     .post(isLoggedIn, function(req, res, next) {
         nconf.load();
         if (req.body) {
-            console.log(req.body);
+            //console.log(req.body);
             var currentConfig = nconf.get();
             fs.writeFileSync( conf_backup, JSON.stringify(currentConfig,null, 2) );
             fs.writeFileSync( conf_file, JSON.stringify(req.body,null, 2) );

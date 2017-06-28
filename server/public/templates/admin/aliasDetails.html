@@ -15,9 +15,11 @@
           <h4 style="padding-left: 15px;"><a href="/admin/">Admin</a> / <a href="/admin/aliases/">Aliases</a> / {{alias.id || 'New'}} {{alias.newMessage}}</div>
   <div class="col-sm-6 col-xs-12">
             <div class="hidden-xs btn-group pull-right" style="margin-top: 11.5px" role="group" aria-label="Actions">
+              <button ng-if="aliasRefreshRequired == 1" type="button" ng-click="aliasRefresh();" class="btn btn-warning">Refresh Alias/Message Map</button>
               <button ng-if="!isNew" type="button" ng-click="newButton('new');" class="btn btn-success">Add New</button>
             </div>
             <div class="visible-xs btn-group" style="padding-left: 15px;" role="group" aria-label="Actions">
+              <button ng-if="aliasRefreshRequired == 1" type="button" ng-click="aliasRefresh();" class="btn btn-warning">Refresh Alias/Message Map</button>
               <button ng-if="!isNew" type="button" ng-click="newButton('new');" class="btn btn-success">Add New</button>
             </div>
           </h4>
@@ -82,7 +84,7 @@
               <div class="checkbox">
                 <label>
                 <input type="checkbox" name="alias.ignore" ng-model="alias.ignore" ng-true-value="1" ng-false-value="0">
-                Ignore messages matching this alias. Still retains messages in the DB, just hides in the UI.
+                Ignore messages matching this alias. Does not store messages matching this alias in the database.
                 </label>
               </div>
               </div>
