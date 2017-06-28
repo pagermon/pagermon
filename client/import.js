@@ -60,7 +60,7 @@ rl.on('line', (line) => {
   if (line.indexOf(',') > -1) {
   	parse(line, {comment: '#'}, function(err, output){
   		var ol = output[0];
-  		address = ol[1].replace(/\?/g, "");
+  		address = ol[1].replace(/\?/g, "_");
   		if (ol[2].indexOf(" - ") > -1) {
   			agency = ol[2].match(/(.*?) - /)[1].trim();
   			alias = ol[2].match(/ - (.*?)$/)[1].trim();

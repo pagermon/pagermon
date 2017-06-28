@@ -482,34 +482,60 @@ router.post('/messages', function(req, res, next) {
                         res.status(200);
                         res.send('Ignoring duplicate');
                     } else {
-                        db.run("INSERT INTO messages (address, message, timestamp, source) VALUES ($mesAddress, $mesBody, $mesDT, $mesSource);", {
-                          $mesAddress: address,
-                          $mesBody: message,
-                          $mesDT: datetime,
-                          $mesSource: source
-                        }, function(err){
-                            if (err) {
-                                res.status(500).send(err);
+                        db.get("SELECT id, ignore FROM capcodes WHERE address LIKE ? ORDER BY address DESC LIMIT 1", address, function(err,row) {
+                            var insert;
+                            var alias_id = null;
+                            if (err) { console.error(err) }
+                            if (row) {
+                                if (row.ignore == '1') {
+                                    insert = false;
+                                    console.log('Ignoring filtered address: '+address+' alias: '+row.id);
+                                } else {
+                                    insert = true;
+                                    alias_id = row.id;
+                                }
                             } else {
-                                // emit the full message
-                                var sql = "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch ";
-                                    sql += " FROM messages LEFT JOIN capcodes ON capcodes.id = (SELECT id FROM capcodes WHERE address LIKE messages.address AND ignore = 0 LIMIT 1) ";
-                                    sql += " WHERE messages.id = "+this.lastID;
-                                db.get(sql,function(err,row){
+                                insert = true;
+                            }
+                            if (insert == true) {
+                                db.run("INSERT INTO messages (address, message, timestamp, source, alias_id) VALUES ($mesAddress, $mesBody, $mesDT, $mesSource, $aliasId);", {
+                                  $mesAddress: address,
+                                  $mesBody: message,
+                                  $mesDT: datetime,
+                                  $mesSource: source,
+                                  $aliasId: alias_id
+                                }, function(err){
                                     if (err) {
                                         res.status(500).send(err);
                                     } else {
-                                        if(row.ignore != 1) {
-                                            if(pdwMode && !row.alias) {
-                                                // do nothing
-                                            } else {
-                                                req.io.emit('messagePost', row);
-                                            }
+                                        // emit the full message
+                                        var sql =  "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch FROM messages";
+                                        if(pdwMode) {
+                                            sql += " INNER JOIN capcodes ON capcodes.id = messages.alias_id ";
+                                        } else {
+                                            sql += " LEFT JOIN capcodes ON capcodes.id = messages.alias_id ";
                                         }
-                                        res.status(200).send(''+this.lastID);
+                                            sql += " WHERE messages.id = "+this.lastID;
+                                        db.get(sql,function(err,row){
+                                            if (err) {
+                                                res.status(500).send(err);
+                                            } else {
+                                                if(row.ignore != 1) {
+                                                    if(pdwMode && !row.alias) {
+                                                        // do nothing
+                                                    } else {
+                                                        req.io.emit('messagePost', row);
+                                                    }
+                                                }
+                                                res.status(200).send(''+this.lastID);
+                                            }
+                                        });
+                                        //res.status(200).send(''+this.lastID);
                                     }
                                 });
-                                //res.status(200).send(''+this.lastID);
+                            } else {
+                                res.status(200);
+                                res.send('Ignoring filtered');
                             }
                         });
                     }
