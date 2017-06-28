@@ -28,32 +28,6 @@ var sqlite3 = require('sqlite3').verbose();
 var db = new sqlite3.Database('./messages.db');
     db.configure("busyTimeout", 30000);
 
-  /////////////////////
-  //
-  // DB Schema
-  //
-  // Table: messages
-  /*
-   CREATE TABLE messages ( 
-   id integer PRIMARY KEY, 
-   address integer NOT NULL, 
-   message text NOT NULL, 
-   timestamp INTEGER);
-  */ 
-  // Table: capcodes
-  /*
-   CREATE TABLE capcodes (
-   address integer NOT NULL,
-   alias text NOT NULL, 
-   agency TEXT, 
-   icon TEXT, 
-   color TEXT, 
-   ignore INTEGER DEFAULT 0, 
-   PRIMARY KEY (address)
-   );
-  */
-  /////////////////////
-
 // defaults
 var initData = {};
     initData.limit = nconf.get('messages:defaultLimit');
@@ -69,7 +43,7 @@ var initData = {};
 //               // 
 ///////////////////    
   
-router.get('/messages/init', function(req, res, next) {
+/*router.get('/messages/init', function(req, res, next) {
     //set current page if specifed as get variable (eg: /?page=2)
     if (typeof req.query.page !== 'undefined') {
         var page = parseInt(req.query.page, 10);
@@ -96,11 +70,12 @@ router.get('/messages/init', function(req, res, next) {
             }
         });
     });
-});
+}); */
 
 /* GET message listing. */
 router.get('/messages', function(req, res, next) {
     nconf.load();
+    console.time('init');
     var pdwMode = nconf.get('messages:pdwMode');
     var maxLimit = nconf.get('messages:maxLimit');
     var defaultLimit = nconf.get('messages:defaultLimit');
@@ -119,21 +94,18 @@ router.get('/messages', function(req, res, next) {
     } else {
         initData.limit = parseInt(defaultLimit, 10);
     }
-
-    var sql = "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, MAX(capcodes.address) ";
-        sql += " FROM messages";
-        sql += " LEFT JOIN capcodes ON messages.address LIKE (capcodes.address || '%')";
-        sql += " GROUP BY messages.id ORDER BY messages.id DESC";
-    db.all(sql,function(err,rows){
+    var initSql;
+    if (pdwMode) {
+        initSql =  "SELECT COUNT(*) AS msgcount FROM messages WHERE alias_id IS NOT NULL;";
+    //    initSql += " INNER JOIN capcodes ON capcodes.id = (SELECT id FROM capcodes WHERE address LIKE messages.address LIMIT 1);";
+    } else {
+        initSql = "SELECT COUNT(*) AS msgcount FROM messages;";
+    }
+    db.get(initSql,function(err,count){
         if (err) {
             console.log(err);
-        } else if (rows) {
-            var result;
-            if (pdwMode)
-                result = rows.filter(function(x){return x.ignore==0});
-            else
-                result = rows.filter(function(x){return !x.ignore || x.ignore==0});
-            initData.msgCount = result.length;
+        } else if (count) {
+            initData.msgCount = count.msgcount;
             initData.pageCount = Math.ceil(initData.msgCount/initData.limit);
             if (initData.currentPage > initData.pageCount) {
                 initData.currentPage = 0;
@@ -143,10 +115,47 @@ router.get('/messages', function(req, res, next) {
                 initData.offset = 0;
             }
             initData.offsetEnd = initData.offset + initData.limit;
-            var limitResults = result.slice(initData.offset, initData.offsetEnd);
-            res.status(200).json({'init': initData, 'messages': limitResults});
+            console.timeEnd('init');
+            console.time('sql');
+            var sql;
+            if(pdwMode) {
+                sql =  "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch ";
+                sql += " FROM messages";
+            //    sql += " INNER JOIN capcodes ON capcodes.id = (SELECT id FROM capcodes WHERE address LIKE messages.address LIMIT 1) ";
+                sql += " INNER JOIN capcodes ON capcodes.id = messages.alias_id ";
+                sql += " ORDER BY messages.id DESC LIMIT "+initData.limit+" OFFSET "+initData.offset+";";
+            } else {
+                sql =  "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch ";
+                sql += " FROM messages";
+                sql += " LEFT JOIN capcodes ON capcodes.id = messages.alias_id ";
+                sql += " ORDER BY messages.id DESC LIMIT "+initData.limit+" OFFSET "+initData.offset+";";
+            }
+            var result = [];
+            db.each(sql,function(err,row){
+                if (err) {
+                    console.log(err);
+                } else if (row) {
+                    result.push(row);
+                } else {
+                    console.log('empty results');
+                }
+            },function(err,rowCount){
+                if (err) {
+                    console.timeEnd('sql');
+                    console.log(err);
+                    res.status(500).send(err);
+                } else if (rowCount > 1) {
+                    console.timeEnd('sql');
+                    //var limitResults = result.slice(initData.offset, initData.offsetEnd);
+                    console.time('send');
+                    res.status(200).json({'init': initData, 'messages': result});
+                    console.timeEnd('send');
+                } else {
+                    res.status(200).json({'init': {}, 'messages': []});
+                }
+            });
         } else {
-            res.status(200).json({'init': {}, 'messages': []});
+            console.log('empty results');
         }
     });
 });
@@ -155,10 +164,10 @@ router.get('/messages/:id', function(req, res, next) {
     nconf.load();
     var pdwMode = nconf.get('messages:pdwMode');
     var id = req.params.id;
-    var sql = "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, MAX(capcodes.address) ";
-    sql += " FROM messages";
-    sql += " LEFT JOIN capcodes ON messages.address LIKE (capcodes.address || '%')";
-    sql += " WHERE messages.id = "+id;
+    var sql =  "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch ";
+        sql += " FROM messages";
+        sql += " LEFT JOIN capcodes ON capcodes.id = messages.alias_id ";
+        sql += " WHERE messages.id = "+id;
     db.serialize(() => {
         db.get(sql,function(err,row){
             if (err) {
@@ -177,7 +186,7 @@ router.get('/messages/:id', function(req, res, next) {
         });
     });
 });
-
+/*
 router.get('/messages/address/:id', function(req, res, next) {
     var id = req.params.id;
     db.serialize(() => {
@@ -191,11 +200,12 @@ router.get('/messages/address/:id', function(req, res, next) {
             }
         });
     });
-});
+});*/
 
 /* GET message search */
 router.get('/messageSearch', function(req, res, next) {
     nconf.load();
+    console.time('init');
     var pdwMode = nconf.get('messages:pdwMode');
     var maxLimit = nconf.get('messages:maxLimit');
     var defaultLimit = nconf.get('messages:defaultLimit');
@@ -225,70 +235,93 @@ router.get('/messageSearch', function(req, res, next) {
     } else { agency = ''; }
     if (typeof req.query.address !== 'undefined') { address = req.query.address;
     } else { address = ''; }
+    var sql;
     
-    var sql = "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, MAX(capcodes.address) ";
-        sql += " FROM messages LEFT JOIN capcodes ON messages.address LIKE (capcodes.address || '%')";
-        sql += " GROUP BY messages.id ORDER BY messages.id DESC";
-    db.all(sql,function(err,rows){
-        if (err) return next(err);
-        // get the search results - js-search
-        var search = new JsSearch.Search('id');
-            search.searchIndex = new JsSearch.UnorderedSearchIndex();
-            search.tokenizer = new JsSearch.StopWordsTokenizer(
-    	        new JsSearch.SimpleTokenizer());
-    	if (agency || address) {
-            search.addIndex('address');
-            search.addIndex('alias');
-            search.addIndex('agency');
-            search.addIndex('source');
-    	} else {
-            search.addIndex('message');
-            search.addIndex('address');
-            search.addIndex('alias');
-            search.addIndex('agency');
-            search.addIndex('source');
-    	}
-	        search.addDocuments(rows);
-	    var sResult;
-	    if (query) {
-	        sResult = search.search(query);
-	    } else {
-	        if (agency) {
-	            sResult = search.search(agency);
-	        } else if (address) {
-	            sResult = search.search(address);
-	        } else {
-	            sResult = search.search();
-	        }
-	    }
-        var result;
-        if (pdwMode)
-	        result = sResult.filter(function(x){return x.ignore==0});
-	    else
-	        result = sResult.filter(function(x){return !x.ignore || x.ignore==0});
-	    
-        // sort by value
-        result.sort(function (a, b) {
-          return b.id - a.id;
-        });
-	    
-        if (result.length > 250) {
-            initData.msgCount = 250;
+    // set select commands based on query type
+    // address can be address or source field
+    if(pdwMode) {
+        sql =  "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch ";
+        sql += " FROM messages";
+        sql += " INNER JOIN capcodes ON capcodes.id = messages.alias_id ";
+    } else {
+        sql =  "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch ";
+        sql += " FROM messages";
+        sql += " LEFT JOIN capcodes ON capcodes.id = messages.alias_id ";
+    }
+    if(address != '' || agency != '')
+        sql += ' WHERE';
+    if(address != '')
+        sql += ' messages.address LIKE "'+address+'" OR messages.source = "'+address+'" OR ';
+    if(agency != '')
+        sql += ' messages.alias_id IN (SELECT id FROM capcodes WHERE agency = "'+agency+'") OR ';
+    if(address != '' || agency != '')
+        sql += ' messages.id IS NULL';
+    
+        sql += " ORDER BY messages.id DESC;";
+        
+    console.timeEnd('init');
+    console.time('sql');
+
+    var rows = [];
+    db.each(sql,function(err,row){
+        if (err) {
+            console.log(err);
+        } else if (row) {
+            rows.push(row);
         } else {
-            initData.msgCount = result.length;    
+            console.log('empty results');
         }
-        initData.pageCount = Math.ceil(initData.msgCount/initData.limit);
-        if (initData.currentPage > initData.pageCount) {
-            initData.currentPage = 0;
+    },function(err,rowCount){
+        if (err) {
+            console.timeEnd('sql');
+            console.log(err);
+            res.status(500).send(err);
+        } else if (rowCount > 1) {
+            console.timeEnd('sql');
+            console.time('search');
+            var result;
+            if (query != '') {
+                var search = new JsSearch.Search('id');
+                    search.searchIndex = new JsSearch.UnorderedSearchIndex();
+                    search.tokenizer = new JsSearch.StopWordsTokenizer(
+            	        new JsSearch.SimpleTokenizer());
+                    search.addIndex('message');
+                    search.addIndex('address');
+                    search.addIndex('alias');
+                    search.addIndex('agency');
+        	    console.timeEnd('search');
+        	    console.time('searchFullText');
+        	        search.addDocuments(rows);
+                result = search.search(query);
+                console.timeEnd('searchFullText');
+                console.time('sort');
+        	    result.sort(function (a, b) {
+                    return b.id - a.id;
+                });
+                console.timeEnd('sort');
+            } else {
+                result = rows;
+                console.timeEnd('search');
+            }
+            console.time('initEnd');
+            initData.msgCount = result.length;
+            initData.pageCount = Math.ceil(initData.msgCount/initData.limit);
+            if (initData.currentPage > initData.pageCount) {
+                initData.currentPage = 0;
+            }
+            initData.offset = initData.limit * initData.currentPage;
+            if (initData.offset < 0) {
+                initData.offset = 0;
+            }
+            initData.offsetEnd = initData.offset + initData.limit;
+            var limitResults = result.slice(initData.offset, initData.offsetEnd);
+            
+    	    console.timeEnd('initEnd');
+            res.json({'init': initData, 'messages': limitResults});
+        } else {
+            res.status(200).json({'init': {}, 'messages': []});
         }
-        initData.offset = initData.limit * initData.currentPage;
-        if (initData.offset < 0) {
-            initData.offset = 0;
-        }
-        initData.offsetEnd = initData.offset + initData.limit;
-        var limitResults = result.slice(initData.offset, initData.offsetEnd);
-	    
-        res.json({'init': initData, 'messages': limitResults});
+            
     });
 });
 
@@ -308,7 +341,7 @@ router.get('/capcodes/init', function(req, res, next) {
             initData.currentPage = page - 1;
     }
     db.serialize(() => {
-        db.get("SELECT address FROM capcodes ORDER BY address DESC LIMIT 1", [], function(err, row) {
+        db.get("SELECT id FROM capcodes ORDER BY id DESC LIMIT 1", [], function(err, row) {
             if (err) {
                 console.log(err);
             } else {
@@ -338,7 +371,7 @@ router.get('/capcodes', function(req, res, next) {
 router.get('/capcodes/:id', function(req, res, next) {
     var id = req.params.id;
     db.serialize(() => {
-        db.get("SELECT * from capcodes WHERE address=?", id, function(err, row){
+        db.get("SELECT * from capcodes WHERE id=?", id, function(err, row){
             if (err) {
                 res.status(500);
                 res.send(err);
@@ -348,6 +381,36 @@ router.get('/capcodes/:id', function(req, res, next) {
                     res.json(row);                    
                 } else {
                     row = {
+                        "id": "",
+                        "address": "",
+                        "alias": "",
+                        "agency": "",
+                        "icon": "question",
+                        "color": "black"
+                    };
+                    res.status(200);
+                    res.json(row);
+                }
+            }
+        });
+    });
+  
+});
+
+router.get('/capcodeCheck/:id', function(req, res, next) {
+    var id = req.params.id;
+    db.serialize(() => {
+        db.get("SELECT * from capcodes WHERE address=?", id, function(err, row){
+            if (err) {
+                res.status(500);
+                res.send(err);
+            } else {
+                if (row) {
+                    res.status(200);
+                    res.json(row);
+                } else {
+                    row = {
+                        "id": "",
                         "address": "",
                         "alias": "",
                         "agency": "",
@@ -392,7 +455,7 @@ router.all('*',
       next();
   },
   function(err, req, res, next) {
-      console.log(err);
+      console.info(err);
       isLoggedIn(req, res, next);
   });
 
@@ -404,7 +467,7 @@ router.post('/messages', function(req, res, next) {
         var pdwMode = nconf.get('messages:pdwMode');
         db.serialize(() => {
             //db.run("UPDATE tbl SET name = ? WHERE id = ?", [ "bar", 2 ]);
-            var address = req.body.address || 0;
+            var address = req.body.address || '0000000';
             var message = req.body.message.replace(/["]+/g, '') || 'null';
             var datetime = req.body.datetime || 1;
             var source = req.body.source || 'UNK';
@@ -429,8 +492,8 @@ router.post('/messages', function(req, res, next) {
                                 res.status(500).send(err);
                             } else {
                                 // emit the full message
-                                var sql = "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, MAX(capcodes.address) ";
-                                    sql += " FROM messages LEFT JOIN capcodes ON messages.address LIKE (capcodes.address || '%')";
+                                var sql = "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch ";
+                                    sql += " FROM messages LEFT JOIN capcodes ON capcodes.id = (SELECT id FROM capcodes WHERE address LIKE messages.address AND ignore = 0 LIMIT 1) ";
                                     sql += " WHERE messages.id = "+this.lastID;
                                 db.get(sql,function(err,row){
                                     if (err) {
@@ -464,6 +527,7 @@ router.post('/capcodes', function(req, res, next) {
 //    db.configure("busyTimeout", 30000);
     nconf.load();
     if (req.body.address && req.body.alias) {
+        var id = req.body.id || null;
         var address = req.body.address || 0;
         var alias = req.body.alias || 'null';
         var agency = req.body.agency || 'null';
@@ -472,7 +536,8 @@ router.post('/capcodes', function(req, res, next) {
         var ignore = req.body.ignore || 0;
         db.serialize(() => {
             //db.run("UPDATE tbl SET name = ? WHERE id = ?", [ "bar", 2 ]);
-            db.run("REPLACE INTO capcodes (address, alias, agency, color, icon, ignore) VALUES ($mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore);", {
+            db.run("REPLACE INTO capcodes (id, address, alias, agency, color, icon, ignore) VALUES ($mesID, $mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore);", {
+              $mesID: id,
               $mesAddress: address,
               $mesAlias: alias,
               $mesAgency: agency,
@@ -495,14 +560,14 @@ router.post('/capcodes', function(req, res, next) {
 });
 
 router.post('/capcodes/:id', function(req, res, next) {
-    var id = req.params.id;
+    var id = req.params.id || req.body.id || null;
     if (id == 'deleteMultiple') {
         // do delete multiple
         var idList = req.body.deleteList || [0, 0];
         if (!idList.some(isNaN)) {
             console.log('Deleting: '+idList);
             db.serialize(() => {
-                db.run(inParam('DELETE FROM capcodes WHERE address IN (?#)', idList), idList, function(err){
+                db.run(inParam('DELETE FROM capcodes WHERE id IN (?#)', idList), idList, function(err){
                     if (err) {
                         res.status(500).send(err);
                     } else {
@@ -516,6 +581,8 @@ router.post('/capcodes/:id', function(req, res, next) {
     } else {
       if (req.body.address && req.body.alias) {
         nconf.load();
+        if (id == 'new')
+            id = null;
         var address = req.body.address || 0;
         var alias = req.body.alias || 'null';
         var agency = req.body.agency || 'null';
@@ -524,7 +591,8 @@ router.post('/capcodes/:id', function(req, res, next) {
         var ignore = req.body.ignore || 0;
         db.serialize(() => {
             //db.run("UPDATE tbl SET name = ? WHERE id = ?", [ "bar", 2 ]);
-            db.run("REPLACE INTO capcodes (address, alias, agency, color, icon, ignore) VALUES ($mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore);", {
+            db.run("REPLACE INTO capcodes (id, address, alias, agency, color, icon, ignore) VALUES ($mesID, $mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore);", {
+              $mesID: id,
               $mesAddress: address,
               $mesAlias: alias,
               $mesAgency: agency,
@@ -535,7 +603,7 @@ router.post('/capcodes/:id', function(req, res, next) {
                 if (err) {
                     res.status(500).send(err);
                 } else {
-                    res.status(200).send({'status': 'ok'});
+                    res.status(200).send({'status': 'ok', 'id': this.lastID});
                 }
             });
             console.log(req.body || 'request body empty');
@@ -553,7 +621,7 @@ router.delete('/capcodes/:id', function(req, res, next) {
     console.log('Deleting '+id);
     db.serialize(() => {
         //db.run("UPDATE tbl SET name = ? WHERE id = ?", [ "bar", 2 ]);
-        db.run("DELETE FROM capcodes WHERE address=?", id, function(err){
+        db.run("DELETE FROM capcodes WHERE id=?", id, function(err){
             if (err) {
                 res.status(500).send(err);
             } else {

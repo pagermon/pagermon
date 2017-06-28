@@ -1,3 +1,5 @@
+var version = "0.1.3-beta";
+
 var debug = require('debug')('pagermon:server');
 var http = require('http');
 var compression = require('compression');
@@ -110,7 +112,7 @@ app.use(flash());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/node_modules', express.static(path.join(__dirname, 'node_modules')));
 app.use(function(req, res, next) {
-  res.locals.version = nconf.get('global:version') || 'unknown version';
+  res.locals.version = version;
   res.locals.loglevel = nconf.get('global:loglevel') || 'info';
   next();
 });

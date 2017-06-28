@@ -14,6 +14,9 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
         }),
         Settings: $resource('/admin/settingsData', null, {
           'post': { method:'POST', isArray: false }
+        }),
+        AliasDupeCheck: $resource('/api/capcodeCheck/:id', {id: '@id'}, {
+          'post': { method:'POST', isArray: false }
         })
       };
     }])
@@ -66,7 +69,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
         $scope.selectedAll = false;
         angular.forEach($scope.aliases, function(selected){
             if(selected.selected){
-                deleteList.push(selected.address);
+                deleteList.push(selected.id);
             }
         });
         var data = {'deleteList': deleteList};
@@ -134,7 +137,8 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
           } else {
             $scope.aliasLoading = false;
             $scope.existingAddress = false;
-            $scope.alias.originalAddress = '';
+            $scope.alias.address = $routeParams.address || '';
+            $scope.alias.originalAddress = $routeParams.address || '';
             $scope.loading = false;
             $scope.isNew = true;
             console.log(results);
@@ -145,13 +149,14 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
       $scope.checkAddress = function() {
         $scope.aliasLoading = true;
         if ($scope.alias.address) {
-          Api.AliasDetail.get({id: $scope.alias.address }, function(results) {
+          Api.AliasDupeCheck.get({id: $scope.alias.address }, function(results) {
             if (results.address) {
               $scope.aliasLoading = false;
               if (results.address == $scope.alias.originalAddress) {
                 $scope.existingAddress = false;
                 return false;
               } else {
+                $scope.existingID = results.id;
                 $scope.existingAddress = true;
                 return true;
               }
@@ -170,7 +175,13 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
       
       $scope.aliasSubmit = function() {
         $scope.loading = true;
-        Api.AliasDetail.save({id: $routeParams.id }, $scope.alias).$promise.then(function (response) {
+        var id;
+        if($scope.alias.id) {
+          id = $routeParams.id;
+        } else {
+          id = "new";
+        }
+        Api.AliasDetail.save({id: id }, $scope.alias).$promise.then(function (response) {
           console.log(response);
           if (response.status == 'ok') {
             $scope.alertMessage.text = 'Alias saved!';
@@ -178,10 +189,10 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
             $scope.alertMessage.show = true;
             $scope.loading = false;
             if ($scope.isNew) {
-              $location.url('/aliases/'+$scope.alias.address);
+              $location.url('/aliases/'+response.id);
             }
           } else {
-            $scope.alertMessage.text = 'Error saving alias: '+response.data.error;
+            $scope.alertMessage.text = 'Error saving alias: '+response;
             $scope.alertMessage.type = 'alert-danger';
             $scope.alertMessage.show = true;
             $scope.loading = false;

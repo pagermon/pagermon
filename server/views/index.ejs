@@ -54,7 +54,7 @@
               <span class="small" style="color: white; font-family: monospace;"><strong>{{message.source}}</strong></span>
               </td>
             <td class="shrink noMobile clickable-td" ng-click="addressFilter(message.address || '')" style="background-color: {{message.color || 'grey'}}; text-align: center;">
-              <span class="small" style="color: white; font-family: monospace;"><strong>{{message.padAddress}}</strong></span>
+              <span class="small" style="color: white; font-family: monospace;"><strong>{{message.address}}</strong></span>
               </td>
             <td class="shrink clickable-td" ng-if="message.agency" ng-click="agencyFilter(message.agency || '')">
               <span class="fa-stack fa-lg fa-fw" style="color: {{message.color || 'grey'}};">
@@ -72,7 +72,7 @@
               </span>
               <strong style="vertical-align: middle;"></strong>
             </td>
-            <td class="shrink noTiny clickable-td" ng-if="user" ng-click="editAlias(message.aliasMatch || message.address)">
+            <td class="shrink noTiny clickable-td" ng-if="user" ng-click="editAlias(message.aliasMatch || 'new?address='+message.address)">
               <span data-toggle="tooltip" title="{{message['MAX(capcodes.address)'] || ''}}" style="color: Maroon;">{{message.alias || 'Unknown'}}</span>
             </td>
             <td class="shrink noTiny" ng-if="!user">
@@ -122,10 +122,6 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
     .factory('socket', function ($rootScope) {
       var socket = io({transports: ['websocket'], upgrade: false});
       return {
-        open: function() {
-          socket = io({transports: ['websocket'], upgrade: false});
-          socket.open();
-        },
         on: function (eventName, callback) {
           socket.on(eventName, function () {  
             var args = arguments;
@@ -143,9 +139,6 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
               }
             });
           })
-        },
-        close: function () {
-          socket.close();
         }
       };
     })
@@ -159,20 +152,6 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
       };
     }])
     
-    .run(function($anchorScroll, $window) {
-      // hack to scroll to top when navigating to new URLS but not back/forward
-      var wrap = function(method) {
-        var orig = $window.window.history[method];
-        $window.window.history[method] = function() {
-          var retval = orig.apply(this, Array.prototype.slice.call(arguments));
-          $anchorScroll();
-          return retval;
-        };
-      };
-      wrap('pushState');
-      wrap('replaceState');
-    })
-    
     // Controller
     // TODO: optimise this whole section, consider popping this entire controller out to a separate file
     .controller('MessageController', ['$scope', '$routeParams', 'Api', 'socket', '$cookies', '$location', '$window', function ($scope, $routeParams, Api, socket, $cookies, $location, $window) {
@@ -182,28 +161,21 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
       <% }else{ %>
         $scope.user="";
       <% } %>
-      
-      $scope.$on('$viewContentLoaded', function() {
-        // register a new socket when scope changes
-        socket.open();
-        // get new message on socket event
-        socket.on('messagePost', function(result) {
-          //console.log(result);
-          // only bother getting the new message if we're on page 1
-          if ($scope.init.currentPage === 1) {
-            if (!result.id) {
-              console.info('ignoring empty message');
-            } else {
-              console.info('New Message ID: '+result.id + ' currentPage: '+$scope.init.currentPage);
+      // get new message on socket event
+      socket.on('messagePost', function(message) {
+        // only bother getting the new message if we're on page 1
+        if ($scope.init.currentPage === 1) {
+          console.log('New Message ID: '+message + ' currentPage: '+$scope.init.currentPage);
+            Api.NewMessage.get({id: message }).$promise.then(function(result) {
               var datetime = moment.unix(result.timestamp);
               result.date = datetime.format("YYYY-MM-DD")
               result.timestamp = datetime.format("HH:mm");
-              result.padAddress = $scope.padDigits(result.address,7);
-              result.aliasMatch = result['MAX(capcodes.address)'];
+            //  result.padAddress = $scope.padDigits(result.address,7);
+            //  result.aliasMatch = result['MAX(capcodes.address)'];
               if ($routeParams.q || $routeParams.agency || $routeParams.address) {
                 if ($routeParams.q) {
                   var patt = new RegExp($routeParams.q, 'i');
-                  if (patt.test(result.message) || patt.test(result.agency) || patt.test(result.padAddress) || patt.test(result.alias) || patt.test(result.source)) {
+                  if (patt.test(result.message) || patt.test(result.agency) || patt.test(result.address) || patt.test(result.alias) || patt.test(result.source)) {
                     $scope.messages.unshift(result);
                     $scope.messages.pop();
                   }
@@ -217,7 +189,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
                 }
                 if ($routeParams.address) {
                   var patt = new RegExp($routeParams.address, 'i');
-                  if (patt.test(result.padAddress) || patt.test(result.alias) || patt.test(result.source)) {
+                  if (patt.test(result.address) || patt.test(result.alias) || patt.test(result.source)) {
                     $scope.messages.unshift(result);
                     $scope.messages.pop();
                   }
@@ -226,9 +198,10 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
                 $scope.messages.unshift(result);
                 $scope.messages.pop();
               }
-            }
-          }
-        });
+            }, function(error) {
+              console.log('Error on Api.NewMessage.get!', error);
+            });
+        }
       });
       
       // this should be popped out into a separate file
@@ -294,8 +267,8 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
                 result.date = datetime.format("YYYY-MM-DD");
                 result.timestamp = datetime.format("HH:mm");
                 result.message = $scope.htmlEntities(result.message);
-                result.padAddress = $scope.padDigits(result.address,7);
-                result.aliasMatch = result['MAX(capcodes.address)'];
+              //  result.padAddress = $scope.padDigits(result.address,7);
+            //    result.aliasMatch = result['MAX(capcodes.address)'];
               });
               $scope.spinner = '';
               $scope.loading = false;
@@ -336,8 +309,8 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
               result.date = datetime.format("YYYY-MM-DD");
               result.timestamp = datetime.format("HH:mm");
               result.message = $scope.htmlEntities(result.message);
-              result.padAddress = $scope.padDigits(result.address,7);
-              result.aliasMatch = result['MAX(capcodes.address)'];
+            //  result.padAddress = $scope.padDigits(result.address,7);
+            //  result.aliasMatch = result['MAX(capcodes.address)'];
             });
             $scope.spinner = '';
             $scope.loading = false;
@@ -397,11 +370,6 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
       $scope.clearSearch = function(){
         $scope.query = '';
       };
-      
-      // destroy socket when we navigate away
-      $scope.$on('$destroy', function() {
-        socket.close();
-      });
       
     }])
     // Routes
