@@ -28,26 +28,30 @@ require('./config/passport')(passport);
 var sqlite3 = require('sqlite3').verbose();
 var db = new sqlite3.Database('./messages.db', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, function (err) {
     if (err) { console.log(err.message); } else {
-      var sql = "CREATE TABLE IF NOT EXISTS messages ( ";
-          sql += "id integer PRIMARY KEY, ";
-          sql += "address integer NOT NULL, ";
-          sql += "message text NOT NULL, ";
-          sql += "source text NOT NULL, ";
-          sql += "timestamp INTEGER); ";
-          sql += "CREATE TABLE IF NOT EXISTS capcodes ( ";
-          sql += "address integer NOT NULL, ";
-          sql += "alias text NOT NULL, ";
+      
+      var sql =  "CREATE TABLE IF NOT EXISTS capcodes ( ";
+	        sql += "id INTEGER PRIMARY KEY AUTOINCREMENT, ";
+          sql += "address TEXT NOT NULL, ";
+          sql += "alias TEXT NOT NULL, ";
           sql += "agency TEXT, ";
           sql += "icon TEXT, ";
           sql += "color TEXT, ";
-          sql += "ignore INTEGER DEFAULT 0, ";
-          sql += "PRIMARY KEY (address) ); ";
+          sql += "ignore INTEGER DEFAULT 0 ); ";
+          sql += "CREATE TABLE IF NOT EXISTS messages ( ";
+          sql += "id INTEGER UNIQUE, ";
+          sql += "address TEXT NOT NULL, ";
+          sql += "message TEXT NOT NULL, ";
+          sql += "source TEXT NOT NULL, ";
+          sql += "timestamp INTEGER, ";
+          sql += "alias_id INTEGER, ";
+          sql += "PRIMARY KEY(`id`), FOREIGN KEY(`alias_id`) REFERENCES capcodes(id) ); ";
+          sql += "CREATE INDEX IF NOT EXISTS `msg_index` ON `messages` (`address`,`id` DESC); ";
+          sql += "CREATE INDEX IF NOT EXISTS `msg_alias` ON `messages` (`id` DESC, `alias_id`); ";
+          sql += "CREATE UNIQUE INDEX IF NOT EXISTS `cc_pk_idx` ON `capcodes` (`id`,`address` DESC); ";
+          
       db.serialize(() => {
           db.exec(sql, function(err) {
               if (err) { console.log(err); }
-              //db.close((e) => {
-              //    if (e) console.log(e);
-              //});
           });
       });
     }
