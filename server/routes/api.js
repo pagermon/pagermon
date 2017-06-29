@@ -445,7 +445,7 @@ router.post('/messages', function(req, res, next) {
             var datetime = req.body.datetime || 1;
             var source = req.body.source || 'UNK';
             var dupeCheck = 'SELECT * FROM messages WHERE id IN ( SELECT id FROM messages ORDER BY id DESC LIMIT '+dupeLimit;
-                dupeCheck +=' ) AND message LIKE "'+message+'" AND address='+address;
+                dupeCheck +=' ) AND message LIKE "'+message+'" AND address="'+address+'";';
             db.get(dupeCheck, [], function (err, row) {
                 if (err) {
                     res.status(500).send(err);                
