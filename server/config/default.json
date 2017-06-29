@@ -1,8 +1,7 @@
 {
   "global": {
     "loglevel": "debug",
-    "sessionSecret": "1DVETLX8VE007RYQN9TN9Z00",
-    "version": "0.1.0-alpha"
+    "sessionSecret": "1DVETLX8VE007RYQN9TN9Z00"
   },
   "database": {
     "file": "./messages.db",

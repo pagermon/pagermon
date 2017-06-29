@@ -12,12 +12,14 @@
 </script>
 <div class="row" style="padding-top: 10px">
   <div class="col-sm-6 col-xs-12">
-          <h4 style="padding-left: 15px;"><a href="/admin/">Admin</a> / <a href="/admin/aliases/">Aliases</a> / {{alias.originalAddress || 'New'}} {{alias.newMessage}}</div>
+          <h4 style="padding-left: 15px;"><a href="/admin/">Admin</a> / <a href="/admin/aliases/">Aliases</a> / {{alias.id || 'New'}} {{alias.newMessage}}</div>
   <div class="col-sm-6 col-xs-12">
             <div class="hidden-xs btn-group pull-right" style="margin-top: 11.5px" role="group" aria-label="Actions">
+              <button ng-if="aliasRefreshRequired == 1" type="button" ng-click="aliasRefresh();" class="btn btn-warning">Refresh Alias/Message Map</button>
               <button ng-if="!isNew" type="button" ng-click="newButton('new');" class="btn btn-success">Add New</button>
             </div>
             <div class="visible-xs btn-group" style="padding-left: 15px;" role="group" aria-label="Actions">
+              <button ng-if="aliasRefreshRequired == 1" type="button" ng-click="aliasRefresh();" class="btn btn-warning">Refresh Alias/Message Map</button>
               <button ng-if="!isNew" type="button" ng-click="newButton('new');" class="btn btn-success">Add New</button>
             </div>
           </h4>
@@ -26,15 +28,21 @@
           <hr />
           <form ng-submit="aliasSubmit()" class="form-horizontal" name="alias">
           <h5>Alias Details</h5>
+          <p>Aliases are ordered so that the closest match takes precedence.<br />
+          Aliases with a full 7 digit capcode will be used first, followed by those with one wildcard, and so on.<br />
+          Those that start with a wildcard will always be ordered last, and thus are only matched with a message if no other alias matches.</p>
             <div class="form-group has-feedback" ng-class="!alias.address || existingAddress ? 'has-error' : 'has-success'">
               <label for="alias.address" class="col-xs-4 col-sm-3 control-label">Address</label>
               <div class="col-xs-8 col-sm-9">
-                <input class="form-control" type="number" name="alias.address" ng-model="alias.address" ng-change="checkAddress()" ng-model-options="{updateOn: 'blur'}" required>
+                <input class="form-control" type="text" name="alias.address" ng-model="alias.address" ng-change="checkAddress()" ng-model-options="{updateOn: 'blur'}" required>
                 <span ng-if="aliasLoading" class="fa fa-refresh fa-spin fa-2x fa-fw form-control-feedback" aria-hidden="true"></span>
-                <span id="helpBlock" class="help-block">Capcode address matches loosely, e.g. '200' will match messages from '0000200', '2009999', or '0002001'.</span>
+                <span id="helpBlock" class="help-block">Capcode address matches based on SQL wildcards - % means 0 or more of any character, _ means one of any character.<br />
+                    For example:<br />
+                    '%200%' will match messages from '0000200', '2009999', or '0002001'<br />
+                    '0200___' will match '0200123', but not '0020012'.</span>
                 <span ng-if="existingAddress" class="text-danger pull-left">Address already exists! </span>
                 <div ng-if="existingAddress" class="btn-group pull-right" role="group" aria-label="Replace existing alias?">
-                  <button type="button" ng-click="newButton(alias.address)" class="btn btn-danger">Replace Existing</button>
+                  <button type="button" ng-click="newButton(existingID)" class="btn btn-danger">Replace Existing</button>
                   <button type="button" ng-click="alias.address = alias.originalAddress; checkAddress()" class="btn btn-danger">Reset<span ng-if="alias.originalAddress"> to {{alias.originalAddress}}</span></button>
                 </div>
               </div>
@@ -82,8 +90,9 @@
               <div class="checkbox">
                 <label>
                 <input type="checkbox" name="alias.ignore" ng-model="alias.ignore" ng-true-value="1" ng-false-value="0">
-                Ignore messages matching this alias. Still retains messages in the DB, just hides in the UI.
+                Ignore messages matching this alias.
                 </label>
+                <span id="helpBlock" class="help-block">New messages that come in matching this alias are not stored in the database, but existing messages will not be deleted.</span>
               </div>
               </div>
             </div>
@@ -92,7 +101,6 @@
               <button type="button" ng-click="aliasLoad()" class="btn btn-default">Reset</button>
               <button type="submit" class="btn btn-default">Save</button>
             </div>
-            
           </form>
         </div>
 </div>

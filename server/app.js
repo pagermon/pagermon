@@ -1,4 +1,14 @@
+var version = "0.1.3-beta";
+
 var debug = require('debug')('pagermon:server');
+var pmx = require('pmx').init({
+    http          : true, // HTTP routes logging (default: true)
+    ignore_routes : [/socket\.io/, /notFound/], // Ignore http routes with this pattern (Default: [])
+    errors        : true, // Exceptions logging (default: true)
+    custom_probes : true, // Auto expose JS Loop Latency and HTTP req/s as custom metrics
+    network       : true, // Network monitoring at the application level
+    ports         : true  // Shows which ports your app is listening on (default: false)
+});
 var http = require('http');
 var compression = require('compression');
 var express = require('express');
@@ -18,26 +28,30 @@ require('./config/passport')(passport);
 var sqlite3 = require('sqlite3').verbose();
 var db = new sqlite3.Database('./messages.db', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, function (err) {
     if (err) { console.log(err.message); } else {
-      var sql = "CREATE TABLE IF NOT EXISTS messages ( ";
-          sql += "id integer PRIMARY KEY, ";
-          sql += "address integer NOT NULL, ";
-          sql += "message text NOT NULL, ";
-          sql += "source text NOT NULL, ";
-          sql += "timestamp INTEGER); ";
-          sql += "CREATE TABLE IF NOT EXISTS capcodes ( ";
-          sql += "address integer NOT NULL, ";
-          sql += "alias text NOT NULL, ";
+      
+      var sql =  "CREATE TABLE IF NOT EXISTS capcodes ( ";
+	        sql += "id INTEGER PRIMARY KEY AUTOINCREMENT, ";
+          sql += "address TEXT NOT NULL, ";
+          sql += "alias TEXT NOT NULL, ";
           sql += "agency TEXT, ";
           sql += "icon TEXT, ";
           sql += "color TEXT, ";
-          sql += "ignore INTEGER DEFAULT 0, ";
-          sql += "PRIMARY KEY (address) ); ";
+          sql += "ignore INTEGER DEFAULT 0 ); ";
+          sql += "CREATE TABLE IF NOT EXISTS messages ( ";
+          sql += "id INTEGER UNIQUE, ";
+          sql += "address TEXT NOT NULL, ";
+          sql += "message TEXT NOT NULL, ";
+          sql += "source TEXT NOT NULL, ";
+          sql += "timestamp INTEGER, ";
+          sql += "alias_id INTEGER, ";
+          sql += "PRIMARY KEY(`id`), FOREIGN KEY(`alias_id`) REFERENCES capcodes(id) ); ";
+          sql += "CREATE INDEX IF NOT EXISTS `msg_index` ON `messages` (`address`,`id` DESC); ";
+          sql += "CREATE INDEX IF NOT EXISTS `msg_alias` ON `messages` (`id` DESC, `alias_id`); ";
+          sql += "CREATE UNIQUE INDEX IF NOT EXISTS `cc_pk_idx` ON `capcodes` (`id`,`address` DESC); ";
+          
       db.serialize(() => {
           db.exec(sql, function(err) {
               if (err) { console.log(err); }
-              //db.close((e) => {
-              //    if (e) console.log(e);
-              //});
           });
       });
     }
@@ -65,7 +79,7 @@ var app = express();
     // view engine setup
     app.set('views', path.join(__dirname, 'views'));
     app.set('view engine', 'ejs');
-    app.set('trust proxy', 'loopback, linklocal, uniquelocal');    
+    app.set('trust proxy', 'loopback, linklocal, uniquelocal');
 
 var server = http.createServer(app);
 var io = require('socket.io').listen(server);
@@ -110,7 +124,7 @@ app.use(flash());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/node_modules', express.static(path.join(__dirname, 'node_modules')));
 app.use(function(req, res, next) {
-  res.locals.version = nconf.get('global:version') || 'unknown version';
+  res.locals.version = version;
   res.locals.loglevel = nconf.get('global:loglevel') || 'info';
   next();
 });

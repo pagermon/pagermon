@@ -34,7 +34,7 @@ var uri = hostname+"/api/messages";
 
 var http = require('http');
 var request = require('request');
-require('request').debug = true
+require('request').debug = true;
 var rp = require('request-promise-native');
 var moment = require('moment');
 
@@ -87,29 +87,30 @@ rl.on('line', (line) => {
   // filter out most false hits
   // if too much junk data, make sure '-p' option isn't enabled in multimon
   if (address.length > 4 && message) {
+    var padAddress = padDigits(address,7);
   	console.log(colors.red(time+': ')+colors.yellow(address+': ')+colors.success(trimMessage));
   	// now send the message
-	var options = {
-		method: 'POST',
-		uri: uri,
-		headers: {
-			'X-Requested-With': 'XMLHttpRequest',
-			apikey: apikey
-		},
-		form: {
-			address: address,
-			message: trimMessage,
-			datetime: datetime,
-			source: identifier
-		}
-	};
-	rp(options)
-	    .then(function (body) {
-	    //    console.log(colors.success('Message delivered. ID: '+body)); 
-	    })
-	    .catch(function (err) {
-	        console.log(colors.yellow('Message failed to deliver. '+err));
-	    });
+  	var options = {
+  		method: 'POST',
+  		uri: uri,
+  		headers: {
+  			'X-Requested-With': 'XMLHttpRequest',
+  			apikey: apikey
+  		},
+  		form: {
+  			address: padAddress,
+  			message: trimMessage,
+  			datetime: datetime,
+  			source: identifier
+  		}
+  	};
+  	rp(options)
+  	    .then(function (body) {
+  	    //    console.log(colors.success('Message delivered. ID: '+body)); 
+  	    })
+  	    .catch(function (err) {
+  	        console.log(colors.yellow('Message failed to deliver. '+err));
+  	    });
   } else {
   	console.log(colors.red(time+': ')+colors.grey(line));
   }
@@ -117,3 +118,7 @@ rl.on('line', (line) => {
 }).on('close', () => {
   console.log('Input died!');
 });
+
+var padDigits = function(number, digits) {
+    return Array(Math.max(digits - String(number).length + 1, 0)).join(0) + number;
+};

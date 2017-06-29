@@ -14,6 +14,12 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
         }),
         Settings: $resource('/admin/settingsData', null, {
           'post': { method:'POST', isArray: false }
+        }),
+        AliasDupeCheck: $resource('/api/capcodeCheck/:id', {id: '@id'}, {
+          'post': { method:'POST', isArray: false }
+        }),
+        AliasRefresh: $resource('/api/capcodeRefresh', null, {
+          'post': { method:'POST', isArray: false }
         })
       };
     }])
@@ -27,6 +33,41 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
         $scope.page = 'aliases';
         $scope.loading = false;
       });
+      Api.Settings.get(null, function(results) {
+        if (results) {
+          if (results.database && results.database.aliasRefreshRequired == 1) {
+            $scope.aliasRefreshRequired = 1;
+            $scope.alertMessage.text = 'Alias refresh required!';
+            $scope.alertMessage.type = 'alert-warning';
+            $scope.alertMessage.show = true;
+          }
+        }
+      });
+      
+      $scope.aliasRefresh = function () {
+        $scope.loading = true;
+        $scope.alertMessage = {};
+        Api.AliasRefresh.post(null, null).$promise.then(function (response) {
+          console.log(response);
+          $scope.loading = false;
+          if (response.status == 'ok') {
+            $scope.alertMessage.text = 'Alias refresh complete!';
+            $scope.alertMessage.type = 'alert-success';
+            $scope.alertMessage.show = true;
+            $scope.aliasRefreshRequired = 0;
+          } else {
+            $scope.alertMessage.text = 'Error refreshing aliases: '+response.data.error;
+            $scope.alertMessage.type = 'alert-danger';
+            $scope.alertMessage.show = true;
+          }
+        }, function(response) {
+          console.log(response);
+          $scope.alertMessage.text = 'Error refreshing aliases: '+response.data.error;
+          $scope.alertMessage.type = 'alert-danger';
+          $scope.alertMessage.show = true;
+          $scope.loading = false;          
+        });
+      };
       
       $scope.messageDetail = function(address) {
           $location.url('/aliases/'+address);
@@ -66,24 +107,24 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
         $scope.selectedAll = false;
         angular.forEach($scope.aliases, function(selected){
             if(selected.selected){
-                deleteList.push(selected.address);
+                deleteList.push(selected.id);
             }
         });
         var data = {'deleteList': deleteList};
         console.log(data);
         Api.AliasDetail.post({id: 'deleteMultiple' }, data).$promise.then(function (response) {
           console.log(response);
+          $scope.loading = false;
           if (response.status == 'ok') {
             $scope.alertMessage.text = 'Alias deleted!';
             $scope.alertMessage.type = 'alert-success';
             $scope.alertMessage.show = true;
-            $scope.loading = false;
+            $scope.aliasRefreshRequired = 1;
             $location.url('/aliases/');
           } else {
             $scope.alertMessage.text = 'Error deleting alias: '+response.data.error;
             $scope.alertMessage.type = 'alert-danger';
             $scope.alertMessage.show = true;
-            $scope.loading = false;
           }
         }, function(response) {
           console.log(response);
@@ -120,24 +161,48 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
       $scope.newButton = function(address) {
           $location.url('/aliases/'+address);
       };
+      
+      $scope.aliasRefresh = function () {
+        $scope.loading = true;
+        $scope.alertMessage = {};
+        Api.AliasRefresh.post(null, null).$promise.then(function (response) {
+          //console.log(response);
+          $scope.loading = false;
+          if (response.status == 'ok') {
+            $scope.alertMessage.text = 'Alias refresh complete!';
+            $scope.alertMessage.type = 'alert-success';
+            $scope.alertMessage.show = true;
+            $scope.aliasRefreshRequired = 0;
+          } else {
+            $scope.alertMessage.text = 'Error refreshing aliases: '+response.data.error;
+            $scope.alertMessage.type = 'alert-danger';
+            $scope.alertMessage.show = true;
+          }
+        }, function(response) {
+          console.log(response);
+          $scope.alertMessage.text = 'Error refreshing aliases: '+response.data.error;
+          $scope.alertMessage.type = 'alert-danger';
+          $scope.alertMessage.show = true;
+          $scope.loading = false;          
+        });
+      };
+      
       $scope.aliasLoad = function() {
         $scope.loading = true;
         Api.AliasDetail.get({id: $routeParams.id }, function(results) {
           $scope.alias = results;
+          $scope.aliasLoading = false;
+          $scope.existingAddress = false;
+          $scope.loading = false;
           if (results.address) {
-            $scope.aliasLoading = false;
-            $scope.existingAddress = false;
             $scope.alias.originalAddress = results.address;
-            $scope.loading = false;
             $scope.isNew = false;
-            console.log(results);
+            //console.log(results);
           } else {
-            $scope.aliasLoading = false;
-            $scope.existingAddress = false;
-            $scope.alias.originalAddress = '';
-            $scope.loading = false;
+            $scope.alias.address = $routeParams.address || '';
+            $scope.alias.originalAddress = $routeParams.address || '';
             $scope.isNew = true;
-            console.log(results);
+            //console.log(results);
           }
         });
       };
@@ -145,13 +210,14 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
       $scope.checkAddress = function() {
         $scope.aliasLoading = true;
         if ($scope.alias.address) {
-          Api.AliasDetail.get({id: $scope.alias.address }, function(results) {
+          Api.AliasDupeCheck.get({id: $scope.alias.address }, function(results) {
             if (results.address) {
               $scope.aliasLoading = false;
               if (results.address == $scope.alias.originalAddress) {
                 $scope.existingAddress = false;
                 return false;
               } else {
+                $scope.existingID = results.id;
                 $scope.existingAddress = true;
                 return true;
               }
@@ -170,18 +236,25 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
       
       $scope.aliasSubmit = function() {
         $scope.loading = true;
-        Api.AliasDetail.save({id: $routeParams.id }, $scope.alias).$promise.then(function (response) {
+        var id;
+        if($scope.alias.id) {
+          id = $routeParams.id;
+        } else {
+          id = "new";
+        }
+        Api.AliasDetail.save({id: id }, $scope.alias).$promise.then(function (response) {
           console.log(response);
           if (response.status == 'ok') {
             $scope.alertMessage.text = 'Alias saved!';
             $scope.alertMessage.type = 'alert-success';
             $scope.alertMessage.show = true;
             $scope.loading = false;
+            $scope.aliasRefreshRequired = 1;
             if ($scope.isNew) {
-              $location.url('/aliases/'+$scope.alias.address);
+              $location.url('/aliases/'+response.id);
             }
           } else {
-            $scope.alertMessage.text = 'Error saving alias: '+response.data.error;
+            $scope.alertMessage.text = 'Error saving alias: '+response;
             $scope.alertMessage.type = 'alert-danger';
             $scope.alertMessage.show = true;
             $scope.loading = false;
@@ -245,6 +318,13 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
         };
       };
       // get data on load
+      Api.Settings.get(null, function(results) {
+        if (results) {
+          if (results.database && results.database.aliasRefreshRequired == 1) {
+            $scope.aliasRefreshRequired = 1;
+          }
+        }
+      });
       $scope.aliasLoad();
     }])
     
@@ -258,16 +338,15 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
         var pass = {'password': $scope.password};
         Api.ResetPass.post(null, pass).$promise.then(function (response) {
           console.log(response);
+          $scope.loading = false;
           if (response.status == 'ok') {
             $scope.alertMessage.text = 'Password changed!';
             $scope.alertMessage.type = 'alert-success';
             $scope.alertMessage.show = true;
-            $scope.loading = false;
           } else {
             $scope.alertMessage.text = 'Error changing password: '+response.data.error;
             $scope.alertMessage.type = 'alert-danger';
             $scope.alertMessage.show = true;
-            $scope.loading = false;
           }
         }, function(response) {
           console.log(response);
@@ -283,12 +362,10 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
     .controller('SettingsController', ['$scope', '$routeParams', 'Api', 'uuid', '$uibModal', '$filter', function ($scope, $routeParams, Api, uuid, $uibModal, $filter) {
       $scope.alertMessage = {};
       Api.Settings.get(null, function(results) {
-        if (!results.messages.replaceText) {
+        if (!results.messages.replaceText)
           results.messages.replaceText = [{}];
-        }
-        if (!results.auth.keys) {
+        if (!results.auth.keys)
           results.auth.keys = [{}];
-        }
         $scope.settings = results;
       });
 
@@ -296,16 +373,15 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
         $scope.loading = true;
         Api.Settings.save(null, $scope.settings).$promise.then(function (response) {
           console.log(response);
+          $scope.loading = false;
           if (response.status == 'ok') {
             $scope.alertMessage.text = 'Settings saved!';
             $scope.alertMessage.type = 'alert-success';
             $scope.alertMessage.show = true;
-            $scope.loading = false;
           } else {
             $scope.alertMessage.text = 'Error saving settings: '+response.data.error;
             $scope.alertMessage.type = 'alert-danger';
             $scope.alertMessage.show = true;
-            $scope.loading = false;
           }
         }, function(response) {
           console.log(response);
@@ -385,7 +461,6 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
         modalInstance.result.then(function() {
           $scope.removeKeyConfirmed();
         }, function () {
-          //$log.info('Modal dismissed at: ' + new Date());
         });
       };
       
@@ -458,7 +533,6 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
       $httpProvider.interceptors.push(function($q, $location) {
         return {
           response: function(response) {
-            // do something on success
             return response;
           },
           responseError: function(response) {
