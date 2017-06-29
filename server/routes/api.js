@@ -249,7 +249,7 @@ router.get('/messageSearch', function(req, res, next) {
             console.timeEnd('sql');
             console.log(err);
             res.status(500).send(err);
-        } else if (rowCount > 1) {
+        } else if (rowCount > 0) {
             console.timeEnd('sql');
             console.time('search');
             var result;
@@ -292,6 +292,7 @@ router.get('/messageSearch', function(req, res, next) {
     	    console.timeEnd('initEnd');
             res.json({'init': initData, 'messages': limitResults});
         } else {
+            console.timeEnd('sql');
             res.status(200).json({'init': {}, 'messages': []});
         }
             
