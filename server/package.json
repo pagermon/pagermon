@@ -39,9 +39,9 @@
     "underscore": "^1.8.3",
     "zone.js": "^0.8.12",
     "pmx": "latest"
-  }
+  },
   "repository": {
   "type": "git",
   "url": "https://github.com/davidmckenzie/pagermon.git"
-}
+ }
 }
