@@ -2,14 +2,12 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var router = express.Router();
 var basicAuth = require('express-basic-auth');
-//var emitMessage = require('../includes/emitMessage.js');
 var bcrypt = require('bcryptjs');
 var JsSearch = require('js-search');
 var passport = require('passport');
 require('../config/passport')(passport); // pass passport for configuration
 
 var nconf = require('nconf');
-// don't forget to change this
 var conf_file = './config/config.json';
 nconf.file({file: conf_file});
 nconf.load();
@@ -36,41 +34,12 @@ var initData = {};
     initData.pageCount = 0;
     initData.msgCount = 0;
     initData.offset = 0;
-    
+
 ///////////////////
 //               //
 // GET messages  //
-//               // 
-///////////////////    
-  
-/*router.get('/messages/init', function(req, res, next) {
-    //set current page if specifed as get variable (eg: /?page=2)
-    if (typeof req.query.page !== 'undefined') {
-        var page = parseInt(req.query.page, 10);
-        if (page > 0)
-            initData.currentPage = page - 1;
-    }
-    if (req.query.limit && req.query.limit <= 100) {
-        initData.limit = parseInt(req.query.limit, 10);
-    }
-    db.serialize(() => {
-        db.get("SELECT id FROM messages ORDER BY id DESC LIMIT 1", [], function(err, row) {
-            if (err) {
-                console.log(err);
-            } else {
-                initData.msgCount = parseInt(row['id'], 10);
-                //console.log(initData.msgCount);
-                initData.pageCount = Math.ceil(initData.msgCount/initData.limit);
-                var offset = initData.limit * initData.currentPage;
-                initData.offset = initData.msgCount - offset;
-                if (initData.offset < 0) {
-                    initData.offset = 0;
-                }
-                res.json(initData);
-            }
-        });
-    });
-}); */
+//               //
+///////////////////
 
 /* GET message listing. */
 router.get('/messages', function(req, res, next) {
@@ -97,9 +66,7 @@ router.get('/messages', function(req, res, next) {
     var initSql;
     if (pdwMode) {
         initSql =  "SELECT COUNT(*) AS msgcount FROM messages WHERE alias_id IN (SELECT id FROM capcodes WHERE ignore = 0);";
-    //    initSql += " INNER JOIN capcodes ON capcodes.id = (SELECT id FROM capcodes WHERE address LIKE messages.address LIMIT 1);";
     } else {
-        //initSql = "SELECT COUNT(*) AS msgcount FROM messages;";
         initSql = "SELECT COUNT(*) AS msgcount FROM messages WHERE alias_id IS NULL OR alias_id NOT IN (SELECT id FROM capcodes WHERE ignore = 1);";
     }
     db.get(initSql,function(err,count){
@@ -122,7 +89,6 @@ router.get('/messages', function(req, res, next) {
             if(pdwMode) {
                 sql =  "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch ";
                 sql += " FROM messages";
-            //    sql += " INNER JOIN capcodes ON capcodes.id = (SELECT id FROM capcodes WHERE address LIKE messages.address LIMIT 1) ";
                 sql += " INNER JOIN capcodes ON capcodes.id = messages.alias_id WHERE capcodes.ignore = 0";
                 sql += " ORDER BY messages.id DESC LIMIT "+initData.limit+" OFFSET "+initData.offset+";";
             } else {
@@ -339,7 +305,7 @@ router.get('/messageSearch', function(req, res, next) {
 /////////////////// 
 
 
-// capcodes aren't pagified at the moment
+// capcodes aren't pagified at the moment, this should probably be removed
 router.get('/capcodes/init', function(req, res, next) {
     //set current page if specifed as get variable (eg: /?page=2)
     if (typeof req.query.page !== 'undefined') {
@@ -551,8 +517,6 @@ router.post('/messages', function(req, res, next) {
 });
 
 router.post('/capcodes', function(req, res, next) {
-//    db = new sqlite3.Database('./messages.db');
-//    db.configure("busyTimeout", 30000);
     nconf.load();
     var updateRequired = nconf.get('database:aliasRefreshRequired');
     if (req.body.address && req.body.alias) {
@@ -564,7 +528,6 @@ router.post('/capcodes', function(req, res, next) {
         var icon = req.body.icon || 'question';
         var ignore = req.body.ignore || 0;
         db.serialize(() => {
-            //db.run("UPDATE tbl SET name = ? WHERE id = ?", [ "bar", 2 ]);
             db.run("REPLACE INTO capcodes (id, address, alias, agency, color, icon, ignore) VALUES ($mesID, $mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore);", {
               $mesID: id,
               $mesAddress: address,
