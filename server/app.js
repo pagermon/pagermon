@@ -1,6 +1,14 @@
 var version = "0.1.3-beta";
 
 var debug = require('debug')('pagermon:server');
+var pmx = require('pmx').init({
+    http          : true, // HTTP routes logging (default: true)
+    ignore_routes : [/socket\.io/, /notFound/], // Ignore http routes with this pattern (Default: [])
+    errors        : true, // Exceptions logging (default: true)
+    custom_probes : true, // Auto expose JS Loop Latency and HTTP req/s as custom metrics
+    network       : true, // Network monitoring at the application level
+    ports         : true  // Shows which ports your app is listening on (default: false)
+});
 var http = require('http');
 var compression = require('compression');
 var express = require('express');
@@ -67,7 +75,7 @@ var app = express();
     // view engine setup
     app.set('views', path.join(__dirname, 'views'));
     app.set('view engine', 'ejs');
-    app.set('trust proxy', 'loopback, linklocal, uniquelocal');    
+    app.set('trust proxy', 'loopback, linklocal, uniquelocal');
 
 var server = http.createServer(app);
 var io = require('socket.io').listen(server);
