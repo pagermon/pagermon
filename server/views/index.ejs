@@ -188,6 +188,12 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
         // register a new socket when scope changes
         socket.open();
         socket.on('messagePost', function(message) {
+          // Send Notification regardless of page
+          if (!message.agency) {
+            //Not showing messages for things that we don't know
+          } else {
+              notify("PagerMon - " +message.agency + " - " + message.alias,message.message);
+          }
           // only bother getting the new message if we're on page 1
           if ($scope.init.currentPage === 1) {
             console.log('New Message ID: '+message.id + ' currentPage: '+$scope.init.currentPage);
@@ -412,7 +418,32 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
        });
       $locationProvider.html5Mode({ enabled: true, requireBase: false, rewriteLinks: false});
     }]);
-    
+
+function notify(notifyTitle,notifyMessage) {
+    if (!("Notification" in window)) {
+        alert("This browser does not support desktop notification");
+    }
+    else if (Notification.permission === "granted") {
+        var options = {
+            body: notifyMessage
+        };
+        var notification = new Notification(notifyTitle,options);
+    }
+    else if (Notification.permission !== 'denied') {
+        Notification.requestPermission(function (permission) {
+            if (!('permission' in Notification)) {
+                Notification.permission = permission;
+            }
+
+            if (permission === "granted") {
+                var options = {
+                    body: notifyMessage
+                };
+                var notification = new Notification(notifyTitle,options);
+            }
+        });
+    }
+}
   </script>
 
 </div>
