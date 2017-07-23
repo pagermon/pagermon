@@ -64,7 +64,7 @@ rl.on('line', (line) => {
   	address = line.match(/POCSAG(\d+): Address:(.*?)Function/)[2].trim();
     if (line.indexOf('Alpha:') > -1) {
     	message = line.match(/Alpha:(.*?)$/)[1].trim();
-    	trimMessage = message.replace(/<EOT>/g,'');
+    	trimMessage = message.replace(/<[A-Za-z]{3}>/g,'');
     } else {
     	message = false;
     	trimMessage = '';
