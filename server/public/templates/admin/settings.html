@@ -5,11 +5,6 @@
   <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="alertMessage.show = false">&times;</button>
   <strong>{{alertMessage.text}}</strong>
 </div>
-<script>
-  window.setTimeout(function() {
-    $(".alert").fadeTo(500, 0).slideUp(500, function(){});
-  }, 6000);
-</script>
 <div class="row" style="padding-top: 10px">
   <div class="col-xs-12">
           <h4 style="padding-left: 15px;"><a href="/admin/">Admin</a> / Settings</h4>
