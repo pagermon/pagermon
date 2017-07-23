@@ -24,10 +24,12 @@
         <thead class="thead-default">
           <tr>
             <th colspan="2">
-                <button type="button" class="btn btn-default btn-sm" ng-click="updateData();" aria-label="Refresh"><i class="fa fa-refresh {{spinner}}" aria-hidden="true"></i></button>
+                <div class="btn-group" data-toggle="buttons">
+                  <button type="button" class="btn btn-default btn-sm" ng-click="updateData();" aria-label="Refresh" title="Refresh Messages"><i class="fa fa-refresh {{spinner}}" aria-hidden="true"></i></button>
+                  <button type="button" ng-if="notificationSupport == true" class="btn btn-default btn-sm" ng-class="{active: notificationEnabled == 'true'}" ng-click="toggleNotifications();" aria-label="Notifications" title="Toggle Browser Notifications">
+                    <i class="fa fa-bell" aria-hidden="true"></i></button>
                 <span class="dropdown">
-                  <button class="btn btn-default btn-sm dropdown-toggle" type="button" data-toggle="dropdown">{{init.limit}}
-                  <span class="caret"></span></button>
+                  <button class="btn btn-default btn-sm dropdown-toggle" type="button" data-toggle="dropdown" title="Message Limit">{{init.limit}} <span class="caret"></span></button>
                   <ul class="dropdown-menu" role="menu" style="margin-top: 9px;">
                     <li ng-class="{disabled:init.limit == 10}"><a href="#" ng-click="setCookie('messageLimit', 10);">10</a></li>
                     <li ng-class="{disabled:init.limit == 20}"><a href="#" ng-click="setCookie('messageLimit', 20);">20</a></li>
@@ -35,6 +37,7 @@
                     <li ng-class="{disabled:init.limit == 100}"><a href="#" ng-click="setCookie('messageLimit', 100);">100</a></li>
                   </ul>
                 </span>
+                </div>
             </th>
             <th class="noMobile" style="text-align: center;">Src</th>
             <th class="noTiny" style="text-align: center;">Capcode</th>
@@ -188,6 +191,14 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
         // register a new socket when scope changes
         socket.open();
         socket.on('messagePost', function(message) {
+          // Send Browser Notifications
+          if ($scope.notificationEnabled == 'true') {
+            if (!message.agency) {
+              //Not showing messages for things that we don't know
+            } else {
+                notify("PagerMon - " +message.agency + " - " + message.alias,message.message);
+            }
+          }
           // only bother getting the new message if we're on page 1
           if ($scope.init.currentPage === 1) {
             console.log('New Message ID: '+message.id + ' currentPage: '+$scope.init.currentPage);
@@ -228,12 +239,17 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
       
       // this should be popped out into a separate file
       $scope.updateData = function(page, query){
+        // check if browser supports notifications
+        if ("Notification" in window) {
+          $scope.notificationSupport = true;
+        }
         // spinner start
         $scope.spinner = 'fa-spin';
         $scope.loading = true;
         // get limit from cookiestore
         var curPage = page || $routeParams.page || '1';
         var limit = $cookies.get('messageLimit') || '';
+        $scope.notificationEnabled = $cookies.get('notificationEnabled') || 'true';
         
         var queryObj = {};
             queryObj.page = curPage;
@@ -371,6 +387,19 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
           $scope.updateData($scope.init.currentPage);
       };
       
+      $scope.toggleNotifications = function() {
+          if ($scope.notificationEnabled == 'true') {
+            $scope.setCookie('notificationEnabled', 'false');
+          } else {
+            $scope.setCookie('notificationEnabled', 'true');
+            Notification.requestPermission(function (permission) {
+              if (!('permission' in Notification)) {
+                  Notification.permission = permission;
+              }
+            });
+          }
+      };
+      
       // this bit sucks, rewrite
       $scope.agencyFilter = function(agency){
         $location.url('/?agency='+agency);
@@ -412,7 +441,38 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
        });
       $locationProvider.html5Mode({ enabled: true, requireBase: false, rewriteLinks: false});
     }]);
-    
+
+function notify(notifyTitle,notifyMessage) {
+    if (!("Notification" in window)) {
+        console.log("This browser does not support desktop notification");
+    }
+    else if (Notification.permission === "granted") {
+        var options = {
+            body: notifyMessage,
+            icon: '/favicon.ico',
+            image: '/favicon.ico',
+            badge: '/favicon.ico'
+        };
+        var notification = new Notification(notifyTitle,options);
+    }
+    else if (Notification.permission !== 'denied') {
+        Notification.requestPermission(function (permission) {
+            if (!('permission' in Notification)) {
+                Notification.permission = permission;
+            }
+
+            if (permission === "granted") {
+                var options = {
+                    body: notifyMessage,
+                    icon: '/favicon.ico',
+                    image: '/favicon.ico',
+                    badge: '/favicon.ico'
+                };
+                var notification = new Notification(notifyTitle,options);
+            }
+        });
+    }
+}
   </script>
 
 </div>
