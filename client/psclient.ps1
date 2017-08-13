@@ -1,9 +1,9 @@
 $capcode = $args[0]
 $msgbody = $args[1]
 
-$sourcename = "test"
-$appurl 	= "http://localhost:3000/api/messages" #www.example.com:3000/api/messages
-$apikey 	= "whydoyouneedtwokeys"
+$sourcename 	= "***Source name***"
+$appurl 	= "***App URL***/api/messages" #www.example.com:3000/api/messages
+$apikey 	= "***API Key***"
 
 $datetime = [Math]::Floor([decimal](Get-Date(Get-Date).ToUniversalTime()-uformat "%s"))
 
