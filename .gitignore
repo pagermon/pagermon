@@ -80,3 +80,6 @@ client/config/backup.json
 # cloud9
 
 .c9
+
+#idea
+.idea
