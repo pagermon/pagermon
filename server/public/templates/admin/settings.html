@@ -169,6 +169,33 @@
               </table>
               </div>
             </div>
+
+            <h5>Pushover</h5>
+            <div class="form-group">
+              <label for="pushover.pushenable" class="col-xs-4 col-sm-3 control-label">Enable</label>
+              <div class="col-xs-8 col-sm-9">
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" name="pushover.pushenable" ng-model="settings.pushover.pushenable">
+                    Enable or disable for selected alias's
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="pushover.pushAPIKEY" class="col-xs-4 col-sm-3 control-label">App Key</label>
+              <div class="col-xs-8 col-sm-9">
+                <input type="text" class="form-control" name="pushover.pushAPIKEY" ng-model="settings.pushover.pushAPIKEY">
+                <span id="helpBlock" class="help-block">Application key supplied by Pushover.</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="pushover.pushgroup" class="col-xs-4 col-sm-3 control-label">User/Group Key</label>
+              <div class="col-xs-8 col-sm-9">
+                <input type="text" class="form-control" name="pushover.pushgroup" ng-model="settings.pushover.pushgroup">
+                <span id="helpBlock" class="help-block">This can be a individual user key or a group key.</span>
+              </div>
+            </div>
             
             <h5>Auth</h5>
             <div class="form-group">

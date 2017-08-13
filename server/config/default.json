@@ -43,5 +43,10 @@
         "key": "whydoyouneedtwokeys"
       }
     ]
+  },
+  "pushover":{
+    "push-enable": false,
+    "push-APIKEY":  "",
+    "push-group":   ""
   }
 }

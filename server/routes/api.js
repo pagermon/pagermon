@@ -5,6 +5,7 @@ var basicAuth = require('express-basic-auth');
 var bcrypt = require('bcryptjs');
 var JsSearch = require('js-search');
 var passport = require('passport');
+var push = require('pushover-notifications');
 require('../config/passport')(passport); // pass passport for configuration
 
 var nconf = require('nconf');
@@ -439,6 +440,10 @@ router.post('/messages', function(req, res, next) {
         var filterDupes = nconf.get('messages:duplicateFiltering');
         var dupeLimit = nconf.get('messages:duplicateLimit');
         var pdwMode = nconf.get('messages:pdwMode');
+        var pushenable = nconf.get('pushover:pushenable');
+        var pushkey = nconf.get('pushover:pushAPIKEY');
+        var pushgroup = nconf.get('pushover:pushgroup');
+
         db.serialize(() => {
             //db.run("UPDATE tbl SET name = ? WHERE id = ?", [ "bar", 2 ]);
             var address = req.body.address || '0000000';
@@ -456,9 +461,10 @@ router.post('/messages', function(req, res, next) {
                         res.status(200);
                         res.send('Ignoring duplicate');
                     } else {
-                        db.get("SELECT id, ignore FROM capcodes WHERE ? LIKE address ORDER BY REPLACE(address, '_', '%') DESC LIMIT 1", address, function(err,row) {
+                        db.get("SELECT id, ignore, push FROM capcodes WHERE ? LIKE address ORDER BY REPLACE(address, '_', '%') DESC LIMIT 1", address, function(err,row) {
                             var insert;
                             var alias_id = null;
+                            var pushonoff = null;
                             if (err) { console.error(err) }
                             if (row) {
                                 if (row.ignore == '1') {
@@ -467,6 +473,7 @@ router.post('/messages', function(req, res, next) {
                                 } else {
                                     insert = true;
                                     alias_id = row.id;
+                                    pushonoff = row.push;
                                 }
                             } else {
                                 insert = true;
@@ -498,6 +505,34 @@ router.post('/messages', function(req, res, next) {
                                                     req.io.emit('messagePost', row);
                                                 }
                                                 res.status(200).send(''+this.lastID);
+                                                //check config to see if push is gloably enabled
+                                                if (pushenable == true) {
+                                                    //check the alais to see if push is enabled for it
+                                                    if (pushonoff == 1) {
+                                                        var p = new push({
+                                                            user: pushgroup,
+                                                            token: pushkey,
+                                                        });
+
+                                                        var msg = {
+                                                            message: row.message,
+                                                            title: row.agency+' - '+row.alias,
+                                                            priority: 0
+                                                        };
+
+                                                        p.send(msg, function (err, result) {
+                                                            if (err) {
+                                                                throw err;
+                                                            }
+
+                                                            console.log(result);
+                                                        });
+
+                                                    } else {
+                                                        //do nothing bruh
+                                                    };
+
+                                                };
                                             }
                                         });
                                     }
@@ -591,18 +626,20 @@ router.post('/capcodes/:id', function(req, res, next) {
         var color = req.body.color || 'black';
         var icon = req.body.icon || 'question';
         var ignore = req.body.ignore || 0;
+        var push = req.body.push || 0;
         var updateAlias = req.body.updateAlias || 0;
         console.time('insert');
         db.serialize(() => {
             //db.run("UPDATE tbl SET name = ? WHERE id = ?", [ "bar", 2 ]);
-            db.run("REPLACE INTO capcodes (id, address, alias, agency, color, icon, ignore) VALUES ($mesID, $mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore);", {
+            db.run("REPLACE INTO capcodes (id, address, alias, agency, color, icon, ignore, push ) VALUES ($mesID, $mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore, $mesPush );", {
               $mesID: id,
               $mesAddress: address,
               $mesAlias: alias,
               $mesAgency: agency,
               $mesColor: color,
               $mesIcon: icon,
-              $mesIgnore: ignore
+              $mesIgnore: ignore,
+              $mesPush : push
             }, function(err){
                 if (err) {
                     console.timeEnd('insert');
