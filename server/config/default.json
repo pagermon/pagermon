@@ -45,8 +45,10 @@
     ]
   },
   "pushover":{
-    "push-enable": false,
-    "push-APIKEY":  "",
-    "push-group":   ""
+    "pushenable": false,
+    "pushAPIKEY":  "",
+    "pushgroup":   "",
+    "pushSound": "pushover",
+    "pushPriority": "0"
   }
 }

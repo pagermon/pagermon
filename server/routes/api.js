@@ -443,6 +443,8 @@ router.post('/messages', function(req, res, next) {
         var pushenable = nconf.get('pushover:pushenable');
         var pushkey = nconf.get('pushover:pushAPIKEY');
         var pushgroup = nconf.get('pushover:pushgroup');
+        var pushSound = nconf.get('pushover:pushSound');
+        var pushPriority = nconf.get('pushover:pushPriority');
 
         db.serialize(() => {
             //db.run("UPDATE tbl SET name = ? WHERE id = ?", [ "bar", 2 ]);
@@ -514,19 +516,46 @@ router.post('/messages', function(req, res, next) {
                                                             token: pushkey,
                                                         });
 
-                                                        var msg = {
+                                                        //emergency message
+                                                        var msgEmerg = {
                                                             message: row.message,
                                                             title: row.agency+' - '+row.alias,
-                                                            priority: 0
+                                                            sound: pushSound,
+                                                            priority: 2,
+                                                            retry: 60,
+                                                            expire: 240
+
                                                         };
 
-                                                        p.send(msg, function (err, result) {
-                                                            if (err) {
-                                                                throw err;
-                                                            }
+                                                        //Non Emeg message
+                                                        var msgNormal = {
+                                                            message: row.message,
+                                                            title: row.agency+' - '+row.alias,
+                                                            sound: pushSound,
+                                                            priority: pushPriority
+                                                        };
 
-                                                            console.log(result);
-                                                        });
+
+
+                                                        if (pushPriority == "2") {
+                                                            p.send(msgEmerg, function (err, result) {
+                                                                if (err) {
+                                                                    throw err;
+                                                                }
+                                                                console.log("SENDING EMERGENCY PUSH NOTIFICATION")
+                                                                console.log(result);
+                                                            });
+
+                                                        } else{
+                                                            p.send(msgNormal, function (err, result) {
+                                                                if (err) {
+                                                                    throw err;
+                                                                }
+
+                                                                console.log(result);
+                                                            });
+                                                        }
+
 
                                                     } else {
                                                         //do nothing bruh
