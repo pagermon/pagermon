@@ -38,7 +38,8 @@
     "systemjs": "^0.20.13",
     "underscore": "^1.8.3",
     "zone.js": "^0.8.12",
-    "pmx": "latest"
+    "pmx": "latest",
+    "pushover-notifications": "latest"
   },
   "repository": {
     "type": "git",

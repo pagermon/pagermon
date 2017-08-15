@@ -43,5 +43,12 @@
         "key": "whydoyouneedtwokeys"
       }
     ]
+  },
+  "pushover":{
+    "pushenable": false,
+    "pushAPIKEY":  "",
+    "pushgroup":   "",
+    "pushSound": "pushover",
+    "pushPriority": "0"
   }
 }
