@@ -65,6 +65,9 @@ rl.on('line', (line) => {
     if (line.indexOf('Alpha:') > -1) {
     	message = line.match(/Alpha:(.*?)$/)[1].trim();
     	trimMessage = message.replace(/<[A-Za-z]{3}>/g,'');
+    } else if (line.indexOf('Numeric:') > -1) {
+        message = line.match(/Numeric:(.*?)$/)[1].trim();
+        trimMessage = message.replace(/<[A-Za-z]{3}>/g,'');
     } else {
     	message = false;
     	trimMessage = '';
