@@ -98,7 +98,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 ​	In __foreground__:
 ```
-    $ docker run --restart --name pagermon -p 3000:3000 -v $(pwd)/data:/data --rm -it pagermon
+    $ docker run --name pagermon -p 3000:3000 -v $(pwd)/data:/data --rm -it pagermon
 ```
 
 OR
