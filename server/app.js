@@ -24,6 +24,11 @@ var passport = require('passport');
 var flash    = require('connect-flash');
 require('./config/passport')(passport);
 
+process.on('SIGINT', function() {
+    console.log( "\nGracefully shutting down from SIGINT (Ctrl-C)" );
+    process.exit(1);
+});
+
 // initialize the database if it does not already exist
 var sqlite3 = require('sqlite3').verbose();
 var db = new sqlite3.Database('./messages.db', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, function (err) {
@@ -202,5 +207,5 @@ function onListening() {
   var bind = typeof addr === 'string'
     ? 'pipe ' + addr
     : 'port ' + addr.port;
-  debug('Listening on ' + bind);
+    console.info('Listening on ' + bind);
 }
