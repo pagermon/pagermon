@@ -58,10 +58,12 @@ rl.on('line', (line) => {
   var address;
   var message;
   var trimMessage;
+  var addressmatch;
   // TODO: pad address with zeros for better address matching
-//  if (line.indexOf('POCSAG512: Address:') > -1) {	
+  //  if (line.indexOf('POCSAG512: Address:') > -1) {	
   if (/^POCSAG(\d+): Address: /.test(line) ) {
-  	address = line.match(/POCSAG(\d+): Address:(.*?)Function/)[2].trim();
+    addressmatch = /POCSAG(\d+): Address:(.*?)Function: (\d{1})/.exec(line);
+    address = addressmatch[2].trim() + String.fromCharCode(65 + parseInt(addressmatch[3].trim()));
     if (line.indexOf('Alpha:') > -1) {
     	message = line.match(/Alpha:(.*?)$/)[1].trim();
     	trimMessage = message.replace(/<[A-Za-z]{3}>/g,'');
