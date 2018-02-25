@@ -73,9 +73,9 @@ rl.on('line', (line) => {
     	trimMessage = '';
     }
   } else if (line.indexOf('FLEX: ') > -1) {
-    address = line.match(/FLEX:.*\[(.*?)\] /)[1].trim();
+    address = line.match(/FLEX:.*?\[(\d*?)\] /)[1].trim();
     if (line.match( /( ALN | GPN | NUM)/ )) {
-      message = line.match(/FLEX:.*\[.*\] ... (.*?)$/)[1].trim();
+      message = line.match(/FLEX:.*?\[\d*\] ... (.*?)$/)[1].trim();
       trimMessage = message;
     } else {
       message = false;
