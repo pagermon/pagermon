@@ -21,6 +21,7 @@ The UI is built around a Node/Express/Angular/Bootstrap stack, while the client 
 * Pretty HTML5
 * Native browner notifications
 * [Pushover](https://pushover.net/) Integration - near realtime muti-device notification service
+* SMTP/Email support
 * May or may not contain cute puppies
 
 ### Planned Features
@@ -69,7 +70,7 @@ These instructions will get you a copy of the project up and running on your loc
     $ sudo apt-get install npm sqlite3
     $ npm install npm@latest -g
     $ npm install pm2 -g
-    $ npm install 
+    $ npm install
     $ export NODE_ENV=production
     $ pm2 start server/process.json
 ```
@@ -121,7 +122,7 @@ All are welcome to contribute.
 
 ## Versioning
 
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/davidmckenzie/pagermon/tags). 
+We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/davidmckenzie/pagermon/tags).
 
 ## Authors
 
