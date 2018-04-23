@@ -48,7 +48,16 @@
     "pushenable": false,
     "pushAPIKEY":  "",
     "pushgroup":   "",
-    "pushSound": "pushover",
-    "pushPriority": "0"
+    "pushSound": "pushover"
+  },
+  "STMP":{
+    "MailEnable": false,
+    "MailFrom": "",
+    "MailFromName": "",
+    "SMTPServer":  "",
+    "SMTPPort":   "",
+    "STMPUsername": "",
+    "STMPPassword": "",
+    "STMPSecure": true
   }
 }
