@@ -659,7 +659,7 @@ router.post('/capcodes', function(req, res, next) {
         var Mailenable = req.body.mailenable || 0;
         var MailTo = req.body.mailto || 'null';
         db.serialize(() => {
-            db.run("REPLACE INTO capcodes (id, address, alias, agency, color, icon, ignorem, push, mailenable, mailto) VALUES ($mesID, $mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore, $mesPush, $MailEnable, $MailTo );", {
+            db.run("REPLACE INTO capcodes (id, address, alias, agency, color, icon, ignore, push, mailenable, mailto) VALUES ($mesID, $mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore, $mesPush, $MailEnable, $MailTo );", {
               $mesID: id,
               $mesAddress: address,
               $mesAlias: alias,
