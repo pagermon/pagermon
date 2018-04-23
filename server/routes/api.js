@@ -368,6 +368,7 @@ router.get('/capcodes/:id', function(req, res, next) {
                         "icon": "question",
                         "color": "black",
                         "push" : "",
+                        "pushpri": "0",
                         "mailenable" : "",
                         "mailto" : ""
 
@@ -401,6 +402,7 @@ router.get('/capcodeCheck/:id', function(req, res, next) {
                         "icon": "question",
                         "color": "black",
                         "push" : "",
+                        "pushpri": "0",
                         "mailenable" : "",
                         "mailto" : ""
                     };
@@ -456,7 +458,6 @@ router.post('/messages', function(req, res, next) {
         var pushkey = nconf.get('pushover:pushAPIKEY');
         var pushgroup = nconf.get('pushover:pushgroup');
         var pushSound = nconf.get('pushover:pushSound');
-        var pushPriority = nconf.get('pushover:pushPriority');
         var mailEnable = nconf.get('STMP:MailEnable');
         var MailFrom      = nconf.get('STMP:MailFrom');
         var MailFromName  = nconf.get('STMP:MailFromName');
@@ -483,12 +484,13 @@ router.post('/messages', function(req, res, next) {
                         res.status(200);
                         res.send('Ignoring duplicate');
                     } else {
-                        db.get("SELECT id, ignore, push, mailenable, mailto FROM capcodes WHERE ? LIKE address ORDER BY REPLACE(address, '_', '%') DESC LIMIT 1", address, function(err,row) {
+                        db.get("SELECT id, ignore, push, pushpri, mailenable, mailto FROM capcodes WHERE ? LIKE address ORDER BY REPLACE(address, '_', '%') DESC LIMIT 1", address, function(err,row) {
                             var insert;
                             var alias_id = null;
                             var pushonoff = null;
+                            var pushpri = null;
                             var mailonoff = null;
-                            var mailTo = null;
+                            var mailTo = "";
                             if (err) { console.error(err) }
                             if (row) {
                                 if (row.ignore == '1') {
@@ -498,6 +500,7 @@ router.post('/messages', function(req, res, next) {
                                     insert = true;
                                     alias_id = row.id;
                                     pushonoff = row.push;
+                                    pushPri = row.pushpri;
                                     mailonoff = row.mailenable;
                                     mailTo = row.mailto;
                                 }
@@ -579,29 +582,28 @@ router.post('/messages', function(req, res, next) {
                                                             token: pushkey,
                                                         });
 
-                                                        //emergency message
-                                                        var msgEmerg = {
-                                                            message: row.message,
-                                                            title: row.agency+' - '+row.alias,
-                                                            sound: pushSound,
-                                                            priority: 2,
-                                                            retry: 60,
-                                                            expire: 240
+                                                        if (pushPri == 2) {
+                                                          //emergency message
+                                                          var msg = {
+                                                              message: row.message,
+                                                              title: row.agency+' - '+row.alias,
+                                                              sound: pushSound,
+                                                              priority: 2,
+                                                              retry: 60,
+                                                              expire: 240
+                                                          };
+                                                        } else {
+                                                          //Non Emeg message
+                                                          var msg = {
+                                                              message: row.message,
+                                                              title: row.agency+' - '+row.alias,
+                                                              sound: pushSound,
+                                                              priority: pushPri
+                                                          };
+                                                        }
 
-                                                        };
-
-                                                        //Non Emeg message
-                                                        var msgNormal = {
-                                                            message: row.message,
-                                                            title: row.agency+' - '+row.alias,
-                                                            sound: pushSound,
-                                                            priority: pushPriority
-                                                        };
-
-
-
-                                                        if (pushPriority == "2") {
-                                                            p.send(msgEmerg, function (err, result) {
+                                                        if (pushPri == 2) {
+                                                            p.send(msg, function (err, result) {
                                                                 if (err) {
                                                                     throw err;
                                                                 }
@@ -609,8 +611,8 @@ router.post('/messages', function(req, res, next) {
                                                                 console.log(result);
                                                             });
 
-                                                        } else{
-                                                            p.send(msgNormal, function (err, result) {
+                                                        } else {
+                                                            p.send(msg, function (err, result) {
                                                                 if (err) {
                                                                     throw err;
                                                                 }
@@ -656,10 +658,11 @@ router.post('/capcodes', function(req, res, next) {
         var icon = req.body.icon || 'question';
         var ignore = req.body.ignore || 0;
         var push = req.body.push || 0;
+        var pushpri = req.body.pushpri || "0";
         var Mailenable = req.body.mailenable || 0;
-        var MailTo = req.body.mailto || 'null';
+        var MailTo = req.body.mailto || '';
         db.serialize(() => {
-            db.run("REPLACE INTO capcodes (id, address, alias, agency, color, icon, ignore, push, mailenable, mailto) VALUES ($mesID, $mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore, $mesPush, $MailEnable, $MailTo );", {
+            db.run("REPLACE INTO capcodes (id, address, alias, agency, color, icon, ignore, push, pushpri, mailenable, mailto) VALUES ($mesID, $mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore, $mesPush, $mesPushPri, $MailEnable, $MailTo );", {
               $mesID: id,
               $mesAddress: address,
               $mesAlias: alias,
@@ -668,6 +671,7 @@ router.post('/capcodes', function(req, res, next) {
               $mesIcon: icon,
               $mesIgnore: ignore,
               $mesPush : push,
+              $mesPushPri : pushpri,
               $MailEnable : Mailenable,
               $MailTo : MailTo
             }, function(err){
@@ -725,13 +729,14 @@ router.post('/capcodes/:id', function(req, res, next) {
         var icon = req.body.icon || 'question';
         var ignore = req.body.ignore || 0;
         var push = req.body.push || 0;
+        var pushpri = req.body.pushpri || "0";
         var Mailenable = req.body.mailenable || 0;
-        var MailTo = req.body.mailto || 'null';
+        var MailTo = req.body.mailto || '';
         var updateAlias = req.body.updateAlias || 0;
         console.time('insert');
         db.serialize(() => {
             //db.run("UPDATE tbl SET name = ? WHERE id = ?", [ "bar", 2 ]);
-            db.run("REPLACE INTO capcodes (id, address, alias, agency, color, icon, ignore, push, mailenable, mailto  ) VALUES ($mesID, $mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore, $mesPush, $MailEnable, $MailTo );", {
+            db.run("REPLACE INTO capcodes (id, address, alias, agency, color, icon, ignore, push, pushpri, mailenable, mailto  ) VALUES ($mesID, $mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore, $mesPush, $mesPushPri, $MailEnable, $MailTo );", {
               $mesID: id,
               $mesAddress: address,
               $mesAlias: alias,
@@ -740,6 +745,7 @@ router.post('/capcodes/:id', function(req, res, next) {
               $mesIcon: icon,
               $mesIgnore: ignore,
               $mesPush : push,
+              $mesPushPri : pushpri,
               $MailEnable : Mailenable,
               $MailTo : MailTo
             }, function(err){

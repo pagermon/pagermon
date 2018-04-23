@@ -42,6 +42,7 @@ var db = new sqlite3.Database('./messages.db', sqlite3.OPEN_READWRITE | sqlite3.
           sql += "icon TEXT, ";
           sql += "color TEXT, ";
           sql += "push INTEGER DEFAULT 0, ";
+          sql += "pushpri TEXT, ";
           sql += "mailenable INTEGER DEFAULT 0, ";
           sql += "mailto TEXT, ";
           sql += "ignore INTEGER DEFAULT 0 ); ";
