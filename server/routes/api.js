@@ -6,6 +6,7 @@ var bcrypt = require('bcryptjs');
 var JsSearch = require('js-search');
 var passport = require('passport');
 var push = require('pushover-notifications');
+const nodemailer = require('nodemailer');
 require('../config/passport')(passport); // pass passport for configuration
 
 var nconf = require('nconf');
@@ -36,6 +37,10 @@ var initData = {};
     initData.msgCount = 0;
     initData.offset = 0;
 
+
+
+
+
 ///////////////////
 //               //
 // GET messages  //
@@ -50,7 +55,7 @@ router.get('/messages', function(req, res, next) {
     var maxLimit = nconf.get('messages:maxLimit');
     var defaultLimit = nconf.get('messages:defaultLimit');
     initData.replaceText = nconf.get('messages:replaceText');
-    
+
     if (typeof req.query.page !== 'undefined') {
         var page = parseInt(req.query.page, 10);
         if (page > 0) {
@@ -178,7 +183,7 @@ router.get('/messageSearch', function(req, res, next) {
     var maxLimit = nconf.get('messages:maxLimit');
     var defaultLimit = nconf.get('messages:defaultLimit');
     initData.replaceText = nconf.get('messages:replaceText');
-    
+
     if (typeof req.query.page !== 'undefined') {
         var page = parseInt(req.query.page, 10);
         if (page > 0) {
@@ -192,7 +197,7 @@ router.get('/messageSearch', function(req, res, next) {
     } else {
         initData.limit = parseInt(defaultLimit, 10);
     }
-    
+
     var query;
     var agency;
     var address;
@@ -204,7 +209,7 @@ router.get('/messageSearch', function(req, res, next) {
     if (typeof req.query.address !== 'undefined') { address = req.query.address;
     } else { address = ''; }
     var sql;
-    
+
     // set select commands based on query type
     // address can be address or source field
     if(pdwMode) {
@@ -224,9 +229,9 @@ router.get('/messageSearch', function(req, res, next) {
         sql += ' messages.alias_id IN (SELECT id FROM capcodes WHERE agency = "'+agency+'" AND ignore = 0) OR ';
     if(address != '' || agency != '')
         sql += ' messages.id IS NULL';
-    
+
         sql += " ORDER BY messages.id DESC;";
-        
+
     console.timeEnd('init');
     console.time('sql');
 
@@ -289,22 +294,22 @@ router.get('/messageSearch', function(req, res, next) {
             }
             initData.offsetEnd = initData.offset + initData.limit;
             var limitResults = result.slice(initData.offset, initData.offsetEnd);
-            
+
     	    console.timeEnd('initEnd');
             res.json({'init': initData, 'messages': limitResults});
         } else {
             console.timeEnd('sql');
             res.status(200).json({'init': {}, 'messages': []});
         }
-            
+
     });
 });
 
 ///////////////////
 //               //
 // GET capcodes  //
-//               // 
-/////////////////// 
+//               //
+///////////////////
 
 
 // capcodes aren't pagified at the moment, this should probably be removed
@@ -330,7 +335,7 @@ router.get('/capcodes/init', function(req, res, next) {
                 }
                 res.json(initData);
             }
-        });    
+        });
     });
 });
 
@@ -353,7 +358,7 @@ router.get('/capcodes/:id', function(req, res, next) {
             } else {
                 if (row) {
                     res.status(200);
-                    res.json(row);                    
+                    res.json(row);
                 } else {
                     row = {
                         "id": "",
@@ -361,7 +366,11 @@ router.get('/capcodes/:id', function(req, res, next) {
                         "alias": "",
                         "agency": "",
                         "icon": "question",
-                        "color": "black"
+                        "color": "black",
+                        "push" : "",
+                        "mailenable" : "",
+                        "mailto" : ""
+
                     };
                     res.status(200);
                     res.json(row);
@@ -369,7 +378,7 @@ router.get('/capcodes/:id', function(req, res, next) {
             }
         });
     });
-  
+
 });
 
 router.get('/capcodeCheck/:id', function(req, res, next) {
@@ -390,7 +399,10 @@ router.get('/capcodeCheck/:id', function(req, res, next) {
                         "alias": "",
                         "agency": "",
                         "icon": "question",
-                        "color": "black"
+                        "color": "black",
+                        "push" : "",
+                        "mailenable" : "",
+                        "mailto" : ""
                     };
                     res.status(200);
                     res.json(row);
@@ -398,7 +410,7 @@ router.get('/capcodeCheck/:id', function(req, res, next) {
             }
         });
     });
-  
+
 });
 
 router.get('/capcodes/agency/:id', function(req, res, next) {
@@ -419,7 +431,7 @@ router.get('/capcodes/agency/:id', function(req, res, next) {
 //////////////////////////////////
 //
 // POST calls below
-// 
+//
 // require API key or auth session
 //
 //////////////////////////////////
@@ -445,6 +457,14 @@ router.post('/messages', function(req, res, next) {
         var pushgroup = nconf.get('pushover:pushgroup');
         var pushSound = nconf.get('pushover:pushSound');
         var pushPriority = nconf.get('pushover:pushPriority');
+        var mailEnable = nconf.get('STMP:MailEnable');
+        var MailFrom      = nconf.get('STMP:MailFrom');
+        var MailFromName  = nconf.get('STMP:MailFromName');
+        var SMTPServer    = nconf.get('STMP:SMTPServer');
+        var SMTPPort      = nconf.get('STMP:SMTPPort');
+        var STMPUsername  = nconf.get('STMP:STMPUsername');
+        var STMPPassword  = nconf.get('STMP:STMPPassword');
+        var STMPSecure    = nconf.get('STMP:STMPSecure');
 
         db.serialize(() => {
             //db.run("UPDATE tbl SET name = ? WHERE id = ?", [ "bar", 2 ]);
@@ -456,17 +476,19 @@ router.post('/messages', function(req, res, next) {
                 dupeCheck +=' ) AND message LIKE "'+message+'" AND address="'+address+'";';
             db.get(dupeCheck, [], function (err, row) {
                 if (err) {
-                    res.status(500).send(err);                
+                    res.status(500).send(err);
                 } else {
                     if (row && filterDupes) {
                         console.log('Ignoring duplicate: ', message);
                         res.status(200);
                         res.send('Ignoring duplicate');
                     } else {
-                        db.get("SELECT id, ignore, push FROM capcodes WHERE ? LIKE address ORDER BY REPLACE(address, '_', '%') DESC LIMIT 1", address, function(err,row) {
+                        db.get("SELECT id, ignore, push, mailenable, mailto FROM capcodes WHERE ? LIKE address ORDER BY REPLACE(address, '_', '%') DESC LIMIT 1", address, function(err,row) {
                             var insert;
                             var alias_id = null;
                             var pushonoff = null;
+                            var mailonoff = null;
+                            var mailTo = null;
                             if (err) { console.error(err) }
                             if (row) {
                                 if (row.ignore == '1') {
@@ -476,6 +498,8 @@ router.post('/messages', function(req, res, next) {
                                     insert = true;
                                     alias_id = row.id;
                                     pushonoff = row.push;
+                                    mailonoff = row.mailenable;
+                                    mailTo = row.mailto;
                                 }
                             } else {
                                 insert = true;
@@ -507,6 +531,45 @@ router.post('/messages', function(req, res, next) {
                                                     req.io.emit('messagePost', row);
                                                 }
                                                 res.status(200).send(''+this.lastID);
+                                                //Check to see if Email is enabled globaly
+                                                if (mailEnable == true){
+                                                  // Check to see if the capcode is set to mailto
+                                                  if (mailonoff == 1) {
+                                                    let smtpConfig = {
+                                                        host: SMTPServer,
+                                                        port: SMTPPort,
+                                                        secure: STMPSecure, // upgrade later with STARTTLS
+                                                        auth: {
+                                                            user: STMPUsername,
+                                                            pass: STMPPassword
+                                                        },
+                                                        tls: {
+                                                              // do not fail on invalid certs
+                                                              rejectUnauthorized: false
+                                                          }
+                                                    };
+                                                    let transporter = nodemailer.createTransport(smtpConfig,[])
+
+                                                        let mailOptions = {
+                                                            from: '"'+MailFromName+'" <'+MailFrom+'>', // sender address
+                                                            to: mailTo, // list of receivers
+                                                            subject: row.agency+' - '+row.alias, // Subject line
+                                                            text: row.message, // plain text body
+                                                            html: '<b>'+row.message+'</b>' // html body
+                                                        };
+
+                                                        // send mail with defined transport object
+                                                        transporter.sendMail(mailOptions, (error, info) => {
+                                                            if (error) {
+                                                                return console.log(error);
+                                                            }
+                                                            console.log('Message sent: %s', info.messageId);
+                                                        });
+                                                  } else {
+                                                      //do nothing bruh
+                                                  };
+                                                };
+
                                                 //check config to see if push is gloably enabled
                                                 if (pushenable == true) {
                                                     //check the alais to see if push is enabled for it
@@ -573,7 +636,7 @@ router.post('/messages', function(req, res, next) {
                         });
                     }
                 }
-                
+
             });
         });
     } else {
@@ -592,15 +655,21 @@ router.post('/capcodes', function(req, res, next) {
         var color = req.body.color || 'black';
         var icon = req.body.icon || 'question';
         var ignore = req.body.ignore || 0;
+        var push = req.body.push || 0;
+        var Mailenable = req.body.mailenable || 0;
+        var MailTo = req.body.mailto || 'null';
         db.serialize(() => {
-            db.run("REPLACE INTO capcodes (id, address, alias, agency, color, icon, ignore) VALUES ($mesID, $mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore);", {
+            db.run("REPLACE INTO capcodes (id, address, alias, agency, color, icon, ignorem, push, mailenable, mailto) VALUES ($mesID, $mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore, $mesPush, $MailEnable, $MailTo );", {
               $mesID: id,
               $mesAddress: address,
               $mesAlias: alias,
               $mesAgency: agency,
               $mesColor: color,
               $mesIcon: icon,
-              $mesIgnore: ignore
+              $mesIgnore: ignore,
+              $mesPush : push,
+              $MailEnable : Mailenable,
+              $MailTo : MailTo
             }, function(err){
                 if (err) {
                     res.status(500).send(err);
@@ -656,11 +725,13 @@ router.post('/capcodes/:id', function(req, res, next) {
         var icon = req.body.icon || 'question';
         var ignore = req.body.ignore || 0;
         var push = req.body.push || 0;
+        var Mailenable = req.body.mailenable || 0;
+        var MailTo = req.body.mailto || 'null';
         var updateAlias = req.body.updateAlias || 0;
         console.time('insert');
         db.serialize(() => {
             //db.run("UPDATE tbl SET name = ? WHERE id = ?", [ "bar", 2 ]);
-            db.run("REPLACE INTO capcodes (id, address, alias, agency, color, icon, ignore, push ) VALUES ($mesID, $mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore, $mesPush );", {
+            db.run("REPLACE INTO capcodes (id, address, alias, agency, color, icon, ignore, push, mailenable, mailto  ) VALUES ($mesID, $mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore, $mesPush, $MailEnable, $MailTo );", {
               $mesID: id,
               $mesAddress: address,
               $mesAlias: alias,
@@ -668,7 +739,9 @@ router.post('/capcodes/:id', function(req, res, next) {
               $mesColor: color,
               $mesIcon: icon,
               $mesIgnore: ignore,
-              $mesPush : push
+              $mesPush : push,
+              $MailEnable : Mailenable,
+              $MailTo : MailTo
             }, function(err){
                 if (err) {
                     console.timeEnd('insert');
@@ -678,7 +751,7 @@ router.post('/capcodes/:id', function(req, res, next) {
                     if (updateAlias == 1) {
                         console.time('updateMap');
                         db.run("UPDATE messages SET alias_id = (SELECT id FROM capcodes WHERE messages.address LIKE address ORDER BY REPLACE(address, '_', '%') DESC LIMIT 1);", function(err){
-                           if (err) { console.log(err); console.timeEnd('updateMap'); } 
+                           if (err) { console.log(err); console.timeEnd('updateMap'); }
                            else { console.timeEnd('updateMap'); }
                         });
                     } else {
@@ -725,8 +798,8 @@ router.post('/capcodeRefresh', function(req, res, next) {
     nconf.load();
     console.time('updateMap');
     db.run("UPDATE messages SET alias_id = (SELECT id FROM capcodes WHERE messages.address LIKE address ORDER BY REPLACE(address, '_', '%') DESC LIMIT 1);", function(err){
-       if (err) { console.log(err); console.timeEnd('updateMap'); } 
-       else { 
+       if (err) { console.log(err); console.timeEnd('updateMap'); }
+       else {
            console.timeEnd('updateMap');
            nconf.set('database:aliasRefreshRequired', 0);
            nconf.save();
@@ -747,7 +820,7 @@ function inParam (sql, arr) {
 
 // route middleware to make sure a user is logged in
 function isLoggedIn(req, res, next) {
-    // if user is authenticated in the session, carry on 
+    // if user is authenticated in the session, carry on
     if (req.isAuthenticated())
         return next();
     // if they aren't redirect them to the home page, or send an error if they're an API

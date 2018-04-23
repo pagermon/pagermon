@@ -1,6 +1,6 @@
 {
   "name": "pagermon",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "private": true,
   "license": "Unlicense",
   "scripts": {
@@ -39,7 +39,8 @@
     "underscore": "^1.8.3",
     "zone.js": "^0.8.12",
     "pmx": "latest",
-    "pushover-notifications": "latest"
+    "pushover-notifications": "latest",
+    "nodemailer": "latest"
   },
   "repository": {
     "type": "git",

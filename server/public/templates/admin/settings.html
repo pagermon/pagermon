@@ -10,7 +10,7 @@
           <h4 style="padding-left: 15px;"><a href="/admin/">Admin</a> / Settings</h4>
           <hr />
           <form ng-submit="settingsSubmit()" class="form-horizontal" style="padding-bottom: 70px;">
-            
+
             <h5>Global</h5>
             <div class="form-group">
               <label for="global.loglevel" class="col-xs-4 col-sm-3 control-label">Log level</label>
@@ -35,7 +35,7 @@
                 <span id="helpBlock" class="help-block">Secret key for cookie sessions, should be changed before deploying the application. Changing this will invalidate existing sessions.</span>
               </div>
             </div>
-            
+
             <h5>Database</h5>
             <fieldset disabled>
             <div class="form-group">
@@ -82,7 +82,7 @@
               </div>
             </div>
             </fieldset>
-            
+
             <h5>Messages</h5>
             <div class="form-group">
               <label for="messages.maxLimit" class="col-xs-4 col-sm-3 control-label">Max limit per page</label>
@@ -239,7 +239,76 @@
                 <span id="helpBlock" class="help-block">Sets the Application Sound</span>
               </div>
             </div>
-            
+
+
+
+            <h5>Email</h5>
+            <div class="form-group">
+              <label for="STMP.MailEnable" class="col-xs-4 col-sm-3 control-label">Enable</label>
+              <div class="col-xs-8 col-sm-9">
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" name="STMP.MailEnable" ng-model="settings.STMP.MailEnable">
+                    Enable or disable for selected alias's
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="STMP.MailFrom" class="col-xs-4 col-sm-3 control-label">Mail from address</label>
+              <div class="col-xs-8 col-sm-9">
+                <input type="text" class="form-control" name="STMP.MailFrom" ng-model="settings.STMP.MailFrom">
+                <span id="helpBlock" class="help-block">Mail will be sent form this address</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="STMP.MailFromName" class="col-xs-4 col-sm-3 control-label">From Name</label>
+              <div class="col-xs-8 col-sm-9">
+                <input type="text" class="form-control" name="STMP.MailFromName" ng-model="settings.STMP.MailFromName">
+                <span id="helpBlock" class="help-block">Name to appear from</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="STMP.SMTPServer" class="col-xs-4 col-sm-3 control-label">SMTP Server</label>
+              <div class="col-xs-8 col-sm-9">
+                <input type="text" class="form-control" name="STMP.SMTPServer" ng-model="settings.STMP.SMTPServer">
+                <span id="helpBlock" class="help-block">SMTP Server to connect to</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="STMP.SMTPPort" class="col-xs-4 col-sm-3 control-label">SMTP Port</label>
+              <div class="col-xs-8 col-sm-9">
+                <input type="text" class="form-control" name="STMP.SMTPPort" ng-model="settings.STMP.SMTPPort">
+                <span id="helpBlock" class="help-block">SMTP Server port to connect to</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="STMP.STMPUsername" class="col-xs-4 col-sm-3 control-label">SMTP Username</label>
+              <div class="col-xs-8 col-sm-9">
+                <input type="text" class="form-control" name="STMP.STMPUsername" ng-model="settings.STMP.STMPUsername">
+                <span id="helpBlock" class="help-block">SMTP server username</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="STMP.STMPPassword" class="col-xs-4 col-sm-3 control-label">SMTP Password</label>
+              <div class="col-xs-8 col-sm-9">
+                <input type="text" class="form-control" name="STMP.STMPPassword" ng-model="settings.STMP.STMPPassword">
+                <span id="helpBlock" class="help-block">SMTP server password</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="STMP.STMPSecure" class="col-xs-4 col-sm-3 control-label">Enable SSL/TLS</label>
+              <div class="col-xs-8 col-sm-9">
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" name="STMP.STMPSecure" ng-model="settings.STMP.STMPSecure">
+                    Enable or disable SSL/TLS
+                  </label>
+                </div>
+              </div>
+            </div>
+
+
             <h5>Auth</h5>
             <div class="form-group">
             <fieldset disabled>
@@ -251,7 +320,7 @@
                 </select>
                 <span class="text-warning">Authentication methods are not yet implemented</span>
               </div>
-            </fieldset>  
+            </fieldset>
             </div>
             <div class="row">
             <label class="col-xs-4 col-sm-3 control-label">API Keys</label>
@@ -293,9 +362,9 @@
               </table>
               </div>
             </div>
-            
+
             <button type="submit" class="btn btn-default pull-right">Save</button>
-            
+
           </form>
         </div>
 </div>

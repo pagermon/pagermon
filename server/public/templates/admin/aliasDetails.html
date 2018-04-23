@@ -92,6 +92,27 @@
               </div>
             </div>
 
+            <div class="form-group">
+              <label for="alias.mailenable" class="col-xs-4 col-sm-3 control-label">Email</label>
+              <div class="col-xs-8 col-sm-9">
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" name="alias.mailenable" ng-model="alias.mailenable" ng-true-value="1" ng-false-value="0">
+                    Enable sending via SMTP
+                  </label>
+                  <span id="helpBlock" class="help-block">If checked, messages matching this alias will be sent via SMTP</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="alias.mailto" class="col-xs-4 col-sm-3 control-label">SMTP Recpeiants</label>
+              <div class="col-xs-8 col-sm-9">
+              <input class="form-control" type="text" name="alias.mailto" ng-model="alias.mailto">
+              <span id="helpBlock" class="help-block">Recpeiants for this capcode, comma separated</span>
+              </div>
+            </div>
+
             <div class="form-group" ng-class="{'has-warning':alias.push == 1}">
               <label for="alias.push" class="col-xs-4 col-sm-3 control-label">Pushover</label>
               <div class="col-xs-8 col-sm-9">
@@ -113,4 +134,3 @@
           </form>
         </div>
 </div>
-

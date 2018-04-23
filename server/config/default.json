@@ -50,5 +50,15 @@
     "pushgroup":   "",
     "pushSound": "pushover",
     "pushPriority": "0"
+  },
+  "STMP":{
+    "MailEnable": false,
+    "MailFrom": "",
+    "MailFromName": "",
+    "SMTPServer":  "",
+    "SMTPPort":   "",
+    "STMPUsername": "",
+    "STMPPassword": "",
+    "STMPSecure": true
   }
 }

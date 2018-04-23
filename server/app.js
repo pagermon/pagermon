@@ -1,4 +1,4 @@
-var version = "0.1.4-beta";
+var version = "0.1.5-beta";
 
 var debug = require('debug')('pagermon:server');
 var pmx = require('pmx').init({
@@ -33,7 +33,7 @@ process.on('SIGINT', function() {
 var sqlite3 = require('sqlite3').verbose();
 var db = new sqlite3.Database('./messages.db', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, function (err) {
     if (err) { console.log(err.message); } else {
-      
+
       var sql =  "CREATE TABLE IF NOT EXISTS capcodes ( ";
 	        sql += "id INTEGER PRIMARY KEY AUTOINCREMENT, ";
           sql += "address TEXT NOT NULL, ";
@@ -42,6 +42,8 @@ var db = new sqlite3.Database('./messages.db', sqlite3.OPEN_READWRITE | sqlite3.
           sql += "icon TEXT, ";
           sql += "color TEXT, ";
           sql += "push INTEGER DEFAULT 0, ";
+          sql += "mailenable INTEGER DEFAULT 0, ";
+          sql += "mailto TEXT, ";
           sql += "ignore INTEGER DEFAULT 0 ); ";
           sql += "CREATE TABLE IF NOT EXISTS messages ( ";
           sql += "id INTEGER UNIQUE, ";
@@ -54,7 +56,7 @@ var db = new sqlite3.Database('./messages.db', sqlite3.OPEN_READWRITE | sqlite3.
           sql += "CREATE INDEX IF NOT EXISTS `msg_index` ON `messages` (`address`,`id` DESC); ";
           sql += "CREATE INDEX IF NOT EXISTS `msg_alias` ON `messages` (`id` DESC, `alias_id`); ";
           sql += "CREATE UNIQUE INDEX IF NOT EXISTS `cc_pk_idx` ON `capcodes` (`id`,`address` DESC); ";
-          
+
       db.serialize(() => {
           db.exec(sql, function(err) {
               if (err) { console.log(err); }
