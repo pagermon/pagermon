@@ -526,6 +526,7 @@ router.post('/messages', function(req, res, next) {
                                             sql += " LEFT JOIN capcodes ON capcodes.id = messages.alias_id ";
                                         }
                                             sql += " WHERE messages.id = "+this.lastID;
+                                        var reqLastID = this.lastID;
                                         db.get(sql,function(err,row){
                                             if (err) {
                                                 res.status(500).send(err);
@@ -533,7 +534,7 @@ router.post('/messages', function(req, res, next) {
                                                 if(row) {
                                                     req.io.emit('messagePost', row);
                                                 }
-                                                res.status(200).send(''+this.lastID);
+                                                res.status(200).send(''+reqLastID);
                                                 //Check to see if Email is enabled globaly
                                                 if (mailEnable == true){
                                                   // Check to see if the capcode is set to mailto
