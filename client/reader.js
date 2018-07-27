@@ -91,7 +91,7 @@ rl.on('line', (line) => {
   // if too much junk data, make sure '-p' option isn't enabled in multimon
   if (address.length > 4 && message) {
     var padAddress = padDigits(address,7);
-  	console.log(colors.red(time+': ')+colors.yellow(address+': ')+colors.success(trimMessage));
+  	console.log(colors.red(time+': ')+colors.yellow(padAddress+': ')+colors.success(trimMessage));
   	// now send the message
   	var options = {
   		method: 'POST',
