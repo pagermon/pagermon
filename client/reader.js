@@ -64,10 +64,10 @@ rl.on('line', (line) => {
   	address = line.match(/POCSAG(\d+): Address:(.*?)Function/)[2].trim();
     if (line.indexOf('Alpha:') > -1) {
     	message = line.match(/Alpha:(.*?)$/)[1].trim();
-    	trimMessage = message.replace(/<[A-Za-z]{3}>/g,'').replace(/[Ü]/g,']').replace(/[Ä]/g,'[');
+    	trimMessage = message.replace(/<[A-Za-z]{3}>/g,'').replace(/Ä/g,'[').replace(/Ü/g,']');
     } else if (line.indexOf('Numeric:') > -1) {
         message = line.match(/Numeric:(.*?)$/)[1].trim();
-        trimMessage = message.replace(/<[A-Za-z]{3}>/g,'').replace(/[Ü]/g,']').replace(/[Ä]/g,'[');
+        trimMessage = message.replace(/<[A-Za-z]{3}>/g,'').replace(/Ä/g,'[').replace(/Ü/g,']');
     } else {
     	message = false;
     	trimMessage = '';
