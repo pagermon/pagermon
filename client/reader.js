@@ -64,10 +64,10 @@ rl.on('line', (line) => {
   	address = line.match(/POCSAG(\d+): Address:(.*?)Function/)[2].trim();
     if (line.indexOf('Alpha:') > -1) {
     	message = line.match(/Alpha:(.*?)$/)[1].trim();
-    	trimMessage = message.replace(/<[A-Za-z]{3}>/g,'');
+    	trimMessage = message.replace(/<[A-Za-z]{3}>/g,'').replace(/[Ü]/g,']').replace(/[Ä]/g,'[');
     } else if (line.indexOf('Numeric:') > -1) {
         message = line.match(/Numeric:(.*?)$/)[1].trim();
-        trimMessage = message.replace(/<[A-Za-z]{3}>/g,'');
+        trimMessage = message.replace(/<[A-Za-z]{3}>/g,'').replace(/[Ü]/g,']').replace(/[Ä]/g,'[');
     } else {
     	message = false;
     	trimMessage = '';
@@ -91,7 +91,7 @@ rl.on('line', (line) => {
   // if too much junk data, make sure '-p' option isn't enabled in multimon
   if (address.length > 4 && message) {
     var padAddress = padDigits(address,7);
-  	console.log(colors.red(time+': ')+colors.yellow(address+': ')+colors.success(trimMessage));
+  	console.log(colors.red(time+': ')+colors.yellow(padAddress+': ')+colors.success(trimMessage));
   	// now send the message
   	var options = {
   		method: 'POST',
