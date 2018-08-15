@@ -46,9 +46,7 @@
   },
   "pushover":{
     "pushenable": false,
-    "pushAPIKEY":  "",
-    "pushgroup":   "",
-    "pushSound": "pushover"
+    "pushAPIKEY":  ""
   },
   "STMP":{
     "MailEnable": false,

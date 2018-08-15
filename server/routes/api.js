@@ -367,7 +367,9 @@ router.get('/capcodes/:id', function(req, res, next) {
                         "agency": "",
                         "icon": "question",
                         "color": "black",
-                        "push" : "",
+                        "push": "",
+                        "pushgroup": "",
+                        "pushsound": "",
                         "pushpri": "0",
                         "mailenable" : "",
                         "mailto" : ""
@@ -401,7 +403,9 @@ router.get('/capcodeCheck/:id', function(req, res, next) {
                         "agency": "",
                         "icon": "question",
                         "color": "black",
-                        "push" : "",
+                        "push": "",
+                        "pushgroup": "",
+                        "pushsound": "",
                         "pushpri": "0",
                         "mailenable" : "",
                         "mailto" : ""
@@ -456,8 +460,6 @@ router.post('/messages', function(req, res, next) {
         var pdwMode = nconf.get('messages:pdwMode');
         var pushenable = nconf.get('pushover:pushenable');
         var pushkey = nconf.get('pushover:pushAPIKEY');
-        var pushgroup = nconf.get('pushover:pushgroup');
-        var pushSound = nconf.get('pushover:pushSound');
         var mailEnable = nconf.get('STMP:MailEnable');
         var MailFrom      = nconf.get('STMP:MailFrom');
         var MailFromName  = nconf.get('STMP:MailFromName');
@@ -484,11 +486,13 @@ router.post('/messages', function(req, res, next) {
                         res.status(200);
                         res.send('Ignoring duplicate');
                     } else {
-                        db.get("SELECT id, ignore, push, pushpri, mailenable, mailto FROM capcodes WHERE ? LIKE address ORDER BY REPLACE(address, '_', '%') DESC LIMIT 1", address, function(err,row) {
+                        db.get("SELECT id, ignore, push, pushpri, pushgroup, pushsound, mailenable, mailto FROM capcodes WHERE ? LIKE address ORDER BY REPLACE(address, '_', '%') DESC LIMIT 1", address, function(err,row) {
                             var insert;
                             var alias_id = null;
                             var pushonoff = null;
                             var pushpri = null;
+                            var pushgroup = null;
+                            var pushsound = null;
                             var mailonoff = null;
                             var mailTo = "";
                             if (err) { console.error(err) }
@@ -501,6 +505,8 @@ router.post('/messages', function(req, res, next) {
                                     alias_id = row.id;
                                     pushonoff = row.push;
                                     pushPri = row.pushpri;
+                                    pushGroup = row.pushgroup;
+                                    pushSound = row.pushsound;
                                     mailonoff = row.mailenable;
                                     mailTo = row.mailto;
                                 }
@@ -578,7 +584,7 @@ router.post('/messages', function(req, res, next) {
                                                     //check the alais to see if push is enabled for it
                                                     if (pushonoff == 1) {
                                                         var p = new push({
-                                                            user: pushgroup,
+                                                            user: pushGroup,
                                                             token: pushkey,
                                                         });
 
@@ -659,10 +665,12 @@ router.post('/capcodes', function(req, res, next) {
         var ignore = req.body.ignore || 0;
         var push = req.body.push || 0;
         var pushpri = req.body.pushpri || "0";
+        var pushgroup = req.body.pushgroup || 0;
+        var pushsound = req.body.pushsound || '';
         var Mailenable = req.body.mailenable || 0;
         var MailTo = req.body.mailto || '';
         db.serialize(() => {
-            db.run("REPLACE INTO capcodes (id, address, alias, agency, color, icon, ignore, push, pushpri, mailenable, mailto) VALUES ($mesID, $mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore, $mesPush, $mesPushPri, $MailEnable, $MailTo );", {
+            db.run("REPLACE INTO capcodes (id, address, alias, agency, color, icon, ignore, push, pushpri, pushgroup, pushsound, mailenable, mailto) VALUES ($mesID, $mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore, $mesPush, $mesPushPri, $mesPushGroup, $mesPushSound, $MailEnable, $MailTo );", {
               $mesID: id,
               $mesAddress: address,
               $mesAlias: alias,
@@ -671,7 +679,9 @@ router.post('/capcodes', function(req, res, next) {
               $mesIcon: icon,
               $mesIgnore: ignore,
               $mesPush : push,
-              $mesPushPri : pushpri,
+              $mesPushPri: pushpri,
+              $mesPushGroup: pushgroup,
+              $mesPushSound: pushsound,
               $MailEnable : Mailenable,
               $MailTo : MailTo
             }, function(err){
@@ -730,13 +740,15 @@ router.post('/capcodes/:id', function(req, res, next) {
         var ignore = req.body.ignore || 0;
         var push = req.body.push || 0;
         var pushpri = req.body.pushpri || "0";
+        var pushgroup = req.body.pushgroup || 0;
+        var pushsound = req.body.pushsound || '';  
         var Mailenable = req.body.mailenable || 0;
         var MailTo = req.body.mailto || '';
         var updateAlias = req.body.updateAlias || 0;
         console.time('insert');
         db.serialize(() => {
             //db.run("UPDATE tbl SET name = ? WHERE id = ?", [ "bar", 2 ]);
-            db.run("REPLACE INTO capcodes (id, address, alias, agency, color, icon, ignore, push, pushpri, mailenable, mailto  ) VALUES ($mesID, $mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore, $mesPush, $mesPushPri, $MailEnable, $MailTo );", {
+            db.run("REPLACE INTO capcodes (id, address, alias, agency, color, icon, ignore, push, pushpri, pushgroup, pushsound, mailenable, mailto  ) VALUES ($mesID, $mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore, $mesPush, $mesPushPri, $mesPushGroup, $mesPushSound, $MailEnable, $MailTo );", {
               $mesID: id,
               $mesAddress: address,
               $mesAlias: alias,
@@ -745,7 +757,9 @@ router.post('/capcodes/:id', function(req, res, next) {
               $mesIcon: icon,
               $mesIgnore: ignore,
               $mesPush : push,
-              $mesPushPri : pushpri,
+              $mesPushPri: pushpri,
+              $mesPushGroup: pushgroup,
+              $mesPushSound: pushsound,
               $MailEnable : Mailenable,
               $MailTo : MailTo
             }, function(err){
