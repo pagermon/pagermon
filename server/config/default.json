@@ -26,7 +26,9 @@
         "replace": ""
       }
     ],
-    "pdwMode": false
+    "pdwMode": false,
+    "HideCapcode": false,
+    "HideSource": false
   },
   "auth": {
     "type": "local",
