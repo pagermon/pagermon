@@ -39,8 +39,20 @@
                 </span>
                 </div>
             </th>
-            <th class="noMobile" style="text-align: center;">Src</th>
-            <th class="noTiny" style="text-align: center;">Capcode</th>
+            <% if (hidesource) { %>
+              <% if (login) { %>
+              <th class="noMobile" style="text-align: center;">Src</th>
+              <% } %>
+            <% } else { %>
+              <th class="noMobile" style="text-align: center;">Src</th>
+            <% } %>
+            <% if (hidecapcode) { %>
+              <% if (login) { %>
+              <th class="noMobile" style="text-align: center;">Capcode</th>
+              <% } %>
+            <% } else { %>
+              <th class="noMobile" style="text-align: center;">Capcode</th>
+            <% } %>
             <th class="noMobile"></th>
             <th class="noMobile"></th>
             <th style="text-align: center;">Message
@@ -53,12 +65,27 @@
           <tr ng-repeat="message in messages | filter: search">
             <td class="shrink noMobile">{{message.date}}</td>
             <td class="shrink">{{message.timestamp}}</td>
+            <% if (hidesource) { %>
+              <% if (login) { %>
             <td class="shrink noMobile clickable-td" ng-click="addressFilter(message.source || '')" style="background-color: {{message.color || 'grey'}}; text-align: center;">
               <span class="small" style="color: white; font-family: monospace;"><strong>{{message.source}}</strong></span>
               </td>
+              <% } %>
+            <% } else { %>
+             <td class="shrink noMobile clickable-td" ng-click="addressFilter(message.source || '')" style="background-color: {{message.color || 'grey'}}; text-align: center;">
+              <span class="small" style="color: white; font-family: monospace;"><strong>{{message.source}}</strong></span>
+              </td>
+              <% } %>
+            <% if (hidecapcode) { %>
+              <% if (login) { %>
             <td class="shrink noMobile clickable-td" ng-click="addressFilter(message.address || '')" style="background-color: {{message.color || 'grey'}}; text-align: center;">
               <span class="small" style="color: white; font-family: monospace;"><strong>{{message.address}}</strong></span>
               </td>
+              <% } %>
+            <% } else { %>
+              <td class="shrink noMobile clickable-td" ng-click="addressFilter(message.address || '')" style="background-color: {{message.color || 'grey'}}; text-align: center;">
+              <span class="small" style="color: white; font-family: monospace;"><strong>{{message.address}}</strong></span>
+              <% } %>
             <td class="shrink clickable-td" ng-if="message.agency" ng-click="agencyFilter(message.agency || '')">
               <span class="fa-stack fa-lg fa-fw" style="color: {{message.color || 'grey'}};">
                 <i class="fa fa-circle fa-stack-2x"></i>

@@ -1,11 +1,18 @@
+var conf_file = './config/config.json';
 var express = require('express');
 var router = express.Router();
 var passport = require('passport');
+var nconf = require('nconf');
+nconf.file({file: conf_file});
+nconf.load();
+
 require('../config/passport')(passport); // pass passport for configuration
 
 router.use(function (req, res, next) {
   res.locals.login = req.isAuthenticated();
   res.locals.user = req.user || '';
+  res.locals.hidecapcode = nconf.get('messages:HideCapcode');
+  res.locals.hidesource = nconf.get('messages:HideSource');
   next();
 });
 
