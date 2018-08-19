@@ -441,9 +441,10 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
       };
       
       $scope.editAlias = function(alias){
-        // admin urls need to use $window since they don't use this route
-        $window.location.href = '/admin/aliases/'+alias;
-      };
+        // use window.open to launch a new tab when editing aliases
+        var editurl = '/admin/aliases/'+alias;
+          window.open(editurl, '_blank');
+       };
       
       $scope.clearSearch = function(){
         $scope.query = '';
