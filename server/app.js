@@ -1,4 +1,4 @@
-var version = "0.1.5-beta";
+var version = "0.1.6-beta";
 
 var debug = require('debug')('pagermon:server');
 var pmx = require('pmx').init({
@@ -43,6 +43,8 @@ var db = new sqlite3.Database('./messages.db', sqlite3.OPEN_READWRITE | sqlite3.
           sql += "color TEXT, ";
           sql += "push INTEGER DEFAULT 0, ";
           sql += "pushpri TEXT, ";
+          sql += "pushgroup TEXT, ";
+          sql += "pushsound TEXT, ";
           sql += "mailenable INTEGER DEFAULT 0, ";
           sql += "mailto TEXT, ";
           sql += "ignore INTEGER DEFAULT 0 ); ";
