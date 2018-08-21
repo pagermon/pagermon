@@ -118,24 +118,25 @@ router.get('/messages', function(req, res, next) {
                 sql += " ORDER BY messages.id DESC LIMIT "+initData.limit+" OFFSET "+initData.offset+";";
             }
             var result = [];
-            db.each(sql,function(err,newrow){
+            db.each(sql,function(err,row){
 					  //outRow = JSON.parse(newrow);
 					if (HideCapcode) {
-						row = {
-							"id": newrow.id,
-							"message": newrow.message,
-							"source": newrow.source,
-							"timestamp": newrow.timestamp,
-							"alias_id": newrow.alias_id,
-							"alias": newrow.alias,
-							"agency": newrow.agency,
-							"icon": newrow.icon,
-							"color": newrow.color,
-							"ignore": newrow.ignore,
-							"aliasMatch": newrow.aliasMatch
-							 };
-					} else {
-						row = newrow
+						if (!req.isAuthenticated()) {
+							row = {
+								"id": row.id,
+								"message": row.message,
+								"source": row.source,
+								"timestamp": row.timestamp,
+								"alias_id": row.alias_id,
+								"alias": row.alias,
+								"agency": row.agency,
+								"icon": row.icon,
+								"color": row.color,
+								"ignore": row.ignore,
+								"aliasMatch": row.aliasMatch
+							};
+						} else {
+						}
 					}
                 if (err) {
                     console.log(err);
@@ -174,27 +175,28 @@ router.get('/messages/:id', function(req, res, next) {
         sql += " LEFT JOIN capcodes ON capcodes.id = messages.alias_id ";
         sql += " WHERE messages.id = "+id;
     db.serialize(() => {
-        db.get(sql,function(err,newrow){
+        db.get(sql,function(err,row){
             if (err) {
                 res.status(500).send(err);
             } else {
-				if (HideCapcode) {
-                  row = {
-                        "id": newrow.id,
-                        "message": newrow.message,
-                        "source": newrow.source,
-                        "timestamp": newrow.timestamp,
-                        "alias_id": newrow.alias_id,
-                        "alias": newrow.alias,
-                        "agency": newrow.agency,
-                        "icon": newrow.icon,
-                        "color": newrow.color,
-                        "ignore": newrow.ignore,
-                        "aliasMatch": newrow.aliasMatch
-						 };
-				} else {
-					row = newrow
-				}
+					if (HideCapcode) {
+						if (!req.isAuthenticated()) {
+							row = {
+								"id": row.id,
+								"message": row.message,
+								"source": row.source,
+								"timestamp": row.timestamp,
+								"alias_id": row.alias_id,
+								"alias": row.alias,
+								"agency": row.agency,
+								"icon": row.icon,
+								"color": row.color,
+								"ignore": row.ignore,
+								"aliasMatch": row.aliasMatch
+							};
+						} else {
+						}
+					}
                 if(row.ignore == 1) {
                     res.status(200).json({});
                 } else {
@@ -285,27 +287,28 @@ router.get('/messageSearch', function(req, res, next) {
     console.time('sql');
 
     var rows = [];
-    db.each(sql,function(err,newrow){
+    db.each(sql,function(err,row){
         if (err) {
             console.log(err);
-        } else if (newrow) {
-				if (HideCapcode) {
-                  row = {
-                        "id": newrow.id,
-                        "message": newrow.message,
-                        "source": newrow.source,
-                        "timestamp": newrow.timestamp,
-                        "alias_id": newrow.alias_id,
-                        "alias": newrow.alias,
-                        "agency": newrow.agency,
-                        "icon": newrow.icon,
-                        "color": newrow.color,
-                        "ignore": newrow.ignore,
-                        "aliasMatch": newrow.aliasMatch
-						 };
-				} else {
-					row = newrow
-				}
+        } else if (row) {
+					if (HideCapcode) {
+						if (!req.isAuthenticated()) {
+							row = {
+								"id": row.id,
+								"message": row.message,
+								"source": row.source,
+								"timestamp": row.timestamp,
+								"alias_id": row.alias_id,
+								"alias": row.alias,
+								"agency": row.agency,
+								"icon": row.icon,
+								"color": row.color,
+								"ignore": row.ignore,
+								"aliasMatch": row.aliasMatch
+							};
+						} else {
+						}
+					}
             if (pdwMode) {
                 if (row.ignore == 0)
                     rows.push(row);
@@ -377,25 +380,44 @@ router.get('/messageSearch', function(req, res, next) {
 //               //
 ///////////////////
 
-router.get('/capcodes', isLoggedIn, function(req, res, next) {
-    db.serialize(() => {
-        db.all("SELECT * from capcodes ORDER BY REPLACE(address, '_', '%')",function(err,rows){
-            if (err) return next(err);
-            res.json(rows);
-        });
-    });
-});
- if (!apiSecurity) {
-	router.all('*',
-	  passport.authenticate('localapikey', { session: false, failWithError: true }),
-	  function(req, res, next) {
-		  next();
-	  },
-	  function(err, req, res, next) {
-		  console.info(err);
-		  isLoggedIn(req, res, next);
-	  });
- }
+if (HideCapcode && apiSecurity) {
+	router.get('/capcodes', function(req, res, next) {
+		db.serialize(() => {
+			db.all("SELECT * from capcodes ORDER BY REPLACE(address, '_', '%')",function(err,rows){
+				if (err) return next(err);
+				res.json(rows);
+			});
+		});
+	});
+} else if (!apiSecurity && HideCapcode) {
+	router.get('/capcodes', isLoggedIn, function(req, res, next) {
+		db.serialize(() => {
+			db.all("SELECT * from capcodes ORDER BY REPLACE(address, '_', '%')",function(err,rows){
+				if (err) return next(err);
+				res.json(rows);
+			});
+		});
+	});
+} else if (apiSecurity && !HideCapcode) {
+	router.get('/capcodes', function(req, res, next) {
+		db.serialize(() => {
+			db.all("SELECT * from capcodes ORDER BY REPLACE(address, '_', '%')",function(err,rows){
+				if (err) return next(err);
+				res.json(rows);
+			});
+		});
+	});	
+} else {
+	router.get('/capcodes', function(req, res, next) {
+		db.serialize(() => {
+			db.all("SELECT * from capcodes ORDER BY REPLACE(address, '_', '%')",function(err,rows){
+				if (err) return next(err);
+				res.json(rows);
+			});
+		});
+	});		
+}
+
 // capcodes aren't pagified at the moment, this should probably be removed
 router.get('/capcodes/init', function(req, res, next) {
     //set current page if specifed as get variable (eg: /?page=2)
@@ -432,6 +454,24 @@ router.get('/capcodes/:id', function(req, res, next) {
                 res.send(err);
             } else {
                 if (row) {
+					if (HideCapcode) {
+						if (!req.isAuthenticated()) {
+							row = {
+								"id": row.id,
+								"message": row.message,
+								"source": row.source,
+								"timestamp": row.timestamp,
+								"alias_id": row.alias_id,
+								"alias": row.alias,
+								"agency": row.agency,
+								"icon": row.icon,
+								"color": row.color,
+								"ignore": row.ignore,
+								"aliasMatch": row.aliasMatch
+							};
+						} else {
+						}
+					}
                     res.status(200);
                     res.json(row);
                 } else {
@@ -468,6 +508,24 @@ router.get('/capcodeCheck/:id', function(req, res, next) {
                 res.send(err);
             } else {
                 if (row) {
+					if (HideCapcode) {
+						if (!req.isAuthenticated()) {
+							row = {
+								"id": row.id,
+								"message": row.message,
+								"source": row.source,
+								"timestamp": row.timestamp,
+								"alias_id": row.alias_id,
+								"alias": row.alias,
+								"agency": row.agency,
+								"icon": row.icon,
+								"color": row.color,
+								"ignore": row.ignore,
+								"aliasMatch": row.aliasMatch
+							};
+						} else {
+						}
+					}
                     res.status(200);
                     res.json(row);
                 } else {
@@ -494,7 +552,7 @@ router.get('/capcodeCheck/:id', function(req, res, next) {
 
 });
 
-router.get('/capcodes/agency/:id', function(req, res, next) {
+router.get('/capcodes/agency/:id', isLoggedIn, function(req, res, next) {
     var id = req.params.id;
     db.serialize(() => {
         db.all("SELECT * from capcodes WHERE agency LIKE ?", id, function(err,rows){
@@ -508,6 +566,18 @@ router.get('/capcodes/agency/:id', function(req, res, next) {
         });
     });
 });
+//if no api sec, lock down POST
+ if (!apiSecurity) {
+	router.all('*',
+	  passport.authenticate('localapikey', { session: false, failWithError: true }),
+	  function(req, res, next) {
+		  next();
+	  },
+	  function(err, req, res, next) {
+		  console.info(err);
+		  isLoggedIn(req, res, next);
+	  });
+ }
 
 //////////////////////////////////
 //
