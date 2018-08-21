@@ -37,7 +37,9 @@ var initData = {};
     initData.msgCount = 0;
     initData.offset = 0;
 
-
+// auth variables
+    var apiSecurity = nconf.get('messages:apiSecurity');
+    
 
 
 
@@ -46,6 +48,18 @@ var initData = {};
 // GET messages  //
 //               //
 ///////////////////
+// secure all API's if API Security is enabled
+if (apiSecurity) {
+router.all('*',
+  passport.authenticate('localapikey', { session: false, failWithError: true }),
+  function(req, res, next) {
+      next();
+  },
+  function(err, req, res, next) {
+      console.info(err);
+      isLoggedIn(req, res, next);
+  });
+};
 
 /* GET message listing. */
 router.get('/messages', function(req, res, next) {
@@ -55,82 +69,81 @@ router.get('/messages', function(req, res, next) {
     var maxLimit = nconf.get('messages:maxLimit');
     var defaultLimit = nconf.get('messages:defaultLimit');
     initData.replaceText = nconf.get('messages:replaceText');
-
-    if (typeof req.query.page !== 'undefined') {
-        var page = parseInt(req.query.page, 10);
-        if (page > 0) {
-            initData.currentPage = page - 1;
-        } else {
-            initData.currentPage = 0;
-        }
-    }
-    if (req.query.limit && req.query.limit <= maxLimit) {
-        initData.limit = parseInt(req.query.limit, 10);
-    } else {
-        initData.limit = parseInt(defaultLimit, 10);
-    }
-    var initSql;
-    if (pdwMode) {
-        initSql =  "SELECT COUNT(*) AS msgcount FROM messages WHERE alias_id IN (SELECT id FROM capcodes WHERE ignore = 0);";
-    } else {
-        initSql = "SELECT COUNT(*) AS msgcount FROM messages WHERE alias_id IS NULL OR alias_id NOT IN (SELECT id FROM capcodes WHERE ignore = 1);";
-    }
-    db.get(initSql,function(err,count){
-        if (err) {
-            console.log(err);
-        } else if (count) {
-            initData.msgCount = count.msgcount;
-            initData.pageCount = Math.ceil(initData.msgCount/initData.limit);
-            if (initData.currentPage > initData.pageCount) {
-                initData.currentPage = 0;
-            }
-            initData.offset = initData.limit * initData.currentPage;
-            if (initData.offset < 0) {
-                initData.offset = 0;
-            }
-            initData.offsetEnd = initData.offset + initData.limit;
-            console.timeEnd('init');
-            console.time('sql');
-            var sql;
-            if(pdwMode) {
-                sql =  "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch ";
-                sql += " FROM messages";
-                sql += " INNER JOIN capcodes ON capcodes.id = messages.alias_id WHERE capcodes.ignore = 0";
-                sql += " ORDER BY messages.id DESC LIMIT "+initData.limit+" OFFSET "+initData.offset+";";
-            } else {
-                sql =  "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch ";
-                sql += " FROM messages";
-                sql += " LEFT JOIN capcodes ON capcodes.id = messages.alias_id WHERE capcodes.ignore = 0 OR capcodes.ignore IS NULL ";
-                sql += " ORDER BY messages.id DESC LIMIT "+initData.limit+" OFFSET "+initData.offset+";";
-            }
-            var result = [];
-            db.each(sql,function(err,row){
-                if (err) {
-                    console.log(err);
-                } else if (row) {
-                    result.push(row);
-                } else {
-                    console.log('empty results');
-                }
-            },function(err,rowCount){
-                if (err) {
-                    console.timeEnd('sql');
-                    console.log(err);
-                    res.status(500).send(err);
-                } else if (rowCount > 0) {
-                    console.timeEnd('sql');
-                    //var limitResults = result.slice(initData.offset, initData.offsetEnd);
-                    console.time('send');
-                    res.status(200).json({'init': initData, 'messages': result});
-                    console.timeEnd('send');
-                } else {
-                    res.status(200).json({'init': {}, 'messages': []});
-                }
-            });
-        } else {
-            console.log('empty results');
-        }
-    });
+      if (typeof req.query.page !== 'undefined') {
+          var page = parseInt(req.query.page, 10);
+          if (page > 0) {
+              initData.currentPage = page - 1;
+          } else {
+              initData.currentPage = 0;
+          }
+      }
+      if (req.query.limit && req.query.limit <= maxLimit) {
+          initData.limit = parseInt(req.query.limit, 10);
+      } else {
+          initData.limit = parseInt(defaultLimit, 10);
+      }
+      var initSql;
+      if (pdwMode) {
+          initSql =  "SELECT COUNT(*) AS msgcount FROM messages WHERE alias_id IN (SELECT id FROM capcodes WHERE ignore = 0);";
+      } else {
+          initSql = "SELECT COUNT(*) AS msgcount FROM messages WHERE alias_id IS NULL OR alias_id NOT IN (SELECT id FROM capcodes WHERE ignore = 1);";
+      }
+      db.get(initSql,function(err,count){
+          if (err) {
+              console.log(err);
+          } else if (count) {
+              initData.msgCount = count.msgcount;
+              initData.pageCount = Math.ceil(initData.msgCount/initData.limit);
+              if (initData.currentPage > initData.pageCount) {
+                  initData.currentPage = 0;
+              }
+              initData.offset = initData.limit * initData.currentPage;
+              if (initData.offset < 0) {
+                  initData.offset = 0;
+              }
+              initData.offsetEnd = initData.offset + initData.limit;
+              console.timeEnd('init');
+              console.time('sql');
+              var sql;
+              if(pdwMode) {
+                  sql =  "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch ";
+                  sql += " FROM messages";
+                  sql += " INNER JOIN capcodes ON capcodes.id = messages.alias_id WHERE capcodes.ignore = 0";
+                  sql += " ORDER BY messages.id DESC LIMIT "+initData.limit+" OFFSET "+initData.offset+";";
+              } else {
+                  sql =  "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch ";
+                  sql += " FROM messages";
+                  sql += " LEFT JOIN capcodes ON capcodes.id = messages.alias_id WHERE capcodes.ignore = 0 OR capcodes.ignore IS NULL ";
+                  sql += " ORDER BY messages.id DESC LIMIT "+initData.limit+" OFFSET "+initData.offset+";";
+              }
+              var result = [];
+              db.each(sql,function(err,row){
+                  if (err) {
+                      console.log(err);
+                  } else if (row) {
+                      result.push(row);
+                  } else {
+                      console.log('empty results');
+                  }
+              },function(err,rowCount){
+                  if (err) {
+                      console.timeEnd('sql');
+                      console.log(err);
+                      res.status(500).send(err);
+                  } else if (rowCount > 0) {
+                      console.timeEnd('sql');
+                      //var limitResults = result.slice(initData.offset, initData.offsetEnd);
+                      console.time('send');
+                      res.status(200).json({'init': initData, 'messages': result});
+                      console.timeEnd('send');
+                  } else {
+                      res.status(200).json({'init': {}, 'messages': []});
+                  }
+              });
+          } else {
+              console.log('empty results');
+          }
+      });
 });
 
 router.get('/messages/:id', function(req, res, next) {
@@ -340,7 +353,7 @@ router.get('/capcodes/init', function(req, res, next) {
 });
 
 router.get('/capcodes', function(req, res, next) {
-    db.serialize(() => {
+  db.serialize(() => {
         db.all("SELECT * from capcodes ORDER BY REPLACE(address, '_', '%')",function(err,rows){
             if (err) return next(err);
             res.json(rows);
@@ -438,11 +451,10 @@ router.get('/capcodes/agency/:id', function(req, res, next) {
 //
 // POST calls below
 //
-// require API key or auth session
-//
 //////////////////////////////////
-
-router.all('*',
+// secure POST API's if API Security is disabled
+if (!apiSecurity) {
+  router.all('*',
   passport.authenticate('localapikey', { session: false, failWithError: true }),
   function(req, res, next) {
       next();
@@ -451,6 +463,8 @@ router.all('*',
       console.info(err);
       isLoggedIn(req, res, next);
   });
+};
+
 
 router.post('/messages', function(req, res, next) {
     nconf.load();

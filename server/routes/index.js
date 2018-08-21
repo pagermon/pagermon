@@ -13,6 +13,7 @@ router.use(function (req, res, next) {
   res.locals.user = req.user || '';
   res.locals.hidecapcode = nconf.get('messages:HideCapcode');
   res.locals.hidesource = nconf.get('messages:HideSource');
+  res.locals.apisecurity = nconf.get('messages:apiSecurity');
   next();
 });
 
