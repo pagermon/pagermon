@@ -41,6 +41,47 @@ var initData = {};
 var HideCapcode = nconf.get('messages:HideCapcode');
 var apiSecurity = nconf.get('messages:apiSecurity');
 
+if (HideCapcode && apiSecurity) {
+	router.get('/capcodes', isLoggedIn, function(req, res, next) {
+		db.serialize(() => {
+			db.all("SELECT * from capcodes ORDER BY REPLACE(address, '_', '%')",function(err,rows){
+				if (err) return next(err);
+				res.json(rows);
+			});
+		});
+	});
+} else if (!apiSecurity && HideCapcode) {
+	router.get('/capcodes', isLoggedIn, function(req, res, next) {
+		db.serialize(() => {
+			db.all("SELECT * from capcodes ORDER BY REPLACE(address, '_', '%')",function(err,rows){
+				if (err) return next(err);
+				res.json(rows);
+			});
+		});
+	});
+} else if (apiSecurity && !HideCapcode) {
+	router.get('/capcodes', isLoggedIn, function(req, res, next) {
+		db.serialize(() => {
+			db.all("SELECT * from capcodes ORDER BY REPLACE(address, '_', '%')",function(err,rows){
+				if (err) return next(err);
+				res.json(rows);
+			});
+		});
+	});	
+} else {
+	router.get('/capcodes', function(req, res, next) {
+		db.serialize(() => {
+			db.all("SELECT * from capcodes ORDER BY REPLACE(address, '_', '%')",function(err,rows){
+				if (err) return next(err);
+				res.json(rows);
+			});
+		});
+	});		
+}
+
+
+
+
 	 // secure all API's if API Security is enabled
  if (apiSecurity) {
 	 router.all('*',
@@ -380,43 +421,6 @@ router.get('/messageSearch', function(req, res, next) {
 //               //
 ///////////////////
 
-if (HideCapcode && apiSecurity) {
-	router.get('/capcodes', function(req, res, next) {
-		db.serialize(() => {
-			db.all("SELECT * from capcodes ORDER BY REPLACE(address, '_', '%')",function(err,rows){
-				if (err) return next(err);
-				res.json(rows);
-			});
-		});
-	});
-} else if (!apiSecurity && HideCapcode) {
-	router.get('/capcodes', isLoggedIn, function(req, res, next) {
-		db.serialize(() => {
-			db.all("SELECT * from capcodes ORDER BY REPLACE(address, '_', '%')",function(err,rows){
-				if (err) return next(err);
-				res.json(rows);
-			});
-		});
-	});
-} else if (apiSecurity && !HideCapcode) {
-	router.get('/capcodes', function(req, res, next) {
-		db.serialize(() => {
-			db.all("SELECT * from capcodes ORDER BY REPLACE(address, '_', '%')",function(err,rows){
-				if (err) return next(err);
-				res.json(rows);
-			});
-		});
-	});	
-} else {
-	router.get('/capcodes', function(req, res, next) {
-		db.serialize(() => {
-			db.all("SELECT * from capcodes ORDER BY REPLACE(address, '_', '%')",function(err,rows){
-				if (err) return next(err);
-				res.json(rows);
-			});
-		});
-	});		
-}
 
 // capcodes aren't pagified at the moment, this should probably be removed
 router.get('/capcodes/init', function(req, res, next) {
@@ -469,7 +473,6 @@ router.get('/capcodes/:id', function(req, res, next) {
 								"ignore": row.ignore,
 								"aliasMatch": row.aliasMatch
 							};
-						} else {
 						}
 					}
                     res.status(200);
