@@ -670,25 +670,8 @@ router.post('/messages', function(req, res, next) {
                                                 res.status(500).send(err);
                                             } else {
                                                 if(row) {
-													if (HideCapcode) {
-														row = {
-															"id": row.id,
-															"message": row.message,
-															"source": row.source,
-															"timestamp": row.timestamp,
-															"alias_id": row.alias_id,
-															"alias": row.alias,
-															"agency": row.agency,
-															"icon": row.icon,
-															"color": row.color,
-															"ignore": row.ignore,
-															"aliasMatch": row.aliasMatch
-															 };
-														req.io.emit('messagePost', row);
-													} else {
 													req.io.emit('messagePost', row);
-													}
-                                                }
+												}
                                                 res.status(200).send(''+reqLastID);
                                                 //Check to see if Email is enabled globaly
                                                 if (mailEnable == true){
