@@ -38,8 +38,21 @@ var initData = {};
     initData.offset = 0;
 
 // auth variables
-    var apiSecurity = nconf.get('messages:apiSecurity');
-    
+var HideCapcode = nconf.get('messages:HideCapcode');
+var apiSecurity = nconf.get('messages:apiSecurity');
+
+	 // secure all API's if API Security is enabled
+ if (apiSecurity) {
+	 router.all('*',
+	   passport.authenticate('localapikey', { session: false, failWithError: true }),
+	   function(req, res, next) {
+		   next();
+	   },
+	   function(err, req, res, next) {
+		   console.info(err);
+		   isLoggedIn(req, res, next);
+	   });
+ };
 
 
 
@@ -48,18 +61,6 @@ var initData = {};
 // GET messages  //
 //               //
 ///////////////////
-// secure all API's if API Security is enabled
-if (apiSecurity) {
-router.all('*',
-  passport.authenticate('localapikey', { session: false, failWithError: true }),
-  function(req, res, next) {
-      next();
-  },
-  function(err, req, res, next) {
-      console.info(err);
-      isLoggedIn(req, res, next);
-  });
-};
 
 /* GET message listing. */
 router.get('/messages', function(req, res, next) {
@@ -69,81 +70,100 @@ router.get('/messages', function(req, res, next) {
     var maxLimit = nconf.get('messages:maxLimit');
     var defaultLimit = nconf.get('messages:defaultLimit');
     initData.replaceText = nconf.get('messages:replaceText');
-      if (typeof req.query.page !== 'undefined') {
-          var page = parseInt(req.query.page, 10);
-          if (page > 0) {
-              initData.currentPage = page - 1;
-          } else {
-              initData.currentPage = 0;
-          }
-      }
-      if (req.query.limit && req.query.limit <= maxLimit) {
-          initData.limit = parseInt(req.query.limit, 10);
-      } else {
-          initData.limit = parseInt(defaultLimit, 10);
-      }
-      var initSql;
-      if (pdwMode) {
-          initSql =  "SELECT COUNT(*) AS msgcount FROM messages WHERE alias_id IN (SELECT id FROM capcodes WHERE ignore = 0);";
-      } else {
-          initSql = "SELECT COUNT(*) AS msgcount FROM messages WHERE alias_id IS NULL OR alias_id NOT IN (SELECT id FROM capcodes WHERE ignore = 1);";
-      }
-      db.get(initSql,function(err,count){
-          if (err) {
-              console.log(err);
-          } else if (count) {
-              initData.msgCount = count.msgcount;
-              initData.pageCount = Math.ceil(initData.msgCount/initData.limit);
-              if (initData.currentPage > initData.pageCount) {
-                  initData.currentPage = 0;
-              }
-              initData.offset = initData.limit * initData.currentPage;
-              if (initData.offset < 0) {
-                  initData.offset = 0;
-              }
-              initData.offsetEnd = initData.offset + initData.limit;
-              console.timeEnd('init');
-              console.time('sql');
-              var sql;
-              if(pdwMode) {
-                  sql =  "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch ";
-                  sql += " FROM messages";
-                  sql += " INNER JOIN capcodes ON capcodes.id = messages.alias_id WHERE capcodes.ignore = 0";
-                  sql += " ORDER BY messages.id DESC LIMIT "+initData.limit+" OFFSET "+initData.offset+";";
-              } else {
-                  sql =  "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch ";
-                  sql += " FROM messages";
-                  sql += " LEFT JOIN capcodes ON capcodes.id = messages.alias_id WHERE capcodes.ignore = 0 OR capcodes.ignore IS NULL ";
-                  sql += " ORDER BY messages.id DESC LIMIT "+initData.limit+" OFFSET "+initData.offset+";";
-              }
-              var result = [];
-              db.each(sql,function(err,row){
-                  if (err) {
-                      console.log(err);
-                  } else if (row) {
-                      result.push(row);
-                  } else {
-                      console.log('empty results');
-                  }
-              },function(err,rowCount){
-                  if (err) {
-                      console.timeEnd('sql');
-                      console.log(err);
-                      res.status(500).send(err);
-                  } else if (rowCount > 0) {
-                      console.timeEnd('sql');
-                      //var limitResults = result.slice(initData.offset, initData.offsetEnd);
-                      console.time('send');
-                      res.status(200).json({'init': initData, 'messages': result});
-                      console.timeEnd('send');
-                  } else {
-                      res.status(200).json({'init': {}, 'messages': []});
-                  }
-              });
-          } else {
-              console.log('empty results');
-          }
-      });
+    if (typeof req.query.page !== 'undefined') {
+        var page = parseInt(req.query.page, 10);
+        if (page > 0) {
+            initData.currentPage = page - 1;
+        } else {
+            initData.currentPage = 0;
+        }
+    }
+    if (req.query.limit && req.query.limit <= maxLimit) {
+        initData.limit = parseInt(req.query.limit, 10);
+    } else {
+        initData.limit = parseInt(defaultLimit, 10);
+    }
+    var initSql;
+    if (pdwMode) {
+        initSql =  "SELECT COUNT(*) AS msgcount FROM messages WHERE alias_id IN (SELECT id FROM capcodes WHERE ignore = 0);";
+    } else {
+        initSql = "SELECT COUNT(*) AS msgcount FROM messages WHERE alias_id IS NULL OR alias_id NOT IN (SELECT id FROM capcodes WHERE ignore = 1);";
+    }
+    db.get(initSql,function(err,count){
+        if (err) {
+            console.log(err);
+        } else if (count) {
+            initData.msgCount = count.msgcount;
+            initData.pageCount = Math.ceil(initData.msgCount/initData.limit);
+            if (initData.currentPage > initData.pageCount) {
+                initData.currentPage = 0;
+            }
+            initData.offset = initData.limit * initData.currentPage;
+            if (initData.offset < 0) {
+                initData.offset = 0;
+            }
+            initData.offsetEnd = initData.offset + initData.limit;
+            console.timeEnd('init');
+            console.time('sql');
+            var sql;
+            if(pdwMode) {
+                sql =  "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch ";
+                sql += " FROM messages";
+                sql += " INNER JOIN capcodes ON capcodes.id = messages.alias_id WHERE capcodes.ignore = 0";
+                sql += " ORDER BY messages.id DESC LIMIT "+initData.limit+" OFFSET "+initData.offset+";";
+            } else {
+                sql =  "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch ";
+                sql += " FROM messages";
+                sql += " LEFT JOIN capcodes ON capcodes.id = messages.alias_id WHERE capcodes.ignore = 0 OR capcodes.ignore IS NULL ";
+                sql += " ORDER BY messages.id DESC LIMIT "+initData.limit+" OFFSET "+initData.offset+";";
+            }
+            var result = [];
+            db.each(sql,function(err,row){
+					  //outRow = JSON.parse(newrow);
+					if (HideCapcode) {
+						if (!req.isAuthenticated()) {
+							row = {
+								"id": row.id,
+								"message": row.message,
+								"source": row.source,
+								"timestamp": row.timestamp,
+								"alias_id": row.alias_id,
+								"alias": row.alias,
+								"agency": row.agency,
+								"icon": row.icon,
+								"color": row.color,
+								"ignore": row.ignore,
+								"aliasMatch": row.aliasMatch
+							};
+						} else {
+						}
+					}
+                if (err) {
+                    console.log(err);
+                } else if (row) {
+                    result.push(row);
+                } else {
+                    console.log('empty results');
+                }
+            },function(err,rowCount){
+                if (err) {
+                    console.timeEnd('sql');
+                    console.log(err);
+                    res.status(500).send(err);
+                } else if (rowCount > 0) {
+                    console.timeEnd('sql');
+                    //var limitResults = result.slice(initData.offset, initData.offsetEnd);
+                    console.time('send');
+                    res.status(200).json({'init': initData, 'messages': result});
+                    console.timeEnd('send');
+                } else {
+                    res.status(200).json({'init': {}, 'messages': []});
+                }
+            });
+        } else {
+            console.log('empty results');
+        }
+    });
 });
 
 router.get('/messages/:id', function(req, res, next) {
@@ -159,6 +179,24 @@ router.get('/messages/:id', function(req, res, next) {
             if (err) {
                 res.status(500).send(err);
             } else {
+					if (HideCapcode) {
+						if (!req.isAuthenticated()) {
+							row = {
+								"id": row.id,
+								"message": row.message,
+								"source": row.source,
+								"timestamp": row.timestamp,
+								"alias_id": row.alias_id,
+								"alias": row.alias,
+								"agency": row.agency,
+								"icon": row.icon,
+								"color": row.color,
+								"ignore": row.ignore,
+								"aliasMatch": row.aliasMatch
+							};
+						} else {
+						}
+					}
                 if(row.ignore == 1) {
                     res.status(200).json({});
                 } else {
@@ -253,6 +291,24 @@ router.get('/messageSearch', function(req, res, next) {
         if (err) {
             console.log(err);
         } else if (row) {
+					if (HideCapcode) {
+						if (!req.isAuthenticated()) {
+							row = {
+								"id": row.id,
+								"message": row.message,
+								"source": row.source,
+								"timestamp": row.timestamp,
+								"alias_id": row.alias_id,
+								"alias": row.alias,
+								"agency": row.agency,
+								"icon": row.icon,
+								"color": row.color,
+								"ignore": row.ignore,
+								"aliasMatch": row.aliasMatch
+							};
+						} else {
+						}
+					}
             if (pdwMode) {
                 if (row.ignore == 0)
                     rows.push(row);
@@ -324,6 +380,43 @@ router.get('/messageSearch', function(req, res, next) {
 //               //
 ///////////////////
 
+if (HideCapcode && apiSecurity) {
+	router.get('/capcodes', function(req, res, next) {
+		db.serialize(() => {
+			db.all("SELECT * from capcodes ORDER BY REPLACE(address, '_', '%')",function(err,rows){
+				if (err) return next(err);
+				res.json(rows);
+			});
+		});
+	});
+} else if (!apiSecurity && HideCapcode) {
+	router.get('/capcodes', isLoggedIn, function(req, res, next) {
+		db.serialize(() => {
+			db.all("SELECT * from capcodes ORDER BY REPLACE(address, '_', '%')",function(err,rows){
+				if (err) return next(err);
+				res.json(rows);
+			});
+		});
+	});
+} else if (apiSecurity && !HideCapcode) {
+	router.get('/capcodes', function(req, res, next) {
+		db.serialize(() => {
+			db.all("SELECT * from capcodes ORDER BY REPLACE(address, '_', '%')",function(err,rows){
+				if (err) return next(err);
+				res.json(rows);
+			});
+		});
+	});	
+} else {
+	router.get('/capcodes', function(req, res, next) {
+		db.serialize(() => {
+			db.all("SELECT * from capcodes ORDER BY REPLACE(address, '_', '%')",function(err,rows){
+				if (err) return next(err);
+				res.json(rows);
+			});
+		});
+	});		
+}
 
 // capcodes aren't pagified at the moment, this should probably be removed
 router.get('/capcodes/init', function(req, res, next) {
@@ -352,15 +445,6 @@ router.get('/capcodes/init', function(req, res, next) {
     });
 });
 
-router.get('/capcodes', function(req, res, next) {
-  db.serialize(() => {
-        db.all("SELECT * from capcodes ORDER BY REPLACE(address, '_', '%')",function(err,rows){
-            if (err) return next(err);
-            res.json(rows);
-        });
-    });
-});
-
 router.get('/capcodes/:id', function(req, res, next) {
     var id = req.params.id;
     db.serialize(() => {
@@ -370,10 +454,28 @@ router.get('/capcodes/:id', function(req, res, next) {
                 res.send(err);
             } else {
                 if (row) {
+					if (HideCapcode) {
+						if (!req.isAuthenticated()) {
+							row = {
+								"id": row.id,
+								"message": row.message,
+								"source": row.source,
+								"timestamp": row.timestamp,
+								"alias_id": row.alias_id,
+								"alias": row.alias,
+								"agency": row.agency,
+								"icon": row.icon,
+								"color": row.color,
+								"ignore": row.ignore,
+								"aliasMatch": row.aliasMatch
+							};
+						} else {
+						}
+					}
                     res.status(200);
                     res.json(row);
                 } else {
-                    row = {
+					 row = {
                         "id": "",
                         "address": "",
                         "alias": "",
@@ -406,6 +508,24 @@ router.get('/capcodeCheck/:id', function(req, res, next) {
                 res.send(err);
             } else {
                 if (row) {
+					if (HideCapcode) {
+						if (!req.isAuthenticated()) {
+							row = {
+								"id": row.id,
+								"message": row.message,
+								"source": row.source,
+								"timestamp": row.timestamp,
+								"alias_id": row.alias_id,
+								"alias": row.alias,
+								"agency": row.agency,
+								"icon": row.icon,
+								"color": row.color,
+								"ignore": row.ignore,
+								"aliasMatch": row.aliasMatch
+							};
+						} else {
+						}
+					}
                     res.status(200);
                     res.json(row);
                 } else {
@@ -432,7 +552,7 @@ router.get('/capcodeCheck/:id', function(req, res, next) {
 
 });
 
-router.get('/capcodes/agency/:id', function(req, res, next) {
+router.get('/capcodes/agency/:id', isLoggedIn, function(req, res, next) {
     var id = req.params.id;
     db.serialize(() => {
         db.all("SELECT * from capcodes WHERE agency LIKE ?", id, function(err,rows){
@@ -446,26 +566,24 @@ router.get('/capcodes/agency/:id', function(req, res, next) {
         });
     });
 });
+//if no api sec, lock down POST
+ if (!apiSecurity) {
+	router.all('*',
+	  passport.authenticate('localapikey', { session: false, failWithError: true }),
+	  function(req, res, next) {
+		  next();
+	  },
+	  function(err, req, res, next) {
+		  console.info(err);
+		  isLoggedIn(req, res, next);
+	  });
+ }
 
 //////////////////////////////////
 //
 // POST calls below
 //
 //////////////////////////////////
-// secure POST API's if API Security is disabled
-if (!apiSecurity) {
-  router.all('*',
-  passport.authenticate('localapikey', { session: false, failWithError: true }),
-  function(req, res, next) {
-      next();
-  },
-  function(err, req, res, next) {
-      console.info(err);
-      isLoggedIn(req, res, next);
-  });
-};
-
-
 router.post('/messages', function(req, res, next) {
     nconf.load();
     if (req.body.address && req.body.message) {
@@ -552,7 +670,24 @@ router.post('/messages', function(req, res, next) {
                                                 res.status(500).send(err);
                                             } else {
                                                 if(row) {
-                                                    req.io.emit('messagePost', row);
+													if (HideCapcode) {
+														row = {
+															"id": row.id,
+															"message": row.message,
+															"source": row.source,
+															"timestamp": row.timestamp,
+															"alias_id": row.alias_id,
+															"alias": row.alias,
+															"agency": row.agency,
+															"icon": row.icon,
+															"color": row.color,
+															"ignore": row.ignore,
+															"aliasMatch": row.aliasMatch
+															 };
+														req.io.emit('messagePost', row);
+													} else {
+													req.io.emit('messagePost', row);
+													}
                                                 }
                                                 res.status(200).send(''+reqLastID);
                                                 //Check to see if Email is enabled globaly
