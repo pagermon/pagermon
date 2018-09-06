@@ -673,7 +673,31 @@ router.post('/messages', function(req, res, next) {
                                                 res.status(500).send(err);
                                             } else {
                                                 if(row) {
-													req.io.emit('messagePost', row);
+													console.log(row);
+													//req.io.emit('messagePost', row);
+													if (HideCapcode) {
+														//Emit full details to the admin socket						
+														req.io.of('adminio').emit('messagePost', row);								
+														// Emit No capdoe to normal socket
+														row = {
+															"id": row.id,
+															"message": row.message,
+															"source": row.source,
+															"timestamp": row.timestamp,
+															"alias_id": row.alias_id,
+															"alias": row.alias,
+															"agency": row.agency,
+															"icon": row.icon,
+															"color": row.color,
+															"ignore": row.ignore,
+															"aliasMatch": row.aliasMatch
+															 };
+															req.io.emit('messagePost', row);
+														
+													}else {
+														//Just emit - No Security enabled
+														req.io.emit('messagePost', row);
+													}
 												}
                                                 res.status(200).send(''+reqLastID);
                                                 //Check to see if Email is enabled globaly

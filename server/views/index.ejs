@@ -163,6 +163,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
     
     .factory('socket', function ($rootScope) {
       var socket = io({transports: ['websocket'], upgrade: false});
+	  var adminSocket = io('/adminio', {transports: ['websocket'], upgrade: false});
       return {
         open: function() {
           socket = io({transports: ['websocket'], upgrade: false});
@@ -192,6 +193,39 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
       };
     })
     
+	
+	.factory('adminSocket', function ($rootScope) {
+
+	  var adminSocket = io('/adminio', {transports: ['webadminSocket'], upgrade: false});
+      return {
+        open: function() {
+          adminSocket = io('/adminio', {transports: ['webadminSocket'], upgrade: false});
+          adminSocket.open();
+        },
+        on: function (eventName, callback) {
+          adminSocket.on(eventName, function () {  
+            var args = arguments;
+            $rootScope.$apply(function () {
+              callback.apply(adminSocket, args);
+            });
+          });
+        },
+        emit: function (eventName, data, callback) {
+          adminSocket.emit(eventName, data, function () {
+            var args = arguments;
+            $rootScope.$apply(function () {
+              if (callback) {
+                callback.apply(adminSocket, args);
+              }
+            });
+          })
+        },
+        close: function () {
+          adminSocket.close();
+        }
+      };
+    })
+	
     .factory('Api', ['$resource',
      function($resource) {
       return {
@@ -218,7 +252,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
     
     // Controller
     // TODO: optimise this whole section, consider popping this entire controller out to a separate file
-    .controller('MessageController', ['$scope', '$routeParams', 'Api', 'socket', '$cookies', '$location', '$window', function ($scope, $routeParams, Api, socket, $cookies, $location, $window) {
+    .controller('MessageController', ['$scope', '$routeParams', 'Api', 'socket', 'adminSocket', '$cookies', '$location', '$window', function ($scope, $routeParams, Api, socket, adminSocket, $cookies, $location, $window) {
       // I hate ejs
       <% if(typeof user != 'undefined'){ %>
         $scope.user="<%=user%>";
@@ -229,7 +263,20 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
       $scope.$on('$viewContentLoaded', function() {
 	  	
 		// register a new socket when scope changes
-		socket.open();
+
+		<% if (hidecapcode) { %>
+			<% if (login) { %>
+				adminSocket.open();
+				console.log("Admin Socket Open");
+			<% } else { %>
+			socket.open();
+			console.log("Normal Socket Open");
+			<% } %>
+		<%} else { %>
+		 socket.open();
+		 console.log("Normal Socket Open!");
+		<% } %>
+		
 		
 		//Close the socket if we arent ment to have it open.
 		//This could probably be done better
@@ -262,9 +309,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
 				}
 			  }
 			 <% } %>
-		  
-		  
-		
+
           // only bother getting the new message if we're on page 1
           if ($scope.init.currentPage === 1) {
             console.log('New Message ID: '+message.id + ' currentPage: '+$scope.init.currentPage);
