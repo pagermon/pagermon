@@ -162,8 +162,8 @@
 var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-highlight', 'ui.bootstrap'])
     
     .factory('socket', function ($rootScope) {
-      var socket = io({transports: ['websocket'], upgrade: false});
-	  var adminSocket = io('/adminio', {transports: ['websocket'], upgrade: false});
+      
+	  var socket = io({transports: ['websocket'], upgrade: false});
       return {
         open: function() {
           socket = io({transports: ['websocket'], upgrade: false});
@@ -196,10 +196,10 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
 	
 	.factory('adminSocket', function ($rootScope) {
 
-	  var adminSocket = io('/adminio', {transports: ['webadminSocket'], upgrade: false});
+	  var adminSocket = io('/adminio', {transports: ['websocket'], upgrade: false});
       return {
         open: function() {
-          adminSocket = io('/adminio', {transports: ['webadminSocket'], upgrade: false});
+          adminSocket = io('/adminio', {transports: ['websocket'], upgrade: false});
           adminSocket.open();
         },
         on: function (eventName, callback) {
@@ -262,31 +262,39 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
       // get new message on socket event
       $scope.$on('$viewContentLoaded', function() {
 	  	
-		// register a new socket when scope changes
+		// register a new socket when scope changes and set Socket Typle
 
+	//Manage the sockets
+	//This is messy as hell, but it works
+	//for some reason, socket opens both sockets, so the adminSocket is required to be closed after opening to prevent leaking data
+	<% if (!apisecurity) { %>
 		<% if (hidecapcode) { %>
 			<% if (login) { %>
+				var socketMode = adminSocket
 				adminSocket.open();
-				console.log("Admin Socket Open");
 			<% } else { %>
-			socket.open();
-			console.log("Normal Socket Open");
-			<% } %>
+				var socketMode = socket
+				socket.open();
+				adminSocket.close()
+				<% } %>
 		<%} else { %>
-		 socket.open();
-		 console.log("Normal Socket Open!");
-		<% } %>
-		
-		
-		//Close the socket if we arent ment to have it open.
-		//This could probably be done better
-		//TODO: Change to only open a socket if needed insted of closing it
-			<% if (apisecurity) { %>
-			 <% if (!login) { %>
-				socket.close()
-			  <% } %>
+			var socketMode = socket
+			socket.open();
+			adminSocket.close()
+		<% } %>	
+	<% } else { %>
+		<% if (login) { %>
+			var socketMode = socket
+			socket.open();
+			adminSocket.close()
+			<% } else { %>
+			var socketMode = socket
+			socket.close();
+			adminSocket.close();
 			<% } %>
-		socket.on('messagePost', function(message) {
+	<% } %>
+	
+		socketMode.on('messagePost', function(message) {
         // Send Browser Notifications  
 		<% if (apisecurity) { %>
 			  <% if (login) { %>
@@ -309,7 +317,9 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
 				}
 			  }
 			 <% } %>
-
+		  
+		  
+		
           // only bother getting the new message if we're on page 1
           if ($scope.init.currentPage === 1) {
             console.log('New Message ID: '+message.id + ' currentPage: '+$scope.init.currentPage);
@@ -345,7 +355,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
               $scope.messages.pop();
             }
           }
-        });
+        });	
       });
       
       // this should be popped out into a separate file
