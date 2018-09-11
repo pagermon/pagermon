@@ -673,7 +673,7 @@ router.post('/messages', function(req, res, next) {
                                                 res.status(500).send(err);
                                             } else {
                                                 if(row) {
-													console.log(row);
+													//console.log(row);
 													//req.io.emit('messagePost', row);
 													if (HideCapcode) {
 														//Emit full details to the admin socket						
@@ -697,6 +697,7 @@ router.post('/messages', function(req, res, next) {
 													}else {
 														//Just emit - No Security enabled
 														req.io.emit('messagePost', row);
+														
 													}
 												}
                                                 res.status(200).send(''+reqLastID);
