@@ -132,7 +132,8 @@
               <div class="checkbox">
                 <label>
                 <input type="checkbox" name="messages.HideCapcode" ng-model="settings.messages.HideCapcode">
-                Hide Capcodes for non-logged in users. Note: Does not secure capcode data at the API level, only hides it.
+                Hide Capcodes for non-logged in users. 
+			<br><b> Note: You must restart the application after making this change.</b>
                 </label>
               </div>
               </div>
@@ -144,6 +145,18 @@
                 <label>
                 <input type="checkbox" name="messages.HideSource" ng-model="settings.messages.HideSource">
                 Hide Source field for non-logged in users. Note: Does not secure source data at the API level, only hides it.
+                </label>
+              </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="messages.apiSecurity" class="col-xs-4 col-sm-3 control-label">Enable Secure Mode</label>
+              <div class="col-xs-8 col-sm-9">
+              <div class="checkbox">
+                <label>
+                <input type="checkbox" name="messages.SecureApi" ng-model="settings.messages.apiSecurity">
+                Secures all API's and WebInterface from being accessed unless logged in.
+			<p><b> Note: You must restart the application after making this change.</b>
                 </label>
               </div>
               </div>

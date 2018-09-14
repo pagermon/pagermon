@@ -28,7 +28,8 @@
     ],
     "pdwMode": false,
     "HideCapcode": false,
-    "HideSource": false
+    "HideSource": false,
+    "apiSecurity": false
   },
   "auth": {
     "type": "local",

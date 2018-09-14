@@ -121,6 +121,18 @@
         </div>
       </div>
     </div>
+    <% if (apisecurity) { %>
+      <% if (!login) { %>
+        <div class="row">
+          <div class="col-sm-8 col-sm-offset-2" style="text-align: center; vertical-align: middle;">
+            <h2>Secure Mode Enabled</h2>
+            <h4>Please <a href="/login">sign in</a> to view messages</h4>
+              <p>If you believe you reached this message by error, <a href="https://github.com/davidmckenzie/pagermon/issues" target="_blank">log an issue.</a></p>
+            </div>
+          </div>
+        </div>
+      <% } %>
+    <% } %>
     <div class="row">
       <div class="col-xs-offset-1 col-xs-10">
       <form action="/" method="get">
@@ -150,7 +162,8 @@
 var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-highlight', 'ui.bootstrap'])
     
     .factory('socket', function ($rootScope) {
-      var socket = io({transports: ['websocket'], upgrade: false});
+      
+	  var socket = io({transports: ['websocket'], upgrade: false});
       return {
         open: function() {
           socket = io({transports: ['websocket'], upgrade: false});
@@ -180,6 +193,39 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
       };
     })
     
+	
+	.factory('adminSocket', function ($rootScope) {
+
+	  var adminSocket = io('/adminio', {transports: ['websocket'], upgrade: false});
+      return {
+        open: function() {
+          adminSocket = io('/adminio', {transports: ['websocket'], upgrade: false});
+          adminSocket.open();
+        },
+        on: function (eventName, callback) {
+          adminSocket.on(eventName, function () {  
+            var args = arguments;
+            $rootScope.$apply(function () {
+              callback.apply(adminSocket, args);
+            });
+          });
+        },
+        emit: function (eventName, data, callback) {
+          adminSocket.emit(eventName, data, function () {
+            var args = arguments;
+            $rootScope.$apply(function () {
+              if (callback) {
+                callback.apply(adminSocket, args);
+              }
+            });
+          })
+        },
+        close: function () {
+          adminSocket.close();
+        }
+      };
+    })
+	
     .factory('Api', ['$resource',
      function($resource) {
       return {
@@ -206,7 +252,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
     
     // Controller
     // TODO: optimise this whole section, consider popping this entire controller out to a separate file
-    .controller('MessageController', ['$scope', '$routeParams', 'Api', 'socket', '$cookies', '$location', '$window', function ($scope, $routeParams, Api, socket, $cookies, $location, $window) {
+    .controller('MessageController', ['$scope', '$routeParams', 'Api', 'socket', 'adminSocket', '$cookies', '$location', '$window', function ($scope, $routeParams, Api, socket, adminSocket, $cookies, $location, $window) {
       // I hate ejs
       <% if(typeof user != 'undefined'){ %>
         $scope.user="<%=user%>";
@@ -215,17 +261,65 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
       <% } %>
       // get new message on socket event
       $scope.$on('$viewContentLoaded', function() {
-        // register a new socket when scope changes
-        socket.open();
-        socket.on('messagePost', function(message) {
-          // Send Browser Notifications
-          if ($scope.notificationEnabled == 'true') {
-            if (!message.agency) {
-              //Not showing messages for things that we don't know
-            } else {
-                notify("PagerMon - " +message.agency + " - " + message.alias,message.message);
-            }
-          }
+	  	
+		// register a new socket when scope changes and set Socket Typle
+
+	//Manage the sockets
+	//This is messy as hell, but it works
+	//for some reason, socket opens both sockets, so the adminSocket is required to be closed after opening to prevent leaking data
+	<% if (!apisecurity) { %>
+		<% if (hidecapcode) { %>
+			<% if (login) { %>
+				var socketMode = adminSocket
+				adminSocket.open();
+			<% } else { %>
+				var socketMode = socket
+				socket.open();
+				adminSocket.close()
+				<% } %>
+		<%} else { %>
+			var socketMode = socket
+			socket.open();
+			adminSocket.close()
+		<% } %>	
+	<% } else { %>
+		<% if (login) { %>
+			var socketMode = socket
+			socket.open();
+			adminSocket.close()
+			<% } else { %>
+			var socketMode = socket
+			socket.close();
+			adminSocket.close();
+			<% } %>
+	<% } %>
+	
+		socketMode.on('messagePost', function(message) {
+        // Send Browser Notifications  
+		<% if (apisecurity) { %>
+			  <% if (login) { %>
+			  if ($scope.notificationEnabled == 'true') {
+				if (!message.agency) {
+				  //Not showing messages for things that we don't know
+				} else {
+				
+					notify("PagerMon - " +message.agency + " - " + message.alias,message.message);
+				}
+			  }
+			  <% } %>
+			<% } else { %>
+			  if ($scope.notificationEnabled == 'true') {
+				if (!message.agency) {
+				  //Not showing messages for things that we don't know
+				} else {
+				
+					notify("PagerMon - " +message.agency + " - " + message.alias,message.message);
+				}
+			  }
+			 <% } %>
+		  
+		  
+		
           // only bother getting the new message if we're on page 1
           if ($scope.init.currentPage === 1) {
             console.log('New Message ID: '+message.id + ' currentPage: '+$scope.init.currentPage);
@@ -261,7 +355,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
               $scope.messages.pop();
             }
           }
-        });
+        });	
       });
       
       // this should be popped out into a separate file

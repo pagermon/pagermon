@@ -37,7 +37,63 @@ var initData = {};
     initData.msgCount = 0;
     initData.offset = 0;
 
+// auth variables
+var HideCapcode = nconf.get('messages:HideCapcode');
+var apiSecurity = nconf.get('messages:apiSecurity');
 
+if (HideCapcode && apiSecurity) {
+	router.get('/capcodes', isLoggedIn, function(req, res, next) {
+		db.serialize(() => {
+			db.all("SELECT * from capcodes ORDER BY REPLACE(address, '_', '%')",function(err,rows){
+				if (err) return next(err);
+				res.json(rows);
+			});
+		});
+	});
+} else if (!apiSecurity && HideCapcode) {
+	router.get('/capcodes', isLoggedIn, function(req, res, next) {
+		db.serialize(() => {
+			db.all("SELECT * from capcodes ORDER BY REPLACE(address, '_', '%')",function(err,rows){
+				if (err) return next(err);
+				res.json(rows);
+			});
+		});
+	});
+} else if (apiSecurity && !HideCapcode) {
+	router.get('/capcodes', isLoggedIn, function(req, res, next) {
+		db.serialize(() => {
+			db.all("SELECT * from capcodes ORDER BY REPLACE(address, '_', '%')",function(err,rows){
+				if (err) return next(err);
+				res.json(rows);
+			});
+		});
+	});	
+} else {
+	router.get('/capcodes', function(req, res, next) {
+		db.serialize(() => {
+			db.all("SELECT * from capcodes ORDER BY REPLACE(address, '_', '%')",function(err,rows){
+				if (err) return next(err);
+				res.json(rows);
+			});
+		});
+	});		
+}
+
+
+
+
+	 // secure all API's if API Security is enabled
+ if (apiSecurity) {
+	 router.all('*',
+	   passport.authenticate('localapikey', { session: false, failWithError: true }),
+	   function(req, res, next) {
+		   next();
+	   },
+	   function(err, req, res, next) {
+		   console.info(err);
+		   isLoggedIn(req, res, next);
+	   });
+ };
 
 
 
@@ -55,7 +111,6 @@ router.get('/messages', function(req, res, next) {
     var maxLimit = nconf.get('messages:maxLimit');
     var defaultLimit = nconf.get('messages:defaultLimit');
     initData.replaceText = nconf.get('messages:replaceText');
-
     if (typeof req.query.page !== 'undefined') {
         var page = parseInt(req.query.page, 10);
         if (page > 0) {
@@ -105,6 +160,25 @@ router.get('/messages', function(req, res, next) {
             }
             var result = [];
             db.each(sql,function(err,row){
+					  //outRow = JSON.parse(newrow);
+					if (HideCapcode) {
+						if (!req.isAuthenticated()) {
+							row = {
+								"id": row.id,
+								"message": row.message,
+								"source": row.source,
+								"timestamp": row.timestamp,
+								"alias_id": row.alias_id,
+								"alias": row.alias,
+								"agency": row.agency,
+								"icon": row.icon,
+								"color": row.color,
+								"ignore": row.ignore,
+								"aliasMatch": row.aliasMatch
+							};
+						} else {
+						}
+					}
                 if (err) {
                     console.log(err);
                 } else if (row) {
@@ -146,6 +220,24 @@ router.get('/messages/:id', function(req, res, next) {
             if (err) {
                 res.status(500).send(err);
             } else {
+					if (HideCapcode) {
+						if (!req.isAuthenticated()) {
+							row = {
+								"id": row.id,
+								"message": row.message,
+								"source": row.source,
+								"timestamp": row.timestamp,
+								"alias_id": row.alias_id,
+								"alias": row.alias,
+								"agency": row.agency,
+								"icon": row.icon,
+								"color": row.color,
+								"ignore": row.ignore,
+								"aliasMatch": row.aliasMatch
+							};
+						} else {
+						}
+					}
                 if(row.ignore == 1) {
                     res.status(200).json({});
                 } else {
@@ -240,6 +332,24 @@ router.get('/messageSearch', function(req, res, next) {
         if (err) {
             console.log(err);
         } else if (row) {
+					if (HideCapcode) {
+						if (!req.isAuthenticated()) {
+							row = {
+								"id": row.id,
+								"message": row.message,
+								"source": row.source,
+								"timestamp": row.timestamp,
+								"alias_id": row.alias_id,
+								"alias": row.alias,
+								"agency": row.agency,
+								"icon": row.icon,
+								"color": row.color,
+								"ignore": row.ignore,
+								"aliasMatch": row.aliasMatch
+							};
+						} else {
+						}
+					}
             if (pdwMode) {
                 if (row.ignore == 0)
                     rows.push(row);
@@ -339,15 +449,6 @@ router.get('/capcodes/init', function(req, res, next) {
     });
 });
 
-router.get('/capcodes', function(req, res, next) {
-    db.serialize(() => {
-        db.all("SELECT * from capcodes ORDER BY REPLACE(address, '_', '%')",function(err,rows){
-            if (err) return next(err);
-            res.json(rows);
-        });
-    });
-});
-
 router.get('/capcodes/:id', function(req, res, next) {
     var id = req.params.id;
     db.serialize(() => {
@@ -357,10 +458,27 @@ router.get('/capcodes/:id', function(req, res, next) {
                 res.send(err);
             } else {
                 if (row) {
+					if (HideCapcode) {
+						if (!req.isAuthenticated()) {
+							row = {
+								"id": row.id,
+								"message": row.message,
+								"source": row.source,
+								"timestamp": row.timestamp,
+								"alias_id": row.alias_id,
+								"alias": row.alias,
+								"agency": row.agency,
+								"icon": row.icon,
+								"color": row.color,
+								"ignore": row.ignore,
+								"aliasMatch": row.aliasMatch
+							};
+						}
+					}
                     res.status(200);
                     res.json(row);
                 } else {
-                    row = {
+					 row = {
                         "id": "",
                         "address": "",
                         "alias": "",
@@ -393,6 +511,24 @@ router.get('/capcodeCheck/:id', function(req, res, next) {
                 res.send(err);
             } else {
                 if (row) {
+					if (HideCapcode) {
+						if (!req.isAuthenticated()) {
+							row = {
+								"id": row.id,
+								"message": row.message,
+								"source": row.source,
+								"timestamp": row.timestamp,
+								"alias_id": row.alias_id,
+								"alias": row.alias,
+								"agency": row.agency,
+								"icon": row.icon,
+								"color": row.color,
+								"ignore": row.ignore,
+								"aliasMatch": row.aliasMatch
+							};
+						} else {
+						}
+					}
                     res.status(200);
                     res.json(row);
                 } else {
@@ -419,7 +555,7 @@ router.get('/capcodeCheck/:id', function(req, res, next) {
 
 });
 
-router.get('/capcodes/agency/:id', function(req, res, next) {
+router.get('/capcodes/agency/:id', isLoggedIn, function(req, res, next) {
     var id = req.params.id;
     db.serialize(() => {
         db.all("SELECT * from capcodes WHERE agency LIKE ?", id, function(err,rows){
@@ -433,25 +569,24 @@ router.get('/capcodes/agency/:id', function(req, res, next) {
         });
     });
 });
+//if no api sec, lock down POST
+ if (!apiSecurity) {
+	router.all('*',
+	  passport.authenticate('localapikey', { session: false, failWithError: true }),
+	  function(req, res, next) {
+		  next();
+	  },
+	  function(err, req, res, next) {
+		  console.info(err);
+		  isLoggedIn(req, res, next);
+	  });
+ }
 
 //////////////////////////////////
 //
 // POST calls below
 //
-// require API key or auth session
-//
 //////////////////////////////////
-
-router.all('*',
-  passport.authenticate('localapikey', { session: false, failWithError: true }),
-  function(req, res, next) {
-      next();
-  },
-  function(err, req, res, next) {
-      console.info(err);
-      isLoggedIn(req, res, next);
-  });
-
 router.post('/messages', function(req, res, next) {
     nconf.load();
     if (req.body.address && req.body.message) {
@@ -538,8 +673,33 @@ router.post('/messages', function(req, res, next) {
                                                 res.status(500).send(err);
                                             } else {
                                                 if(row) {
-                                                    req.io.emit('messagePost', row);
-                                                }
+													//console.log(row);
+													//req.io.emit('messagePost', row);
+													if (HideCapcode) {
+														//Emit full details to the admin socket						
+														req.io.of('adminio').emit('messagePost', row);								
+														// Emit No capdoe to normal socket
+														row = {
+															"id": row.id,
+															"message": row.message,
+															"source": row.source,
+															"timestamp": row.timestamp,
+															"alias_id": row.alias_id,
+															"alias": row.alias,
+															"agency": row.agency,
+															"icon": row.icon,
+															"color": row.color,
+															"ignore": row.ignore,
+															"aliasMatch": row.aliasMatch
+															 };
+															req.io.emit('messagePost', row);
+														
+													}else {
+														//Just emit - No Security enabled
+														req.io.emit('messagePost', row);
+														
+													}
+												}
                                                 res.status(200).send(''+reqLastID);
                                                 //Check to see if Email is enabled globaly
                                                 if (mailEnable == true){

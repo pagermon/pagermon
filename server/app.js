@@ -1,4 +1,4 @@
-var version = "0.1.6-beta";
+var version = "0.1.7-beta";
 
 var debug = require('debug')('pagermon:server');
 var pmx = require('pmx').init({
@@ -35,7 +35,7 @@ var db = new sqlite3.Database('./messages.db', sqlite3.OPEN_READWRITE | sqlite3.
     if (err) { console.log(err.message); } else {
 
       var sql =  "CREATE TABLE IF NOT EXISTS capcodes ( ";
-	        sql += "id INTEGER PRIMARY KEY AUTOINCREMENT, ";
+	      sql += "id INTEGER PRIMARY KEY AUTOINCREMENT, ";
           sql += "address TEXT NOT NULL, ";
           sql += "alias TEXT NOT NULL, ";
           sql += "agency TEXT, ";
@@ -99,9 +99,20 @@ var io = require('socket.io').listen(server);
     server.on('listening', onListening);
 io.sockets.on('connection', function (socket) {
     socket.removeAllListeners();
-    debug('client connect');
+    debug('client connect to normal socket');
     socket.on('echo', function (data) {
         io.sockets.emit('message', data);
+        console.log('message', data);
+    });
+});
+
+//Admin Socket
+var adminio = io.of('/adminio');
+adminio.on('connection', function (socket) {
+    socket.removeAllListeners();
+    debug('client connect to admin socket');
+    adminio.on('echo', function (data) {
+        adminio.emit('message', data);
         console.log('message', data);
     });
 });
