@@ -162,7 +162,8 @@
 var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-highlight', 'ui.bootstrap'])
     
     .factory('socket', function ($rootScope) {
-      var socket = io({transports: ['websocket'], upgrade: false});
+      
+	  var socket = io({transports: ['websocket'], upgrade: false});
       return {
         open: function() {
           socket = io({transports: ['websocket'], upgrade: false});
@@ -192,6 +193,39 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
       };
     })
     
+	
+	.factory('adminSocket', function ($rootScope) {
+
+	  var adminSocket = io('/adminio', {transports: ['websocket'], upgrade: false});
+      return {
+        open: function() {
+          adminSocket = io('/adminio', {transports: ['websocket'], upgrade: false});
+          adminSocket.open();
+        },
+        on: function (eventName, callback) {
+          adminSocket.on(eventName, function () {  
+            var args = arguments;
+            $rootScope.$apply(function () {
+              callback.apply(adminSocket, args);
+            });
+          });
+        },
+        emit: function (eventName, data, callback) {
+          adminSocket.emit(eventName, data, function () {
+            var args = arguments;
+            $rootScope.$apply(function () {
+              if (callback) {
+                callback.apply(adminSocket, args);
+              }
+            });
+          })
+        },
+        close: function () {
+          adminSocket.close();
+        }
+      };
+    })
+	
     .factory('Api', ['$resource',
      function($resource) {
       return {
@@ -218,7 +252,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
     
     // Controller
     // TODO: optimise this whole section, consider popping this entire controller out to a separate file
-    .controller('MessageController', ['$scope', '$routeParams', 'Api', 'socket', '$cookies', '$location', '$window', function ($scope, $routeParams, Api, socket, $cookies, $location, $window) {
+    .controller('MessageController', ['$scope', '$routeParams', 'Api', 'socket', 'adminSocket', '$cookies', '$location', '$window', function ($scope, $routeParams, Api, socket, adminSocket, $cookies, $location, $window) {
       // I hate ejs
       <% if(typeof user != 'undefined'){ %>
         $scope.user="<%=user%>";
@@ -228,18 +262,39 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
       // get new message on socket event
       $scope.$on('$viewContentLoaded', function() {
 	  	
-		// register a new socket when scope changes
-		socket.open();
-		
-		//Close the socket if we arent ment to have it open.
-		//This could probably be done better
-		//TODO: Change to only open a socket if needed insted of closing it
-			<% if (apisecurity) { %>
-			 <% if (!login) { %>
-				socket.close()
-			  <% } %>
+		// register a new socket when scope changes and set Socket Typle
+
+	//Manage the sockets
+	//This is messy as hell, but it works
+	//for some reason, socket opens both sockets, so the adminSocket is required to be closed after opening to prevent leaking data
+	<% if (!apisecurity) { %>
+		<% if (hidecapcode) { %>
+			<% if (login) { %>
+				var socketMode = adminSocket
+				adminSocket.open();
+			<% } else { %>
+				var socketMode = socket
+				socket.open();
+				adminSocket.close()
+				<% } %>
+		<%} else { %>
+			var socketMode = socket
+			socket.open();
+			adminSocket.close()
+		<% } %>	
+	<% } else { %>
+		<% if (login) { %>
+			var socketMode = socket
+			socket.open();
+			adminSocket.close()
+			<% } else { %>
+			var socketMode = socket
+			socket.close();
+			adminSocket.close();
 			<% } %>
-		socket.on('messagePost', function(message) {
+	<% } %>
+	
+		socketMode.on('messagePost', function(message) {
         // Send Browser Notifications  
 		<% if (apisecurity) { %>
 			  <% if (login) { %>
@@ -300,7 +355,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
               $scope.messages.pop();
             }
           }
-        });
+        });	
       });
       
       // this should be popped out into a separate file
