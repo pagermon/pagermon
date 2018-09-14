@@ -1,4 +1,4 @@
-var version = "0.1.6-beta";
+var version = "0.1.7-beta";
 
 var debug = require('debug')('pagermon:server');
 var pmx = require('pmx').init({
