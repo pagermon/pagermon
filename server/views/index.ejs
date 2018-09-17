@@ -571,9 +571,7 @@ function notify(notifyTitle,notifyMessage) {
     else if (Notification.permission === "granted") {
         var options = {
             body: notifyMessage,
-            icon: '/favicon.ico',
-            image: '/favicon.ico',
-            badge: '/favicon.ico'
+            icon: '/favicon.ico'
         };
         var notification = new Notification(notifyTitle,options);
     }
@@ -587,8 +585,6 @@ function notify(notifyTitle,notifyMessage) {
                 var options = {
                     body: notifyMessage,
                     icon: '/favicon.ico',
-                    image: '/favicon.ico',
-                    badge: '/favicon.ico'
                 };
                 var notification = new Notification(notifyTitle,options);
             }
