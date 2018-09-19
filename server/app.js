@@ -92,11 +92,15 @@ var app = express();
     app.set('view engine', 'ejs');
     app.set('trust proxy', 'loopback, linklocal, uniquelocal');
 
+
+
 var server = http.createServer(app);
 var io = require('socket.io').listen(server);
     server.listen(port);
     server.on('error', onError);
     server.on('listening', onListening);
+    //Lets set setMaxListeners to a decent number - not to high to allow the memory leak warking to still trigger
+    io.sockets.setMaxListeners(20);
 io.sockets.on('connection', function (socket) {
     socket.removeAllListeners();
     debug('client connect to normal socket');
@@ -105,8 +109,6 @@ io.sockets.on('connection', function (socket) {
 //        console.log('message', data);
 //    });
 });
-//Lets set setMaxListeners to a decent number - not to high to allow the memory leak warking to still trigger
-io.sockets.setMaxListeners(20);
 //Admin Socket
 var adminio = io.of('/adminio');
 adminio.on('connection', function (socket) {
