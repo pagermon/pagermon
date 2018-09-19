@@ -100,10 +100,10 @@ var io = require('socket.io').listen(server);
 io.sockets.on('connection', function (socket) {
     socket.removeAllListeners();
     debug('client connect to normal socket');
-    socket.on('echo', function (data) {
-        io.sockets.emit('message', data);
-        console.log('message', data);
-    });
+//    socket.on('echo', function (data) {
+//        io.sockets.emit('message', data);
+//        console.log('message', data);
+//    });
 });
 //Lets set setMaxListeners to a decent number - not to high to allow the memory leak warking to still trigger
 io.sockets.setMaxListeners(20);
@@ -112,10 +112,10 @@ var adminio = io.of('/adminio');
 adminio.on('connection', function (socket) {
     socket.removeAllListeners();
     debug('client connect to admin socket');
-    adminio.on('echo', function (data) {
-        adminio.emit('message', data);
-        console.log('message', data);
-    });
+//    adminio.on('echo', function (data) {
+//        adminio.emit('message', data);
+//        console.log('message', data);
+//    });
 });
 
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
