@@ -105,7 +105,8 @@ io.sockets.on('connection', function (socket) {
         console.log('message', data);
     });
 });
-
+//Lets set setMaxListeners to a decent number - not to high to allow the memory leak warking to still trigger
+io.sockets.setMaxListeners(20);
 //Admin Socket
 var adminio = io.of('/adminio');
 adminio.on('connection', function (socket) {
