@@ -67,7 +67,7 @@ if (HideCapcode && apiSecurity) {
 				res.json(rows);
 			});
 		});
-	});	
+	});
 } else {
 	router.get('/capcodes', function(req, res, next) {
 		db.serialize(() => {
@@ -76,7 +76,7 @@ if (HideCapcode && apiSecurity) {
 				res.json(rows);
 			});
 		});
-	});		
+	});
 }
 
 
@@ -90,7 +90,7 @@ if (HideCapcode && apiSecurity) {
 		   next();
 	   },
 	   function(err, req, res, next) {
-		   console.info(err);
+		   console.error(err);
 		   isLoggedIn(req, res, next);
 	   });
  };
@@ -132,7 +132,7 @@ router.get('/messages', function(req, res, next) {
     }
     db.get(initSql,function(err,count){
         if (err) {
-            console.log(err);
+            console.error(err);
         } else if (count) {
             initData.msgCount = count.msgcount;
             initData.pageCount = Math.ceil(initData.msgCount/initData.limit);
@@ -180,7 +180,7 @@ router.get('/messages', function(req, res, next) {
 						}
 					}
                 if (err) {
-                    console.log(err);
+                    console.error(err);
                 } else if (row) {
                     result.push(row);
                 } else {
@@ -189,7 +189,7 @@ router.get('/messages', function(req, res, next) {
             },function(err,rowCount){
                 if (err) {
                     console.timeEnd('sql');
-                    console.log(err);
+                    console.error(err);
                     res.status(500).send(err);
                 } else if (rowCount > 0) {
                     console.timeEnd('sql');
@@ -330,7 +330,7 @@ router.get('/messageSearch', function(req, res, next) {
     var rows = [];
     db.each(sql,function(err,row){
         if (err) {
-            console.log(err);
+            console.error(err);
         } else if (row) {
 					if (HideCapcode) {
 						if (!req.isAuthenticated()) {
@@ -363,7 +363,7 @@ router.get('/messageSearch', function(req, res, next) {
     },function(err,rowCount){
         if (err) {
             console.timeEnd('sql');
-            console.log(err);
+            console.error(err);
             res.status(500).send(err);
         } else if (rowCount > 0) {
             console.timeEnd('sql');
@@ -433,7 +433,7 @@ router.get('/capcodes/init', function(req, res, next) {
     db.serialize(() => {
         db.get("SELECT id FROM capcodes ORDER BY id DESC LIMIT 1", [], function(err, row) {
             if (err) {
-                console.log(err);
+                console.error(err);
             } else {
                 initData.msgCount = parseInt(row['id'], 10);
                 //console.log(initData.msgCount);
@@ -676,8 +676,8 @@ router.post('/messages', function(req, res, next) {
 													//console.log(row);
 													//req.io.emit('messagePost', row);
 													if (HideCapcode) {
-														//Emit full details to the admin socket						
-														req.io.of('adminio').emit('messagePost', row);								
+														//Emit full details to the admin socket
+														req.io.of('adminio').emit('messagePost', row);
 														// Emit No capdoe to normal socket
 														row = {
 															"id": row.id,
@@ -693,11 +693,11 @@ router.post('/messages', function(req, res, next) {
 															"aliasMatch": row.aliasMatch
 															 };
 															req.io.emit('messagePost', row);
-														
+
 													}else {
 														//Just emit - No Security enabled
 														req.io.emit('messagePost', row);
-														
+
 													}
 												}
                                                 res.status(200).send(''+reqLastID);
@@ -731,7 +731,7 @@ router.post('/messages', function(req, res, next) {
                                                         // send mail with defined transport object
                                                         transporter.sendMail(mailOptions, (error, info) => {
                                                             if (error) {
-                                                                return console.log(error);
+                                                                return console.error(error);
                                                             }
                                                             console.log('Message sent: %s', info.messageId);
                                                         });
@@ -772,7 +772,8 @@ router.post('/messages', function(req, res, next) {
                                                         if (pushPri == 2) {
                                                             p.send(msg, function (err, result) {
                                                                 if (err) {
-                                                                    throw err;
+                                                                    //throw err;
+                                                                    console.error(err);
                                                                 }
                                                                 console.log("SENDING EMERGENCY PUSH NOTIFICATION")
                                                                 console.log(result);
@@ -781,7 +782,8 @@ router.post('/messages', function(req, res, next) {
                                                         } else {
                                                             p.send(msg, function (err, result) {
                                                                 if (err) {
-                                                                    throw err;
+                                                                    //throw err;
+                                                                    console.error(err);
                                                                 }
 
                                                                 console.log(result);
@@ -902,7 +904,7 @@ router.post('/capcodes/:id', function(req, res, next) {
         var push = req.body.push || 0;
         var pushpri = req.body.pushpri || "0";
         var pushgroup = req.body.pushgroup || 0;
-        var pushsound = req.body.pushsound || '';  
+        var pushsound = req.body.pushsound || '';
         var Mailenable = req.body.mailenable || 0;
         var MailTo = req.body.mailto || '';
         var updateAlias = req.body.updateAlias || 0;
@@ -932,7 +934,7 @@ router.post('/capcodes/:id', function(req, res, next) {
                     if (updateAlias == 1) {
                         console.time('updateMap');
                         db.run("UPDATE messages SET alias_id = (SELECT id FROM capcodes WHERE messages.address LIKE address ORDER BY REPLACE(address, '_', '%') DESC LIMIT 1);", function(err){
-                           if (err) { console.log(err); console.timeEnd('updateMap'); }
+                           if (err) { console.error(err); console.timeEnd('updateMap'); }
                            else { console.timeEnd('updateMap'); }
                         });
                     } else {
@@ -979,7 +981,7 @@ router.post('/capcodeRefresh', function(req, res, next) {
     nconf.load();
     console.time('updateMap');
     db.run("UPDATE messages SET alias_id = (SELECT id FROM capcodes WHERE messages.address LIKE address ORDER BY REPLACE(address, '_', '%') DESC LIMIT 1);", function(err){
-       if (err) { console.log(err); console.timeEnd('updateMap'); }
+       if (err) { console.error(err); console.timeEnd('updateMap'); }
        else {
            console.timeEnd('updateMap');
            nconf.set('database:aliasRefreshRequired', 0);
