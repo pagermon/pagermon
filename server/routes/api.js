@@ -794,11 +794,10 @@ router.post('/messages', function(req, res, next) {
 								    });
 								}
 
-
+							}
 							    } else {
 								//do nothing bruh
 							    };
-						    	}
                                                 };
                                             }
                                         });
