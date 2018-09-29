@@ -742,62 +742,42 @@ router.post('/messages', function(req, res, next) {
 
                                                 //check config to see if push is gloably enabled
                                                 if (pushenable == true) {
-                                                    //check the alais to see if push is enabled for it
+                                                    //check the alias to see if push is enabled for it
                                                     if (pushonoff == 1) {
                                                          //ensure key has been entered before trying to push
-                                                        if (pushGroup == 0) {
+                                                        if (pushGroup == 0 || !pushGroup) {
                                                             console.error('Push Enabled on Alias ' + address + ' No User/Group key set. Please enter User/Group Key.');
                                                         } else {   
 								var p = new push({
 								    user: pushGroup,
 								    token: pushkey,
 								});
-
-								if (pushPri == 2) {
-								  //emergency message
-								  var msg = {
-								      message: row.message,
-								      title: row.agency+' - '+row.alias,
-								      sound: pushSound,
-								      priority: 2,
-								      retry: 60,
-								      expire: 240
-								  };
-								} else {
-								  //Non Emeg message
-								  var msg = {
+								
+								var msg = {
 								      message: row.message,
 								      title: row.agency+' - '+row.alias,
 								      sound: pushSound,
 								      priority: pushPri
-								  };
+								};
+
+								if (pushPri == 2) {
+								  //emergency message
+								  msg.retry = 60;
+								  msg.expire = 240;
 								}
 
 								if (pushPri == 2) {
-								    p.send(msg, function (err, result) {
-									if (err) {
-									    //throw err;
-									    console.error(err);
-									}
-									console.log("SENDING EMERGENCY PUSH NOTIFICATION")
-									console.log(result);
-								    });
-
-								} else {
-								    p.send(msg, function (err, result) {
-									if (err) {
-									    //throw err;
-									    console.error(err);
-									}
-
-									console.log(result);
-								    });
+								  console.log("SENDING EMERGENCY PUSH NOTIFICATION")
 								}
+								p.send(msg, function (err, result) {
+									if (err) {
+									    //throw err;
+									    console.error(err);
+									}
 
+									console.log(result);
+								});
 							}
-							    } else {
-								//do nothing bruh
-							    };
                                                 };
                                             }
                                         });
