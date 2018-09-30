@@ -779,8 +779,9 @@ router.post('/messages', function(req, res, next) {
 								});
 							}
                                                 };
-                                            }
-                                        });
+                                            };
+                                        }
+					});
                                     }
                                 });
                             } else {
