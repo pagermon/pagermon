@@ -163,7 +163,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
     
     .factory('socket', function ($rootScope) {
       
-	  var socket = io({transports: ['websocket'], upgrade: false});
+    var socket = io({transports: ['websocket'], upgrade: false});
       return {
         open: function() {
           socket = io({transports: ['websocket'], upgrade: false});
@@ -193,10 +193,10 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
       };
     })
     
-	
-	.factory('adminSocket', function ($rootScope) {
+  
+  .factory('adminSocket', function ($rootScope) {
 
-	  var adminSocket = io('/adminio', {transports: ['websocket'], upgrade: false});
+    var adminSocket = io('/adminio', {transports: ['websocket'], upgrade: false});
       return {
         open: function() {
           adminSocket = io('/adminio', {transports: ['websocket'], upgrade: false});
@@ -225,7 +225,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
         }
       };
     })
-	
+  
     .factory('Api', ['$resource',
      function($resource) {
       return {
@@ -261,65 +261,65 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
       <% } %>
       // get new message on socket event
       $scope.$on('$viewContentLoaded', function() {
-	  	
-		// register a new socket when scope changes and set Socket Typle
+      
+    // register a new socket when scope changes and set Socket Typle
 
-	//Manage the sockets
-	//This is messy as hell, but it works
-	//for some reason, socket opens both sockets, so the adminSocket is required to be closed after opening to prevent leaking data
-	<% if (!apisecurity) { %>
-		<% if (hidecapcode) { %>
-			<% if (login) { %>
-				var socketMode = adminSocket
-				adminSocket.open();
-			<% } else { %>
-				var socketMode = socket
-				socket.open();
-				adminSocket.close()
-				<% } %>
-		<%} else { %>
-			var socketMode = socket
-			socket.open();
-			adminSocket.close()
-		<% } %>	
-	<% } else { %>
-		<% if (login) { %>
-			var socketMode = socket
-			socket.open();
-			adminSocket.close()
-			<% } else { %>
-			var socketMode = socket
-			socket.close();
-			adminSocket.close();
-			<% } %>
-	<% } %>
-	
-		socketMode.on('messagePost', function(message) {
+  //Manage the sockets
+  //This is messy as hell, but it works
+  //for some reason, socket opens both sockets, so the adminSocket is required to be closed after opening to prevent leaking data
+  <% if (!apisecurity) { %>
+    <% if (hidecapcode) { %>
+      <% if (login) { %>
+        var socketMode = adminSocket
+        adminSocket.open();
+      <% } else { %>
+        var socketMode = socket
+        socket.open();
+        adminSocket.close()
+        <% } %>
+    <%} else { %>
+      var socketMode = socket
+      socket.open();
+      adminSocket.close()
+    <% } %>	
+  <% } else { %>
+    <% if (login) { %>
+      var socketMode = socket
+      socket.open();
+      adminSocket.close()
+      <% } else { %>
+      var socketMode = socket
+      socket.close();
+      adminSocket.close();
+      <% } %>
+  <% } %>
+  
+    socketMode.on('messagePost', function(message) {
         // Send Browser Notifications  
-		<% if (apisecurity) { %>
-			  <% if (login) { %>
-			  if ($scope.notificationEnabled == 'true') {
-				if (!message.agency) {
-				  //Not showing messages for things that we don't know
-				} else {
-				
-					notify("PagerMon - " +message.agency + " - " + message.alias,message.message);
-				}
-			  }
-			  <% } %>
-			<% } else { %>
-			  if ($scope.notificationEnabled == 'true') {
-				if (!message.agency) {
-				  //Not showing messages for things that we don't know
-				} else {
-				
-					notify("PagerMon - " +message.agency + " - " + message.alias,message.message);
-				}
-			  }
-			 <% } %>
-		  
-		  
-		
+    <% if (apisecurity) { %>
+        <% if (login) { %>
+        if ($scope.notificationEnabled == 'true') {
+        if (!message.agency) {
+          //Not showing messages for things that we don't know
+        } else {
+        
+          notify("PagerMon - " +message.agency + " - " + message.alias,message.message);
+        }
+        }
+        <% } %>
+      <% } else { %>
+        if ($scope.notificationEnabled == 'true') {
+        if (!message.agency) {
+          //Not showing messages for things that we don't know
+        } else {
+        
+          notify("PagerMon - " +message.agency + " - " + message.alias,message.message);
+        }
+        }
+       <% } %>
+      
+      
+    
           // only bother getting the new message if we're on page 1
           if ($scope.init.currentPage === 1) {
             console.log('New Message ID: '+message.id + ' currentPage: '+$scope.init.currentPage);

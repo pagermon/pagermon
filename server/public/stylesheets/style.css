@@ -27,8 +27,8 @@
 .angular-highlight {
     background: rgba(197, 0, 0); /* Fallback */
     background-color: rgba(197, 0, 0, 0.2);
-	color: black;
-	margin: -1px;
+    color: black;
+    margin: -1px;
     padding: 5px 5px;
 }
 
@@ -305,10 +305,10 @@ table .expand {
   position:fixed;
   margin-top:0px;
   width: 0; 
-	height: 0; 
-	border-left: 30px solid transparent;
-	border-right: 30px solid transparent;
-	border-top: 30px solid Maroon;
+    height: 0; 
+    border-left: 30px solid transparent;
+    border-right: 30px solid transparent;
+    border-top: 30px solid Maroon;
 }
 
 .triangle-down:hover {
