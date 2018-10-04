@@ -35,7 +35,7 @@ var db = new sqlite3.Database('./messages.db', sqlite3.OPEN_READWRITE | sqlite3.
     if (err) { console.log(err.message); } else {
 
       var sql =  "CREATE TABLE IF NOT EXISTS capcodes ( ";
-	      sql += "id INTEGER PRIMARY KEY AUTOINCREMENT, ";
+          sql += "id INTEGER PRIMARY KEY AUTOINCREMENT, ";
           sql += "address TEXT NOT NULL, ";
           sql += "alias TEXT NOT NULL, ";
           sql += "agency TEXT, ";
