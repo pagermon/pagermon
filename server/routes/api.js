@@ -82,8 +82,8 @@ if (HideCapcode && apiSecurity) {
 
 
 
-     // secure all API's if API Security is enabled
- if (apiSecurity) {
+// secure all API's if API Security is enabled
+if (apiSecurity) {
   router.all('*',
     passport.authenticate('localapikey', { session: false, failWithError: true }),
     function(req, res, next) {
@@ -94,7 +94,7 @@ if (HideCapcode && apiSecurity) {
       isLoggedIn(req, res, next);
     }
   );
- };
+};
 
 
 
