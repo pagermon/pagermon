@@ -303,31 +303,37 @@ router.get('/messageSearch', function(req, res, next) {
 
   // set select commands based on query type
   // address can be address or source field
+  if (query != '') {
+    sql = `SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch
+    FROM messages_search_index
+    LEFT JOIN messages ON messages.id = messages_search_index.rowid `;
+  } else {
+    sql = `SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch 
+    FROM messages `;
+  }
   if(pdwMode) {
-    sql =  "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch ";
-    sql += " FROM messages";
     sql += " INNER JOIN capcodes ON capcodes.id = messages.alias_id";
   } else {
-    sql =  "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch ";
-    sql += " FROM messages";
     sql += " LEFT JOIN capcodes ON capcodes.id = messages.alias_id ";
   }
-  if(address != '' || agency != '')
-    sql += ' WHERE';
-  if(address != '')
-    sql += ' messages.address LIKE "'+address+'" OR messages.source = "'+address+'" OR ';
-  if(agency != '')
-    sql += ' messages.alias_id IN (SELECT id FROM capcodes WHERE agency = "'+agency+'" AND ignore = 0) OR ';
-  if(address != '' || agency != '')
-    sql += ' messages.id IS NULL';
+  sql += ' WHERE';
+  if(query != '') {
+    sql += ` messages_search_index MATCH ?`;
+  } else {
+    if(address != '')
+      sql += ` messages.address LIKE "${address}" OR messages.source = "${address}" OR `;
+    if(agency != '')
+      sql += ` messages.alias_id IN (SELECT id FROM capcodes WHERE agency = "${agency}" AND ignore = 0) OR `;
+    sql += ' messages.id IS ?';
+  }
   
-    sql += " ORDER BY messages.id DESC;";
+  sql += " ORDER BY messages.id DESC;";
 
   console.timeEnd('init');
   console.time('sql');
 
   var rows = [];
-  db.each(sql,function(err,row){
+  db.each(sql,query,function(err,row){
     if (err) {
       console.error(err);
     } else if (row) {
@@ -365,31 +371,7 @@ router.get('/messageSearch', function(req, res, next) {
       res.status(500).send(err);
     } else if (rowCount > 0) {
       console.timeEnd('sql');
-      console.time('search');
-      var result;
-      if (query != '') {
-        var search = new JsSearch.Search('id');
-          search.searchIndex = new JsSearch.UnorderedSearchIndex();
-          search.tokenizer = new JsSearch.StopWordsTokenizer(
-          new JsSearch.SimpleTokenizer());
-          search.addIndex('message');
-          search.addIndex('address');
-          search.addIndex('alias');
-          search.addIndex('agency');
-        console.timeEnd('search');
-        console.time('searchFullText');
-          search.addDocuments(rows);
-        result = search.search(query);
-        console.timeEnd('searchFullText');
-        console.time('sort');
-        result.sort(function (a, b) {
-          return b.id - a.id;
-        });
-        console.timeEnd('sort');
-      } else {
-        result = rows;
-        console.timeEnd('search');
-      }
+      var result = rows;
       console.time('initEnd');
       initData.msgCount = result.length;
       initData.pageCount = Math.ceil(initData.msgCount/initData.limit);
