@@ -3,7 +3,6 @@ var bodyParser = require('body-parser');
 var router = express.Router();
 var basicAuth = require('express-basic-auth');
 var bcrypt = require('bcryptjs');
-var JsSearch = require('js-search');
 var passport = require('passport');
 var push = require('pushover-notifications');
 const nodemailer = require('nodemailer');
