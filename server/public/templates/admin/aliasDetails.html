@@ -42,7 +42,7 @@
                 </div>
               </div>
             </div>
-            <div class="form-group">
+            <div class="form-group" ng-class="!alias.agency ? 'has-error' : 'has-success'">
               <label for="alias.agency" class="col-xs-4 col-sm-3 control-label">Agency</label>
               <div class="col-xs-8 col-sm-9">
               <input class="form-control" type="text" name="alias.agency" ng-model="alias.agency" required>
@@ -105,10 +105,10 @@
               </div>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" ng-class="!alias.mailto && alias.mailenable ? 'has-error' : 'has-success'">
               <label for="alias.mailto" class="col-xs-4 col-sm-3 control-label">SMTP Recipients</label>
               <div class="col-xs-8 col-sm-9">
-              <input class="form-control" type="text" name="alias.mailto" ng-model="alias.mailto">
+              <input class="form-control" type="text" name="alias.mailto" ng-model="alias.mailto" ng-disabled="!alias.mailenable" ng-required="alias.mailenable">
               <span id="helpBlock" class="help-block">Recipients for this capcode, comma separated</span>
               </div>
             </div>
@@ -128,7 +128,7 @@
             <div class="form-group">
               <label for="alias.pushpri" class="col-xs-4 col-sm-3 control-label">Pushover - Priority</label>
               <div class="col-xs-8 col-sm-9">
-                <select name="alias.pushpri" ng-model="alias.pushpri" class="form-control">
+                <select name="alias.pushpri" ng-model="alias.pushpri" class="form-control" ng-disabled="!alias.push" ng-required="alias.push">
                   <option value="-2">Lowest Priority</option>
                   <option value="-1">Low Priority</option>
                   <option value="0">Normal Priority</option>
@@ -138,10 +138,10 @@
                 <span id="helpBlock" class="help-block">Set's the priority messages will be sent at. More information can be found here <a href="https://pushover.net/api#priority">https://pushover.net/api#priority</a></span>
               </div>
             </div>
-            <div class="form-group">
+            <div class="form-group" ng-class="!alias.pushgroup && alias.push || alias.pushgroup == 0 && alias.push ? 'has-error' : 'has-success'">
               <label for="alias.pushgroup" class="col-xs-4 col-sm-3 control-label">Pushover - User/Group Key </label>
               <div class="col-xs-8 col-sm-9">
-                <input type="text" class="form-control" name="alias.pushgroup" ng-model="alias.pushgroup">
+                <input type="text" class="form-control" name="alias.pushgroup" ng-model="alias.pushgroup" ng-disabled="!alias.push" ng-required="alias.push">
                 <span id="helpBlock" class="help-block">This can be a individual user key or a group key.</a>
                 </span>
               </div>
@@ -149,7 +149,7 @@
             <div class="form-group">
               <label for="alias.pushsound" class="col-xs-4 col-sm-3 control-label">Sound</label>
               <div class="col-xs-8 col-sm-9">
-                <select name="alias.pushsound" ng-model="alias.pushsound" class="form-control">
+                <select name="alias.pushsound" ng-model="alias.pushsound" class="form-control" ng-disabled="!alias.push">
                   <option value=""></option>
                   <option value="pushover">Pushover</option>
                   <option value="bike">Bike</option>
