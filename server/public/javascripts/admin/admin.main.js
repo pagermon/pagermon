@@ -245,40 +245,47 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
       };
       
       $scope.aliasSubmit = function() {
-        $scope.loading = true;
-        var id;
-        if($scope.alias.id) {
-          id = $routeParams.id;
+        if (($scope.alias.push) && (!$scope.alias.pushgroup || $scope.alias.pushgroup == 0)) {
+          $scope.alertMessage.text = 'Pushover key cannot be blank if pushover enabled';
+          $scope.alertMessage.type = 'alert-danger';
+          $scope.alertMessage.show = true;
+          $timeout(function () { $scope.alertMessage.show = false; }, 3000);
         } else {
-          id = "new";
-        }
-        Api.AliasDetail.save({id: id }, $scope.alias).$promise.then(function (response) {
-          console.log(response);
-          if (response.status == 'ok') {
-            $scope.alertMessage.text = 'Alias saved!';
-            $scope.alertMessage.type = 'alert-success';
-            $scope.alertMessage.show = true;
-            $timeout(function () { $scope.alertMessage.show = false; }, 3000);
-            $scope.loading = false;
-            $scope.aliasRefreshRequired = 1;
-            if ($scope.isNew) {
-              $location.url('/aliases/'+response.id);
-            }
+          $scope.loading = true;
+          var id;
+          if ($scope.alias.id) {
+            id = $routeParams.id;
           } else {
-            $scope.alertMessage.text = 'Error saving alias: '+response;
+            id = "new";
+          }
+          Api.AliasDetail.save({ id: id }, $scope.alias).$promise.then(function (response) {
+            console.log(response);
+            if (response.status == 'ok') {
+              $scope.alertMessage.text = 'Alias saved!';
+              $scope.alertMessage.type = 'alert-success';
+              $scope.alertMessage.show = true;
+              $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+              $scope.loading = false;
+              $scope.aliasRefreshRequired = 1;
+              if ($scope.isNew) {
+                $location.url('/aliases/' + response.id);
+              }
+            } else {
+              $scope.alertMessage.text = 'Error saving alias: ' + response;
+              $scope.alertMessage.type = 'alert-danger';
+              $scope.alertMessage.show = true;
+              $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+              $scope.loading = false;
+            }
+          }, function (response) {
+            console.log(response);
+            $scope.alertMessage.text = 'Error saving alias: ' + response.data.error;
             $scope.alertMessage.type = 'alert-danger';
             $scope.alertMessage.show = true;
             $timeout(function () { $scope.alertMessage.show = false; }, 3000);
             $scope.loading = false;
-          }
-        }, function(response) {
-          console.log(response);
-          $scope.alertMessage.text = 'Error saving alias: '+response.data.error;
-          $scope.alertMessage.type = 'alert-danger';
-          $scope.alertMessage.show = true;
-          $timeout(function () { $scope.alertMessage.show = false; }, 3000);
-          $scope.loading = false;          
-        });
+          });
+        }
       };
       
       $scope.aliasDelete = function () {
