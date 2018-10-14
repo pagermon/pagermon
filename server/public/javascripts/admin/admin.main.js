@@ -250,6 +250,11 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
           $scope.alertMessage.type = 'alert-danger';
           $scope.alertMessage.show = true;
           $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+        } else if ($scope.existingAddress) {
+          $scope.alertMessage.text = 'Error saving alias: Alias with this address already exists.';
+          $scope.alertMessage.type = 'alert-danger';
+          $scope.alertMessage.show = true;
+          $timeout(function () { $scope.alertMessage.show = false; }, 3000);
         } else {
           $scope.loading = true;
           var id;
