@@ -246,7 +246,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
       
       $scope.aliasSubmit = function() {
         if (($scope.alias.push) && (!$scope.alias.pushgroup || $scope.alias.pushgroup == 0)) {
-          $scope.alertMessage.text = 'Pushover key cannot be blank if pushover enabled';
+          $scope.alertMessage.text = 'Error saving alias: Pushover key cannot be blank when pushover enabled.';
           $scope.alertMessage.type = 'alert-danger';
           $scope.alertMessage.show = true;
           $timeout(function () { $scope.alertMessage.show = false; }, 3000);
