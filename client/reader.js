@@ -74,18 +74,26 @@ rl.on('line', (line) => {
     }
   } else if (line.indexOf('FLEX: ') > -1) {
     address = line.match(/FLEX:.*?\[(\d*?)\] /)[1].trim();
-    if (line.match( /( ALN | GPN | NUM)/ )) {
-      message = line.match(/FLEX:.*?\[\d*\] ... (.*?)$/)[1].trim();
-      trimMessage = message;
-    } else {
-      message = false;
-      trimMessage = '';
+      if (line.match( /1600\/2\/F\/A/ )) {
+       if (line.match( /( ALN | GPN | NUM)/ )) {
+        frag = line.match(/FLEX:.*?\[\d*\] ... (.*?)$/)[1].trim();
+        message = false;
+        trimMessage = '';
+       }
+      }
+      if (line.match( /1600\/2\/C\/A/ )) {
+       if (line.match( /( ALN | GPN | NUM)/ )) {
+          message = line.match(/FLEX:.*?\[\d*\] ... (.*?)$/)[1].trim();
+          trimMessage = frag+message;
+          }
+        }
+      if (line.match( /1600\/2\/K\/A/ )) {
+        if (line.match( /( ALN | GPN | NUM)/ )) {
+        message = line.match(/FLEX:.*?\[\d*\] ... (.*?)$/)[1].trim();
+        trimMessage = message;
+        }
+       }
     }
-  } else {
-  	address = '';
-  	message = false;
-  	trimMessage = '';
-  }
 
   // filter out most false hits
   // if too much junk data, make sure '-p' option isn't enabled in multimon
