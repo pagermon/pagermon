@@ -20,8 +20,10 @@ The UI is built around a Node/Express/Angular/Bootstrap stack, while the client 
 * WebSockets support - messages are delivered to clients in near realtime
 * Pretty HTML5
 * Native browner notifications
-* [Pushover](https://pushover.net/) Integration - near realtime muti-device notification service
-* SMTP/Email support
+* Push notifications
+    * [Pushover](https://pushover.net/) Integration - near realtime muti-device notification service
+    * [Telegram](https://telegram.org/) Integration - near realtime cloud based multi-device messaging
+    * [Email] Support for conventional SMTP email notifications 
 * May or may not contain cute puppies
 
 ### Planned Features
@@ -33,7 +35,6 @@ The UI is built around a Node/Express/Angular/Bootstrap stack, while the client 
 * Bootstrap 4 + Angular 2 support
 * Enhanced alias control
 * Graphing
-* Push notifications
 * Non-sucky documentation
 
 ### Screenshots
