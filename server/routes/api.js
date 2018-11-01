@@ -522,7 +522,7 @@ router.get('/capcodeCheck/:id', function(req, res, next) {
             "pushgroup": "",
             "pushsound": "",
             "pushpri": "0",
-            "tele": "",
+            "telegram": "",
             "telechat": "",
             "mailenable" : "",
             "mailto" : ""
