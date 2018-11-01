@@ -42,7 +42,6 @@
     "nodemailer": "latest",
     "telegram-bot-api": "latest",
     "util": "^0.10.3",
-    "zone.js": "^0.8.12"
   },
   "repository": {
     "type": "git",
