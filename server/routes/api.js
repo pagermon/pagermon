@@ -766,9 +766,7 @@ router.post('/messages', function(req, res, next) {
                               token: telekey
                             });
                             //Notification formatted in Markdown for pretty notifications
-                            var notificationTime = new Date(row.timestamp*1000);
                             var notificationText = `*${row.agency} - ${row.alias}*\n` + 
-                                                   `Time: ${notificationTime.toString()}\n` +
                                                    `Message: ${row.message}`;
                             
                             t.sendMessage({
