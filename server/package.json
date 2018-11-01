@@ -1,6 +1,6 @@
 {
   "name": "pagermon",
-  "version": "0.1.8-beta",
+  "version": "0.1.9-beta",
   "private": true,
   "license": "Unlicense",
   "scripts": {
@@ -39,7 +39,10 @@
     "zone.js": "^0.8.12",
     "pmx": "latest",
     "pushover-notifications": "latest",
-    "nodemailer": "latest"
+    "nodemailer": "latest",
+    "telegram-bot-api": "latest",
+    "util": "^0.10.3",
+    "zone.js": "^0.8.12"
   },
   "repository": {
     "type": "git",

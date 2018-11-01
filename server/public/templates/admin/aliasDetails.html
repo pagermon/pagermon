@@ -91,7 +91,9 @@
               </div>
               </div>
             </div>
-
+            
+            <h5>Notifications</h5>
+            <h5>Email</h5>
             <div class="form-group">
               <label for="alias.mailenable" class="col-xs-4 col-sm-3 control-label">Email</label>
               <div class="col-xs-8 col-sm-9">
@@ -112,7 +114,7 @@
               <span id="helpBlock" class="help-block">Recipients for this capcode, comma separated</span>
               </div>
             </div>
-
+           <h5>Pushover</h5>
             <div class="form-group">
               <label for="alias.push" class="col-xs-4 col-sm-3 control-label">Pushover</label>
               <div class="col-xs-8 col-sm-9">
@@ -121,7 +123,7 @@
                     <input type="checkbox" name="alias.push" ng-model="alias.push" ng-true-value="1" ng-false-value="0">
                     Enable sending via Pushover
                   </label>
-                  <span id="helpBlock" class="help-block">If checked, messages matching this alias will be sent via pushover</span>
+                  <span id="helpBlock" class="help-block">If checked, messages matching this alias will be sent via Pushover</span>
                 </div>
               </div>
             </div>
@@ -177,7 +179,28 @@
                 <span id="helpBlock" class="help-block">Sets the Notification Sound - Leaving this blank will use the default notification sound set in your application</span>
               </div>
             </div>
-
+            <h5>Telegram</h5>
+            <div class="form-group">
+              <label for="alias.telegram" class="col-xs-4 col-sm-3 control-label">Telegram</label>
+              <div class="col-xs-8 col-sm-9">
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" name="alias.telegram" ng-model="alias.telegram" ng-true-value="1" ng-false-value="0">
+                    Enable sending via Telegram
+                  </label>
+                  <span id="helpBlock" class="help-block">If checked, messages matching this alias will be sent via Telegram</span>
+                </div>
+              </div>
+            </div>
+            <div class="form-group" ng-class="!alias.telechat && alias.telegram || alias.telechat == 0 && alias.telegram ? 'has-error' : 'has-success'">
+              <label for="alias.telechat" class="col-xs-4 col-sm-3 control-label">Telegram - Chat ID </label>
+              <div class="col-xs-8 col-sm-9">
+                <input type="text" class="form-control" name="alias.telechat" ng-model="alias.telechat" ng-disabled="!alias.telegram" ng-required="alias.telegram">
+                <span id="helpBlock" class="help-block">Telegram Chat ID.</a>
+                </span>
+              </div>
+            </div>
+        
             <div class="btn-group pull-right" style="padding-right: 10px; padding-bottom: 10px;"role="group" aria-label="Actions">
               <button type="button" ng-if="!isNew" ng-click="aliasDelete()" class="btn btn-danger">Delete</button>
               <button type="button" ng-click="aliasLoad()" class="btn btn-default">Reset</button>

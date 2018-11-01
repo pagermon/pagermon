@@ -48,6 +48,8 @@ var db = new sqlite3.Database('./messages.db', sqlite3.OPEN_READWRITE | sqlite3.
         sql += "pushsound TEXT, ";
         sql += "mailenable INTEGER DEFAULT 0, ";
         sql += "mailto TEXT, ";
+        sql += "telegram INTEGER DEFAULT 0, ";
+        sql += "telechat TEXT, ";
         sql += "ignore INTEGER DEFAULT 0 ); ";
     // initialise messages table
     sql += "CREATE TABLE IF NOT EXISTS messages ( ";
