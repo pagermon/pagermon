@@ -96,10 +96,10 @@ rl.on('line', (line) => {
         trimMessage = message;
       }
     }
-  } else {	
-    address = '';	
-    message = false;	
-    trimMessage = '';	
+  } else {
+    address = '';
+    message = false;
+    trimMessage = '';
   }
 
   // filter out most false hits
