@@ -51,6 +51,8 @@ const rl = readline.createInterface({
     terminal: true
 });
 
+var frag;
+
 rl.on('line', (line) => {
   //console.log(`Received: ${line.trim()}`);
   var time = moment().format("YYYY-MM-DD HH:mm:ss");
@@ -66,8 +68,8 @@ rl.on('line', (line) => {
     	message = line.match(/Alpha:(.*?)$/)[1].trim();
     	trimMessage = message.replace(/<[A-Za-z]{3}>/g,'').replace(/Ä/g,'[').replace(/Ü/g,']');
     } else if (line.indexOf('Numeric:') > -1) {
-        message = line.match(/Numeric:(.*?)$/)[1].trim();
-        trimMessage = message.replace(/<[A-Za-z]{3}>/g,'').replace(/Ä/g,'[').replace(/Ü/g,']');
+      message = line.match(/Numeric:(.*?)$/)[1].trim();
+      trimMessage = message.replace(/<[A-Za-z]{3}>/g,'').replace(/Ä/g,'[').replace(/Ü/g,']');
     } else {
     	message = false;
     	trimMessage = '';
@@ -75,16 +77,29 @@ rl.on('line', (line) => {
   } else if (line.indexOf('FLEX: ') > -1) {
     address = line.match(/FLEX:.*?\[(\d*?)\] /)[1].trim();
     if (line.match( /( ALN | GPN | NUM)/ )) {
-      message = line.match(/FLEX:.*?\[\d*\] ... (.*?)$/)[1].trim();
-      trimMessage = message;
-    } else {
-      message = false;
-      trimMessage = '';
+      if (line.match( / [0-9]{4}\/[0-9]\/F\/. / )) {
+        // message is fragmented, hold onto it for next line
+        frag = line.match(/FLEX:.*?\[\d*\] ... (.*?)$/)[1].trim();
+        message = false;
+        trimMessage = '';
+      } else if (line.match( / [0-9]{4}\/[0-9]\/C\/. / )) {
+        // message is a completion of the last fragmented message
+        message = line.match(/FLEX:.*?\[\d*\] ... (.*?)$/)[1].trim();
+        trimMessage = frag+message;
+      } else if (line.match( / [0-9]{4}\/[0-9]\/K\/. / )) {
+        // message is a full message
+        message = line.match(/FLEX:.*?\[\d*\] ... (.*?)$/)[1].trim();
+        trimMessage = message;
+      } else {
+        // message doesn't have the KFC flags, treat as full message
+        message = line.match(/FLEX:.*?\[\d*\] ... (.*?)$/)[1].trim();
+        trimMessage = message;
+      }
     }
   } else {
-  	address = '';
-  	message = false;
-  	trimMessage = '';
+    address = '';
+    message = false;
+    trimMessage = '';
   }
 
   // filter out most false hits
