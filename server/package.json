@@ -41,7 +41,7 @@
     "pushover-notifications": "latest",
     "nodemailer": "latest",
     "telegram-bot-api": "latest",
-    "util": "^0.10.3",
+    "util": "^0.10.3"
   },
   "repository": {
     "type": "git",

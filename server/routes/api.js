@@ -5,7 +5,6 @@ var basicAuth = require('express-basic-auth');
 var bcrypt = require('bcryptjs');
 var passport = require('passport');
 var push = require('pushover-notifications');
-var telegram = require('telegram-bot-api');
 var util = require('util')
 const nodemailer = require('nodemailer');
 require('../config/passport')(passport); // pass passport for configuration
@@ -14,6 +13,15 @@ var nconf = require('nconf');
 var conf_file = './config/config.json';
 nconf.file({file: conf_file});
 nconf.load();
+
+var teleenable = nconf.get('telegram:teleenable');
+if (teleenable) {
+  var telegram = require('telegram-bot-api');
+  var telekey = nconf.get('telegram:teleAPIKEY');
+  var t = new telegram({
+    token: telekey
+  });
+}
 
 router.use( bodyParser.json() );       // to support JSON-encoded bodies
 router.use(bodyParser.urlencoded({     // to support URL-encoded bodies
@@ -576,8 +584,6 @@ router.post('/messages', function(req, res, next) {
     var pdwMode = nconf.get('messages:pdwMode');
     var pushenable = nconf.get('pushover:pushenable');
     var pushkey = nconf.get('pushover:pushAPIKEY');
-    var teleenable = nconf.get('telegram:teleenable');
-    var telekey = nconf.get('telegram:teleAPIKEY');
     var mailEnable = nconf.get('STMP:MailEnable');
     var MailFrom      = nconf.get('STMP:MailFrom');
     var MailFromName  = nconf.get('STMP:MailFromName');
@@ -762,9 +768,6 @@ router.post('/messages', function(req, res, next) {
                           if (telechat == 0 || !telechat) {
                             console.error('Telegram Enabled on Alias ' + address + ' No ChatID key set. Please enter ChatID.');
                           } else {
-                            var t = new telegram({
-                              token: telekey
-                            });
                             //Notification formatted in Markdown for pretty notifications
                             var notificationText = `*${row.agency} - ${row.alias}*\n` + 
                                                    `Message: ${row.message}`;
@@ -773,14 +776,10 @@ router.post('/messages', function(req, res, next) {
                                 chat_id: telechat,
                                 text: notificationText,
                                 parse_mode: "Markdown"
-                            })
-                            .then(function(data)
-                            {
+                            }).then(function(data) {
                               //uncomment below line to debug messages at the console!
                               //console.log(util.inspect(data, false, null));
-                            })
-                            .catch(function(err)
-                            {
+                            }).catch(function(err) {
                                 console.log(err);
                             });
                           }
