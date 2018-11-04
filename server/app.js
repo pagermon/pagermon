@@ -1,4 +1,5 @@
-var version = "0.1.8-beta";
+var version = "0.1.9-beta";
+var release = 20181103;
 
 var debug = require('debug')('pagermon:server');
 var pmx = require('pmx').init({
@@ -29,79 +30,8 @@ process.on('SIGINT', function() {
     process.exit(1);
 });
 
-// initialize the database if it does not already exist
-var sqlite3 = require('sqlite3').verbose();
-var db = new sqlite3.Database('./messages.db', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, function (err) {
-    if (err) { console.log(err.message); } else {
-
-    // initialise capcodes table
-    var sql =  "CREATE TABLE IF NOT EXISTS capcodes ( ";
-        sql += "id INTEGER PRIMARY KEY AUTOINCREMENT, ";
-        sql += "address TEXT NOT NULL, ";
-        sql += "alias TEXT NOT NULL, ";
-        sql += "agency TEXT, ";
-        sql += "icon TEXT, ";
-        sql += "color TEXT, ";
-        sql += "push INTEGER DEFAULT 0, ";
-        sql += "pushpri TEXT, ";
-        sql += "pushgroup TEXT, ";
-        sql += "pushsound TEXT, ";
-        sql += "mailenable INTEGER DEFAULT 0, ";
-        sql += "mailto TEXT, ";
-        sql += "ignore INTEGER DEFAULT 0 ); ";
-    // initialise messages table
-    sql += "CREATE TABLE IF NOT EXISTS messages ( ";
-    sql += "id INTEGER UNIQUE, ";
-    sql += "address TEXT NOT NULL, ";
-    sql += "message TEXT NOT NULL, ";
-    sql += "source TEXT NOT NULL, ";
-    sql += "timestamp INTEGER, ";
-    sql += "alias_id INTEGER, ";
-    sql += "PRIMARY KEY(`id`), FOREIGN KEY(`alias_id`) REFERENCES capcodes(id) ); ";
-    // create indexes and the fts table
-    sql += "CREATE INDEX IF NOT EXISTS `msg_index` ON `messages` (`address`,`id` DESC); ";
-    sql += "CREATE INDEX IF NOT EXISTS `msg_alias` ON `messages` (`id` DESC, `alias_id`); ";
-    sql += "CREATE UNIQUE INDEX IF NOT EXISTS `cc_pk_idx` ON `capcodes` (`id`,`address` DESC); ";
-    sql += "CREATE VIRTUAL TABLE IF NOT EXISTS messages_search_index USING fts3(message, alias, agency); ";
-    // Create triggers to update the search table on insert/update/delete
-    sql += `CREATE TRIGGER IF NOT EXISTS messages_search_index_insert AFTER INSERT ON messages BEGIN
-        INSERT INTO messages_search_index (
-            rowid,
-            message,
-            alias,
-            agency
-        )
-        VALUES(
-            new.id,
-            new.message,
-            (SELECT alias FROM capcodes WHERE id = new.alias_id),
-            (SELECT agency FROM capcodes WHERE id = new.alias_id)
-        );
-        END;`;
-    sql += `CREATE TRIGGER IF NOT EXISTS messages_search_index_update AFTER UPDATE ON messages BEGIN
-        UPDATE messages_search_index SET
-            message = new.message,
-            alias = (SELECT alias FROM capcodes WHERE id = new.alias_id),
-            agency = (SELECT agency FROM capcodes WHERE id = new.alias_id)
-        WHERE rowid = old.id;
-        END;`;
-    sql += `CREATE TRIGGER IF NOT EXISTS messages_search_index_delete AFTER DELETE ON messages BEGIN
-        DELETE FROM messages_search_index WHERE rowid = old.id;
-        END;`;
-    // Populate the search index if not already populated
-    sql += `INSERT INTO messages_search_index (rowid, message, alias, agency)
-        SELECT messages.id, messages.message, capcodes.alias, capcodes.agency 
-        FROM messages LEFT JOIN capcodes ON capcodes.id = messages.alias_id
-        WHERE messages.id NOT IN (SELECT rowid FROM messages_search_index);`;
-
-
-      db.serialize(() => {
-          db.exec(sql, function(err) {
-              if (err) { console.log(err); }
-          });
-      });
-    }
-});
+var db = require('./db');
+    db.init(release);
 
 // routes
 var index = require('./routes/index');

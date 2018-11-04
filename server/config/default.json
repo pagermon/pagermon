@@ -51,6 +51,10 @@
     "pushenable": false,
     "pushAPIKEY":  ""
   },
+  "telegram":{
+    "teleenable": false,
+    "teleAPIKEY": ""
+  },
   "STMP":{
     "MailEnable": false,
     "MailFrom": "",
