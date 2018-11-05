@@ -395,6 +395,22 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
             queryObj.address = $routeParams.address;
           }
         }
+
+        var qArray = [];
+        if (queryObj.q)
+          qArray.push('q='+queryObj.q);
+        if (queryObj.address)
+          qArray.push('address='+queryObj.address);
+        if (queryObj.agency)
+          qArray.push('agency='+queryObj.agency);
+        if (queryObj.page > 1)
+          qArray.push('page='+queryObj.page);
+
+        var qString = '';
+        if (qArray.length > 0) {
+          qString = '?'+qArray.join('&');
+        }
+        window.history.pushState('', '', qString);
         
         if (queryObj.q || queryObj.agency || queryObj.address) {
           Api.MessageSearch.get(queryObj).$promise.then(function(results) {
