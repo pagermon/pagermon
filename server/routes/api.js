@@ -50,25 +50,7 @@ var initData = {};
 var HideCapcode = nconf.get('messages:HideCapcode');
 var apiSecurity = nconf.get('messages:apiSecurity');
 
-if (HideCapcode && apiSecurity) {
-  router.get('/capcodes', isLoggedIn, function(req, res, next) {
-    db.serialize(() => {
-      db.all("SELECT * from capcodes ORDER BY REPLACE(address, '_', '%')",function(err,rows){
-        if (err) return next(err);
-        res.json(rows);
-      });
-    });
-  });
-} else if (!apiSecurity && HideCapcode) {
-  router.get('/capcodes', isLoggedIn, function(req, res, next) {
-    db.serialize(() => {
-      db.all("SELECT * from capcodes ORDER BY REPLACE(address, '_', '%')",function(err,rows){
-        if (err) return next(err);
-        res.json(rows);
-      });
-    });
-  });
-} else if (apiSecurity && !HideCapcode) {
+if (HideCapcode) {
   router.get('/capcodes', isLoggedIn, function(req, res, next) {
     db.serialize(() => {
       db.all("SELECT * from capcodes ORDER BY REPLACE(address, '_', '%')",function(err,rows){
@@ -78,7 +60,7 @@ if (HideCapcode && apiSecurity) {
     });
   });
 } else {
-  router.get('/capcodes', function(req, res, next) {
+  router.get('/capcodes', isSecMode, function(req, res, next) {
     db.serialize(() => {
       db.all("SELECT * from capcodes ORDER BY REPLACE(address, '_', '%')",function(err,rows){
         if (err) return next(err);
@@ -88,25 +70,6 @@ if (HideCapcode && apiSecurity) {
   });
 }
 
-
-
-
-// secure all API's if API Security is enabled
-if (apiSecurity) {
-  router.all('*',
-    passport.authenticate('localapikey', { session: false, failWithError: true }),
-    function(req, res, next) {
-      next();
-    },
-    function(err, req, res, next) {
-      console.error(err);
-      isLoggedIn(req, res, next);
-    }
-  );
-};
-
-
-
 ///////////////////
 //               //
 // GET messages  //
@@ -114,7 +77,7 @@ if (apiSecurity) {
 ///////////////////
 
 /* GET message listing. */
-router.get('/messages', function(req, res, next) {
+router.get('/messages', isSecMode, function(req, res, next) {
   nconf.load();
   console.time('init');
   var pdwMode = nconf.get('messages:pdwMode');
@@ -216,7 +179,7 @@ router.get('/messages', function(req, res, next) {
   });
 });
 
-router.get('/messages/:id', function(req, res, next) {
+router.get('/messages/:id', isSecMode, function(req, res, next) {
   nconf.load();
   var pdwMode = nconf.get('messages:pdwMode');
   var id = req.params.id;
@@ -276,7 +239,7 @@ router.get('/messages/address/:id', function(req, res, next) {
 });*/
 
 /* GET message search */
-router.get('/messageSearch', function(req, res, next) {
+router.get('/messageSearch', isSecMode, function(req, res, next) {
   nconf.load();
   console.time('init');
   var pdwMode = nconf.get('messages:pdwMode');
@@ -411,7 +374,7 @@ router.get('/messageSearch', function(req, res, next) {
 
 
 // capcodes aren't pagified at the moment, this should probably be removed
-router.get('/capcodes/init', function(req, res, next) {
+router.get('/capcodes/init', isSecMode, function(req, res, next) {
   //set current page if specifed as get variable (eg: /?page=2)
   if (typeof req.query.page !== 'undefined') {
     var page = parseInt(req.query.page, 10);
@@ -437,7 +400,7 @@ router.get('/capcodes/init', function(req, res, next) {
   });
 });
 
-router.get('/capcodes/:id', function(req, res, next) {
+router.get('/capcodes/:id', isSecMode, function(req, res, next) {
   var id = req.params.id;
   db.serialize(() => {
     db.get("SELECT * from capcodes WHERE id=?", id, function(err, row){
@@ -490,7 +453,7 @@ router.get('/capcodes/:id', function(req, res, next) {
   });
 });
 
-router.get('/capcodeCheck/:id', function(req, res, next) {
+router.get('/capcodeCheck/:id', isSecMode, function(req, res, next) {
   var id = req.params.id;
   db.serialize(() => {
     db.get("SELECT * from capcodes WHERE address=?", id, function(err, row){
@@ -557,19 +520,18 @@ router.get('/capcodes/agency/:id', isLoggedIn, function(req, res, next) {
     });
   });
 });
-//if no api sec, lock down POST
-if (!apiSecurity) {
-  router.all('*',
-    passport.authenticate('localapikey', { session: false, failWithError: true }),
-    function(req, res, next) {
-      next();
-    },
-    function(err, req, res, next) {
-      console.info(err);
-      isLoggedIn(req, res, next);
-    }
-  );
-}
+
+// lock down POST routes
+router.all('*',
+  passport.authenticate('localapikey', { session: false, failWithError: true }),
+  function(req, res, next) {
+    next();
+  },
+  function(err, req, res, next) {
+    console.debug('API key auth failed, attempting basic auth');
+    isLoggedIn(req, res, next);
+  }
+);
 
 //////////////////////////////////
 //
@@ -997,14 +959,25 @@ function inParam (sql, arr) {
 // route middleware to make sure a user is logged in
 function isLoggedIn(req, res, next) {
   // if user is authenticated in the session, carry on
-  if (req.isAuthenticated())
+  if (req.isAuthenticated()) {
     return next();
-  // if they aren't redirect them to the home page, or send an error if they're an API
-  if (req.xhr) {
-    res.status(401).json({error: 'Authentication failed.'});
   } else {
-    //res.redirect('/login');
-    res.status(401).json({error: 'Authentication failed.'});
+    return res.status(401).json({error: 'Authentication failed.'});
+  }
+}
+
+// route middleware to make sure a user is logged in, only if in sec mode
+function isSecMode(req, res, next) {
+  if (apiSecurity) {
+    // if user is authenticated in the session, carry on
+    if (req.isAuthenticated()) {
+      return next();
+    } else {
+      return res.status(401).json({error: 'Authentication failed.'});
+    }
+  } else {
+    // if not sec mode then continue
+    return next();
   }
 }
 
