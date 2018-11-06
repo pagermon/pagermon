@@ -20,6 +20,7 @@
   "vizion"           : false, // enable/disable vizion features (versioning control)
   "env": {
     "NODE_ENV": "production",
+    "HOSTNAME": "",
     "APP_NAME": "pagermon"
   }
 }
