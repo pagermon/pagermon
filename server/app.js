@@ -50,8 +50,6 @@ var nconf = require('nconf');
     nconf.load();
 
 var port = normalizePort(process.env.PORT || '3000');
-var hostname = process.env.HOSTNAME;
-console.log(hostname);
 var app = express();
     app.set('port', port);
     // view engine setup
@@ -103,6 +101,7 @@ app.use(logger('combined'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
+
 var sessSet = {
     cookie: { maxAge: 7 * 24 * 60 * 60 * 1000 }, // 1 week
     store: new SQLiteStore,
@@ -110,9 +109,10 @@ var sessSet = {
     resave: 'true',
     secret: secret
 }
+var hostname = process.env.HOSTNAME;
 if (hostname)
-    sessSet.cookie.domain = hostname;
-console.log(sessSet);
+    sessSet.cookie.domain = '.'+hostname;
+
 app.use(session(sessSet));
 app.use(passport.initialize());
 app.use(passport.session()); // persistent login sessions
