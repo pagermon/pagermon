@@ -101,13 +101,19 @@ app.use(logger('combined'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(session({
+
+var sessSet = {
     cookie: { maxAge: 7 * 24 * 60 * 60 * 1000 }, // 1 week
     store: new SQLiteStore,
     saveUninitialized: true,
     resave: 'true',
     secret: secret
-}));
+}
+var hostname = process.env.HOSTNAME;
+if (hostname)
+    sessSet.cookie.domain = '.'+hostname;
+
+app.use(session(sessSet));
 app.use(passport.initialize());
 app.use(passport.session()); // persistent login sessions
 app.use(flash());
