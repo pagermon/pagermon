@@ -12,6 +12,7 @@
     "defaultLimit": 20,
     "duplicateFiltering": true,
     "duplicateLimit": 10,
+    "duplicateTime": 60,
     "rotationEnabled": true,
     "rotateDays": 7,
     "rotateKeep": 4,

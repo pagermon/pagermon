@@ -542,7 +542,8 @@ router.post('/messages', function(req, res, next) {
   nconf.load();
   if (req.body.address && req.body.message) {
     var filterDupes = nconf.get('messages:duplicateFiltering');
-    var dupeLimit = nconf.get('messages:duplicateLimit');
+    var dupeLimit = nconf.get('messages:duplicateLimit') || 0; // default 0
+    var dupeTime = nconf.get('messages:duplicateTime') || 0; // default 0
     var pdwMode = nconf.get('messages:pdwMode');
     var pushenable = nconf.get('pushover:pushenable');
     var pushkey = nconf.get('pushover:pushAPIKEY');
@@ -560,9 +561,24 @@ router.post('/messages', function(req, res, next) {
       var address = req.body.address || '0000000';
       var message = req.body.message.replace(/["]+/g, '') || 'null';
       var datetime = req.body.datetime || 1;
+      var timeDiff = datetime - dupeTime;
       var source = req.body.source || 'UNK';
-      var dupeCheck = 'SELECT * FROM messages WHERE id IN ( SELECT id FROM messages ORDER BY id DESC LIMIT '+dupeLimit;
-          dupeCheck +=' ) AND message LIKE "'+message+'" AND address="'+address+'";';
+      var dupeCheck = 'SELECT * FROM messages WHERE ';
+      if (dupeLimit != 0 || dupeTime != 0) {
+        dupeCheck += 'id IN ( SELECT id FROM messages ';
+        if (dupeTime != 0) {
+          dupeCheck += 'WHERE timestamp > '+timeDiff+' ';
+        }
+        if (dupeLimit != 0) {
+          dupeCheck += 'ORDER BY id DESC LIMIT '+dupeLimit;
+        }
+        dupeCheck +=' ) AND message LIKE "'+message+'" AND address="'+address+'";';
+      } else {
+        dupeCheck += 'message LIKE "'+message+'" AND address="'+address+'";';
+      }
+      // var dupeCheck = 'SELECT * FROM messages WHERE id IN ( SELECT id FROM messages WHERE timestamp > '+timeDiff+' ORDER BY id DESC LIMIT '+dupeLimit;
+      //     dupeCheck +=' ) AND message LIKE "'+message+'" AND address="'+address+'";';
+      console.log(dupeCheck);
       db.get(dupeCheck, [], function (err, row) {
         if (err) {
           res.status(500).send(err);
