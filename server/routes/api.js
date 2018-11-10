@@ -563,6 +563,7 @@ router.post('/messages', function(req, res, next) {
       var datetime = req.body.datetime || 1;
       var timeDiff = datetime - dupeTime;
       var source = req.body.source || 'UNK';
+      
       var dupeCheck = 'SELECT * FROM messages WHERE ';
       if (dupeLimit != 0 || dupeTime != 0) {
         dupeCheck += 'id IN ( SELECT id FROM messages ';
@@ -576,9 +577,7 @@ router.post('/messages', function(req, res, next) {
       } else {
         dupeCheck += 'message LIKE "'+message+'" AND address="'+address+'";';
       }
-      // var dupeCheck = 'SELECT * FROM messages WHERE id IN ( SELECT id FROM messages WHERE timestamp > '+timeDiff+' ORDER BY id DESC LIMIT '+dupeLimit;
-      //     dupeCheck +=' ) AND message LIKE "'+message+'" AND address="'+address+'";';
-      console.log(dupeCheck);
+
       db.get(dupeCheck, [], function (err, row) {
         if (err) {
           res.status(500).send(err);
