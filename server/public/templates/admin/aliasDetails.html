@@ -200,7 +200,28 @@
                 </span>
               </div>
             </div>
-        
+
+            <h5>Twitter</h5>
+            <div class="form-group">
+              <label for="alias.twitter" class="col-xs-4 col-sm-3 control-label">Twitter</label>
+              <div class="col-xs-8 col-sm-9">
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" name="alias.twitter" ng-model="alias.twitter" ng-true-value="1" ng-false-value="0">
+                    Enable posting to Twitter
+                  </label>
+                  <span id="helpBlock" class="help-block">If checked, messages matching this alias will be posted to twitter</span>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="alias.twitterhashtag" class="col-xs-4 col-sm-3 control-label">Twitter Alias Hashtags </label>
+              <div class="col-xs-8 col-sm-9">
+                <input type="text" class="form-control" name="alias.twitterhashtag" ng-model="alias.twitterhashtag" ng-disabled="!alias.twitter">
+                <span id="helpBlock" class="help-block">Hashtags to append to all twitter posts regarding this alias. </a>
+                </span>
+              </div>
+            </div>
             <div class="btn-group pull-right" style="padding-right: 10px; padding-bottom: 10px;"role="group" aria-label="Actions">
               <button type="button" ng-if="!isNew" ng-click="aliasDelete()" class="btn btn-danger">Delete</button>
               <button type="button" ng-click="aliasLoad()" class="btn btn-default">Reset</button>

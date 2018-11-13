@@ -22,6 +22,21 @@ if (teleenable) {
     token: telekey
   });
 }
+var twitenable = nconf.get('twitter:twitenable');
+if (twitenable) {
+  var twit = require('twit');
+  var twitconskey = nconf.get('twitter:twitconskey');
+  var twitconssecret = nconf.get('twitter:twitconssecret');
+  var twitacctoken = nconf.get('twitter:twitacctoken');
+  var twitaccsecret = nconf.get('twitter:twitaccsecret');
+  var twitglobalhashtags = nconf.get('twitter:twitglobalhashtags');
+  var tw = new twit({
+    consumer_key: twitconskey,
+    consumer_secret: twitconssecret,
+    access_token: twitacctoken,
+    access_token_secret: twitaccsecret,
+  });
+}
 
 router.use( bodyParser.json() );       // to support JSON-encoded bodies
 router.use(bodyParser.urlencoded({     // to support URL-encoded bodies
@@ -442,6 +457,8 @@ router.get('/capcodes/:id', isSecMode, function(req, res, next) {
             "pushpri": "0",
             "telegram": "",
             "telechat": "",
+            "twitter": "",
+            "twitterhashtag": "",
             "mailenable" : "",
             "mailto" : ""
           };
@@ -495,6 +512,8 @@ router.get('/capcodeCheck/:id', isSecMode, function(req, res, next) {
             "pushpri": "0",
             "telegram": "",
             "telechat": "",
+            "twitter": "",
+            "twitterhashtag": "",
             "mailenable" : "",
             "mailto" : ""
           };
@@ -587,7 +606,7 @@ router.post('/messages', function(req, res, next) {
             res.status(200);
             res.send('Ignoring duplicate');
           } else {
-            db.get("SELECT id, ignore, push, pushpri, pushgroup, pushsound, telegram, telechat, mailenable, mailto FROM capcodes WHERE ? LIKE address ORDER BY REPLACE(address, '_', '%') DESC LIMIT 1", address, function(err,row) {
+            db.get("SELECT id, ignore, push, pushpri, pushgroup, pushsound, telegram, telechat, twitter, twitterhashtag, mailenable, mailto FROM capcodes WHERE ? LIKE address ORDER BY REPLACE(address, '_', '%') DESC LIMIT 1", address, function(err,row) {
               var insert;
               var alias_id = null;
               var pushonoff = null;
@@ -596,6 +615,7 @@ router.post('/messages', function(req, res, next) {
               var pushsound = null;
               var teleonoff = null;
               var telechat = null;
+              var twitonoff = null;
               var mailonoff = null;
               var mailTo = "";
               if (err) { console.error(err) }
@@ -612,6 +632,8 @@ router.post('/messages', function(req, res, next) {
                   pushSound = row.pushsound;
                   teleonoff = row.telegram;
                   telechat = row.telechat
+                  twitonoff = row.twitter
+                  twithashtags = row.twitterhashtag
                   mailonoff = row.mailenable;
                   mailTo = row.mailto;
                 }
@@ -699,9 +721,9 @@ router.post('/messages', function(req, res, next) {
                             // send mail with defined transport object
                             transporter.sendMail(mailOptions, (error, info) => {
                               if (error) {
-                                return console.error(error);
+                                return console.error('SMTP:' + error);
                               }
-                              console.log('Message sent: %s', info.messageId);
+                              console.log('SMTP:' + 'Message sent: %s', info.messageId);
                             });
                           }
                         };
@@ -710,7 +732,7 @@ router.post('/messages', function(req, res, next) {
                         if (pushenable == true && pushonoff == 1) {
                           //ensure key has been entered before trying to push
                           if (pushGroup == 0 || !pushGroup) {
-                            console.error('Push Enabled on Alias ' + address + ' No User/Group key set. Please enter User/Group Key.');
+                            console.error('Pushover: ' + address + ' No User/Group key set. Please enter User/Group Key.');
                           } else {
                             var p = new push({
                               user: pushGroup,
@@ -734,8 +756,8 @@ router.post('/messages', function(req, res, next) {
                               console.log("SENDING EMERGENCY PUSH NOTIFICATION")
                             }
                             p.send(msg, function (err, result) {
-                              if (err) { console.error(err); }
-                              console.log(result);
+                              if (err) { console.error('Pushover:' + err); }
+                              console.log('Pushover:' + result);
                             });
                           }
                         };
@@ -743,7 +765,7 @@ router.post('/messages', function(req, res, next) {
                         if (teleenable == true && teleonoff == 1) {
                           //ensure chatid has been entered before trying to push
                           if (telechat == 0 || !telechat) {
-                            console.error('Telegram Enabled on Alias ' + address + ' No ChatID key set. Please enter ChatID.');
+                            console.error('Telegram: ' + address + ' No ChatID key set. Please enter ChatID.');
                           } else {
                             //Notification formatted in Markdown for pretty notifications
                             var notificationText = `*${row.agency} - ${row.alias}*\n` + 
@@ -755,10 +777,27 @@ router.post('/messages', function(req, res, next) {
                                 parse_mode: "Markdown"
                             }).then(function(data) {
                               //uncomment below line to debug messages at the console!
-                              //console.log(util.inspect(data, false, null));
+                              console.log('Telegram: ' + util.inspect(data, false, null));
                             }).catch(function(err) {
-                                console.log(err);
+                                console.log('Telegram: ' + err);
                             });
+                          }
+                        };
+                        //start Twitter Module
+                        if (twitenable == true && twitonoff == 1) {
+                          //ensure API Keys have been entered before trying to post. 
+                          if ((twitconskey == 0 || !twitconskey) || (twitconssecret == 0 || !twitconssecret) || (twitacctoken == 0 || !twitacctoken) || (twitaccsecret == 0 || !twitaccsecret)) {
+                            console.error('Twitter: ' + address + ' No API keys set. Please check API keys.');
+                          } else {
+                            var twittertext = `${row.agency} - ${row.alias} \n` +
+                              `${row.message} \n` +
+                              `${twithashtags}` + `${twitglobalhashtags}`
+                            
+                            tw.post('statuses/update', {
+                              status: twittertext
+                            }, function (err, data, response) {
+                              if (err) { console.error('Twitter: ' + err); }else{ console.log('Twitter: ' + data)}
+                            })
                           }
                         };
                       }
@@ -796,10 +835,12 @@ router.post('/capcodes', function(req, res, next) {
     var pushsound = req.body.pushsound || '';
     var telegram = req.body.telegram || 0;
     var telechat = req.body.telechat || '';
+    var twitter = req.body.twitter || 0;
+    var twitterhashtag = req.body.twitterhashtag || '';
     var Mailenable = req.body.mailenable || 0;
     var MailTo = req.body.mailto || '';
     db.serialize(() => {
-      db.run("REPLACE INTO capcodes (id, address, alias, agency, color, icon, ignore, push, pushpri, pushgroup, pushsound, telegram, telechat, mailenable, mailto) VALUES ($mesID, $mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore, $mesPush, $mesPushPri, $mesPushGroup, $mesPushSound, $mesTelegram, $mesTeleChat, $MailEnable, $MailTo );", {
+      db.run("REPLACE INTO capcodes (id, address, alias, agency, color, icon, ignore, push, pushpri, pushgroup, pushsound, telegram, telechat, twitter, twitterhashtag, mailenable, mailto) VALUES ($mesID, $mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore, $mesPush, $mesPushPri, $mesPushGroup, $mesPushSound, $mesTelegram, $mesTeleChat, $mesTwitter, $mesTwitterHashTag, $MailEnable, $MailTo );", {
         $mesID: id,
         $mesAddress: address,
         $mesAlias: alias,
@@ -813,6 +854,8 @@ router.post('/capcodes', function(req, res, next) {
         $mesPushSound: pushsound,
         $mesTelegram: telegram,
         $mesTeleChat: telechat,
+        $mesTwitter: twitter,
+        $mesTwitterHashTag: twitterhashtag,
         $MailEnable : Mailenable,
         $MailTo : MailTo
       }, function(err){
@@ -875,13 +918,15 @@ router.post('/capcodes/:id', function(req, res, next) {
       var pushsound = req.body.pushsound || '';
       var telegram = req.body.telegram || 0;
       var telechat = req.body.telechat || '';
+      var twitter = req.body.twitter || 0;
+      var twitterhashtag = req.body.twitterhashtag || '';
       var Mailenable = req.body.mailenable || 0;
       var MailTo = req.body.mailto || '';
       var updateAlias = req.body.updateAlias || 0;
       console.time('insert');
       db.serialize(() => {
         //db.run("UPDATE tbl SET name = ? WHERE id = ?", [ "bar", 2 ]);
-        db.run("REPLACE INTO capcodes (id, address, alias, agency, color, icon, ignore, push, pushpri, pushgroup, pushsound, telegram, telechat, mailenable, mailto  ) VALUES ($mesID, $mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore, $mesPush, $mesPushPri, $mesPushGroup, $mesPushSound, $mesTelegram, $mesTeleChat, $MailEnable, $MailTo );", {
+        db.run("REPLACE INTO capcodes (id, address, alias, agency, color, icon, ignore, push, pushpri, pushgroup, pushsound, telegram, telechat, twitter, twitterhashtag, mailenable, mailto  ) VALUES ($mesID, $mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore, $mesPush, $mesPushPri, $mesPushGroup, $mesPushSound, $mesTelegram, $mesTeleChat, $mesTwitter, $mesTwitterHashTag, $MailEnable, $MailTo );", {
           $mesID: id,
           $mesAddress: address,
           $mesAlias: alias,
@@ -895,6 +940,8 @@ router.post('/capcodes/:id', function(req, res, next) {
           $mesPushSound: pushsound,
           $mesTelegram: telegram,
           $mesTeleChat: telechat,
+          $mesTwitter: twitter,
+          $mesTwitterHashTag: twitterhashtag,
           $MailEnable : Mailenable,
           $MailTo : MailTo
         }, function(err){
