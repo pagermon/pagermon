@@ -23,6 +23,7 @@ The UI is built around a Node/Express/Angular/Bootstrap stack, while the client 
 * Push notifications
     * [Pushover](https://pushover.net/) Integration - near realtime muti-device notification service
     * [Telegram](https://telegram.org/) Integration - near realtime cloud based multi-device messaging
+    * [Discord](https://discordapp.com/) Integration - near realtime cloud based messaging service
     * Email Support for conventional SMTP email notifications 
 * May or may not contain cute puppies
 
