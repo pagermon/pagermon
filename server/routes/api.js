@@ -786,12 +786,12 @@ router.post('/messages', function(req, res, next) {
                             var d = new discord.WebhookClient(discwebhookid, discwebhooktoken);
             
                             //Notification formatted in Markdown for pretty notifications
-                            var notificationText = `*${row.agency} - ${row.alias}*\n` +
-                              `Message: ${row.message}`;
+                            var notificationText = `***${row.agency} - ${row.alias}***\n` +
+                              `Message: **${row.message}**`;
                             
                             d.send(notificationText)
                               .then(console.log(`Discord: Message Sent`))
-                              .catch(function (err) {
+                              .catch(function(err) {
                                 'Discord: ' + console.error(err);
                               });
                           }
