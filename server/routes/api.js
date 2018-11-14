@@ -791,7 +791,9 @@ router.post('/messages', function(req, res, next) {
                             
                             d.send(notificationText)
                               .then(console.log(`Discord: Message Sent`))
-                              .catch('Discord: ' + console.error);
+                              .catch(function (err) {
+                                'Discord: ' + console.error(err);
+                              });
                           }
                         };
                       }
