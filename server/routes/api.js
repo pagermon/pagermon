@@ -528,7 +528,7 @@ router.all('*',
     next();
   },
   function(err, req, res, next) {
-    console.debug('API key auth failed, attempting basic auth');
+    console.log('API key auth failed, attempting basic auth');
     isLoggedIn(req, res, next);
   }
 );
