@@ -200,7 +200,39 @@
                 </span>
               </div>
             </div>
-        
+            
+            <h5>Discord</h5>
+            <div class="form-group">
+              <label for="alias.discord" class="col-xs-4 col-sm-3 control-label">Discord</label>
+              <div class="col-xs-8 col-sm-9">
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" name="alias.discord" ng-model="alias.discord" ng-true-value="1" ng-false-value="0">
+                    Enable sending via Discord
+                  </label>
+                  <span id="helpBlock" class="help-block">If checked, messages matching this alias will be sent via webhook to Discord</span>
+                </div>
+              </div>
+            </div>
+            <div class="form-group" ng-class="!alias.discwebhookid && alias.discord || alias.discwebhookid == 0 && alias.discord ? 'has-error' : 'has-success'">
+              <label for="alias.discwebhookid" class="col-xs-4 col-sm-3 control-label">Discord - Webhook URL </label>
+              <div class="col-xs-8 col-sm-9">
+                <input type="text" class="form-control" name="alias.discwebhookid" ng-model="alias.discwebhookid" ng-disabled="!alias.discord"
+                  ng-required="alias.discord">
+                <span id="helpBlock" class="help-block">Discord Webhook ID</a>
+                </span>
+              </div>
+            </div>
+            <div class="form-group" ng-class="!alias.discwebhooktoken && alias.discord || alias.discwebhooktoken == 0 && alias.discord ? 'has-error' : 'has-success'">
+              <label for="alias.discwebhooktoken" class="col-xs-4 col-sm-3 control-label">Discord - Webhook Token </label>
+              <div class="col-xs-8 col-sm-9">
+                <input type="text" class="form-control" name="alias.discwebhooktoken" ng-model="alias.discwebhooktoken" ng-disabled="!alias.discord"
+                  ng-required="alias.discord">
+                <span id="helpBlock" class="help-block">Discord Webhook Token</a>
+                </span>
+              </div>
+            </div>
+
             <div class="btn-group pull-right" style="padding-right: 10px; padding-bottom: 10px;"role="group" aria-label="Actions">
               <button type="button" ng-if="!isNew" ng-click="aliasDelete()" class="btn btn-danger">Delete</button>
               <button type="button" ng-click="aliasLoad()" class="btn btn-default">Reset</button>
