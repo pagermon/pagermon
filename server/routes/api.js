@@ -797,7 +797,7 @@ router.post('/messages', function(req, res, next) {
                             tw.post('statuses/update', {
                               status: twittertext
                             }, function (err, data, response) {
-                              if (err) { console.error('Twitter: ' + err); }else{ console.log('Twitter: ' + data)}
+                              if (err) { console.error('Twitter: ' + err); }else{ console.log('Twitter: ' + 'Tweet Posted')}
                             })
                           }
                         };
