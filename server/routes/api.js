@@ -779,6 +779,7 @@ router.post('/messages', function(req, res, next) {
                           }
                         };
                         if (discenable == true && disconoff == 1) {
+                          var toHex = require('colornames')
                           var hostname = nconf.get('hostname');
                           //Ensure webhook ID and Token have been entered into the alias. 
                           if ((discwebhookid == 0 || !discwebhookid) || (discwebhooktoken == 0 || !discwebhooktoken)) {
@@ -790,7 +791,14 @@ router.post('/messages', function(req, res, next) {
                             var notificationembed = new discord.RichEmbed({
                               timestamp: new Date(),
                             });
-                            notificationembed.setColor(`${row.color}`);
+                            // toHex doesn't support putting HEX in, needs to check and skip over if already hex. 
+                            var isHex = /^#[0-9A-F]{6}$/i.test(row.color)
+                            if (!isHex || isHex == false) {
+                              var discordcolor = toHex(row.color)
+                            } else {
+                              var discordcolor = row.color
+                            }
+                            notificationembed.setColor(discordcolor);
                             notificationembed.setTitle(`**${row.agency} - ${row.alias}**`);
                             notificationembed.addField('Message', `${row.message}`);
                             if (hostname == undefined || !hostname) {
@@ -799,7 +807,8 @@ router.post('/messages', function(req, res, next) {
                             } else {
                               notificationembed.setAuthor('PagerMon', '', `${hostname}`);
                             }
-                            
+                            //Print notification template when debugging enabled
+                            console.debug(notificationembed)
                             d.send(notificationembed)
                               .then(console.log(`Discord: Message Sent`))
                               .catch(function(err) {
