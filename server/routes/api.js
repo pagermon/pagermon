@@ -779,17 +779,28 @@ router.post('/messages', function(req, res, next) {
                           }
                         };
                         if (discenable == true && disconoff == 1) {
-                          //ensure chatid has been entered before trying to push
+                          var hostname = nconf.get('hostname');
+                          //Ensure webhook ID and Token have been entered into the alias. 
                           if ((discwebhookid == 0 || !discwebhookid) || (discwebhooktoken == 0 || !discwebhooktoken)) {
                             console.error('Discord: ' + address + ' No Webhook URL set. Please enter Webhook URL.');
                           } else {
                             var d = new discord.WebhookClient(discwebhookid, discwebhooktoken);
             
-                            //Notification formatted in Markdown for pretty notifications
-                            var notificationText = `***${row.agency} - ${row.alias}***\n` +
-                              `Message: **${row.message}**`;
+                            //Use embedded discord notification format from discord.js 
+                            var notificationembed = new discord.RichEmbed({
+                              timestamp: new Date(),
+                            });
+                            notificationembed.setColor(`${row.color}`);
+                            notificationembed.setTitle(`**${row.agency} - ${row.alias}**`);
+                            notificationembed.addField('Message', `${row.message}`);
+                            if (hostname == undefined || !hostname) {
+                              console.debug('Discord: Hostname not set in config file using pagermon github')
+                              notificationembed.setAuthor('PagerMon', '', `https://github.com/davidmckenzie/pagermon`);
+                            } else {
+                              notificationembed.setAuthor('PagerMon', '', `${hostname}`);
+                            }
                             
-                            d.send(notificationText)
+                            d.send(notificationembed)
                               .then(console.log(`Discord: Message Sent`))
                               .catch(function(err) {
                                 'Discord: ' + console.error(err);
