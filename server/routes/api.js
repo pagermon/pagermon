@@ -784,7 +784,7 @@ router.post('/messages', function(req, res, next) {
                             var webhook = discwebhook.split('/');
                             var discwebhookid = webhook[5];
                             var discwebhooktoken = webhook[6];
-                            console.debug(discwebhookid + ' ' + discwebhooktoken)
+
                             var d = new discord.WebhookClient(discwebhookid, discwebhooktoken);
             
                             //Use embedded discord notification format from discord.js 
