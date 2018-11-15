@@ -64,6 +64,10 @@
     "twitaccsecret": "",
     "twitglobalhashtags": ""
   },
+  "discord":{
+    "discenable": false
+  
+  },
   "STMP":{
     "MailEnable": false,
     "MailFrom": "",
