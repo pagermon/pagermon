@@ -448,8 +448,7 @@ router.get('/capcodes/:id', isSecMode, function(req, res, next) {
             "telegram": "",
             "telechat": "",
             "discord": "",
-            "discwebhookid": "",
-            "discwebhooktoken": "",
+            "discwebhook": "",
             "mailenable" : "",
             "mailto" : ""
           };
@@ -504,8 +503,7 @@ router.get('/capcodeCheck/:id', isSecMode, function(req, res, next) {
             "telegram": "",
             "telechat": "",
             "discord": "",
-            "discwebhookid": "",
-            "discwebhooktoken": "",
+            "discwebhook": "",
             "mailenable" : "",
             "mailto" : ""
           };
@@ -598,7 +596,7 @@ router.post('/messages', function(req, res, next) {
             res.status(200);
             res.send('Ignoring duplicate');
           } else {
-            db.get("SELECT id, ignore, push, pushpri, pushgroup, pushsound, telegram, telechat, discord, discwebhookid, discwebhooktoken, mailenable, mailto FROM capcodes WHERE ? LIKE address ORDER BY REPLACE(address, '_', '%') DESC LIMIT 1", address, function(err,row) {
+            db.get("SELECT id, ignore, push, pushpri, pushgroup, pushsound, telegram, telechat, discord, discwebhook, mailenable, mailto FROM capcodes WHERE ? LIKE address ORDER BY REPLACE(address, '_', '%') DESC LIMIT 1", address, function(err,row) {
               var insert;
               var alias_id = null;
               var pushonoff = null;
@@ -608,8 +606,7 @@ router.post('/messages', function(req, res, next) {
               var teleonoff = null;
               var telechat = null;
               var disconoff = null;
-              var discwebhookid = null;
-              var discwebhooktoken = null;
+              var discwebhook = null;
               var mailonoff = null;
               var mailTo = "";
               if (err) { console.error(err) }
@@ -627,8 +624,7 @@ router.post('/messages', function(req, res, next) {
                   teleonoff = row.telegram;
                   telechat = row.telechat;
                   disconoff = row.discord;
-                  discwebhookid = row.discwebhookid;
-                  discwebhooktoken = row.discwebhooktoken;
+                  discwebhook = row.discwebhook;
                   mailonoff = row.mailenable;
                   mailTo = row.mailto;
                 }
@@ -727,7 +723,7 @@ router.post('/messages', function(req, res, next) {
                         if (pushenable == true && pushonoff == 1) {
                           //ensure key has been entered before trying to push
                           if (pushGroup == 0 || !pushGroup) {
-                            console.error('Push Enabled on Alias ' + address + ' No User/Group key set. Please enter User/Group Key.');
+                            console.error('Pushover: ' + address + ' No User/Group key set. Please enter User/Group Key.');
                           } else {
                             var p = new push({
                               user: pushGroup,
@@ -751,8 +747,8 @@ router.post('/messages', function(req, res, next) {
                               console.log("SENDING EMERGENCY PUSH NOTIFICATION")
                             }
                             p.send(msg, function (err, result) {
-                              if (err) { console.error(err); }
-                              console.log(result);
+                              if (err) { console.error('Pushover :' + err); }
+                              console.log('Pushover: ' + result);
                             });
                           }
                         };
@@ -760,7 +756,7 @@ router.post('/messages', function(req, res, next) {
                         if (teleenable == true && teleonoff == 1) {
                           //ensure chatid has been entered before trying to push
                           if (telechat == 0 || !telechat) {
-                            console.error('Telegram Enabled on Alias ' + address + ' No ChatID key set. Please enter ChatID.');
+                            console.error('Telegram: ' + address + ' No ChatID key set. Please enter ChatID.');
                           } else {
                             //Notification formatted in Markdown for pretty notifications
                             var notificationText = `*${row.agency} - ${row.alias}*\n` + 
@@ -774,7 +770,7 @@ router.post('/messages', function(req, res, next) {
                               //uncomment below line to debug messages at the console!
                               //console.log(util.inspect(data, false, null));
                             }).catch(function(err) {
-                                console.log(err);
+                                console.log('Telegram: ' + err);
                             });
                           }
                         };
@@ -782,9 +778,13 @@ router.post('/messages', function(req, res, next) {
                           var toHex = require('colornames')
                           var hostname = nconf.get('hostname');
                           //Ensure webhook ID and Token have been entered into the alias. 
-                          if ((discwebhookid == 0 || !discwebhookid) || (discwebhooktoken == 0 || !discwebhooktoken)) {
+                          if (discwebhook == 0 || !discwebhook) {
                             console.error('Discord: ' + address + ' No Webhook URL set. Please enter Webhook URL.');
                           } else {
+                            var webhook = discwebhook.split('/');
+                            var discwebhookid = webhook[5];
+                            var discwebhooktoken = webhook[6];
+                            console.debug(discwebhookid + ' ' + discwebhooktoken)
                             var d = new discord.WebhookClient(discwebhookid, discwebhooktoken);
             
                             //Use embedded discord notification format from discord.js 
@@ -852,12 +852,11 @@ router.post('/capcodes', function(req, res, next) {
     var telegram = req.body.telegram || 0;
     var telechat = req.body.telechat || '';
     var discord = req.body.discord || 0;
-    var discwebhookid = req.body.discwebhookid || '';
-    var discwebhooktoken = req.body.discwebhooktoken || '';
+    var discwebhook = req.body.discwebhook || '';
     var Mailenable = req.body.mailenable || 0;
     var MailTo = req.body.mailto || '';
     db.serialize(() => {
-      db.run("REPLACE INTO capcodes (id, address, alias, agency, color, icon, ignore, push, pushpri, pushgroup, pushsound, telegram, telechat, discord, discwebhookid, discwebhooktoken, mailenable, mailto) VALUES ($mesID, $mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore, $mesPush, $mesPushPri, $mesPushGroup, $mesPushSound, $mesTelegram, $mesTeleChat, $mesDiscord, $mesDiscWebhookID, $mesDiscWebhookToken, $MailEnable, $MailTo );", {
+      db.run("REPLACE INTO capcodes (id, address, alias, agency, color, icon, ignore, push, pushpri, pushgroup, pushsound, telegram, telechat, discord, discwebhook, mailenable, mailto) VALUES ($mesID, $mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore, $mesPush, $mesPushPri, $mesPushGroup, $mesPushSound, $mesTelegram, $mesTeleChat, $mesDiscord, $mesDiscWebhook, $MailEnable, $MailTo );", {
         $mesID: id,
         $mesAddress: address,
         $mesAlias: alias,
@@ -872,8 +871,7 @@ router.post('/capcodes', function(req, res, next) {
         $mesTelegram: telegram,
         $mesTeleChat: telechat,
         $mesDiscord: discord,
-        $mesDiscWebhookID: discwebhookid,
-        $mesDiscWebhookToken: discwebhooktoken,
+        $mesDiscWebhook: discwebhook,
         $MailEnable : Mailenable,
         $MailTo : MailTo
       }, function(err){
@@ -937,15 +935,14 @@ router.post('/capcodes/:id', function(req, res, next) {
       var telegram = req.body.telegram || 0;
       var telechat = req.body.telechat || '';
       var discord = req.body.discord || 0;
-      var discwebhookid = req.body.discwebhookid || '';
-      var discwebhooktoken = req.body.discwebhooktoken || '';
+      var discwebhook = req.body.discwebhook || '';
       var Mailenable = req.body.mailenable || 0;
       var MailTo = req.body.mailto || '';
       var updateAlias = req.body.updateAlias || 0;
       console.time('insert');
       db.serialize(() => {
         //db.run("UPDATE tbl SET name = ? WHERE id = ?", [ "bar", 2 ]);
-        db.run("REPLACE INTO capcodes (id, address, alias, agency, color, icon, ignore, push, pushpri, pushgroup, pushsound, telegram, telechat, discord, discwebhookid, discwebhooktoken, mailenable, mailto  ) VALUES ($mesID, $mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore, $mesPush, $mesPushPri, $mesPushGroup, $mesPushSound, $mesTelegram, $mesTeleChat, $mesDiscord, $mesDiscWebhookID, $mesDiscWebhookToken, $MailEnable, $MailTo );", {
+        db.run("REPLACE INTO capcodes (id, address, alias, agency, color, icon, ignore, push, pushpri, pushgroup, pushsound, telegram, telechat, discord, discwebhook, mailenable, mailto  ) VALUES ($mesID, $mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore, $mesPush, $mesPushPri, $mesPushGroup, $mesPushSound, $mesTelegram, $mesTeleChat, $mesDiscord, $mesDiscWebhook, $MailEnable, $MailTo );", {
           $mesID: id,
           $mesAddress: address,
           $mesAlias: alias,
@@ -960,8 +957,7 @@ router.post('/capcodes/:id', function(req, res, next) {
           $mesTelegram: telegram,
           $mesTeleChat: telechat,
           $mesDiscord: discord,
-          $mesDiscWebhookID: discwebhookid,
-          $mesDiscWebhookToken: discwebhooktoken,
+          $mesDiscWebhook: discwebhook,
           $MailEnable : Mailenable,
           $MailTo : MailTo
         }, function(err){
