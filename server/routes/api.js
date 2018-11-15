@@ -30,12 +30,6 @@ if (twitenable) {
   var twitacctoken = nconf.get('twitter:twitacctoken');
   var twitaccsecret = nconf.get('twitter:twitaccsecret');
   var twitglobalhashtags = nconf.get('twitter:twitglobalhashtags');
-  var tw = new twit({
-    consumer_key: twitconskey,
-    consumer_secret: twitconssecret,
-    access_token: twitacctoken,
-    access_token_secret: twitaccsecret,
-  });
 }
 
 router.use( bodyParser.json() );       // to support JSON-encoded bodies
@@ -789,9 +783,16 @@ router.post('/messages', function(req, res, next) {
                           if ((twitconskey == 0 || !twitconskey) || (twitconssecret == 0 || !twitconssecret) || (twitacctoken == 0 || !twitacctoken) || (twitaccsecret == 0 || !twitaccsecret)) {
                             console.error('Twitter: ' + address + ' No API keys set. Please check API keys.');
                           } else {
+                            var tw = new twit({
+                              consumer_key: twitconskey,
+                              consumer_secret: twitconssecret,
+                              access_token: twitacctoken,
+                              access_token_secret: twitaccsecret,
+                            });
+                            
                             var twittertext = `${row.agency} - ${row.alias} \n` +
                               `${row.message} \n` +
-                              `${twithashtags}` + `${twitglobalhashtags}`
+                              `${twithashtags}` + ' ' + `${twitglobalhashtags}`
                             
                             tw.post('statuses/update', {
                               status: twittertext
