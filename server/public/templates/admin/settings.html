@@ -235,7 +235,7 @@
               </div>
             </div>
 		  
-	    <h6>Telegram</h6>
+	          <h6>Telegram</h6>
             <div class="form-group">
               <label for="telegram.teleenable" class="col-xs-4 col-sm-3 control-label">Enable</label>
               <div class="col-xs-8 col-sm-9">
@@ -302,7 +302,20 @@
                 <span id="helpBlock" class="help-block">Global Hashtags to be added to all tweets. Space Seperated</span>
               </div>
             </div>
-
+            
+            <h6>Discord</h6>
+            <div class="form-group">
+              <label for="discord.discenable" class="col-xs-4 col-sm-3 control-label">Enable</label>
+              <div class="col-xs-8 col-sm-9">
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" name="discord.discenable" ng-model="settings.discord.discenable">
+                    Enable or disable for selected alias's
+                  </label>
+                </div>
+              </div>
+            </div>
+            
             <h6>Email</h6>
             <div class="form-group">
               <label for="STMP.MailEnable" class="col-xs-4 col-sm-3 control-label">Enable</label>

@@ -32,6 +32,11 @@ if (twitenable) {
   var twitglobalhashtags = nconf.get('twitter:twitglobalhashtags');
 }
 
+var discenable = nconf.get('discord:discenable');
+if (discenable) {
+  var discord = require('discord.js');
+}
+
 router.use( bodyParser.json() );       // to support JSON-encoded bodies
 router.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: true
@@ -453,6 +458,8 @@ router.get('/capcodes/:id', isSecMode, function(req, res, next) {
             "telechat": "",
             "twitter": "",
             "twitterhashtag": "",
+            "discord": "",
+            "discwebhook": "",
             "mailenable" : "",
             "mailto" : ""
           };
@@ -508,6 +515,8 @@ router.get('/capcodeCheck/:id', isSecMode, function(req, res, next) {
             "telechat": "",
             "twitter": "",
             "twitterhashtag": "",
+            "discord": "",
+            "discwebhook": "",
             "mailenable" : "",
             "mailto" : ""
           };
@@ -600,7 +609,7 @@ router.post('/messages', function(req, res, next) {
             res.status(200);
             res.send('Ignoring duplicate');
           } else {
-            db.get("SELECT id, ignore, push, pushpri, pushgroup, pushsound, telegram, telechat, twitter, twitterhashtag, mailenable, mailto FROM capcodes WHERE ? LIKE address ORDER BY REPLACE(address, '_', '%') DESC LIMIT 1", address, function(err,row) {
+            db.get("SELECT id, ignore, push, pushpri, pushgroup, pushsound, telegram, telechat, twitter, twitterhashtag, discord, discwebhook, mailenable, mailto FROM capcodes WHERE ? LIKE address ORDER BY REPLACE(address, '_', '%') DESC LIMIT 1", address, function(err,row) {
               var insert;
               var alias_id = null;
               var pushonoff = null;
@@ -610,6 +619,8 @@ router.post('/messages', function(req, res, next) {
               var teleonoff = null;
               var telechat = null;
               var twitonoff = null;
+              var disconoff = null;
+              var discwebhook = null;
               var mailonoff = null;
               var mailTo = "";
               if (err) { console.error(err) }
@@ -628,6 +639,9 @@ router.post('/messages', function(req, res, next) {
                   telechat = row.telechat
                   twitonoff = row.twitter
                   twithashtags = row.twitterhashtag
+                  telechat = row.telechat;
+                  disconoff = row.discord;
+                  discwebhook = row.discwebhook;
                   mailonoff = row.mailenable;
                   mailTo = row.mailto;
                 }
@@ -801,6 +815,50 @@ router.post('/messages', function(req, res, next) {
                             })
                           }
                         };
+                        
+                        //Start Discord Module
+                        if (discenable == true && disconoff == 1) {
+                          var toHex = require('colornames')
+                          var hostname = nconf.get('hostname');
+                          //Ensure webhook ID and Token have been entered into the alias. 
+                          if (discwebhook == 0 || !discwebhook) {
+                            console.error('Discord: ' + address + ' No Webhook URL set. Please enter Webhook URL.');
+                          } else {
+                            var webhook = discwebhook.split('/');
+                            var discwebhookid = webhook[5];
+                            var discwebhooktoken = webhook[6];
+
+                            var d = new discord.WebhookClient(discwebhookid, discwebhooktoken);
+            
+                            //Use embedded discord notification format from discord.js 
+                            var notificationembed = new discord.RichEmbed({
+                              timestamp: new Date(),
+                            });
+                            // toHex doesn't support putting HEX in, needs to check and skip over if already hex. 
+                            var isHex = /^#[0-9A-F]{6}$/i.test(row.color)
+                            if (!isHex || isHex == false) {
+                              var discordcolor = toHex(row.color)
+                            } else {
+                              var discordcolor = row.color
+                            }
+                            notificationembed.setColor(discordcolor);
+                            notificationembed.setTitle(`**${row.agency} - ${row.alias}**`);
+                            notificationembed.addField('Message', `${row.message}`);
+                            if (hostname == undefined || !hostname) {
+                              console.debug('Discord: Hostname not set in config file using pagermon github')
+                              notificationembed.setAuthor('PagerMon', '', `https://github.com/davidmckenzie/pagermon`);
+                            } else {
+                              notificationembed.setAuthor('PagerMon', '', `${hostname}`);
+                            }
+                            //Print notification template when debugging enabled
+                            console.debug(notificationembed)
+                            d.send(notificationembed)
+                              .then(console.log(`Discord: Message Sent`))
+                              .catch(function(err) {
+                                'Discord: ' + console.error(err);
+                              });
+                          }
+                        };
                       }
                     });
                           }
@@ -838,10 +896,12 @@ router.post('/capcodes', function(req, res, next) {
     var telechat = req.body.telechat || '';
     var twitter = req.body.twitter || 0;
     var twitterhashtag = req.body.twitterhashtag || '';
+    var discord = req.body.discord || 0;
+    var discwebhook = req.body.discwebhook || '';
     var Mailenable = req.body.mailenable || 0;
     var MailTo = req.body.mailto || '';
     db.serialize(() => {
-      db.run("REPLACE INTO capcodes (id, address, alias, agency, color, icon, ignore, push, pushpri, pushgroup, pushsound, telegram, telechat, twitter, twitterhashtag, mailenable, mailto) VALUES ($mesID, $mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore, $mesPush, $mesPushPri, $mesPushGroup, $mesPushSound, $mesTelegram, $mesTeleChat, $mesTwitter, $mesTwitterHashTag, $MailEnable, $MailTo );", {
+      db.run("REPLACE INTO capcodes (id, address, alias, agency, color, icon, ignore, push, pushpri, pushgroup, pushsound, telegram, telechat, twitter, twitterhashtag, discord, discwebhook, mailenable, mailto) VALUES ($mesID, $mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore, $mesPush, $mesPushPri, $mesPushGroup, $mesPushSound, $mesTelegram, $mesTeleChat, $mesTwitter, $mesTwitterHashTag, $mesDiscord, $mesDiscWebhook, $MailEnable, $MailTo );", {
         $mesID: id,
         $mesAddress: address,
         $mesAlias: alias,
@@ -857,6 +917,8 @@ router.post('/capcodes', function(req, res, next) {
         $mesTeleChat: telechat,
         $mesTwitter: twitter,
         $mesTwitterHashTag: twitterhashtag,
+        $mesDiscord: discord,
+        $mesDiscWebhook: discwebhook,
         $MailEnable : Mailenable,
         $MailTo : MailTo
       }, function(err){
@@ -921,13 +983,15 @@ router.post('/capcodes/:id', function(req, res, next) {
       var telechat = req.body.telechat || '';
       var twitter = req.body.twitter || 0;
       var twitterhashtag = req.body.twitterhashtag || '';
+      var discord = req.body.discord || 0;
+      var discwebhook = req.body.discwebhook || '';
       var Mailenable = req.body.mailenable || 0;
       var MailTo = req.body.mailto || '';
       var updateAlias = req.body.updateAlias || 0;
       console.time('insert');
       db.serialize(() => {
         //db.run("UPDATE tbl SET name = ? WHERE id = ?", [ "bar", 2 ]);
-        db.run("REPLACE INTO capcodes (id, address, alias, agency, color, icon, ignore, push, pushpri, pushgroup, pushsound, telegram, telechat, twitter, twitterhashtag, mailenable, mailto  ) VALUES ($mesID, $mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore, $mesPush, $mesPushPri, $mesPushGroup, $mesPushSound, $mesTelegram, $mesTeleChat, $mesTwitter, $mesTwitterHashTag, $MailEnable, $MailTo );", {
+        db.run("REPLACE INTO capcodes (id, address, alias, agency, color, icon, ignore, push, pushpri, pushgroup, pushsound, telegram, telechat, twitter, twitterhashtag, discord, discwebhook, mailenable, mailto  ) VALUES ($mesID, $mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore, $mesPush, $mesPushPri, $mesPushGroup, $mesPushSound, $mesTelegram, $mesTeleChat, $mesTwitter, $mesTwitterHashTag, $mesDiscord, $mesDiscWebhook, $MailEnable, $MailTo );", {
           $mesID: id,
           $mesAddress: address,
           $mesAlias: alias,
@@ -943,6 +1007,8 @@ router.post('/capcodes/:id', function(req, res, next) {
           $mesTeleChat: telechat,
           $mesTwitter: twitter,
           $mesTwitterHashTag: twitterhashtag,
+          $mesDiscord: discord,
+          $mesDiscWebhook: discwebhook,
           $MailEnable : Mailenable,
           $MailTo : MailTo
         }, function(err){
