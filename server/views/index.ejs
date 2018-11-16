@@ -265,9 +265,8 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
     <% } %>	
   <% } else { %>
     <% if (login) { %>
-      var socketMode = socket
-      socket.open();
-      adminSocket.close()
+      var socketMode = adminSocket
+      adminSocket.open();
       <% } else { %>
       var socketMode = socket
       socket.close();
