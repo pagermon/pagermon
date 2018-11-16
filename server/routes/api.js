@@ -544,6 +544,7 @@ router.post('/messages', function(req, res, next) {
     var filterDupes = nconf.get('messages:duplicateFiltering');
     var dupeLimit = nconf.get('messages:duplicateLimit') || 0; // default 0
     var dupeTime = nconf.get('messages:duplicateTime') || 0; // default 0
+    var ignoreNotMatching = nconf.get('messages:ignoreNotMatching') || false; // default 0
     var pdwMode = nconf.get('messages:pdwMode');
     var pushenable = nconf.get('pushover:pushenable');
     var pushkey = nconf.get('pushover:pushAPIKEY');
@@ -587,189 +588,198 @@ router.post('/messages', function(req, res, next) {
             res.status(200);
             res.send('Ignoring duplicate');
           } else {
-            db.get("SELECT id, ignore, push, pushpri, pushgroup, pushsound, telegram, telechat, mailenable, mailto FROM capcodes WHERE ? LIKE address ORDER BY REPLACE(address, '_', '%') DESC LIMIT 1", address, function(err,row) {
-              var insert;
-              var alias_id = null;
-              var pushonoff = null;
-              var pushpri = null;
-              var pushgroup = null;
-              var pushsound = null;
-              var teleonoff = null;
-              var telechat = null;
-              var mailonoff = null;
-              var mailTo = "";
-              if (err) { console.error(err) }
-              if (row) {
-                if (row.ignore == '1') {
-                  insert = false;
-                  console.log('Ignoring filtered address: '+address+' alias: '+row.id);
+
+            if( !ignoreNotMatching || (ignoreNotMatching &&
+                address.match(new RegExp(ignoreNotMatching))) ){            
+
+              db.get("SELECT id, ignore, push, pushpri, pushgroup, pushsound, telegram, telechat, mailenable, mailto FROM capcodes WHERE ? LIKE address ORDER BY REPLACE(address, '_', '%') DESC LIMIT 1", address, function(err,row) {
+                var insert;
+                var alias_id = null;
+                var pushonoff = null;
+                var pushpri = null;
+                var pushgroup = null;
+                var pushsound = null;
+                var teleonoff = null;
+                var telechat = null;
+                var mailonoff = null;
+                var mailTo = "";
+                if (err) { console.error(err) }
+                if (row) {
+                  if (row.ignore == '1') {
+                    insert = false;
+                    console.log('Ignoring filtered address: '+address+' alias: '+row.id);
+                  } else {
+                    insert = true;
+                    alias_id = row.id;
+                    pushonoff = row.push;
+                    pushPri = row.pushpri;
+                    pushGroup = row.pushgroup;
+                    pushSound = row.pushsound;
+                    teleonoff = row.telegram;
+                    telechat = row.telechat
+                    mailonoff = row.mailenable;
+                    mailTo = row.mailto;
+                  }
                 } else {
                   insert = true;
-                  alias_id = row.id;
-                  pushonoff = row.push;
-                  pushPri = row.pushpri;
-                  pushGroup = row.pushgroup;
-                  pushSound = row.pushsound;
-                  teleonoff = row.telegram;
-                  telechat = row.telechat
-                  mailonoff = row.mailenable;
-                  mailTo = row.mailto;
                 }
-              } else {
-                insert = true;
-              }
-              if (insert == true) {
-                db.run("INSERT INTO messages (address, message, timestamp, source, alias_id) VALUES ($mesAddress, $mesBody, $mesDT, $mesSource, $aliasId);", {
-                  $mesAddress: address,
-                  $mesBody: message,
-                  $mesDT: datetime,
-                  $mesSource: source,
-                  $aliasId: alias_id
-                }, function(err){
-                  if (err) {
-                    res.status(500).send(err);
-                  } else {
-                    // emit the full message
-                    var sql =  "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch FROM messages";
-                    if(pdwMode) {
-                        sql += " INNER JOIN capcodes ON capcodes.id = messages.alias_id ";
+                if (insert == true) {
+                  db.run("INSERT INTO messages (address, message, timestamp, source, alias_id) VALUES ($mesAddress, $mesBody, $mesDT, $mesSource, $aliasId);", {
+                    $mesAddress: address,
+                    $mesBody: message,
+                    $mesDT: datetime,
+                    $mesSource: source,
+                    $aliasId: alias_id
+                  }, function(err){
+                    if (err) {
+                      res.status(500).send(err);
                     } else {
-                        sql += " LEFT JOIN capcodes ON capcodes.id = messages.alias_id ";
-                    }
-                        sql += " WHERE messages.id = "+this.lastID;
-                    var reqLastID = this.lastID;
-                    db.get(sql,function(err,row){
-                      if (err) {
-                        res.status(500).send(err);
+                      // emit the full message
+                      var sql =  "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch FROM messages";
+                      if(pdwMode) {
+                          sql += " INNER JOIN capcodes ON capcodes.id = messages.alias_id ";
                       } else {
-                        if(row) {
-                          //console.log(row);
-                          //req.io.emit('messagePost', row);
-                          if (HideCapcode) {
-                            //Emit full details to the admin socket
-                            req.io.of('adminio').emit('messagePost', row);
-                            // Emit No capdoe to normal socket
-                            row = {
-                              "id": row.id,
-                              "message": row.message,
-                              "source": row.source,
-                              "timestamp": row.timestamp,
-                              "alias_id": row.alias_id,
-                              "alias": row.alias,
-                              "agency": row.agency,
-                              "icon": row.icon,
-                              "color": row.color,
-                              "ignore": row.ignore,
-                              "aliasMatch": row.aliasMatch
-                            };
-                            req.io.emit('messagePost', row);
-                          } else {
-                            //Just emit - No Security enabled
-                            req.io.emit('messagePost', row);
-                          }
-                        }
-                        res.status(200).send(''+reqLastID);
-                        //Check to see if Email is enabled globaly
-                        if (mailEnable == true) {
-                          // Check to see if the capcode is set to mailto
-                          if (mailonoff == 1) {
-                            let smtpConfig = {
-                              host: SMTPServer,
-                              port: SMTPPort,
-                              secure: STMPSecure, // upgrade later with STARTTLS
-                              auth: {
-                                user: STMPUsername,
-                                pass: STMPPassword
-                              },
-                              tls: {
-                                // do not fail on invalid certs
-                                rejectUnauthorized: false
-                              }
-                            };
-                            let transporter = nodemailer.createTransport(smtpConfig,[])
-
-                            let mailOptions = {
-                              from: '"'+MailFromName+'" <'+MailFrom+'>', // sender address
-                              to: mailTo, // list of receivers
-                              subject: row.agency+' - '+row.alias, // Subject line
-                              text: row.message, // plain text body
-                              html: '<b>'+row.message+'</b>' // html body
-                            };
-
-                            // send mail with defined transport object
-                            transporter.sendMail(mailOptions, (error, info) => {
-                              if (error) {
-                                return console.error(error);
-                              }
-                              console.log('Message sent: %s', info.messageId);
-                            });
-                          }
-                        };
-
-                        //check config to see if push is gloably enabled and for the alias
-                        if (pushenable == true && pushonoff == 1) {
-                          //ensure key has been entered before trying to push
-                          if (pushGroup == 0 || !pushGroup) {
-                            console.error('Push Enabled on Alias ' + address + ' No User/Group key set. Please enter User/Group Key.');
-                          } else {
-                            var p = new push({
-                              user: pushGroup,
-                              token: pushkey,
-                            });
-                            
-                            var msg = {
-                              message: row.message,
-                              title: row.agency+' - '+row.alias,
-                              sound: pushSound,
-                              priority: pushPri
-                            };
-
-                            if (pushPri == 2) {
-                              //emergency message
-                              msg.retry = 60;
-                              msg.expire = 240;
-                            }
-
-                            if (pushPri == 2) {
-                              console.log("SENDING EMERGENCY PUSH NOTIFICATION")
-                            }
-                            p.send(msg, function (err, result) {
-                              if (err) { console.error(err); }
-                              console.log(result);
-                            });
-                          }
-                        };
-                        //check config to see if push is gloably enabled and for the alias
-                        if (teleenable == true && teleonoff == 1) {
-                          //ensure chatid has been entered before trying to push
-                          if (telechat == 0 || !telechat) {
-                            console.error('Telegram Enabled on Alias ' + address + ' No ChatID key set. Please enter ChatID.');
-                          } else {
-                            //Notification formatted in Markdown for pretty notifications
-                            var notificationText = `*${row.agency} - ${row.alias}*\n` + 
-                                                   `Message: ${row.message}`;
-                            
-                            t.sendMessage({
-                                chat_id: telechat,
-                                text: notificationText,
-                                parse_mode: "Markdown"
-                            }).then(function(data) {
-                              //uncomment below line to debug messages at the console!
-                              //console.log(util.inspect(data, false, null));
-                            }).catch(function(err) {
-                                console.log(err);
-                            });
-                          }
-                        };
+                          sql += " LEFT JOIN capcodes ON capcodes.id = messages.alias_id ";
                       }
-                    });
+                          sql += " WHERE messages.id = "+this.lastID;
+                      var reqLastID = this.lastID;
+                      db.get(sql,function(err,row){
+                        if (err) {
+                          res.status(500).send(err);
+                        } else {
+                          if(row) {
+                            //console.log(row);
+                            //req.io.emit('messagePost', row);
+                            if (HideCapcode) {
+                              //Emit full details to the admin socket
+                              req.io.of('adminio').emit('messagePost', row);
+                              // Emit No capdoe to normal socket
+                              row = {
+                                "id": row.id,
+                                "message": row.message,
+                                "source": row.source,
+                                "timestamp": row.timestamp,
+                                "alias_id": row.alias_id,
+                                "alias": row.alias,
+                                "agency": row.agency,
+                                "icon": row.icon,
+                                "color": row.color,
+                                "ignore": row.ignore,
+                                "aliasMatch": row.aliasMatch
+                              };
+                              req.io.emit('messagePost', row);
+                            } else {
+                              //Just emit - No Security enabled
+                              req.io.emit('messagePost', row);
+                            }
                           }
+                          res.status(200).send(''+reqLastID);
+                          //Check to see if Email is enabled globaly
+                          if (mailEnable == true) {
+                            // Check to see if the capcode is set to mailto
+                            if (mailonoff == 1) {
+                              let smtpConfig = {
+                                host: SMTPServer,
+                                port: SMTPPort,
+                                secure: STMPSecure, // upgrade later with STARTTLS
+                                auth: {
+                                  user: STMPUsername,
+                                  pass: STMPPassword
+                                },
+                                tls: {
+                                  // do not fail on invalid certs
+                                  rejectUnauthorized: false
+                                }
+                              };
+                              let transporter = nodemailer.createTransport(smtpConfig,[])
+
+                              let mailOptions = {
+                                from: '"'+MailFromName+'" <'+MailFrom+'>', // sender address
+                                to: mailTo, // list of receivers
+                                subject: row.agency+' - '+row.alias, // Subject line
+                                text: row.message, // plain text body
+                                html: '<b>'+row.message+'</b>' // html body
+                              };
+
+                              // send mail with defined transport object
+                              transporter.sendMail(mailOptions, (error, info) => {
+                                if (error) {
+                                  return console.error(error);
+                                }
+                                console.log('Message sent: %s', info.messageId);
+                              });
+                            }
+                          };
+
+                          //check config to see if push is gloably enabled and for the alias
+                          if (pushenable == true && pushonoff == 1) {
+                            //ensure key has been entered before trying to push
+                            if (pushGroup == 0 || !pushGroup) {
+                              console.error('Push Enabled on Alias ' + address + ' No User/Group key set. Please enter User/Group Key.');
+                            } else {
+                              var p = new push({
+                                user: pushGroup,
+                                token: pushkey,
+                              });
+                              
+                              var msg = {
+                                message: row.message,
+                                title: row.agency+' - '+row.alias,
+                                sound: pushSound,
+                                priority: pushPri
+                              };
+
+                              if (pushPri == 2) {
+                                //emergency message
+                                msg.retry = 60;
+                                msg.expire = 240;
+                              }
+
+                              if (pushPri == 2) {
+                                console.log("SENDING EMERGENCY PUSH NOTIFICATION")
+                              }
+                              p.send(msg, function (err, result) {
+                                if (err) { console.error(err); }
+                                console.log(result);
+                              });
+                            }
+                          };
+                          //check config to see if push is gloably enabled and for the alias
+                          if (teleenable == true && teleonoff == 1) {
+                            //ensure chatid has been entered before trying to push
+                            if (telechat == 0 || !telechat) {
+                              console.error('Telegram Enabled on Alias ' + address + ' No ChatID key set. Please enter ChatID.');
+                            } else {
+                              //Notification formatted in Markdown for pretty notifications
+                              var notificationText = `*${row.agency} - ${row.alias}*\n` + 
+                                                     `Message: ${row.message}`;
+                              
+                              t.sendMessage({
+                                  chat_id: telechat,
+                                  text: notificationText,
+                                  parse_mode: "Markdown"
+                              }).then(function(data) {
+                                //uncomment below line to debug messages at the console!
+                                //console.log(util.inspect(data, false, null));
+                              }).catch(function(err) {
+                                  console.log(err);
+                              });
+                            }
+                          };
+                        }
                       });
-              } else {
-                  res.status(200);
-                  res.send('Ignoring filtered');
-              }
-            });
+                            }
+                        });
+                } else {
+                    res.status(200);
+                    res.send('Ignoring filtered');
+                }
+              });
+            }else{
+              console.log('Ignoring not matching address: '+address+' ');
+              res.status(200);
+              res.send('Ignoring not matching address');
+            }
           }
         }
       });

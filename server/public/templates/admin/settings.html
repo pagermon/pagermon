@@ -124,6 +124,14 @@
               </div>
             </div>
             <div class="form-group">
+              <label for="messages.ignoreNotMatching" class="col-xs-4 col-sm-3 control-label">Ignore not matching</label>
+              <div class="col-xs-8 col-sm-9">
+              <input type="text" class="form-control" name="messages.ignoreNotMatching" ng-model="settings.messages.ignoreNotMatching" >
+              <span id="helpBlock" class="help-block">Ignore messages if capcode match with {{settings.messages.ignoreNotMatching}}<br />
+              Use regex like "^00" to ignore messages that start with two zero.</span>
+              </div>
+            </div>
+            <div class="form-group">
               <label for="messages.pdwMode" class="col-xs-4 col-sm-3 control-label">PDW mode</label>
               <div class="col-xs-8 col-sm-9">
               <div class="checkbox">

@@ -13,6 +13,7 @@
     "duplicateFiltering": true,
     "duplicateLimit": 10,
     "duplicateTime": 60,
+    "ignoreNotMatching": "",
     "rotationEnabled": true,
     "rotateDays": 7,
     "rotateKeep": 4,
