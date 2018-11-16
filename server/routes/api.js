@@ -843,7 +843,7 @@ router.post('/messages', function(req, res, next) {
                             }
                             notificationembed.setColor(discordcolor);
                             notificationembed.setTitle(`**${row.agency} - ${row.alias}**`);
-                            notificationembed.addField('Message', `${row.message}`);
+                            notificationembed.setDescription(`${row.message}`);
                             if (hostname == undefined || !hostname) {
                               console.log('Discord: Hostname not set in config file using pagermon github')
                               notificationembed.setAuthor('PagerMon', '', `https://github.com/davidmckenzie/pagermon`);
