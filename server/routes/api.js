@@ -550,7 +550,7 @@ router.all('*',
     next();
   },
   function(err, req, res, next) {
-    console.debug('API key auth failed, attempting basic auth');
+    console.log('API key auth failed, attempting basic auth');
     isLoggedIn(req, res, next);
   }
 );
@@ -845,13 +845,13 @@ router.post('/messages', function(req, res, next) {
                             notificationembed.setTitle(`**${row.agency} - ${row.alias}**`);
                             notificationembed.addField('Message', `${row.message}`);
                             if (hostname == undefined || !hostname) {
-                              console.debug('Discord: Hostname not set in config file using pagermon github')
+                              console.log('Discord: Hostname not set in config file using pagermon github')
                               notificationembed.setAuthor('PagerMon', '', `https://github.com/davidmckenzie/pagermon`);
                             } else {
                               notificationembed.setAuthor('PagerMon', '', `${hostname}`);
                             }
                             //Print notification template when debugging enabled
-                            console.debug(notificationembed)
+                            console.log(notificationembed)
                             d.send(notificationembed)
                               .then(console.log(`Discord: Message Sent`))
                               .catch(function(err) {
