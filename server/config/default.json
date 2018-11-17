@@ -57,6 +57,18 @@
     "teleenable": false,
     "teleAPIKEY": ""
   },
+  "twitter":{
+    "twitenable": false,
+    "twitconskey": "",
+    "twitconssecret": "",
+    "twitacctoken": "",
+    "twitaccsecret": "",
+    "twitglobalhashtags": ""
+  },
+  "discord":{
+    "discenable": false
+  
+  },
   "STMP":{
     "MailEnable": false,
     "MailFrom": "",

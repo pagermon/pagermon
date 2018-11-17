@@ -222,7 +222,8 @@
               </div>
             </div>
 
-            <h5>Pushover</h5>
+            <h5>Notifications</h5>
+            <h6>Pushover</h6>
             <div class="form-group">
               <label for="pushover.pushenable" class="col-xs-4 col-sm-3 control-label">Enable</label>
               <div class="col-xs-8 col-sm-9">
@@ -242,7 +243,7 @@
               </div>
             </div>
 		  
-	    <h5>Telegram</h5>
+	          <h6>Telegram</h6>
             <div class="form-group">
               <label for="telegram.teleenable" class="col-xs-4 col-sm-3 control-label">Enable</label>
               <div class="col-xs-8 col-sm-9">
@@ -262,8 +263,68 @@
               </div>
             </div>
 
-
-            <h5>Email</h5>
+            <h6>Twitter</h6>
+            <div class="form-group">
+              <label for="twitter.twitenable" class="col-xs-4 col-sm-3 control-label">Enable</label>
+              <div class="col-xs-8 col-sm-9">
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" name="twitter.twitenable" ng-model="settings.twitter.twitenable">
+                    Enable or disable for selected alias's
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="twitter.twitconskey" class="col-xs-4 col-sm-3 control-label">Twitter Consumer Key</label>
+              <div class="col-xs-8 col-sm-9">
+                <input type="text" class="form-control" name="twitter.twitconskey" ng-model="settings.twitter.twitconskey">
+                <span id="helpBlock" class="help-block">Twitter Consumer API Key</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="twitter.twitconssecret" class="col-xs-4 col-sm-3 control-label">Twitter Consumer Secret</label>
+              <div class="col-xs-8 col-sm-9">
+                <input type="text" class="form-control" name="twitter.twitconssecret" ng-model="settings.twitter.twitconssecret">
+                <span id="helpBlock" class="help-block">Twitter Consumer Secret Key</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="twitter.twitacctoken" class="col-xs-4 col-sm-3 control-label">Twitter Access Token</label>
+              <div class="col-xs-8 col-sm-9">
+                <input type="text" class="form-control" name="twitter.twitacctoken" ng-model="settings.twitter.twitacctoken">
+                <span id="helpBlock" class="help-block">Twitter Acces Token</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="twitter.twitaccsecret" class="col-xs-4 col-sm-3 control-label">Twitter Access Token Secret</label>
+              <div class="col-xs-8 col-sm-9">
+                <input type="text" class="form-control" name="twitter.twitaccsecret" ng-model="settings.twitter.twitaccsecret">
+                <span id="helpBlock" class="help-block">Twitter Access Token Secret</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="twitter.twitglobalhashtags" class="col-xs-4 col-sm-3 control-label">Twitter Global Hashtags</label>
+              <div class="col-xs-8 col-sm-9">
+                <input type="text" class="form-control" name="twitter.twitglobalhashtags" ng-model="settings.twitter.twitglobalhashtags">
+                <span id="helpBlock" class="help-block">Global Hashtags to be added to all tweets. Space Seperated</span>
+              </div>
+            </div>
+            
+            <h6>Discord</h6>
+            <div class="form-group">
+              <label for="discord.discenable" class="col-xs-4 col-sm-3 control-label">Enable</label>
+              <div class="col-xs-8 col-sm-9">
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" name="discord.discenable" ng-model="settings.discord.discenable">
+                    Enable or disable for selected alias's
+                  </label>
+                </div>
+              </div>
+            </div>
+            
+            <h6>Email</h6>
             <div class="form-group">
               <label for="STMP.MailEnable" class="col-xs-4 col-sm-3 control-label">Enable</label>
               <div class="col-xs-8 col-sm-9">
