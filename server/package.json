@@ -13,12 +13,14 @@
     "angularjs-color-picker": "^3.3.0",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.17.2",
+    "colornames": "latest",
     "compression": "^1.6.2",
     "connect-flash": "^0.1.1",
     "connect-sqlite3": "^0.9.9",
     "cookie-parser": "~1.4.3",
     "core-js": "^2.4.1",
     "debug": "~2.6.3",
+    "discord.js": "latest",
     "ejs": "~2.5.6",
     "express": "~4.16.3",
     "express-basic-auth": "^1.1.1",
@@ -41,6 +43,7 @@
     "pushover-notifications": "latest",
     "nodemailer": "latest",
     "telegram-bot-api": "latest",
+    "twit": "latest",
     "util": "^0.10.3"
   },
   "repository": {

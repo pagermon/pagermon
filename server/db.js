@@ -20,9 +20,14 @@ function init(release) {
                 sql += "mailto TEXT, ";
                 sql += "telegram INTEGER DEFAULT 0, ";
                 sql += "telechat TEXT, ";
-                sql += "ignore INTEGER DEFAULT 0, ";
+                sql += "twitter INTEGER DEFAULT 0, ";   
+                sql += "twitterhashtag TEXT, ";
+                sql += "discord INTEGER DEFAULT 0, ";
+                sql += "discwebhook TEXT, ";
                 sql += "shellenable INTEGER DEFAULT 0, ";
-                sql += "shellcmd TEXT ); ";
+                sql += "shellcmd TEXT,  ";
+                sql += "ignore INTEGER DEFAULT 0 ); ";
+
                 // initialise messages table
                 sql += "CREATE TABLE IF NOT EXISTS messages ( ";
                 sql += "id INTEGER UNIQUE, ";
@@ -90,9 +95,14 @@ function init(release) {
                                     db.run("ALTER TABLE capcodes ADD mailenable INTEGER DEFAULT 0", function(err){ /* ignore error */ });
                                     db.run("ALTER TABLE capcodes ADD telegram INTEGER DEFAULT 0", function(err){ /* ignore error */ });
                                     db.run("ALTER TABLE capcodes ADD telechat TEXT", function(err){ /* ignore error */ });
-                                    db.run("ALTER TABLE capcodes ADD ignore INTEGER DEFAULT 0", function(err){ /* ignore error */ });
+                                    db.run("ALTER TABLE capcodes ADD ignore INTEGER DEFAULT 0", function (err) { /* ignore error */ });
+                                    db.run("ALTER TABLE capcodes ADD twitter INTEGER DEFAULT 0", function (err) { /* ignore error */ });
+                                    db.run("ALTER TABLE capcodes ADD twitterhashtag TEXT", function (err) { /* ignore error */ });
+                                    db.run("ALTER TABLE capcodes ADD discord INTEGER DEFAULT 0", function (err) { /* ignore error */ });
+                                    db.run("ALTER TABLE capcodes ADD discwebhook TEXT", function (err) { /* ignore error */ });
                                     db.run("ALTER TABLE capcodes ADD shellenable INTEGER DEFAULT 0", function(err){ /* ignore error */ });
                                     db.run("ALTER TABLE capcodes ADD shellcmd TEXT", function(err){ /* ignore error */ });
+
                                     db.run("PRAGMA user_version = "+release, function(err){ /* ignore error */ });
                                 });
                             } else {

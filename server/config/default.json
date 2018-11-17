@@ -59,6 +59,17 @@
   "shellCmd":{
     "shellCmdEnable": false
   },
+  "twitter":{
+    "twitenable": false,
+    "twitconskey": "",
+    "twitconssecret": "",
+    "twitacctoken": "",
+    "twitaccsecret": "",
+    "twitglobalhashtags": ""
+  },
+  "discord":{
+    "discenable": false
+  },
   "STMP":{
     "MailEnable": false,
     "MailFrom": "",
