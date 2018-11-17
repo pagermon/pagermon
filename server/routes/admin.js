@@ -17,7 +17,7 @@ var conf_backup = './config/backup.json';
 nconf.file({file: conf_file});
 nconf.load();
 
-router.use( bodyParser.json() );       // to support JSON-encoded bodies
+router.use(bodyParser.json());       // to support JSON-encoded bodies
 router.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: true
 }));

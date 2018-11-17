@@ -48,13 +48,21 @@
       }
     ]
   },
+  "plugins": [
+    {
+      "name": "Telegram",
+      "enabled": true,
+      "config": {
+        "teleAPIKEY": ""
+      }
+    },
+    {
+
+    }
+  ],
   "pushover":{
     "pushenable": false,
     "pushAPIKEY":  ""
-  },
-  "telegram":{
-    "teleenable": false,
-    "teleAPIKEY": ""
   },
   "twitter":{
     "twitenable": false,

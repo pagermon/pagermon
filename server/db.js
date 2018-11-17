@@ -98,6 +98,7 @@ function init(release) {
                                     db.run("ALTER TABLE capcodes ADD discord INTEGER DEFAULT 0", function (err) { /* ignore error */ });
                                     db.run("ALTER TABLE capcodes ADD discwebhook TEXT", function (err) { /* ignore error */ });
                                     db.run("PRAGMA user_version = "+release, function(err){ /* ignore error */ });
+                                    console.log("DB schema update complete");
                                 });
                             } else {
                                 console.log("DB schema up to date!");

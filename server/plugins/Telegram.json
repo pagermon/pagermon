@@ -1,8 +1,8 @@
 {
     "name": "Telegram",
     "description": "Push messages to Telegram channel",
-    "on": "message",
-    "when": "after",
+    "event": "message",
+    "scope": "after",
     "config": [
         {
             "name": "teleAPIKEY",

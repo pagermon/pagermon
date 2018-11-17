@@ -7,6 +7,7 @@ var passport = require('passport');
 var push = require('pushover-notifications');
 var util = require('util')
 const nodemailer = require('nodemailer');
+var pluginHandler = require('../plugins/pluginHandler');
 require('../config/passport')(passport); // pass passport for configuration
 
 var nconf = require('nconf');
@@ -37,7 +38,7 @@ if (discenable) {
   var discord = require('discord.js');
 }
 
-router.use( bodyParser.json() );       // to support JSON-encoded bodies
+router.use(bodyParser.json());       // to support JSON-encoded bodies
 router.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: true
 }));
@@ -236,21 +237,6 @@ router.get('/messages/:id', isSecMode, function(req, res, next) {
     });
   });
 });
-/*
-router.get('/messages/address/:id', function(req, res, next) {
-    var id = req.params.id;
-    db.serialize(() => {
-        db.all("SELECT * from messages WHERE address=?", id, function(err,rows){
-            if (err) {
-                res.status(500);
-                res.send(err);
-            } else {
-                res.status(200);
-                res.json(rows);
-            }
-        });
-    });
-});*/
 
 /* GET message search */
 router.get('/messageSearch', isSecMode, function(req, res, next) {
@@ -578,8 +564,12 @@ router.post('/messages', function(req, res, next) {
     var STMPPassword  = nconf.get('STMP:STMPPassword');
     var STMPSecure    = nconf.get('STMP:STMPSecure');
 
+    // send data to pluginHandler before proceeding
+    console.log('beforeMessage start');
+    pluginHandler.handle('message', 'before', req.body);
+    console.log('beforeMessage done');
+
     db.serialize(() => {
-      //db.run("UPDATE tbl SET name = ? WHERE id = ?", [ "bar", 2 ]);
       var address = req.body.address || '0000000';
       var message = req.body.message.replace(/["]+/g, '') || 'null';
       var datetime = req.body.datetime || 1;
@@ -699,6 +689,12 @@ router.post('/messages', function(req, res, next) {
                           }
                         }
                         res.status(200).send(''+reqLastID);
+
+                        // send data to pluginHandler after processing
+                        console.log('afterMessage start');
+                        pluginHandler.handle('message', 'after', req.body);
+                        console.log('afterMessage done');
+
                         //Check to see if Email is enabled globaly
                         if (mailEnable == true) {
                           // Check to see if the capcode is set to mailto
