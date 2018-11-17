@@ -603,9 +603,9 @@ router.post('/messages', function(req, res, next) {
               var teleonoff = null;
               var telechat = null;
               var mailonoff = null;
+              var mailTo = "";
               var shellonoff = null;
               var shellCmd = null;
-              var mailTo = "";
               if (err) { console.error(err) }
               if (row) {
                 if (row.ignore == '1') {
