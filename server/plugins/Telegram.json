@@ -1,0 +1,20 @@
+{
+    "name": "Telegram",
+    "description": "Push messages to Telegram channel",
+    "on": "message",
+    "when": "after",
+    "config": [
+        {
+            "name": "teleAPIKEY",
+            "label": "Telegram API Key",
+            "description": "API key for Telegram",
+            "type": "text",
+            "default": ""
+        }
+    ],
+    "aliasConfig": [
+        {
+            "name": ""
+        }
+    ]
+}
