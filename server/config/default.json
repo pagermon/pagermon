@@ -56,6 +56,9 @@
     "teleenable": false,
     "teleAPIKEY": ""
   },
+  "shellCmd":{
+    "shellCmdEnable": false
+  },
   "STMP":{
     "MailEnable": false,
     "MailFrom": "",

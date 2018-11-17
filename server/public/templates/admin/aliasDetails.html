@@ -200,6 +200,28 @@
                 </span>
               </div>
             </div>
+
+            <h5>Shell command</h5>
+            <div class="form-group">
+              <label for="alias.shellenable" class="col-xs-4 col-sm-3 control-label">Shell command</label>
+              <div class="col-xs-8 col-sm-9">
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" name="alias.shellenable" ng-model="alias.shellenable" ng-true-value="1" ng-false-value="0">
+                    Enable shell command
+                  </label>
+                  <span id="helpBlock" class="help-block">If checked, messages matching this alias will be exec shell command</span>
+                </div>
+              </div>
+            </div>
+            <div class="form-group" ng-class="!alias.shellcmd && alias.shellenable || alias.shellcmd == 0 && alias.shellenable ? 'has-error' : 'has-success'">
+              <label for="alias.shellcmd" class="col-xs-4 col-sm-3 control-label">Command </label>
+              <div class="col-xs-8 col-sm-9">
+                <input type="text" class="form-control" name="alias.shellcmd" ng-model="alias.shellcmd" ng-disabled="!alias.shellenable" ng-required="alias.shellenable">
+                <span id="helpBlock" class="help-block">Command to exec.</a>
+                </span>
+              </div>
+            </div>
         
             <div class="btn-group pull-right" style="padding-right: 10px; padding-bottom: 10px;"role="group" aria-label="Actions">
               <button type="button" ng-if="!isNew" ng-click="aliasDelete()" class="btn btn-danger">Delete</button>

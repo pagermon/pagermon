@@ -20,7 +20,9 @@ function init(release) {
                 sql += "mailto TEXT, ";
                 sql += "telegram INTEGER DEFAULT 0, ";
                 sql += "telechat TEXT, ";
-                sql += "ignore INTEGER DEFAULT 0 ); ";
+                sql += "ignore INTEGER DEFAULT 0, ";
+                sql += "shellenable INTEGER DEFAULT 0, ";
+                sql += "shellcmd TEXT ); ";
                 // initialise messages table
                 sql += "CREATE TABLE IF NOT EXISTS messages ( ";
                 sql += "id INTEGER UNIQUE, ";
@@ -89,6 +91,8 @@ function init(release) {
                                     db.run("ALTER TABLE capcodes ADD telegram INTEGER DEFAULT 0", function(err){ /* ignore error */ });
                                     db.run("ALTER TABLE capcodes ADD telechat TEXT", function(err){ /* ignore error */ });
                                     db.run("ALTER TABLE capcodes ADD ignore INTEGER DEFAULT 0", function(err){ /* ignore error */ });
+                                    db.run("ALTER TABLE capcodes ADD shellenable INTEGER DEFAULT 0", function(err){ /* ignore error */ });
+                                    db.run("ALTER TABLE capcodes ADD shellcmd TEXT", function(err){ /* ignore error */ });
                                     db.run("PRAGMA user_version = "+release, function(err){ /* ignore error */ });
                                 });
                             } else {
