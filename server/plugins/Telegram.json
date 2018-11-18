@@ -9,7 +9,8 @@
             "name": "teleAPIKEY",
             "label": "Telegram API Key",
             "description": "API key for Telegram",
-            "type": "text"
+            "type": "text",
+            "required": true
         }
     ],
     "aliasConfig": [
@@ -23,7 +24,8 @@
             "name": "chat",
             "label": "Chat ID",
             "description": "Telegram chat ID to send to",
-            "type": "text"
+            "type": "text",
+            "required": true
         }
     ]
 }

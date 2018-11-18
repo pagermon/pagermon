@@ -9,25 +9,29 @@
             "name": "consKey",
             "label": "Consumer Key",
             "description": "Twitter Consumer API key",
-            "type": "text"
+            "type": "text",
+            "required": true
         },
         {
             "name": "consSecret",
             "label": "Consumer Secret",
             "description": "Twitter Consumer API secret key",
-            "type": "password"
+            "type": "password",
+            "required": true
         },
         {
             "name": "accToken",
             "label": "Access Token",
             "description": "Twitter account access token",
-            "type": "text"
+            "type": "text",
+            "required": true
         },
         {
             "name": "accSecret",
             "label": "Access Secret",
             "description": "Twitter account access secret key",
-            "type": "password"
+            "type": "password",
+            "required": true
         },
         {
             "name": "globalHashtags",

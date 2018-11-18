@@ -294,8 +294,13 @@
                       {{configItem.description}}
                     </label>
                   </div>
-                  <div ng-if="configItem.type != 'checkbox'">
-                    <input type="{{configItem.type}}" class="form-control" name="{{plugin.name}}.{{configItem.name}}" ng-model="settings.plugins[plugin.name][configItem.name]" ng-disabled="!settings.plugins[plugin.name].enable">
+                  <div ng-if="configItem.type == 'select'">
+                      <select name="{{plugin.name}}.{{configItem.name}}" ng-model="settings.plugins[plugin.name][configItem.name]" class="form-control" ng-options="obj.text for obj in configItem.options track by obj.value" ng-disabled="!settings.plugins[plugin.name].enable" ng-required="settings.plugins[plugin.name].enable && configItem.required">
+                        </select>
+                        <span id="helpBlock" class="help-block">{{configItem.description}}</span>
+                  </div>
+                  <div ng-if="configItem.type != 'checkbox' && configItem.type != 'select'">
+                    <input type="{{configItem.type}}" class="form-control" name="{{plugin.name}}.{{configItem.name}}" ng-model="settings.plugins[plugin.name][configItem.name]" ng-disabled="!settings.plugins[plugin.name].enable" ng-required="settings.plugins[plugin.name].enable && configItem.required">
                     <span id="helpBlock" class="help-block">{{configItem.description}}</span>
                   </div>
                 </div>

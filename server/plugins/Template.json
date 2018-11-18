@@ -9,7 +9,8 @@
             "name": "templateSetting",
             "label": "Example Setting",
             "description": "This is an example setting on the template plugin",
-            "type": "text"
+            "type": "text",
+            "required": true
         },
         {
             "name": "templateCheckbox",

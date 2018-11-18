@@ -30,13 +30,15 @@
                 {"value": "0", "text": "Normal Priority"},
                 {"value": "1", "text": "High Priority"},
                 {"value": "2", "text": "Emergency Priority"}
-            ]
+            ],
+            "required": true
         },
         {
             "name": "group",
             "label": "User/Group Key",
             "description": "Pushover destination for messages",
-            "type": "text"
+            "type": "text",
+            "required": true
         },
         {
             "name": "sound",
