@@ -1,7 +1,7 @@
 {
     "name": "Template",
     "description": "Example plugin for developers",
-    "disable": false,
+    "disable": true,
     "event": "message",
     "scope": "after",
     "config": [ 
@@ -9,15 +9,13 @@
             "name": "templateSetting",
             "label": "Example Setting",
             "description": "This is an example setting on the template plugin",
-            "type": "text",
-            "default": ""
+            "type": "text"
         },
         {
             "name": "templateCheckbox",
             "label": "Example Checkbox",
             "description": "This is an example checkbox on the template plugin",
-            "type": "checkbox",
-            "default": true
+            "type": "checkbox"
         }
     ],
     "aliasConfig": [ 
@@ -25,8 +23,7 @@
             "name": "templateEnable",
             "label": "Enable Example Plugin",
             "description": "This is an example setting on the template plugin",
-            "type": "checkbox",
-            "default": false
+            "type": "checkbox"
         }
     ]
 }

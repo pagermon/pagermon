@@ -1,5 +1,5 @@
 var version = "0.1.9-beta";
-var release = 20181116;
+var release = 20181117;
 
 var debug = require('debug')('pagermon:server');
 var pmx = require('pmx').init({
@@ -30,14 +30,6 @@ process.on('SIGINT', function() {
     process.exit(1);
 });
 
-var db = require('./db');
-    db.init(release);
-
-// routes
-var index = require('./routes/index');
-var admin = require('./routes/admin');
-var api = require('./routes/api');
-
 // create config file if it does not exist, and set defaults
 var conf_defaults = require('./config/default.json');
 var conf_file = './config/config.json';
@@ -48,6 +40,14 @@ if( ! fs.existsSync(conf_file) ) {
 var nconf = require('nconf');
     nconf.file({file: conf_file});
     nconf.load();
+
+var db = require('./db');
+    db.init(release);
+
+// routes
+var index = require('./routes/index');
+var admin = require('./routes/admin');
+var api = require('./routes/api');
 
 var port = normalizePort(process.env.PORT || '3000');
 var app = express();

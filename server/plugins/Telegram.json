@@ -9,8 +9,7 @@
             "name": "teleAPIKEY",
             "label": "Telegram API Key",
             "description": "API key for Telegram",
-            "type": "text",
-            "default": ""
+            "type": "text"
         }
     ],
     "aliasConfig": [

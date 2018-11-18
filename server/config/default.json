@@ -48,31 +48,5 @@
       }
     ]
   },
-  "plugins": {},
-  "pushover":{
-    "pushenable": false,
-    "pushAPIKEY":  ""
-  },
-  "twitter":{
-    "twitenable": false,
-    "twitconskey": "",
-    "twitconssecret": "",
-    "twitacctoken": "",
-    "twitaccsecret": "",
-    "twitglobalhashtags": ""
-  },
-  "discord":{
-    "discenable": false
-  
-  },
-  "STMP":{
-    "MailEnable": false,
-    "MailFrom": "",
-    "MailFromName": "",
-    "SMTPServer":  "",
-    "SMTPPort":   "",
-    "STMPUsername": "",
-    "STMPPassword": "",
-    "STMPSecure": true
-  }
+  "plugins": {}
 }

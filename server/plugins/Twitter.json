@@ -1,0 +1,47 @@
+{
+    "name": "Twitter",
+    "description": "Send tweet on new messages. See <a href='https://developer.twitter.com/en/docs/basics/authentication/guides/access-tokens.html' target='_blank'>Twitter documentation</a> for key information.",
+    "disable": false,
+    "event": "message",
+    "scope": "after",
+    "config": [ 
+        {
+            "name": "consKey",
+            "label": "Consumer Key",
+            "description": "Twitter Consumer API key",
+            "type": "text"
+        },
+        {
+            "name": "consSecret",
+            "label": "Consumer Secret",
+            "description": "Twitter Consumer API secret key",
+            "type": "password"
+        },
+        {
+            "name": "accToken",
+            "label": "Access Token",
+            "description": "Twitter account access token",
+            "type": "text"
+        },
+        {
+            "name": "accSecret",
+            "label": "Access Secret",
+            "description": "Twitter account access secret key",
+            "type": "password"
+        },
+        {
+            "name": "globalHashtags",
+            "label": "Global Hashtags",
+            "description": "String of space separated hashtags to append to all tweets",
+            "type": "text"
+        }
+    ],
+    "aliasConfig": [ 
+        {
+            "name": "templateEnable",
+            "label": "Enable Example Plugin",
+            "description": "This is an example setting on the template plugin",
+            "type": "checkbox"
+        }
+    ]
+}

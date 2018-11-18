@@ -1,0 +1,17 @@
+{
+    "name": "Discord",
+    "description": "Send messages to a Discord webhook",
+    "disable": false,
+    "event": "message",
+    "scope": "after",
+    "config": [ 
+    ],
+    "aliasConfig": [ 
+        {
+            "name": "templateEnable",
+            "label": "Enable Example Plugin",
+            "description": "This is an example setting on the template plugin",
+            "type": "checkbox"
+        }
+    ]
+}

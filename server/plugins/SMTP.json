@@ -1,0 +1,59 @@
+{
+    "name": "SMTP",
+    "description": "Send messages via email",
+    "disable": false,
+    "event": "message",
+    "scope": "after",
+    "config": [ 
+        {
+            "name": "mailFrom",
+            "label": "Mail From Address",
+            "description": "Mail will be sent from this address",
+            "type": "text"
+        },
+        {
+            "name": "mailFromName",
+            "label": "Mail From Name",
+            "description": "From name in email headers",
+            "type": "text"
+        },
+        {
+            "name": "server",
+            "label": "Hostname",
+            "description": "SMTP server hostname",
+            "type": "text"
+        },
+        {
+            "name": "port",
+            "label": "Port",
+            "description": "SMTP server port",
+            "type": "text"
+        },
+        {
+            "name": "username",
+            "label": "SMTP Username",
+            "description": "For authentication with the mail server",
+            "type": "text"
+        },
+        {
+            "name": "password",
+            "label": "SMTP Password",
+            "description": "For authentication with the mail server",
+            "type": "password"
+        },
+        {
+            "name": "secure",
+            "label": "Enable SSL/TLS",
+            "description": "Enable secure mail transport",
+            "type": "checkbox"
+        }
+    ],
+    "aliasConfig": [ 
+        {
+            "name": "templateEnable",
+            "label": "Enable Example Plugin",
+            "description": "This is an example setting on the template plugin",
+            "type": "checkbox"
+        }
+    ]
+}

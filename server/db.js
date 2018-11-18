@@ -1,4 +1,5 @@
 var sqlite3 = require('sqlite3').verbose();
+var fs = require('fs');
 
 // initialize the database if it does not already exist
 function init(release) {
@@ -99,6 +100,65 @@ function init(release) {
                                     db.run("ALTER TABLE capcodes ADD discwebhook TEXT", function (err) { /* ignore error */ });
                                     db.run("PRAGMA user_version = "+release, function(err){ /* ignore error */ });
                                     console.log("DB schema update complete");
+                                    // Switch config file over to plugin format
+                                    console.log("Updating config file");
+                                    var nconf = require('nconf');
+                                    var conf_file = './config/config.json';
+                                    var conf_backup = './config/backup.json';
+                                    nconf.file({file: conf_file});
+                                    nconf.load();
+                                    var curConfig = nconf.get();
+                                    fs.writeFileSync( conf_backup, JSON.stringify(curConfig,null, 2) );
+                                    if (!curConfig.plugins)
+                                        curConfig.plugins = {};
+                                    
+                                    if (curConfig.discord) {
+                                        curConfig.plugins.Discord = {
+                                            "enable": curConfig.discord.discenable
+                                        };
+                                    }
+                                    if (curConfig.pushover) {
+                                        curConfig.plugins.Pushover = {
+                                            "enable": curConfig.pushover.pushenable,
+                                            "pushAPIKEY": curConfig.pushover.pushAPIKEY
+                                        };
+                                    }
+                                    if (curConfig.STMP) {
+                                        curConfig.plugins.SMTP = {
+                                            "enable": curConfig.STMP.MailEnable,
+                                            "mailFrom": curConfig.STMP.MailFrom,
+                                            "mailFromName": curConfig.STMP.MailFromName,
+                                            "server": curConfig.STMP.SMTPServer,
+                                            "port": curConfig.STMP.SMTPPort,
+                                            "username": curConfig.STMP.STMPUsername,
+                                            "password": curConfig.STMP.STMPPassword,
+                                            "secure": curConfig.STMP.STMPSecure
+                                        };
+                                    }
+                                    if (curConfig.telegram) {
+                                        curConfig.plugins.Telegram = {
+                                            "enable": curConfig.telegram.teleenable,
+                                            "teleAPIKEY": curConfig.telegram.teleAPIKEY
+                                        };
+                                    }
+                                    if (curConfig.twitter) {
+                                        curConfig.plugins.Twitter = {
+                                            "enable": curConfig.twitter.twitenable,
+                                            "consKey": curConfig.twitter.twitconskey,
+                                            "consSecret": curConfig.twitter.twitconssecret,
+                                            "accToken": curConfig.twitter.twitacctoken,
+                                            "accSecret": curConfig.twitter.twitaccsecret,
+                                            "globalHashtags": curConfig.twitter.twitglobalhashtags
+                                        };
+                                    }
+                                    delete curConfig.discord;
+                                    delete curConfig.pushover;
+                                    delete curConfig.STMP;
+                                    delete curConfig.telegram;
+                                    delete curConfig.twitter;
+                                    fs.writeFileSync( conf_file, JSON.stringify(curConfig,null, 2) );
+                                    nconf.load();
+                                    console.log("Config file updated!");
                                 });
                             } else {
                                 console.log("DB schema up to date!");

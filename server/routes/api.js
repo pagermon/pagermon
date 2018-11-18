@@ -15,14 +15,6 @@ var conf_file = './config/config.json';
 nconf.file({file: conf_file});
 nconf.load();
 
-var teleenable = nconf.get('telegram:teleenable');
-if (teleenable) {
-  var telegram = require('telegram-bot-api');
-  var telekey = nconf.get('telegram:teleAPIKEY');
-  var t = new telegram({
-    token: telekey
-  });
-}
 var twitenable = nconf.get('twitter:twitenable');
 if (twitenable) {
   var twit = require('twit');
@@ -602,6 +594,9 @@ router.post('/messages', function(req, res, next) {
             db.get("SELECT id, ignore, push, pushpri, pushgroup, pushsound, telegram, telechat, twitter, twitterhashtag, discord, discwebhook, mailenable, mailto FROM capcodes WHERE ? LIKE address ORDER BY REPLACE(address, '_', '%') DESC LIMIT 1", address, function(err,row) {
               var insert;
               var alias_id = null;
+              var aliasObj = {};
+
+
               var pushonoff = null;
               var pushpri = null;
               var pushgroup = null;
@@ -613,6 +608,8 @@ router.post('/messages', function(req, res, next) {
               var discwebhook = null;
               var mailonoff = null;
               var mailTo = "";
+
+
               if (err) { console.error(err) }
               if (row) {
                 if (row.ignore == '1') {
@@ -621,6 +618,9 @@ router.post('/messages', function(req, res, next) {
                 } else {
                   insert = true;
                   alias_id = row.id;
+                  aliasObj = row;
+
+
                   pushonoff = row.push;
                   pushPri = row.pushpri;
                   pushGroup = row.pushgroup;
@@ -634,6 +634,8 @@ router.post('/messages', function(req, res, next) {
                   discwebhook = row.discwebhook;
                   mailonoff = row.mailenable;
                   mailTo = row.mailto;
+
+
                 }
               } else {
                 insert = true;
@@ -692,6 +694,7 @@ router.post('/messages', function(req, res, next) {
 
                         // send data to pluginHandler after processing
                         console.log('afterMessage start');
+                        row.aliasObj = aliasObj;
                         pluginHandler.handle('message', 'after', row);
                         console.log('afterMessage done');
 
@@ -765,28 +768,7 @@ router.post('/messages', function(req, res, next) {
                             });
                           }
                         };
-                        //check config to see if push is gloably enabled and for the alias
-                        if (teleenable == true && teleonoff == 1) {
-                          //ensure chatid has been entered before trying to push
-                          if (telechat == 0 || !telechat) {
-                            console.error('Telegram: ' + address + ' No ChatID key set. Please enter ChatID.');
-                          } else {
-                            //Notification formatted in Markdown for pretty notifications
-                            var notificationText = `*${row.agency} - ${row.alias}*\n` + 
-                                                   `Message: ${row.message}`;
-                            
-                            t.sendMessage({
-                                chat_id: telechat,
-                                text: notificationText,
-                                parse_mode: "Markdown"
-                            }).then(function(data) {
-                              //uncomment below line to debug messages at the console!
-                              console.log('Telegram: ' + util.inspect(data, false, null));
-                            }).catch(function(err) {
-                                console.log('Telegram: ' + err);
-                            });
-                          }
-                        };
+
                         //start Twitter Module
                         if (twitenable == true && twitonoff == 1) {
                           //ensure API Keys have been entered before trying to post. 

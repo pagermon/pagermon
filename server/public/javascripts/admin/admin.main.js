@@ -1,4 +1,4 @@
-angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 'color.picker', 'ui.validate'])
+angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'ui.bootstrap', 'color.picker', 'ui.validate'])
     // Service
     .factory('Api', ['$resource',
      function($resource) {
@@ -390,7 +390,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
     }])
     
     // needs cleanup
-    .controller('SettingsController', ['$scope', '$routeParams', 'Api', 'uuid', '$uibModal', '$filter', '$timeout', function ($scope, $routeParams, Api, uuid, $uibModal, $filter, $timeout) {
+    .controller('SettingsController', ['$scope', '$routeParams', 'Api', 'uuid', '$uibModal', '$filter', '$timeout', '$sanitize', function ($scope, $routeParams, Api, uuid, $uibModal, $filter, $timeout, $sanitize) {
       $scope.alertMessage = {};
       Api.Settings.get(null, function(results) {
         if (!results.settings.messages.replaceText)

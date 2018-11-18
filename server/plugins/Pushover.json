@@ -1,0 +1,23 @@
+{
+    "name": "Pushover",
+    "description": "Push notifications on mobile devices",
+    "disable": false,
+    "event": "message",
+    "scope": "after",
+    "config": [ 
+        {
+            "name": "pushAPIKEY",
+            "label": "API Key",
+            "description": "Application key supplied by Pushover.",
+            "type": "text"
+        }
+    ],
+    "aliasConfig": [ 
+        {
+            "name": "templateEnable",
+            "label": "Enable Example Plugin",
+            "description": "This is an example setting on the template plugin",
+            "type": "checkbox"
+        }
+    ]
+}
