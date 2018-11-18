@@ -94,9 +94,10 @@ function init(release) {
                                     // begin scary stuff, consider hiding behind a solid object during this bit
                                     var upgradeSql = `PRAGMA foreign_keys=off;
 BEGIN TRANSACTION;
+ALTER TABLE capcodes RENAME TO _capcodes_backup;
 DROP INDEX IF EXISTS cc_pk_idx;
-UPDATE capcodes SET pluginconf = '{}';
-UPDATE capcodes SET pluginconf = '{
+UPDATE _capcodes_backup SET pluginconf = '{}';
+UPDATE _capcodes_backup SET pluginconf = '{
     "Discord": {
         "enable": ' || COALESCE(discord,0) || ',
         "webhook": "' || COALESCE(discwebhook,'') || '"
@@ -120,8 +121,6 @@ UPDATE capcodes SET pluginconf = '{
         "hashtag": "' || COALESCE(twitterhashtag,'') || '"
     }
 }';
-
-ALTER TABLE capcodes RENAME TO _capcodes_backup;
 
 CREATE TABLE IF NOT EXISTS "capcodes" (
 id INTEGER PRIMARY KEY AUTOINCREMENT,
