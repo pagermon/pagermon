@@ -99,25 +99,25 @@ DROP INDEX IF EXISTS cc_pk_idx;
 UPDATE _capcodes_backup SET pluginconf = '{}';
 UPDATE _capcodes_backup SET pluginconf = '{
     "Discord": {
-        "enable": ' || COALESCE(discord,0) || ',
+        "enable": ' || REPLACE(REPLACE(COALESCE(discord,0),0,'false'),1,'true') || ',
         "webhook": "' || COALESCE(discwebhook,'') || '"
     },
     "Pushover": {
-        "enable": ' || COALESCE(push,0) || ',
-        "priority": "' || COALESCE(pushpri,'') || '",
+        "enable": ' || REPLACE(REPLACE(COALESCE(push,0),0,'false'),1,'true') || ',
+        "priority": {"value": "' || COALESCE(pushpri,'') || '"},
         "group": "' || COALESCE(pushgroup,'') || '",
-        "sound": "' || COALESCE(pushsound,'') || '"
+        "sound": {"value": "' || COALESCE(pushsound,'') || '"}
     },
     "SMTP": {
-        "enable": ' || COALESCE(mailenable,0) || ',
+        "enable": ' || REPLACE(REPLACE(COALESCE(mailenable,0),0,'false'),1,'true') || ',
         "mailto": "' || COALESCE(mailto,'') || '"
     },
     "Telegram": {
-        "enable": ' || COALESCE(telegram,0) || ',
+        "enable": ' || REPLACE(REPLACE(COALESCE(telegram,0),0,'false'),1,'true') || ',
         "chat": "' || COALESCE(telechat,'') || '"
     },
     "Twitter": {
-        "enable": ' || COALESCE(twitter,0) || ',
+        "enable": ' || REPLACE(REPLACE(COALESCE(twitter,0),0,'false'),1,'true') || ',
         "hashtag": "' || COALESCE(twitterhashtag,'') || '"
     }
 }';
