@@ -38,10 +38,16 @@
     ],
     "aliasConfig": [ 
         {
-            "name": "templateEnable",
-            "label": "Enable Example Plugin",
-            "description": "This is an example setting on the template plugin",
+            "name": "enable",
+            "label": "Enable",
+            "description": "Send tweets on messages matching this alias",
             "type": "checkbox"
+        },
+        {
+            "name": "hashtag",
+            "label": "Twitter Alias Hashtags",
+            "description": "Hashtags to append to all Twitter posts from this alias. Space separated",
+            "type": "text"
         }
     ]
 }

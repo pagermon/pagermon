@@ -4,9 +4,7 @@ var router = express.Router();
 var basicAuth = require('express-basic-auth');
 var bcrypt = require('bcryptjs');
 var passport = require('passport');
-var push = require('pushover-notifications');
 var util = require('util')
-const nodemailer = require('nodemailer');
 var pluginHandler = require('../plugins/pluginHandler');
 require('../config/passport')(passport); // pass passport for configuration
 
@@ -14,21 +12,6 @@ var nconf = require('nconf');
 var conf_file = './config/config.json';
 nconf.file({file: conf_file});
 nconf.load();
-
-var twitenable = nconf.get('twitter:twitenable');
-if (twitenable) {
-  var twit = require('twit');
-  var twitconskey = nconf.get('twitter:twitconskey');
-  var twitconssecret = nconf.get('twitter:twitconssecret');
-  var twitacctoken = nconf.get('twitter:twitacctoken');
-  var twitaccsecret = nconf.get('twitter:twitaccsecret');
-  var twitglobalhashtags = nconf.get('twitter:twitglobalhashtags');
-}
-
-var discenable = nconf.get('discord:discenable');
-if (discenable) {
-  var discord = require('discord.js');
-}
 
 router.use(bodyParser.json());       // to support JSON-encoded bodies
 router.use(bodyParser.urlencoded({     // to support URL-encoded bodies
@@ -392,7 +375,8 @@ router.get('/capcodes/init', isSecMode, function(req, res, next) {
   });
 });
 
-router.get('/capcodes/:id', isSecMode, function(req, res, next) {
+// all capcode get methods are only used in admin area, so lock down to logged in users as they may contain sensitive data
+router.get('/capcodes/:id', isLoggedIn, function(req, res, next) {
   var id = req.params.id;
   db.serialize(() => {
     db.get("SELECT * from capcodes WHERE id=?", id, function(err, row){
@@ -401,23 +385,7 @@ router.get('/capcodes/:id', isSecMode, function(req, res, next) {
         res.send(err);
       } else {
         if (row) {
-          if (HideCapcode) {
-            if (!req.isAuthenticated()) {
-              row = {
-                "id": row.id,
-                "message": row.message,
-                "source": row.source,
-                "timestamp": row.timestamp,
-                "alias_id": row.alias_id,
-                "alias": row.alias,
-                "agency": row.agency,
-                "icon": row.icon,
-                "color": row.color,
-                "ignore": row.ignore,
-                "aliasMatch": row.aliasMatch
-              };
-            }
-          }
+          row.pluginconf = parseJSON(row.pluginconf);
           res.status(200);
           res.json(row);
         } else {
@@ -428,18 +396,8 @@ router.get('/capcodes/:id', isSecMode, function(req, res, next) {
             "agency": "",
             "icon": "question",
             "color": "black",
-            "push": "",
-            "pushgroup": "",
-            "pushsound": "",
-            "pushpri": "0",
-            "telegram": "",
-            "telechat": "",
-            "twitter": "",
-            "twitterhashtag": "",
-            "discord": "",
-            "discwebhook": "",
-            "mailenable" : "",
-            "mailto" : ""
+            "ignore": 0,
+            "pluginconf": {}
           };
           res.status(200);
           res.json(row);
@@ -449,7 +407,7 @@ router.get('/capcodes/:id', isSecMode, function(req, res, next) {
   });
 });
 
-router.get('/capcodeCheck/:id', isSecMode, function(req, res, next) {
+router.get('/capcodeCheck/:id', isLoggedIn, function(req, res, next) {
   var id = req.params.id;
   db.serialize(() => {
     db.get("SELECT * from capcodes WHERE address=?", id, function(err, row){
@@ -458,23 +416,7 @@ router.get('/capcodeCheck/:id', isSecMode, function(req, res, next) {
         res.send(err);
       } else {
         if (row) {
-          if (HideCapcode) {
-            if (!req.isAuthenticated()) {
-              row = {
-                "id": row.id,
-                "message": row.message,
-                "source": row.source,
-                "timestamp": row.timestamp,
-                "alias_id": row.alias_id,
-                "alias": row.alias,
-                "agency": row.agency,
-                "icon": row.icon,
-                "color": row.color,
-                "ignore": row.ignore,
-                "aliasMatch": row.aliasMatch
-              };
-            }
-          }
+          row.pluginconf = parseJSON(row.pluginconf);
           res.status(200);
           res.json(row);
         } else {
@@ -485,18 +427,8 @@ router.get('/capcodeCheck/:id', isSecMode, function(req, res, next) {
             "agency": "",
             "icon": "question",
             "color": "black",
-            "push": "",
-            "pushgroup": "",
-            "pushsound": "",
-            "pushpri": "0",
-            "telegram": "",
-            "telechat": "",
-            "twitter": "",
-            "twitterhashtag": "",
-            "discord": "",
-            "discwebhook": "",
-            "mailenable" : "",
-            "mailto" : ""
+            "ignore": 0,
+            "pluginconf": {}
           };
           res.status(200);
           res.json(row);
@@ -545,16 +477,6 @@ router.post('/messages', function(req, res, next) {
     var dupeLimit = nconf.get('messages:duplicateLimit') || 0; // default 0
     var dupeTime = nconf.get('messages:duplicateTime') || 0; // default 0
     var pdwMode = nconf.get('messages:pdwMode');
-    var pushenable = nconf.get('pushover:pushenable');
-    var pushkey = nconf.get('pushover:pushAPIKEY');
-    var mailEnable = nconf.get('STMP:MailEnable');
-    var MailFrom      = nconf.get('STMP:MailFrom');
-    var MailFromName  = nconf.get('STMP:MailFromName');
-    var SMTPServer    = nconf.get('STMP:SMTPServer');
-    var SMTPPort      = nconf.get('STMP:SMTPPort');
-    var STMPUsername  = nconf.get('STMP:STMPUsername');
-    var STMPPassword  = nconf.get('STMP:STMPPassword');
-    var STMPSecure    = nconf.get('STMP:STMPSecure');
 
     // send data to pluginHandler before proceeding
     console.log('beforeMessage start');
@@ -591,24 +513,9 @@ router.post('/messages', function(req, res, next) {
             res.status(200);
             res.send('Ignoring duplicate');
           } else {
-            db.get("SELECT id, ignore, push, pushpri, pushgroup, pushsound, telegram, telechat, twitter, twitterhashtag, discord, discwebhook, mailenable, mailto FROM capcodes WHERE ? LIKE address ORDER BY REPLACE(address, '_', '%') DESC LIMIT 1", address, function(err,row) {
+            db.get("SELECT id, ignore FROM capcodes WHERE ? LIKE address ORDER BY REPLACE(address, '_', '%') DESC LIMIT 1", address, function(err,row) {
               var insert;
               var alias_id = null;
-              var aliasObj = {};
-
-
-              var pushonoff = null;
-              var pushpri = null;
-              var pushgroup = null;
-              var pushsound = null;
-              var teleonoff = null;
-              var telechat = null;
-              var twitonoff = null;
-              var disconoff = null;
-              var discwebhook = null;
-              var mailonoff = null;
-              var mailTo = "";
-
 
               if (err) { console.error(err) }
               if (row) {
@@ -618,24 +525,6 @@ router.post('/messages', function(req, res, next) {
                 } else {
                   insert = true;
                   alias_id = row.id;
-                  aliasObj = row;
-
-
-                  pushonoff = row.push;
-                  pushPri = row.pushpri;
-                  pushGroup = row.pushgroup;
-                  pushSound = row.pushsound;
-                  teleonoff = row.telegram;
-                  telechat = row.telechat
-                  twitonoff = row.twitter
-                  twithashtags = row.twitterhashtag
-                  telechat = row.telechat;
-                  disconoff = row.discord;
-                  discwebhook = row.discwebhook;
-                  mailonoff = row.mailenable;
-                  mailTo = row.mailto;
-
-
                 }
               } else {
                 insert = true;
@@ -652,7 +541,7 @@ router.post('/messages', function(req, res, next) {
                     res.status(500).send(err);
                   } else {
                     // emit the full message
-                    var sql =  "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch FROM messages";
+                    var sql =  "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch, capcodes.pluginconf FROM messages";
                     if(pdwMode) {
                         sql += " INNER JOIN capcodes ON capcodes.id = messages.alias_id ";
                     } else {
@@ -664,9 +553,14 @@ router.post('/messages', function(req, res, next) {
                       if (err) {
                         res.status(500).send(err);
                       } else {
+                        // send data to pluginHandler after processing
+                        row.pluginconf = parseJSON(row.pluginconf);
+                        console.log('afterMessage start');
+                        pluginHandler.handle('message', 'after', row);
+                        console.log('afterMessage done');
+                        delete row.pluginconf;
+
                         if(row) {
-                          //console.log(row);
-                          //req.io.emit('messagePost', row);
                           if (HideCapcode) {
                             //Emit full details to the admin socket
                             req.io.of('adminio').emit('messagePost', row);
@@ -692,14 +586,8 @@ router.post('/messages', function(req, res, next) {
                         }
                         res.status(200).send(''+reqLastID);
 
-                        // send data to pluginHandler after processing
-                        console.log('afterMessage start');
-                        row.aliasObj = aliasObj;
-                        pluginHandler.handle('message', 'after', row);
-                        console.log('afterMessage done');
-
                         //Check to see if Email is enabled globaly
-                        if (mailEnable == true) {
+                        if (mailEnable) {
                           // Check to see if the capcode is set to mailto
                           if (mailonoff == 1) {
                             let smtpConfig = {
@@ -866,20 +754,9 @@ router.post('/capcodes', function(req, res, next) {
     var color = req.body.color || 'black';
     var icon = req.body.icon || 'question';
     var ignore = req.body.ignore || 0;
-    var push = req.body.push || 0;
-    var pushpri = req.body.pushpri || "0";
-    var pushgroup = req.body.pushgroup || 0;
-    var pushsound = req.body.pushsound || '';
-    var telegram = req.body.telegram || 0;
-    var telechat = req.body.telechat || '';
-    var twitter = req.body.twitter || 0;
-    var twitterhashtag = req.body.twitterhashtag || '';
-    var discord = req.body.discord || 0;
-    var discwebhook = req.body.discwebhook || '';
-    var Mailenable = req.body.mailenable || 0;
-    var MailTo = req.body.mailto || '';
+    var pluginconf = JSON.stringify(req.body.pluginconf) || "{}";
     db.serialize(() => {
-      db.run("REPLACE INTO capcodes (id, address, alias, agency, color, icon, ignore, push, pushpri, pushgroup, pushsound, telegram, telechat, twitter, twitterhashtag, discord, discwebhook, mailenable, mailto) VALUES ($mesID, $mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore, $mesPush, $mesPushPri, $mesPushGroup, $mesPushSound, $mesTelegram, $mesTeleChat, $mesTwitter, $mesTwitterHashTag, $mesDiscord, $mesDiscWebhook, $MailEnable, $MailTo );", {
+      db.run("REPLACE INTO capcodes (id, address, alias, agency, color, icon, ignore, pluginconf) VALUES ($mesID, $mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore, $mesPluginconf);", {
         $mesID: id,
         $mesAddress: address,
         $mesAlias: alias,
@@ -887,18 +764,7 @@ router.post('/capcodes', function(req, res, next) {
         $mesColor: color,
         $mesIcon: icon,
         $mesIgnore: ignore,
-        $mesPush : push,
-        $mesPushPri: pushpri,
-        $mesPushGroup: pushgroup,
-        $mesPushSound: pushsound,
-        $mesTelegram: telegram,
-        $mesTeleChat: telechat,
-        $mesTwitter: twitter,
-        $mesTwitterHashTag: twitterhashtag,
-        $mesDiscord: discord,
-        $mesDiscWebhook: discwebhook,
-        $MailEnable : Mailenable,
-        $MailTo : MailTo
+        $mesPluginconf : pluginconf
       }, function(err){
         if (err) {
           res.status(500).send(err);
@@ -953,23 +819,12 @@ router.post('/capcodes/:id', function(req, res, next) {
       var color = req.body.color || 'black';
       var icon = req.body.icon || 'question';
       var ignore = req.body.ignore || 0;
-      var push = req.body.push || 0;
-      var pushpri = req.body.pushpri || "0";
-      var pushgroup = req.body.pushgroup || 0;
-      var pushsound = req.body.pushsound || '';
-      var telegram = req.body.telegram || 0;
-      var telechat = req.body.telechat || '';
-      var twitter = req.body.twitter || 0;
-      var twitterhashtag = req.body.twitterhashtag || '';
-      var discord = req.body.discord || 0;
-      var discwebhook = req.body.discwebhook || '';
-      var Mailenable = req.body.mailenable || 0;
-      var MailTo = req.body.mailto || '';
+      var pluginconf = JSON.stringify(req.body.pluginconf) || "{}";
       var updateAlias = req.body.updateAlias || 0;
       console.time('insert');
       db.serialize(() => {
         //db.run("UPDATE tbl SET name = ? WHERE id = ?", [ "bar", 2 ]);
-        db.run("REPLACE INTO capcodes (id, address, alias, agency, color, icon, ignore, push, pushpri, pushgroup, pushsound, telegram, telechat, twitter, twitterhashtag, discord, discwebhook, mailenable, mailto  ) VALUES ($mesID, $mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore, $mesPush, $mesPushPri, $mesPushGroup, $mesPushSound, $mesTelegram, $mesTeleChat, $mesTwitter, $mesTwitterHashTag, $mesDiscord, $mesDiscWebhook, $MailEnable, $MailTo );", {
+        db.run("REPLACE INTO capcodes (id, address, alias, agency, color, icon, ignore, pluginconf) VALUES ($mesID, $mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore, $mesPluginconf);", {
           $mesID: id,
           $mesAddress: address,
           $mesAlias: alias,
@@ -977,18 +832,7 @@ router.post('/capcodes/:id', function(req, res, next) {
           $mesColor: color,
           $mesIcon: icon,
           $mesIgnore: ignore,
-          $mesPush : push,
-          $mesPushPri: pushpri,
-          $mesPushGroup: pushgroup,
-          $mesPushSound: pushsound,
-          $mesTelegram: telegram,
-          $mesTeleChat: telechat,
-          $mesTwitter: twitter,
-          $mesTwitterHashTag: twitterhashtag,
-          $mesDiscord: discord,
-          $mesDiscWebhook: discwebhook,
-          $MailEnable : Mailenable,
-          $MailTo : MailTo
+          $mesPluginconf : pluginconf
         }, function(err){
           if (err) {
             console.timeEnd('insert');
@@ -1098,4 +942,14 @@ function handleError(err,req,res,next){
   };
   var statusCode = err.status || 500;
   res.status(statusCode).json(output);
+}
+
+function parseJSON(json) {
+  var parsed;
+  try {
+    parsed = JSON.parse(json)
+  } catch (e) {
+    // ignore errors
+  }
+  return parsed;
 }

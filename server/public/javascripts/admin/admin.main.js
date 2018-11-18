@@ -204,6 +204,21 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
           $scope.aliasLoading = false;
           $scope.existingAddress = false;
           $scope.loading = false;
+
+          if (results.pluginconf) {
+            $scope.plugins.forEach(plugin => {
+              if (!$scope.alias.pluginconf[plugin.name]) {
+                $scope.alias.pluginconf[plugin.name] = {};
+              }
+            });
+          } else {
+            // populate pluginconf
+            $scope.alias.pluginconf = {};
+            $scope.plugins.forEach(plugin => {
+              $scope.alias.pluginconf[plugin.name] = {};
+            });
+          }
+
           if (results.address) {
             $scope.alias.originalAddress = results.address;
             $scope.isNew = false;
@@ -236,7 +251,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
               $scope.existingAddress = false;
               return false;
             }
-          });          
+          });
         } else {
           $scope.aliasLoading = false;
           $scope.existingAddress = false;
@@ -351,6 +366,8 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
           if (results.database && results.database.aliasRefreshRequired == 1) {
             $scope.aliasRefreshRequired = 1;
           }
+          $scope.settings = results.settings;
+          $scope.plugins = results.plugins;
         }
       });
       $scope.aliasLoad();

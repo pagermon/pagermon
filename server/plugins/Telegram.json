@@ -14,7 +14,16 @@
     ],
     "aliasConfig": [
         {
-            "name": ""
+            "name": "enable",
+            "label": "Enable",
+            "description": "Send matching messages to your Telegram channel",
+            "type": "checkbox"
+        },
+        {
+            "name": "chat",
+            "label": "Chat ID",
+            "description": "Telegram chat ID to send to",
+            "type": "text"
         }
     ]
 }

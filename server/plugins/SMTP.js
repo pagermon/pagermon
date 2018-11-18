@@ -1,3 +1,5 @@
+const nodemailer = require('nodemailer');
+
 function run(event, scope, data, config) {
 
 }
