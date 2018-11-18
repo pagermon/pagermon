@@ -92,7 +92,9 @@ function init(release) {
                                     db.run("ALTER TABLE capcodes ADD discwebhook TEXT", function (err) { /* ignore error */ });
                                     db.run("ALTER TABLE capcodes ADD pluginconf TEXT", function (err) { /* ignore error */ });
                                     // begin scary stuff, consider hiding behind a solid object during this bit
-                                    var upgradeSql = `DROP INDEX IF EXISTS cc_pk_idx;
+                                    var upgradeSql = `PRAGMA foreign_keys=off;
+BEGIN TRANSACTION;
+DROP INDEX IF EXISTS cc_pk_idx;
 UPDATE capcodes SET pluginconf = '{}';
 UPDATE capcodes SET pluginconf = '{
     "Discord": {
@@ -118,28 +120,26 @@ UPDATE capcodes SET pluginconf = '{
         "hashtag": "' || COALESCE(twitterhashtag,'') || '"
     }
 }';
-                                    PRAGMA foreign_keys=off;
-                                    BEGIN TRANSACTION;
-                                    ALTER TABLE capcodes RENAME TO _capcodes_backup;
-                                    
-                                    CREATE TABLE IF NOT EXISTS "capcodes" (
-                                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                    address TEXT NOT NULL,
-                                    alias TEXT NOT NULL,
-                                    agency TEXT,
-                                    icon TEXT,
-                                    color TEXT,
-                                    ignore INTEGER DEFAULT 0,
-                                    pluginconf TEXT);
-                                    
-                                    INSERT INTO capcodes (id, address, alias, agency, icon, color, ignore, pluginconf)
-                                      SELECT id, address, alias, agency, icon, color, ignore, pluginconf
-                                      FROM _capcodes_backup;
-                                    
-                                    COMMIT;
-                                    CREATE UNIQUE INDEX IF NOT EXISTS cc_pk_idx ON capcodes (id,address DESC);
-                                    
-                                    PRAGMA foreign_keys=on;`;
+
+ALTER TABLE capcodes RENAME TO _capcodes_backup;
+
+CREATE TABLE IF NOT EXISTS "capcodes" (
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+address TEXT NOT NULL,
+alias TEXT NOT NULL,
+agency TEXT,
+icon TEXT,
+color TEXT,
+ignore INTEGER DEFAULT 0,
+pluginconf TEXT);
+
+INSERT INTO capcodes (id, address, alias, agency, icon, color, ignore, pluginconf)
+    SELECT id, address, alias, agency, icon, color, ignore, pluginconf
+    FROM _capcodes_backup;
+
+COMMIT;
+PRAGMA foreign_keys=on;
+CREATE UNIQUE INDEX IF NOT EXISTS cc_pk_idx ON capcodes (id,address DESC);`;
                                     db.exec(upgradeSql, function(err) {
                                         if (err) { console.log(err); }
                                         // scary db stuff done, phew
