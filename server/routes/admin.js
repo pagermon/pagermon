@@ -63,7 +63,19 @@ router.post('/resetPass', isLoggedIn, function(req, res, next) {
 router.route('/settingsData')
     .get(isLoggedIn, function(req, res, next) {
         nconf.load();
-        res.json(nconf.get());
+        let settings = nconf.get();
+        console.log(settings);
+        let plugins = [];
+        fs.readdirSync('./plugins').forEach(file => {
+            if (file.endsWith('.json')) {
+                let pConf = require(`../plugins/${file}`);
+                if (!pConf.disable)
+                    plugins.push(pConf);
+            }
+        });
+        console.log(plugins);
+        let data = {"settings": settings, "plugins": plugins}
+        res.json(data);
     })
     .post(isLoggedIn, function(req, res, next) {
         nconf.load();

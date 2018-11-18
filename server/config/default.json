@@ -48,18 +48,7 @@
       }
     ]
   },
-  "plugins": [
-    {
-      "name": "Telegram",
-      "enabled": true,
-      "config": {
-        "teleAPIKEY": ""
-      }
-    },
-    {
-
-    }
-  ],
+  "plugins": {},
   "pushover":{
     "pushenable": false,
     "pushAPIKEY":  ""

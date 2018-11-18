@@ -393,11 +393,12 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
     .controller('SettingsController', ['$scope', '$routeParams', 'Api', 'uuid', '$uibModal', '$filter', '$timeout', function ($scope, $routeParams, Api, uuid, $uibModal, $filter, $timeout) {
       $scope.alertMessage = {};
       Api.Settings.get(null, function(results) {
-        if (!results.messages.replaceText)
-          results.messages.replaceText = [{}];
-        if (!results.auth.keys)
-          results.auth.keys = [{}];
-        $scope.settings = results;
+        if (!results.settings.messages.replaceText)
+          results.settings.messages.replaceText = [{}];
+        if (!results.settings.auth.keys)
+          results.settings.auth.keys = [{}];
+        $scope.settings = results.settings;
+        $scope.plugins = results.plugins;
       });
 
       $scope.settingsSubmit = function() {

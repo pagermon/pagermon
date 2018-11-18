@@ -1,6 +1,7 @@
 {
     "name": "Telegram",
     "description": "Push messages to Telegram channel",
+    "disable": false,
     "event": "message",
     "scope": "after",
     "config": [

@@ -1,4 +1,5 @@
 var fs = require('fs');
+var _ = require('underscore');
 var nconf = require('nconf');
 var conf_file = './config/config.json';
 nconf.file({file: conf_file});
@@ -15,24 +16,26 @@ function handle(event, scope, data) {
     console.log(plugins);
     console.log('======================');
 
-    plugins.forEach(plugin => {
+    _.each(plugins, function(conf, plugin) {
         console.log('======================');
-        console.log(`plugin: ${plugin.name}`);
+        console.log(`plugin: ${plugin}`);
         // note: fs and require use different paths
-        if (fs.existsSync(`./plugins/${plugin.name}.json`) && fs.existsSync(`./plugins/${plugin.name}.js`)) {
-            let pConfig = require(`./${plugin.name}.json`);
-            console.log(pConfig);
-            // check scope
-            if (pConfig.event == event && pConfig.scope == scope) {
-                console.log('RUNNING PLUGIN!');
-                let pRun = require(`./${plugin.name}`);
-                    pRun.run(event, scope, data, plugin.config);
+        if (conf.enable) {
+            if (fs.existsSync(`./plugins/${plugin}.json`) && fs.existsSync(`./plugins/${plugin}.js`)) {
+                let pConfig = require(`./${plugin}.json`);
+                console.log(pConfig);
+                // check scope
+                if (pConfig.event == event && pConfig.scope == scope && !pConfig.disable) {
+                    console.log('RUNNING PLUGIN!');
+                    let pRun = require(`./${plugin}`);
+                        pRun.run(event, scope, data, conf);
+                } else {
+                    console.log('Plugin does not run in this scope');
+                }
             } else {
-                console.log('Plugin does not run in this scope');
+                console.log('Invalid plugin: ');
+                console.log(plugin);
             }
-        } else {
-            console.log('Invalid plugin: ');
-            console.log(plugin);
         }
         console.log('======================');
     })

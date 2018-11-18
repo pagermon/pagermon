@@ -692,7 +692,7 @@ router.post('/messages', function(req, res, next) {
 
                         // send data to pluginHandler after processing
                         console.log('afterMessage start');
-                        pluginHandler.handle('message', 'after', req.body);
+                        pluginHandler.handle('message', 'after', row);
                         console.log('afterMessage done');
 
                         //Check to see if Email is enabled globaly

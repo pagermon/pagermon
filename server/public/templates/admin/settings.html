@@ -164,7 +164,7 @@
                 <label>
                 <input type="checkbox" name="messages.SecureApi" ng-model="settings.messages.apiSecurity">
                 Secures all API's and WebInterface from being accessed unless logged in.
-			<p><b> Note: You must restart the application after making this change.</b>
+                  <p><b> Note: You must restart the application after making this change.</b>
                 </label>
               </div>
               </div>
@@ -214,7 +214,40 @@
               </div>
             </div>
 
-            <h5>Notifications</h5>
+            <hr />
+            <h5>Plugins</h5>
+            <div class="plugin-group" ng-repeat="plugin in plugins">
+              <h6>{{plugin.name}}</h6>
+              <div class="form-group">
+                <label for="{{plugin.name}}.enable" class="col-xs-4 col-sm-3 control-label">Enable</label>
+                <div class="col-xs-8 col-sm-9">
+                  <div class="checkbox">
+                    <label>
+                      <input type="checkbox" name="{{plugin.name}}.enable" ng-model="settings.plugins[plugin.name].enable">
+                      Enable the {{plugin.name}} plugin
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group" ng-repeat="configItem in plugin.config">
+                <label for="{{plugin.name}}.{{configItem.name}}" class="col-xs-4 col-sm-3 control-label">{{configItem.label}}</label>
+                <div class="col-xs-8 col-sm-9">
+                  <div ng-if="configItem.type == 'checkbox'" class="checkbox">
+                    <label>
+                      <input type="checkbox" name="{{plugin.name}}.{{configItem.name}}" ng-model="settings.plugins[plugin.name][configItem.name]" ng-disabled="!settings.plugins[plugin.name].enable">
+                      {{configItem.description}}
+                    </label>
+                  </div>
+                  <div ng-if="configItem.type != 'checkbox'">
+                    <input type="{{configItem.type}}" class="form-control" name="{{plugin.name}}.{{configItem.name}}" ng-model="settings.plugins[plugin.name][configItem.name]" ng-disabled="!settings.plugins[plugin.name].enable">
+                    <span id="helpBlock" class="help-block">{{configItem.description}}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <hr />
+
+
             <h6>Pushover</h6>
             <div class="form-group">
               <label for="pushover.pushenable" class="col-xs-4 col-sm-3 control-label">Enable</label>
