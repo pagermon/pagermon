@@ -1,4 +1,5 @@
 var telegram = require('telegram-bot-api');
+var util = require('util')
 
 function run(event, scope, data, config) {
     var tConf = data.pluginconf.Telegram;
