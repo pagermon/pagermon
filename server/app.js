@@ -1,5 +1,5 @@
-var version = "0.1.9-beta";
-var release = 20181117;
+var version = "0.2.0-beta";
+var release = 20181118;
 
 var debug = require('debug')('pagermon:server');
 var pmx = require('pmx').init({
