@@ -84,3 +84,5 @@ client/config/backup.json
 #idea
 .idea
 server/sessions
+
+client/samples/testymctest.sh

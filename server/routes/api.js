@@ -492,7 +492,7 @@ router.post('/messages', function(req, res, next) {
       if (data.pluginData.ignore) {
         // stop processing
         res.status(200);
-        res.send('Ignoring filtered');
+        return res.send('Ignoring filtered');
       }
       db.serialize(() => {
         var address = data.address || '0000000';
@@ -542,8 +542,8 @@ router.post('/messages', function(req, res, next) {
                 }
 
                 // overwrite alias_id if set from plugin
-                if (data.pluginconf.aliasId) {
-                  alias_id = data.pluginconf.aliasId;
+                if (data.pluginData.aliasId) {
+                  alias_id = data.pluginData.aliasId;
                 }
 
                 if (insert == true) {
@@ -570,44 +570,46 @@ router.post('/messages', function(req, res, next) {
                         if (err) {
                           res.status(500).send(err);
                         } else {
-                          // send data to pluginHandler after processing
-                          row.pluginData = data.pluginData;
-                          if (row.pluginconf) {
-                            row.pluginconf = parseJSON(row.pluginconf);
-                          } else {
-                            row.pluginconf = {};
-                          }
-                          console.log('afterMessage start');
-                          pluginHandler.handle('message', 'after', row, function(response) {
-                            console.log(response);
-                            console.log('afterMessage done');
-                          });
-                          // remove the pluginconf object before firing socket message
-                          delete row.pluginconf;
-  
                           if(row) {
-                            if (HideCapcode) {
-                              //Emit full details to the admin socket
-                              req.io.of('adminio').emit('messagePost', row);
-                              // Emit No capdoe to normal socket
-                              row = {
-                                "id": row.id,
-                                "message": row.message,
-                                "source": row.source,
-                                "timestamp": row.timestamp,
-                                "alias_id": row.alias_id,
-                                "alias": row.alias,
-                                "agency": row.agency,
-                                "icon": row.icon,
-                                "color": row.color,
-                                "ignore": row.ignore,
-                                "aliasMatch": row.aliasMatch
-                              };
-                              req.io.emit('messagePost', row);
+                            // send data to pluginHandler after processing
+                            row.pluginData = data.pluginData;
+                            if (row.pluginconf) {
+                              row.pluginconf = parseJSON(row.pluginconf);
                             } else {
-                              //Just emit - No Security enabled
-                              req.io.emit('messagePost', row);
+                              row.pluginconf = {};
                             }
+                            console.log('afterMessage start');
+                            pluginHandler.handle('message', 'after', row, function(response) {
+                              console.log(response);
+                              console.log('afterMessage done');
+                              // remove the pluginconf object before firing socket message
+                              delete row.pluginconf;
+                              if (HideCapcode || apiSecurity) {
+                                //Emit full details to the admin socket
+                                req.io.of('adminio').emit('messagePost', row);
+                                //Only emit to normal socket if HideCapcode is on and ApiSecurity is off.
+                                if (HideCapcode && !apiSecurity) {
+                                  // Emit No capcode to normal socket
+                                  row = {
+                                    "id": row.id,
+                                    "message": row.message,
+                                    "source": row.source,
+                                    "timestamp": row.timestamp,
+                                    "alias_id": row.alias_id,
+                                    "alias": row.alias,
+                                    "agency": row.agency,
+                                    "icon": row.icon,
+                                    "color": row.color,
+                                    "ignore": row.ignore,
+                                    "aliasMatch": row.aliasMatch
+                                  };
+                                  req.io.emit('messagePost', row);
+                                }
+                              } else {
+                                //Just emit - No Security enabled
+                                req.io.emit('messagePost', row);
+                              }
+                            });
                           }
                           res.status(200).send(''+reqLastID);
                         }
