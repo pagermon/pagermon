@@ -76,10 +76,11 @@ The `run` function receives 4 variables:
 * `scope` is a string containing either `before` or `after`
 * `data` is an object containing the contents of the event
 * `config` is an object containing the global settings configured in the UI for this plugin
+* `callback` for passing `data` back to the main function once complete
 
 ```javascript
-function run(event, scope, data, config) {
-
+function run(event, scope, data, config, callback) {
+  callback(data);
 }
 
 module.exports = {
@@ -153,3 +154,16 @@ The `config` object contains the global config for this particular plugin, e.g.:
 ```javascript
 { enable: true, templateSetting: 'testsetting', templateCheckbox: true }
 ```
+
+### Using callbacks
+
+Passing data to the callback parameter allows you to modify the `data` object before further processing. This does nothing for `after` plugins, but is useful for `before` plugins to stop processing or manually process.
+
+```javascript
+pRun.run(event, scope, data, conf, function(response, error) {
+  if (error) console.log(error);
+  if (response) data = response;
+});
+```
+
+If the first parameter is not null in the callback, then it will replace the entire `data` object. This means that you should only ever return the `data` object or `null` with the callback, otherwise you may encounter unexpected gremlins in message processing.

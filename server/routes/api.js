@@ -483,127 +483,126 @@ router.post('/messages', function(req, res, next) {
     pluginHandler.handle('message', 'before', req.body, function(response) {
       console.log(response);
       console.log('beforeMessage done');
-    });
-
-    db.serialize(() => {
-      var address = req.body.address || '0000000';
-      var message = req.body.message.replace(/["]+/g, '') || 'null';
-      var datetime = req.body.datetime || 1;
-      var timeDiff = datetime - dupeTime;
-      var source = req.body.source || 'UNK';
-      
-      var dupeCheck = 'SELECT * FROM messages WHERE ';
-      if (dupeLimit != 0 || dupeTime != 0) {
-        dupeCheck += 'id IN ( SELECT id FROM messages ';
-        if (dupeTime != 0) {
-          dupeCheck += 'WHERE timestamp > '+timeDiff+' ';
-        }
-        if (dupeLimit != 0) {
-          dupeCheck += 'ORDER BY id DESC LIMIT '+dupeLimit;
-        }
-        dupeCheck +=' ) AND message LIKE "'+message+'" AND address="'+address+'";';
-      } else {
-        dupeCheck += 'message LIKE "'+message+'" AND address="'+address+'";';
-      }
-
-      db.get(dupeCheck, [], function (err, row) {
-        if (err) {
-          res.status(500).send(err);
+      db.serialize(() => {
+        var address = req.body.address || '0000000';
+        var message = req.body.message.replace(/["]+/g, '') || 'null';
+        var datetime = req.body.datetime || 1;
+        var timeDiff = datetime - dupeTime;
+        var source = req.body.source || 'UNK';
+        
+        var dupeCheck = 'SELECT * FROM messages WHERE ';
+        if (dupeLimit != 0 || dupeTime != 0) {
+          dupeCheck += 'id IN ( SELECT id FROM messages ';
+          if (dupeTime != 0) {
+            dupeCheck += 'WHERE timestamp > '+timeDiff+' ';
+          }
+          if (dupeLimit != 0) {
+            dupeCheck += 'ORDER BY id DESC LIMIT '+dupeLimit;
+          }
+          dupeCheck +=' ) AND message LIKE "'+message+'" AND address="'+address+'";';
         } else {
-          if (row && filterDupes) {
-            console.log('Ignoring duplicate: ', message);
-            res.status(200);
-            res.send('Ignoring duplicate');
+          dupeCheck += 'message LIKE "'+message+'" AND address="'+address+'";';
+        }
+  
+        db.get(dupeCheck, [], function (err, row) {
+          if (err) {
+            res.status(500).send(err);
           } else {
-            db.get("SELECT id, ignore FROM capcodes WHERE ? LIKE address ORDER BY REPLACE(address, '_', '%') DESC LIMIT 1", address, function(err,row) {
-              var insert;
-              var alias_id = null;
-
-              if (err) { console.error(err) }
-              if (row) {
-                if (row.ignore == '1') {
-                  insert = false;
-                  console.log('Ignoring filtered address: '+address+' alias: '+row.id);
+            if (row && filterDupes) {
+              console.log('Ignoring duplicate: ', message);
+              res.status(200);
+              res.send('Ignoring duplicate');
+            } else {
+              db.get("SELECT id, ignore FROM capcodes WHERE ? LIKE address ORDER BY REPLACE(address, '_', '%') DESC LIMIT 1", address, function(err,row) {
+                var insert;
+                var alias_id = null;
+  
+                if (err) { console.error(err) }
+                if (row) {
+                  if (row.ignore == '1') {
+                    insert = false;
+                    console.log('Ignoring filtered address: '+address+' alias: '+row.id);
+                  } else {
+                    insert = true;
+                    alias_id = row.id;
+                  }
                 } else {
                   insert = true;
-                  alias_id = row.id;
                 }
-              } else {
-                insert = true;
-              }
-              if (insert == true) {
-                db.run("INSERT INTO messages (address, message, timestamp, source, alias_id) VALUES ($mesAddress, $mesBody, $mesDT, $mesSource, $aliasId);", {
-                  $mesAddress: address,
-                  $mesBody: message,
-                  $mesDT: datetime,
-                  $mesSource: source,
-                  $aliasId: alias_id
-                }, function(err){
-                  if (err) {
-                    res.status(500).send(err);
-                  } else {
-                    // emit the full message
-                    var sql =  "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch, capcodes.pluginconf FROM messages";
-                    if(pdwMode) {
-                        sql += " INNER JOIN capcodes ON capcodes.id = messages.alias_id ";
+                if (insert == true) {
+                  db.run("INSERT INTO messages (address, message, timestamp, source, alias_id) VALUES ($mesAddress, $mesBody, $mesDT, $mesSource, $aliasId);", {
+                    $mesAddress: address,
+                    $mesBody: message,
+                    $mesDT: datetime,
+                    $mesSource: source,
+                    $aliasId: alias_id
+                  }, function(err){
+                    if (err) {
+                      res.status(500).send(err);
                     } else {
-                        sql += " LEFT JOIN capcodes ON capcodes.id = messages.alias_id ";
-                    }
-                        sql += " WHERE messages.id = "+this.lastID;
-                    var reqLastID = this.lastID;
-                    db.get(sql,function(err,row){
-                      if (err) {
-                        res.status(500).send(err);
+                      // emit the full message
+                      var sql =  "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch, capcodes.pluginconf FROM messages";
+                      if(pdwMode) {
+                          sql += " INNER JOIN capcodes ON capcodes.id = messages.alias_id ";
                       } else {
-                        // send data to pluginHandler after processing
-                        if (row.pluginconf) {
-                          row.pluginconf = parseJSON(row.pluginconf);
-                        } else {
-                          row.pluginconf = {};
-                        }
-                        console.log('afterMessage start');
-                        pluginHandler.handle('message', 'after', row, function(response) {
-                          console.log(response);
-                          console.log('afterMessage done');
-                        });
-                        delete row.pluginconf;
-
-                        if(row) {
-                          if (HideCapcode) {
-                            //Emit full details to the admin socket
-                            req.io.of('adminio').emit('messagePost', row);
-                            // Emit No capdoe to normal socket
-                            row = {
-                              "id": row.id,
-                              "message": row.message,
-                              "source": row.source,
-                              "timestamp": row.timestamp,
-                              "alias_id": row.alias_id,
-                              "alias": row.alias,
-                              "agency": row.agency,
-                              "icon": row.icon,
-                              "color": row.color,
-                              "ignore": row.ignore,
-                              "aliasMatch": row.aliasMatch
-                            };
-                            req.io.emit('messagePost', row);
-                          } else {
-                            //Just emit - No Security enabled
-                            req.io.emit('messagePost', row);
-                          }
-                        }
-                        res.status(200).send(''+reqLastID);
+                          sql += " LEFT JOIN capcodes ON capcodes.id = messages.alias_id ";
                       }
-                    });
+                          sql += " WHERE messages.id = "+this.lastID;
+                      var reqLastID = this.lastID;
+                      db.get(sql,function(err,row){
+                        if (err) {
+                          res.status(500).send(err);
+                        } else {
+                          // send data to pluginHandler after processing
+                          if (row.pluginconf) {
+                            row.pluginconf = parseJSON(row.pluginconf);
+                          } else {
+                            row.pluginconf = {};
                           }
+                          console.log('afterMessage start');
+                          pluginHandler.handle('message', 'after', row, function(response) {
+                            console.log(response);
+                            console.log('afterMessage done');
+                          });
+                          delete row.pluginconf;
+  
+                          if(row) {
+                            if (HideCapcode) {
+                              //Emit full details to the admin socket
+                              req.io.of('adminio').emit('messagePost', row);
+                              // Emit No capdoe to normal socket
+                              row = {
+                                "id": row.id,
+                                "message": row.message,
+                                "source": row.source,
+                                "timestamp": row.timestamp,
+                                "alias_id": row.alias_id,
+                                "alias": row.alias,
+                                "agency": row.agency,
+                                "icon": row.icon,
+                                "color": row.color,
+                                "ignore": row.ignore,
+                                "aliasMatch": row.aliasMatch
+                              };
+                              req.io.emit('messagePost', row);
+                            } else {
+                              //Just emit - No Security enabled
+                              req.io.emit('messagePost', row);
+                            }
+                          }
+                          res.status(200).send(''+reqLastID);
+                        }
                       });
-              } else {
-                  res.status(200);
-                  res.send('Ignoring filtered');
-              }
-            });
+                            }
+                        });
+                } else {
+                    res.status(200);
+                    res.send('Ignoring filtered');
+                }
+              });
+            }
           }
-        }
+        });
       });
     });
   } else {
