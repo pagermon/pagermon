@@ -1,7 +1,7 @@
 var discord = require('discord.js');
 var toHex = require('colornames');
 
-function run(event, scope, data, config) {
+function run(event, scope, data, config, callback) {
     var dConf = data.pluginconf.Discord;
     if (dConf && dConf.enable) {
         // var hostname = nconf.get('hostname');
@@ -9,6 +9,7 @@ function run(event, scope, data, config) {
         //Ensure webhook ID and Token have been entered into the alias. 
         if (dConf.webhook == 0 || !dConf.webhook) {
             console.error('Discord: ' + data.address + ' No Webhook URL set. Please enter Webhook URL.');
+            callback();
         } else {
             // we should probably not do this and take the id/token separately
             var webhook = dConf.webhook.split('/');
@@ -40,15 +41,15 @@ function run(event, scope, data, config) {
             //Print notification template when debugging enabled
             console.log(notificationembed)
             d.send(notificationembed)
-                .then(console.log(`Discord: Message Sent`))
+                .then(
+                    console.log(`Discord: Message Sent`))
                 .catch(function(err) {
                 'Discord: ' + console.error(err);
                 });
+            callback();
         }
     } else {
-        console.log("Discord disabled on alias");
-        console.log(data);
-        console.log(config);
+        callback();
     }
 }
 

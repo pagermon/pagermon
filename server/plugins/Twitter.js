@@ -1,10 +1,11 @@
 var twit = require('twit');
 
-function run(event, scope, data, config) {
+function run(event, scope, data, config, callback) {
     var tConf = data.pluginconf.Twitter;
     if (tConf && tConf.enable) {
         if ((config.consKey == 0 || !config.consKey) || (config.consSecret == 0 || !config.consSecret) || (config.accToken == 0 || !config.accToken) || (config.accSecret == 0 || !config.accSecret)) {
             console.error('Twitter: ' + data.address + ' No API keys set. Please check API keys.');
+            callback();
         } else {
             var tw = new twit({
                 consumer_key: config.consKey,
@@ -21,12 +22,11 @@ function run(event, scope, data, config) {
                 status: twittertext
               }, function (err, data, response) {
                 if (err) { console.error('Twitter: ' + err); }else{ console.log('Twitter: ' + 'Tweet Posted')}
+                callback();
               })
         }
     } else {
-        console.log("Twitter disabled on alias");
-        console.log(data);
-        console.log(config);
+        callback();
     }
 }
 

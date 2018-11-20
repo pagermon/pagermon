@@ -157,6 +157,8 @@ The `config` object contains the global config for this particular plugin, e.g.:
 
 ### Using callbacks
 
+**All plugins must call the callback when complete - this signals to the plugin handler that it's all good to continue.** This may mean placing the callback in multiple locations if your plugin is running async operations.
+
 Passing data to the callback parameter allows you to modify the `data` object before further processing. This does nothing for `after` plugins, but is useful for `before` plugins to stop processing or manually process.
 
 ```javascript

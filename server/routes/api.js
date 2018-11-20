@@ -477,18 +477,20 @@ router.post('/messages', function(req, res, next) {
     var dupeLimit = nconf.get('messages:duplicateLimit') || 0; // default 0
     var dupeTime = nconf.get('messages:duplicateTime') || 0; // default 0
     var pdwMode = nconf.get('messages:pdwMode');
+    var data = req.body;
 
     // send data to pluginHandler before proceeding
     console.log('beforeMessage start');
-    pluginHandler.handle('message', 'before', req.body, function(response) {
+    pluginHandler.handle('message', 'before', data, function(response) {
       console.log(response);
       console.log('beforeMessage done');
+      if (response) data = response;
       db.serialize(() => {
-        var address = req.body.address || '0000000';
-        var message = req.body.message.replace(/["]+/g, '') || 'null';
-        var datetime = req.body.datetime || 1;
+        var address = data.address || '0000000';
+        var message = data.message.replace(/["]+/g, '') || 'null';
+        var datetime = data.datetime || 1;
         var timeDiff = datetime - dupeTime;
-        var source = req.body.source || 'UNK';
+        var source = data.source || 'UNK';
         
         var dupeCheck = 'SELECT * FROM messages WHERE ';
         if (dupeLimit != 0 || dupeTime != 0) {
@@ -564,6 +566,7 @@ router.post('/messages', function(req, res, next) {
                             console.log(response);
                             console.log('afterMessage done');
                           });
+                          // remove the pluginconf object before firing socket message
                           delete row.pluginconf;
   
                           if(row) {

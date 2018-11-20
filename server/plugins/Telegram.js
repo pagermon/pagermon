@@ -1,7 +1,7 @@
 var telegram = require('telegram-bot-api');
 var util = require('util')
 
-function run(event, scope, data, config) {
+function run(event, scope, data, config, callback) {
     var tConf = data.pluginconf.Telegram;
     if (tConf && tConf.enable) {
         var telekey = config.teleAPIKEY;
@@ -10,6 +10,7 @@ function run(event, scope, data, config) {
         });
         if (tConf.chat == 0 || !tConf.chat) {
             console.error('Telegram: ' + data.address + ' No ChatID key set. Please enter ChatID.');
+            callback();
         } else {
             //Notification formatted in Markdown for pretty notifications
             var notificationText = `*${data.agency} - ${data.alias}*\n` + 
@@ -22,14 +23,14 @@ function run(event, scope, data, config) {
             }).then(function(data) {
                 //uncomment below line to debug messages at the console!
                 console.log('Telegram: ' + util.inspect(data, false, null));
+                callback();
             }).catch(function(err) {
                 console.log('Telegram: ' + err);
+                callback();
             });
         }
     } else {
-        console.log("Telegram disabled on alias");
-        console.log(data);
-        console.log(config);
+        callback();
     }
 }
 
