@@ -47,34 +47,8 @@ function handle(event, scope, data, callback) {
     }, function(err) {
         if (err) console.log(err);
         callback(data);
-    })
-
-    // _.each(plugins, function(conf, plugin) {
-    //     console.log('======================');
-    //     console.log(`plugin: ${plugin}`);
-    //     // note: fs and require use different paths
-    //     if (conf.enable) {
-    //         if (fs.existsSync(`./plugins/${plugin}.json`) && fs.existsSync(`./plugins/${plugin}.js`)) {
-    //             let pConfig = require(`./${plugin}.json`);
-    //             // check scope
-    //             if (pConfig.event == event && pConfig.scope == scope && !pConfig.disable) {
-    //                 console.log('RUNNING PLUGIN!');
-    //                 let pRun = require(`./${plugin}`);
-    //                     pRun.run(event, scope, data, conf, function(response, error) {
-    //                         if (error) console.log(error);
-    //                         if (response) data = response;
-    //                     });
-    //             } else {
-    //                 console.log('Plugin does not run in this scope');
-    //             }
-    //         } else {
-    //             console.log(`Invalid plugin ${plugin} - could not find json or js file`);
-    //         }
-    //     }
-    //     console.log('======================');
-    // });
-
-    // callback(data);
+    });
+    
 };
 
 module.exports = {
