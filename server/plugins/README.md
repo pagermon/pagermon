@@ -103,6 +103,7 @@ The `data` object is structured thusly on `after` events:
   color: 'black',
   ignore: 0,
   aliasMatch: 148,
+  pluginData: {},
   pluginconf: {
     Discord: { enable: false, webhook: '' },
     Pushover: {
@@ -119,8 +120,9 @@ The `data` object is structured thusly on `after` events:
 ```
 
 * `data.pluginconf` contains the per-alias configuration settings for all plugins - the plugin name is the key for its object, so you can pull down `data.pluginconf.Template` for the template plugin's settings.
-* Your plugin's logic should expect that `data.pluginconf` may return `undefined` or an empty object
-* Note that the `select` option types are stored as an object - in this example, to access the Pushover priority you would need to read `data.pluginconf.Pushover.priority.value`
+* `data.pluginData` is an object that can be used for passing data from a `before` plugin to the rest of the workflow, including to `after` plugins or the front-end UI.
+* Your plugin's logic should expect that `data.pluginconf` may return `undefined` or an empty object.
+* Note that the `select` option types are stored as an object - in this example, to access the Pushover priority you would need to read `data.pluginconf.Pushover.priority.value`.
 
 On a message without a matching alias, the `data` object will have null for most fields, and an empty object for `pluginconf`:
 
@@ -137,6 +139,7 @@ On a message without a matching alias, the `data` object will have null for most
   color: null,
   ignore: null,
   aliasMatch: null,
+  pluginData: {},
   pluginconf: {} }
 ```
 
@@ -146,7 +149,8 @@ On a `before` plugin, the `data` object has not yet been through alias matching,
 { address: '8120000',
   message: 'Tue 20 Nov 2018 11:11:29 AEDT Test message, disregard',
   datetime: '1542672689',
-  source: 'TEST' }
+  source: 'TEST',
+  pluginData: {} }
 ```
 
 The `config` object contains the global config for this particular plugin, e.g.:
@@ -161,6 +165,8 @@ The `config` object contains the global config for this particular plugin, e.g.:
 
 Passing data to the callback parameter allows you to modify the `data` object before further processing. This does nothing for `after` plugins, but is useful for `before` plugins to stop processing or manually process.
 
+The `data.pluginData` object should be used for passing data between plugins or for stopping processing.
+
 ```javascript
 pRun.run(event, scope, data, conf, function(response, error) {
   if (error) console.log(error);
@@ -169,3 +175,23 @@ pRun.run(event, scope, data, conf, function(response, error) {
 ```
 
 If the first parameter is not null in the callback, then it will replace the entire `data` object. This means that you should only ever return the `data` object or `null` with the callback, otherwise you may encounter unexpected gremlins in message processing.
+
+### Modifying message processing
+
+* For a `before` plugin to stop message processing, return `true` on `data.pluginData.ignore`
+* For a `before` plugin to manually match an alias by ID, return the alias ID as an integer on `data.pluginData.aliasId`
+
+Example:
+
+```javascript
+function run(event, scope, data, config, callback) {
+  if (data.source == 'TEST') {
+    data.pluginData.ignore = true;
+  } else if (data.source == 'TEST2') {
+    data.pluginData.aliasId = 123;
+  }
+  callback(data);
+}
+```
+
+In this example, the message would stop being processed if the `source` sent by the client was `TEST`. If the `source` was `TEST2`, then it would continue processing but manually assign the alias with ID `123` to the message. In all other scenarios, the message would continue processing unchanged.

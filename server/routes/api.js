@@ -478,13 +478,22 @@ router.post('/messages', function(req, res, next) {
     var dupeTime = nconf.get('messages:duplicateTime') || 0; // default 0
     var pdwMode = nconf.get('messages:pdwMode');
     var data = req.body;
+        data.pluginData = {};
 
     // send data to pluginHandler before proceeding
     console.log('beforeMessage start');
     pluginHandler.handle('message', 'before', data, function(response) {
       console.log(response);
       console.log('beforeMessage done');
-      if (response) data = response;
+      if (response && response.pluginData) {
+        // only set data to the response if it's non-empty and still contains the pluginData object
+        data = response;
+      }
+      if (data.pluginData.ignore) {
+        // stop processing
+        res.status(200);
+        res.send('Ignoring filtered');
+      }
       db.serialize(() => {
         var address = data.address || '0000000';
         var message = data.message.replace(/["]+/g, '') || 'null';
@@ -531,6 +540,12 @@ router.post('/messages', function(req, res, next) {
                 } else {
                   insert = true;
                 }
+
+                // overwrite alias_id if set from plugin
+                if (data.pluginconf.aliasId) {
+                  alias_id = data.pluginconf.aliasId;
+                }
+
                 if (insert == true) {
                   db.run("INSERT INTO messages (address, message, timestamp, source, alias_id) VALUES ($mesAddress, $mesBody, $mesDT, $mesSource, $aliasId);", {
                     $mesAddress: address,
@@ -556,6 +571,7 @@ router.post('/messages', function(req, res, next) {
                           res.status(500).send(err);
                         } else {
                           // send data to pluginHandler after processing
+                          row.pluginData = data.pluginData;
                           if (row.pluginconf) {
                             row.pluginconf = parseJSON(row.pluginconf);
                           } else {
