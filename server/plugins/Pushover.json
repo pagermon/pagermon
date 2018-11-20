@@ -9,7 +9,8 @@
             "name": "pushAPIKEY",
             "label": "API Key",
             "description": "Application key supplied by Pushover.",
-            "type": "text"
+            "type": "text",
+            "required": true
         }
     ],
     "aliasConfig": [ 

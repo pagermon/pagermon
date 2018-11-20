@@ -554,7 +554,11 @@ router.post('/messages', function(req, res, next) {
                         res.status(500).send(err);
                       } else {
                         // send data to pluginHandler after processing
-                        row.pluginconf = parseJSON(row.pluginconf);
+                        if (row.pluginconf) {
+                          row.pluginconf = parseJSON(row.pluginconf);
+                        } else {
+                          row.pluginconf = {};
+                        }
                         console.log('afterMessage start');
                         pluginHandler.handle('message', 'after', row);
                         console.log('afterMessage done');
