@@ -10,7 +10,7 @@ To add a new plugin, you will need a .json and .js file. Ideally these two files
 
 [Template.json](Template.json)
 
-```json
+```javascript
 {
   "name": "Template",       // must map to file name
   "description": "Example plugin for developers", // shown in UI when enabling/disabling
