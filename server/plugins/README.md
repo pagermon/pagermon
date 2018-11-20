@@ -17,7 +17,7 @@ The plugin handler iterates through all files in the plugin directory ending wit
   "name": "Template",       // must map to file name
   "description": "Example plugin for developers", // shown in UI when enabling/disabling
   "disable": true,          // global disable - if true then cannot be enabled in UI. Plugins that may be a security risk should ship with this set to true
-  "event": "message",       // on what event should this plugin run, currently only "message"
+  "trigger": "message",       // on what event should this plugin run, currently only "message"
   "scope": "after",         // should this run before or after the event - before will block processing, but allow you to manipulate a message before it is committed to the database
   "config": [               // array of global config options exposed in settings page
     {
@@ -68,18 +68,18 @@ The plugin handler iterates through all files in the plugin directory ending wit
 
 [Template.js](Template.js)
 
-Plugins are called by the `run` function on each event, only when the event and scope settings match in the associated JSON file, and only when the plugin is enabled in the global config.
+Plugins are called by the `run` function on each trigger, only when the trigger and scope settings match in the associated JSON file, and only when the plugin is enabled in the global config.
 
 The `run` function receives 4 variables:
 
-* `event` is a string containing event which triggered the plugin (currently only 'message')
+* `trigger` is a string containing event which triggered the plugin (currently only 'message')
 * `scope` is a string containing either `before` or `after`
 * `data` is an object containing the contents of the event
 * `config` is an object containing the global settings configured in the UI for this plugin
 * `callback` for passing `data` back to the main function once complete
 
 ```javascript
-function run(event, scope, data, config, callback) {
+function run(trigger, scope, data, config, callback) {
   callback(data);
 }
 
@@ -168,7 +168,7 @@ Passing data to the callback parameter allows you to modify the `data` object be
 The `data.pluginData` object should be used for passing data between plugins or for stopping processing.
 
 ```javascript
-pRun.run(event, scope, data, conf, function(response, error) {
+pRun.run(trigger, scope, data, conf, function(response, error) {
   if (error) console.log(error);
   if (response) data = response;
 });
@@ -184,7 +184,7 @@ If the first parameter is not null in the callback, then it will replace the ent
 Example:
 
 ```javascript
-function run(event, scope, data, config, callback) {
+function run(trigger, scope, data, config, callback) {
   if (data.source == 'TEST') {
     data.pluginData.ignore = true;
   } else if (data.source == 'TEST2') {

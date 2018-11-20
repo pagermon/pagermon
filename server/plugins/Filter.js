@@ -1,5 +1,5 @@
 
-function run(event, scope, data, config, callback) {
+function run(trigger, scope, data, config, callback) {
     if (config.ignoreAddress) {
         if (data.address.match(new RegExp(config.ignoreAddress))) {
             data.pluginData.ignore = true;

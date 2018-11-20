@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer');
 
-function run(event, scope, data, config, callback) {
+function run(trigger, scope, data, config, callback) {
     var sConf = data.pluginconf.SMTP;
     if (sConf && sConf.enable) {
         let smtpConfig = {

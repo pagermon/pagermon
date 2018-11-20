@@ -2,7 +2,7 @@
     "name": "SMTP",
     "description": "Send messages via email",
     "disable": false,
-    "event": "message",
+    "trigger": "message",
     "scope": "after",
     "config": [ 
         {

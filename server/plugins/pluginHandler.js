@@ -6,10 +6,10 @@ var conf_file = './config/config.json';
 nconf.file({file: conf_file});
 nconf.load();
 
-function handle(event, scope, data, callback) {
+function handle(trigger, scope, data, callback) {
     var plugins = nconf.get("plugins");
     console.log('======================');
-    console.log(`event: ${event} scope: ${scope}`);
+    console.log(`trigger: ${trigger} scope: ${scope}`);
     console.log('======================');
     console.log('data object');
     console.log(data);
@@ -25,10 +25,10 @@ function handle(event, scope, data, callback) {
             if (fs.existsSync(`./plugins/${plugin}.json`) && fs.existsSync(`./plugins/${plugin}.js`)) {
                 let pConfig = require(`./${plugin}.json`);
                 // check scope
-                if (pConfig.event == event && pConfig.scope == scope && !pConfig.disable) {
+                if (pConfig.trigger == trigger && pConfig.scope == scope && !pConfig.disable) {
                     console.log('RUNNING PLUGIN!');
                     let pRun = require(`./${plugin}`);
-                        pRun.run(event, scope, data, conf, function(response, error) {
+                        pRun.run(trigger, scope, data, conf, function(response, error) {
                             if (error) console.log(error);
                             if (response) data = response;
                             cb();
@@ -48,7 +48,7 @@ function handle(event, scope, data, callback) {
         if (err) console.log(err);
         callback(data);
     });
-    
+
 };
 
 module.exports = {

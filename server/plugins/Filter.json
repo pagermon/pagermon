@@ -2,7 +2,7 @@
     "name": "Filter",
     "description": "Filter incoming messages based on regex",
     "disable": false,
-    "event": "message",
+    "trigger": "message",
     "scope": "before",
     "config": [ 
         {

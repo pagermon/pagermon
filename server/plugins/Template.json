@@ -2,7 +2,7 @@
     "name": "Template",
     "description": "Example plugin for developers",
     "disable": false,
-    "event": "message",
+    "trigger": "message",
     "scope": "before",
     "config": [ 
         {

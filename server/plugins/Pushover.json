@@ -2,7 +2,7 @@
     "name": "Pushover",
     "description": "Push notifications on mobile devices. For more information, see <a href='https://pushover.net/api' target='_blank'>Pushover documentation</a>.",
     "disable": false,
-    "event": "message",
+    "trigger": "message",
     "scope": "after",
     "config": [ 
         {

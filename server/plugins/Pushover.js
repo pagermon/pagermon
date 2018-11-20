@@ -1,6 +1,6 @@
 var push = require('pushover-notifications');
 
-function run(event, scope, data, config, callback) {
+function run(trigger, scope, data, config, callback) {
     var pConf = data.pluginconf.Pushover;
     if (pConf && pConf.enable) {
         //ensure key has been entered before trying to push

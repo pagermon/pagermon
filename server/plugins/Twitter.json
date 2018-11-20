@@ -2,7 +2,7 @@
     "name": "Twitter",
     "description": "Send tweet on new messages. See <a href='https://developer.twitter.com/en/docs/basics/authentication/guides/access-tokens.html' target='_blank'>Twitter documentation</a> for key information.",
     "disable": false,
-    "event": "message",
+    "trigger": "message",
     "scope": "after",
     "config": [ 
         {

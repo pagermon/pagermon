@@ -1,7 +1,7 @@
 var discord = require('discord.js');
 var toHex = require('colornames');
 
-function run(event, scope, data, config, callback) {
+function run(trigger, scope, data, config, callback) {
     var dConf = data.pluginconf.Discord;
     if (dConf && dConf.enable) {
         // var hostname = nconf.get('hostname');

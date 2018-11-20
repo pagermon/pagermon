@@ -6,7 +6,7 @@ See README.md for more info
 
 */
 
-function run(event, scope, data, config, callback) {
+function run(trigger, scope, data, config, callback) {
     data.test = 'test';
     // setTimeout(callback, 10000);
     if (data.source == 'TEST') {

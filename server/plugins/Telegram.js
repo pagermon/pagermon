@@ -1,7 +1,7 @@
 var telegram = require('telegram-bot-api');
 var util = require('util')
 
-function run(event, scope, data, config, callback) {
+function run(trigger, scope, data, config, callback) {
     var tConf = data.pluginconf.Telegram;
     if (tConf && tConf.enable) {
         var telekey = config.teleAPIKEY;

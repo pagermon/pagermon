@@ -2,7 +2,7 @@
     "name": "Telegram",
     "description": "Push messages to Telegram channel",
     "disable": false,
-    "event": "message",
+    "trigger": "message",
     "scope": "after",
     "config": [
         {

@@ -1,6 +1,6 @@
 var twit = require('twit');
 
-function run(event, scope, data, config, callback) {
+function run(trigger, scope, data, config, callback) {
     var tConf = data.pluginconf.Twitter;
     if (tConf && tConf.enable) {
         if ((config.consKey == 0 || !config.consKey) || (config.consSecret == 0 || !config.consSecret) || (config.accToken == 0 || !config.accToken) || (config.accSecret == 0 || !config.accSecret)) {

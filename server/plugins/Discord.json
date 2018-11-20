@@ -2,7 +2,7 @@
     "name": "Discord",
     "description": "Send messages to a Discord webhook",
     "disable": false,
-    "event": "message",
+    "trigger": "message",
     "scope": "after",
     "config": [ 
     ],
