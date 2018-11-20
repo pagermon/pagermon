@@ -5,7 +5,7 @@ var conf_file = './config/config.json';
 nconf.file({file: conf_file});
 nconf.load();
 
-function handle(event, scope, data) {
+function handle(event, scope, data, callback) {
     var plugins = nconf.get("plugins");
     console.log('======================');
     console.log(`event: ${event} scope: ${scope}`);
@@ -23,22 +23,25 @@ function handle(event, scope, data) {
         if (conf.enable) {
             if (fs.existsSync(`./plugins/${plugin}.json`) && fs.existsSync(`./plugins/${plugin}.js`)) {
                 let pConfig = require(`./${plugin}.json`);
-                console.log(pConfig);
                 // check scope
                 if (pConfig.event == event && pConfig.scope == scope && !pConfig.disable) {
                     console.log('RUNNING PLUGIN!');
                     let pRun = require(`./${plugin}`);
-                        pRun.run(event, scope, data, conf);
+                        pRun.run(event, scope, data, conf, function(response, error) {
+                            if (error) console.log(error);
+                            if (response) data = response;
+                        });
                 } else {
                     console.log('Plugin does not run in this scope');
                 }
             } else {
-                console.log('Invalid plugin: ');
-                console.log(plugin);
+                console.log(`Invalid plugin ${plugin} - could not find json or js file`);
             }
         }
         console.log('======================');
-    })
+    });
+
+    callback(data);
 };
 
 module.exports = {

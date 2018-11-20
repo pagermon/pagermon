@@ -4,7 +4,9 @@ PagerMon plugins are modular addons for executing custom workflows during messag
 
 ## Developing plugins
 
-To add a new plugin, you will need a .json and .js file. Ideally these two files will have the same name and use the same 'first character uppercase' convention as other plugins, for consistency. 
+To add a new plugin, you will need a .json and .js file. These two files must have the same name and should use the same 'first character uppercase' convention as other plugins, for consistency.
+
+The plugin handler iterates through all files in the plugin directory ending with json.
 
 ### Plugin configuration file
 

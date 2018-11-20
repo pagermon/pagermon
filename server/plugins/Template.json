@@ -1,9 +1,9 @@
 {
     "name": "Template",
     "description": "Example plugin for developers",
-    "disable": true,
+    "disable": false,
     "event": "message",
-    "scope": "after",
+    "scope": "before",
     "config": [ 
         {
             "name": "templateSetting",

@@ -480,8 +480,10 @@ router.post('/messages', function(req, res, next) {
 
     // send data to pluginHandler before proceeding
     console.log('beforeMessage start');
-    pluginHandler.handle('message', 'before', req.body);
-    console.log('beforeMessage done');
+    pluginHandler.handle('message', 'before', req.body, function(response) {
+      console.log(response);
+      console.log('beforeMessage done');
+    });
 
     db.serialize(() => {
       var address = req.body.address || '0000000';
@@ -560,8 +562,10 @@ router.post('/messages', function(req, res, next) {
                           row.pluginconf = {};
                         }
                         console.log('afterMessage start');
-                        pluginHandler.handle('message', 'after', row);
-                        console.log('afterMessage done');
+                        pluginHandler.handle('message', 'after', row, function(response) {
+                          console.log(response);
+                          console.log('afterMessage done');
+                        });
                         delete row.pluginconf;
 
                         if(row) {

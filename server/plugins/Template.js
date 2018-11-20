@@ -11,8 +11,9 @@ The `run` function receives 4 variables:
 
 */
 
-function run(event, scope, data, config) {
-
+function run(event, scope, data, config, callback) {
+    data.test = 'test';
+    callback(data, 'test error');
 }
 
 module.exports = {
