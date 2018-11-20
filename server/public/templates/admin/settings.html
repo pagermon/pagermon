@@ -286,22 +286,24 @@
                 </div>
               </div>
               <div class="form-group" ng-repeat="configItem in plugin.config">
-                <label for="{{plugin.name}}.{{configItem.name}}" class="col-xs-4 col-sm-3 control-label">{{configItem.label}}</label>
-                <div class="col-xs-8 col-sm-9">
-                  <div ng-if="configItem.type == 'checkbox'" class="checkbox">
-                    <label>
-                      <input type="checkbox" name="{{plugin.name}}.{{configItem.name}}" ng-model="settings.plugins[plugin.name][configItem.name]" ng-disabled="!settings.plugins[plugin.name].enable">
-                      {{configItem.description}}
-                    </label>
-                  </div>
-                  <div ng-if="configItem.type == 'select'">
-                      <select name="{{plugin.name}}.{{configItem.name}}" ng-model="settings.plugins[plugin.name][configItem.name]" class="form-control" ng-options="obj.text for obj in configItem.options track by obj.value" ng-disabled="!settings.plugins[plugin.name].enable" ng-required="settings.plugins[plugin.name].enable && configItem.required">
-                        </select>
-                        <span id="helpBlock" class="help-block">{{configItem.description}}</span>
-                  </div>
-                  <div ng-if="configItem.type != 'checkbox' && configItem.type != 'select'">
-                    <input type="{{configItem.type}}" class="form-control" name="{{plugin.name}}.{{configItem.name}}" ng-model="settings.plugins[plugin.name][configItem.name]" ng-disabled="!settings.plugins[plugin.name].enable" ng-required="settings.plugins[plugin.name].enable && configItem.required">
-                    <span id="helpBlock" class="help-block">{{configItem.description}}</span>
+                <div ng-hide="!settings.plugins[plugin.name].enable">
+                  <label for="{{plugin.name}}.{{configItem.name}}" class="col-xs-4 col-sm-3 control-label">{{configItem.label}}</label>
+                  <div class="col-xs-8 col-sm-9">
+                    <div ng-if="configItem.type == 'checkbox'" class="checkbox">
+                      <label>
+                        <input type="checkbox" name="{{plugin.name}}.{{configItem.name}}" ng-model="settings.plugins[plugin.name][configItem.name]">
+                        {{configItem.description}}
+                      </label>
+                    </div>
+                    <div ng-if="configItem.type == 'select'">
+                        <select name="{{plugin.name}}.{{configItem.name}}" ng-model="settings.plugins[plugin.name][configItem.name]" class="form-control" ng-options="obj.text for obj in configItem.options track by obj.value" ng-hide="!settings.plugins[plugin.name].enable" ng-required="settings.plugins[plugin.name].enable && configItem.required">
+                          </select>
+                          <span id="helpBlock" class="help-block">{{configItem.description}}</span>
+                    </div>
+                    <div ng-if="configItem.type != 'checkbox' && configItem.type != 'select'">
+                      <input type="{{configItem.type}}" class="form-control" name="{{plugin.name}}.{{configItem.name}}" ng-model="settings.plugins[plugin.name][configItem.name]" ng-hide="!settings.plugins[plugin.name].enable" ng-required="settings.plugins[plugin.name].enable && configItem.required">
+                      <span id="helpBlock" class="help-block">{{configItem.description}}</span>
+                    </div>
                   </div>
                 </div>
               </div>
