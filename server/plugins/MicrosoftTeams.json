@@ -16,7 +16,7 @@
         {
             "name": "webhookuri",
             "label": "Webhook URI",
-            "description": "Webhook URI to post too",
+            "description": "Webhook URI to post to",
             "type": "text",
             "required": true
         }
