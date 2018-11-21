@@ -23,7 +23,7 @@
         {
             "name": "channel",
             "label": "Slack Channel",
-            "description": "Name or ID of the Slack channel to post too",
+            "description": "Name or ID of the Slack channel to post to",
             "type": "text",
             "required": true
         }
