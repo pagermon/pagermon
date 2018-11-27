@@ -16,6 +16,18 @@
             "label": "Ignore Message",
             "description": "If message content matches regex pattern, stop processing and ignore",
             "type": "text"
+        },
+        {
+            "name": "ignoreallbutAddress",
+            "label": "Ignore all except Address",
+            "description": "If message adress does not match regex pattern, stop processing and ignore",
+            "type": "text"
+        },
+        {
+            "name": "ignoreallbutMessage",
+            "label": "Ignore all except Message",
+            "description": "If message content does not match regex pattern, stop processing and ignore",
+            "type": "text"
         }
     ],
     "aliasConfig": [
