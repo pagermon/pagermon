@@ -15,7 +15,7 @@ var compression = require('compression');
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
-var logger = require('morgan');
+var logger = require('./log');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var fs = require('fs');
@@ -97,7 +97,7 @@ app.use(function(req,res,next){
 var secret = nconf.get('global:sessionSecret');
 // compress all responses
 app.use(compression());
-app.use(logger('combined'));
+app.use(require("morgan")("combined", { "stream": logger.http.stream }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -197,5 +197,5 @@ function onListening() {
   var bind = typeof addr === 'string'
     ? 'pipe ' + addr
     : 'port ' + addr.port;
-    console.info('Listening on ' + bind);
+    logger.main.info('Listening on ' + bind);
 }
