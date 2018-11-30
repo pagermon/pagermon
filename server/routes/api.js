@@ -138,13 +138,12 @@ router.get('/messages', isSecMode, function(req, res, next) {
         sql =  "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch ";
         sql += " FROM messages";
         sql += " INNER JOIN capcodes ON capcodes.id = messages.alias_id WHERE capcodes.ignore = 0";
-        sql += " ORDER BY messages.id DESC LIMIT "+initData.limit+" OFFSET "+initData.offset+";";
       } else {
         sql =  "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch ";
         sql += " FROM messages";
         sql += " LEFT JOIN capcodes ON capcodes.id = messages.alias_id WHERE capcodes.ignore = 0 OR capcodes.ignore IS NULL ";
-        sql += " ORDER BY messages.id DESC LIMIT "+initData.limit+" OFFSET "+initData.offset+";";
       }
+      sql += " ORDER BY messages.timestamp DESC LIMIT "+initData.limit+" OFFSET "+initData.offset+";";
       var result = [];
       db.each(sql,function(err,row){
         //outRow = JSON.parse(newrow);
@@ -294,7 +293,7 @@ router.get('/messageSearch', isSecMode, function(req, res, next) {
     FROM messages_search_index
     LEFT JOIN messages ON messages.id = messages_search_index.rowid `;
   } else {
-    sql = `SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch 
+    sql = `SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch
     FROM messages `;
   }
   if(pdwMode) {
@@ -312,8 +311,8 @@ router.get('/messageSearch', isSecMode, function(req, res, next) {
       sql += ` messages.alias_id IN (SELECT id FROM capcodes WHERE agency = "${agency}" AND ignore = 0) OR `;
     sql += ' messages.id IS ?';
   }
-  
-  sql += " ORDER BY messages.id DESC;";
+
+  sql += " ORDER BY messages.timestamp DESC;";
 
   console.timeEnd('init');
   console.time('sql');
@@ -585,7 +584,7 @@ router.post('/messages', function(req, res, next) {
       var datetime = req.body.datetime || 1;
       var timeDiff = datetime - dupeTime;
       var source = req.body.source || 'UNK';
-      
+
       var dupeCheck = 'SELECT * FROM messages WHERE ';
       if (dupeLimit != 0 || dupeTime != 0) {
         dupeCheck += 'id IN ( SELECT id FROM messages ';
@@ -749,7 +748,7 @@ router.post('/messages', function(req, res, next) {
                               user: pushGroup,
                               token: pushkey,
                             });
-                            
+
                             var msg = {
                               message: row.message,
                               title: row.agency+' - '+row.alias,
@@ -779,9 +778,9 @@ router.post('/messages', function(req, res, next) {
                             console.error('Telegram: ' + address + ' No ChatID key set. Please enter ChatID.');
                           } else {
                             //Notification formatted in Markdown for pretty notifications
-                            var notificationText = `*${row.agency} - ${row.alias}*\n` + 
+                            var notificationText = `*${row.agency} - ${row.alias}*\n` +
                                                    `Message: ${row.message}`;
-                            
+
                             t.sendMessage({
                                 chat_id: telechat,
                                 text: notificationText,
@@ -796,7 +795,7 @@ router.post('/messages', function(req, res, next) {
                         };
                         //start Twitter Module
                         if (twitenable == true && twitonoff == 1) {
-                          //ensure API Keys have been entered before trying to post. 
+                          //ensure API Keys have been entered before trying to post.
                           if ((twitconskey == 0 || !twitconskey) || (twitconssecret == 0 || !twitconssecret) || (twitacctoken == 0 || !twitacctoken) || (twitaccsecret == 0 || !twitaccsecret)) {
                             console.error('Twitter: ' + address + ' No API keys set. Please check API keys.');
                           } else {
@@ -806,11 +805,11 @@ router.post('/messages', function(req, res, next) {
                               access_token: twitacctoken,
                               access_token_secret: twitaccsecret,
                             });
-                            
+
                             var twittertext = `${row.agency} - ${row.alias} \n` +
                               `${row.message} \n` +
                               `${twithashtags}` + ' ' + `${twitglobalhashtags}`
-                            
+
                             tw.post('statuses/update', {
                               status: twittertext
                             }, function (err, data, response) {
@@ -818,12 +817,12 @@ router.post('/messages', function(req, res, next) {
                             })
                           }
                         };
-                        
+
                         //Start Discord Module
                         if (discenable == true && disconoff == 1) {
                           var toHex = require('colornames')
                           var hostname = nconf.get('hostname');
-                          //Ensure webhook ID and Token have been entered into the alias. 
+                          //Ensure webhook ID and Token have been entered into the alias.
                           if (discwebhook == 0 || !discwebhook) {
                             console.error('Discord: ' + address + ' No Webhook URL set. Please enter Webhook URL.');
                           } else {
@@ -832,12 +831,12 @@ router.post('/messages', function(req, res, next) {
                             var discwebhooktoken = webhook[6];
 
                             var d = new discord.WebhookClient(discwebhookid, discwebhooktoken);
-            
-                            //Use embedded discord notification format from discord.js 
+
+                            //Use embedded discord notification format from discord.js
                             var notificationembed = new discord.RichEmbed({
                               timestamp: new Date(),
                             });
-                            // toHex doesn't support putting HEX in, needs to check and skip over if already hex. 
+                            // toHex doesn't support putting HEX in, needs to check and skip over if already hex.
                             var isHex = /^#[0-9A-F]{6}$/i.test(row.color)
                             if (!isHex || isHex == false) {
                               var discordcolor = toHex(row.color)
