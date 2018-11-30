@@ -109,18 +109,17 @@ router.get('/messages', isSecMode, function(req, res, next) {
       initData.offsetEnd = initData.offset + initData.limit;
       console.timeEnd('init');
       console.time('sql');
+
       var sql;
+      sql =  "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch ";
+      sql += " FROM messages";
       if(pdwMode) {
-        sql =  "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch ";
-        sql += " FROM messages";
         sql += " INNER JOIN capcodes ON capcodes.id = messages.alias_id WHERE capcodes.ignore = 0";
-        sql += " ORDER BY messages.id DESC LIMIT "+initData.limit+" OFFSET "+initData.offset+";";
       } else {
-        sql =  "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch ";
-        sql += " FROM messages";
         sql += " LEFT JOIN capcodes ON capcodes.id = messages.alias_id WHERE capcodes.ignore = 0 OR capcodes.ignore IS NULL ";
-        sql += " ORDER BY messages.id DESC LIMIT "+initData.limit+" OFFSET "+initData.offset+";";
       }
+      sql += " ORDER BY messages.timestamp DESC LIMIT "+initData.limit+" OFFSET "+initData.offset+";";
+
       var result = [];
       db.each(sql,function(err,row){
         //outRow = JSON.parse(newrow);
@@ -274,7 +273,7 @@ router.get('/messageSearch', isSecMode, function(req, res, next) {
     sql += ' messages.id IS ?';
   }
   
-  sql += " ORDER BY messages.id DESC;";
+  sql += " ORDER BY messages.timestamp DESC;";
 
   console.timeEnd('init');
   console.time('sql');
