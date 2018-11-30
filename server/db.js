@@ -74,25 +74,28 @@ function init(release) {
                                 console.log("DB schema out of date, updating");
                                 // we now run alter table commands for every column that has been added since the early versions
                                 // this is inefficient, but should only run once per upgrade, and will skip over errors of adding columns that already exist
-                                db.serialize(() => {
-                                    // need to make sure all the old source columns are present before we convert to new format
-                                    // probably look at removing this on next release, or making it so it only runs when upgrading from ancient version
-                                    db.run("ALTER TABLE capcodes ADD push INTEGER DEFAULT 0", function(err){ /* ignore error */ });
-                                    db.run("ALTER TABLE capcodes ADD pushpri TEXT", function(err){ /* ignore error */ });
-                                    db.run("ALTER TABLE capcodes ADD pushgroup TEXT", function(err){ /* ignore error */ });
-                                    db.run("ALTER TABLE capcodes ADD pushsound TEXT", function(err){ /* ignore error */ });
-                                    db.run("ALTER TABLE capcodes ADD mailenable INTEGER DEFAULT 0", function(err){ /* ignore error */ });
-                                    db.run("ALTER TABLE capcodes ADD mailto TEXT", function(err){ /* ignore error */ });
-                                    db.run("ALTER TABLE capcodes ADD telegram INTEGER DEFAULT 0", function(err){ /* ignore error */ });
-                                    db.run("ALTER TABLE capcodes ADD telechat TEXT", function(err){ /* ignore error */ });
-                                    db.run("ALTER TABLE capcodes ADD ignore INTEGER DEFAULT 0", function (err) { /* ignore error */ });
-                                    db.run("ALTER TABLE capcodes ADD twitter INTEGER DEFAULT 0", function (err) { /* ignore error */ });
-                                    db.run("ALTER TABLE capcodes ADD twitterhashtag TEXT", function (err) { /* ignore error */ });
-                                    db.run("ALTER TABLE capcodes ADD discord INTEGER DEFAULT 0", function (err) { /* ignore error */ });
-                                    db.run("ALTER TABLE capcodes ADD discwebhook TEXT", function (err) { /* ignore error */ });
-                                    db.run("ALTER TABLE capcodes ADD pluginconf TEXT", function (err) { /* ignore error */ });
-                                    // begin scary stuff, consider hiding behind a solid object during this bit
-                                    var upgradeSql = `PRAGMA foreign_keys=off;
+                                // TODO: revise below logic to be smarter and less bloaty over time
+                                if (res.user_version < 20181118) {
+                                    // we are updating from a pre-plugin release
+                                    db.serialize(() => {
+                                        // need to make sure all the old source columns are present before we convert to new format
+                                        // probably look at removing this on next release, or making it so it only runs when upgrading from ancient version
+                                        db.run("ALTER TABLE capcodes ADD push INTEGER DEFAULT 0", function(err){ /* ignore error */ });
+                                        db.run("ALTER TABLE capcodes ADD pushpri TEXT", function(err){ /* ignore error */ });
+                                        db.run("ALTER TABLE capcodes ADD pushgroup TEXT", function(err){ /* ignore error */ });
+                                        db.run("ALTER TABLE capcodes ADD pushsound TEXT", function(err){ /* ignore error */ });
+                                        db.run("ALTER TABLE capcodes ADD mailenable INTEGER DEFAULT 0", function(err){ /* ignore error */ });
+                                        db.run("ALTER TABLE capcodes ADD mailto TEXT", function(err){ /* ignore error */ });
+                                        db.run("ALTER TABLE capcodes ADD telegram INTEGER DEFAULT 0", function(err){ /* ignore error */ });
+                                        db.run("ALTER TABLE capcodes ADD telechat TEXT", function(err){ /* ignore error */ });
+                                        db.run("ALTER TABLE capcodes ADD ignore INTEGER DEFAULT 0", function (err) { /* ignore error */ });
+                                        db.run("ALTER TABLE capcodes ADD twitter INTEGER DEFAULT 0", function (err) { /* ignore error */ });
+                                        db.run("ALTER TABLE capcodes ADD twitterhashtag TEXT", function (err) { /* ignore error */ });
+                                        db.run("ALTER TABLE capcodes ADD discord INTEGER DEFAULT 0", function (err) { /* ignore error */ });
+                                        db.run("ALTER TABLE capcodes ADD discwebhook TEXT", function (err) { /* ignore error */ });
+                                        db.run("ALTER TABLE capcodes ADD pluginconf TEXT", function (err) { /* ignore error */ });
+                                        // begin scary stuff, consider hiding behind a solid object during this bit
+                                        var upgradeSql = `PRAGMA foreign_keys=off;
 BEGIN TRANSACTION;
 ALTER TABLE capcodes RENAME TO _capcodes_backup;
 DROP INDEX IF EXISTS cc_pk_idx;
@@ -139,72 +142,76 @@ INSERT INTO capcodes (id, address, alias, agency, icon, color, ignore, plugincon
 COMMIT;
 PRAGMA foreign_keys=on;
 CREATE UNIQUE INDEX IF NOT EXISTS cc_pk_idx ON capcodes (id,address DESC);`;
-                                    db.exec(upgradeSql, function(err) {
-                                        if (err) { console.log(err); }
-                                        // scary db stuff done, phew
-                                        db.run("PRAGMA user_version = "+release, function(err){ /* ignore error */ });
-                                        console.log("DB schema update complete");
-                                        // Switch config file over to plugin format
-                                        console.log("Updating config file");
-                                        var nconf = require('nconf');
-                                        var conf_file = './config/config.json';
-                                        var conf_backup = './config/backup.json';
-                                        nconf.file({file: conf_file});
-                                        nconf.load();
-                                        var curConfig = nconf.get();
-                                        fs.writeFileSync( conf_backup, JSON.stringify(curConfig,null, 2) );
-                                        if (!curConfig.plugins)
-                                            curConfig.plugins = {};
-                                        
-                                        if (curConfig.discord) {
-                                            curConfig.plugins.Discord = {
-                                                "enable": curConfig.discord.discenable
-                                            };
-                                        }
-                                        if (curConfig.pushover) {
-                                            curConfig.plugins.Pushover = {
-                                                "enable": curConfig.pushover.pushenable,
-                                                "pushAPIKEY": curConfig.pushover.pushAPIKEY
-                                            };
-                                        }
-                                        if (curConfig.STMP) {
-                                            curConfig.plugins.SMTP = {
-                                                "enable": curConfig.STMP.MailEnable,
-                                                "mailFrom": curConfig.STMP.MailFrom,
-                                                "mailFromName": curConfig.STMP.MailFromName,
-                                                "server": curConfig.STMP.SMTPServer,
-                                                "port": curConfig.STMP.SMTPPort,
-                                                "username": curConfig.STMP.STMPUsername,
-                                                "password": curConfig.STMP.STMPPassword,
-                                                "secure": curConfig.STMP.STMPSecure
-                                            };
-                                        }
-                                        if (curConfig.telegram) {
-                                            curConfig.plugins.Telegram = {
-                                                "enable": curConfig.telegram.teleenable,
-                                                "teleAPIKEY": curConfig.telegram.teleAPIKEY
-                                            };
-                                        }
-                                        if (curConfig.twitter) {
-                                            curConfig.plugins.Twitter = {
-                                                "enable": curConfig.twitter.twitenable,
-                                                "consKey": curConfig.twitter.twitconskey,
-                                                "consSecret": curConfig.twitter.twitconssecret,
-                                                "accToken": curConfig.twitter.twitacctoken,
-                                                "accSecret": curConfig.twitter.twitaccsecret,
-                                                "globalHashtags": curConfig.twitter.twitglobalhashtags
-                                            };
-                                        }
-                                        delete curConfig.discord;
-                                        delete curConfig.pushover;
-                                        delete curConfig.STMP;
-                                        delete curConfig.telegram;
-                                        delete curConfig.twitter;
-                                        fs.writeFileSync( conf_file, JSON.stringify(curConfig,null, 2) );
-                                        nconf.load();
-                                        console.log("Config file updated!");
+                                        db.exec(upgradeSql, function(err) {
+                                            if (err) { console.log(err); }
+                                            // scary db stuff done, phew
+                                            db.run("PRAGMA user_version = "+release, function(err){ /* ignore error */ });
+                                            console.log("DB schema update complete");
+                                            // Switch config file over to plugin format
+                                            console.log("Updating config file");
+                                            var nconf = require('nconf');
+                                            var conf_file = './config/config.json';
+                                            var conf_backup = './config/backup.json';
+                                            nconf.file({file: conf_file});
+                                            nconf.load();
+                                            var curConfig = nconf.get();
+                                            fs.writeFileSync( conf_backup, JSON.stringify(curConfig,null, 2) );
+                                            if (!curConfig.plugins)
+                                                curConfig.plugins = {};
+                                            
+                                            if (curConfig.discord) {
+                                                curConfig.plugins.Discord = {
+                                                    "enable": curConfig.discord.discenable
+                                                };
+                                            }
+                                            if (curConfig.pushover) {
+                                                curConfig.plugins.Pushover = {
+                                                    "enable": curConfig.pushover.pushenable,
+                                                    "pushAPIKEY": curConfig.pushover.pushAPIKEY
+                                                };
+                                            }
+                                            if (curConfig.STMP) {
+                                                curConfig.plugins.SMTP = {
+                                                    "enable": curConfig.STMP.MailEnable,
+                                                    "mailFrom": curConfig.STMP.MailFrom,
+                                                    "mailFromName": curConfig.STMP.MailFromName,
+                                                    "server": curConfig.STMP.SMTPServer,
+                                                    "port": curConfig.STMP.SMTPPort,
+                                                    "username": curConfig.STMP.STMPUsername,
+                                                    "password": curConfig.STMP.STMPPassword,
+                                                    "secure": curConfig.STMP.STMPSecure
+                                                };
+                                            }
+                                            if (curConfig.telegram) {
+                                                curConfig.plugins.Telegram = {
+                                                    "enable": curConfig.telegram.teleenable,
+                                                    "teleAPIKEY": curConfig.telegram.teleAPIKEY
+                                                };
+                                            }
+                                            if (curConfig.twitter) {
+                                                curConfig.plugins.Twitter = {
+                                                    "enable": curConfig.twitter.twitenable,
+                                                    "consKey": curConfig.twitter.twitconskey,
+                                                    "consSecret": curConfig.twitter.twitconssecret,
+                                                    "accToken": curConfig.twitter.twitacctoken,
+                                                    "accSecret": curConfig.twitter.twitaccsecret,
+                                                    "globalHashtags": curConfig.twitter.twitglobalhashtags
+                                                };
+                                            }
+                                            delete curConfig.discord;
+                                            delete curConfig.pushover;
+                                            delete curConfig.STMP;
+                                            delete curConfig.telegram;
+                                            delete curConfig.twitter;
+                                            fs.writeFileSync( conf_file, JSON.stringify(curConfig,null, 2) );
+                                            nconf.load();
+                                            console.log("Config file updated!");
+                                        });
                                     });
-                                });
+                                } else {
+                                    // we are updating from after the plugin release
+                                    // nothing to do here for now
+                                }
                             } else {
                                 console.log("DB schema up to date!");
                             }
