@@ -1,5 +1,6 @@
 var discord = require('discord.js');
 var toHex = require('colornames');
+var logger = require('../log');
 
 function run(trigger, scope, data, config, callback) {
     var dConf = data.pluginconf.Discord;
@@ -8,7 +9,7 @@ function run(trigger, scope, data, config, callback) {
         var hostname = process.env.HOSTNAME || '';
         //Ensure webhook ID and Token have been entered into the alias. 
         if (dConf.webhook == 0 || !dConf.webhook) {
-            console.error('Discord: ' + data.address + ' No Webhook URL set. Please enter Webhook URL.');
+            logger.main.error('Discord: ' + data.address + ' No Webhook URL set. Please enter Webhook URL.');
             callback();
         } else {
             // we should probably not do this and take the id/token separately
@@ -33,18 +34,18 @@ function run(trigger, scope, data, config, callback) {
             notificationembed.setTitle(`**${data.agency} - ${data.alias}**`);
             notificationembed.setDescription(`${data.message}`);
             if (hostname == undefined || !hostname) {
-                console.log('Discord: Hostname not set in config file using pagermon github')
+                logger.main.debug('Discord: Hostname not set in config file using pagermon github')
                 notificationembed.setAuthor('PagerMon', '', `https://github.com/davidmckenzie/pagermon`);
             } else {
                 notificationembed.setAuthor('PagerMon', '', `${hostname}`);
             }
             //Print notification template when debugging enabled
-            console.log(notificationembed)
+            logger.main.debug(notificationembed)
             d.send(notificationembed)
                 .then(
-                    console.log(`Discord: Message Sent`))
+                    logger.main.info(`Discord: Message Sent`))
                 .catch(function(err) {
-                'Discord: ' + console.error(err);
+                'Discord: ' + logger.main.error(err);
                 });
             callback();
         }

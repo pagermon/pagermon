@@ -6,6 +6,7 @@ var bcrypt = require('bcryptjs');
 var passport = require('passport');
 var util = require('util')
 var pluginHandler = require('../plugins/pluginHandler');
+var logger = require('../log');
 require('../config/passport')(passport); // pass passport for configuration
 
 var nconf = require('nconf');
@@ -95,7 +96,7 @@ router.get('/messages', isSecMode, function(req, res, next) {
   }
   db.get(initSql,function(err,count){
     if (err) {
-      console.error(err);
+      logger.main.error(err);
     } else if (count) {
       initData.msgCount = count.msgcount;
       initData.pageCount = Math.ceil(initData.msgCount/initData.limit);
@@ -141,16 +142,16 @@ router.get('/messages', isSecMode, function(req, res, next) {
           }
         }
         if (err) {
-          console.error(err);
+          logger.main.error(err);
         } else if (row) {
           result.push(row);
         } else {
-          console.log('empty results');
+          logger.main.info('empty results');
         }
       },function(err,rowCount){
         if (err) {
           console.timeEnd('sql');
-          console.error(err);
+          logger.main.error(err);
           res.status(500).send(err);
         } else if (rowCount > 0) {
           console.timeEnd('sql');
@@ -163,7 +164,7 @@ router.get('/messages', isSecMode, function(req, res, next) {
         }
       });
     } else {
-      console.log('empty results');
+      logger.main.info('empty results');
     }
   });
 });
@@ -281,7 +282,7 @@ router.get('/messageSearch', isSecMode, function(req, res, next) {
   var rows = [];
   db.each(sql,query,function(err,row){
     if (err) {
-      console.error(err);
+      logger.main.error(err);
     } else if (row) {
       if (HideCapcode) {
         if (!req.isAuthenticated()) {
@@ -308,12 +309,12 @@ router.get('/messageSearch', isSecMode, function(req, res, next) {
           rows.push(row);
       }
     } else {
-      console.log('empty results');
+      logger.main.info('empty results');
     }
   },function(err,rowCount){
     if (err) {
       console.timeEnd('sql');
-      console.error(err);
+      logger.main.error(err);
       res.status(500).send(err);
     } else if (rowCount > 0) {
       console.timeEnd('sql');
@@ -358,7 +359,7 @@ router.get('/capcodes/init', isSecMode, function(req, res, next) {
   db.serialize(() => {
     db.get("SELECT id FROM capcodes ORDER BY id DESC LIMIT 1", [], function(err, row) {
       if (err) {
-        console.error(err);
+        logger.main.error(err);
       } else {
         initData.msgCount = parseInt(row['id'], 10);
         //console.log(initData.msgCount);
@@ -459,7 +460,7 @@ router.all('*',
     next();
   },
   function(err, req, res, next) {
-    console.log('API key auth failed, attempting basic auth');
+    logger.main.debug('API key auth failed, attempting basic auth');
     isLoggedIn(req, res, next);
   }
 );
@@ -480,10 +481,10 @@ router.post('/messages', function(req, res, next) {
         data.pluginData = {};
 
     // send data to pluginHandler before proceeding
-    console.log('beforeMessage start');
+    logger.main.debug('beforeMessage start');
     pluginHandler.handle('message', 'before', data, function(response) {
-      console.log(response);
-      console.log('beforeMessage done');
+      logger.main.debug(response);
+      logger.main.debug('beforeMessage done');
       if (response && response.pluginData) {
         // only set data to the response if it's non-empty and still contains the pluginData object
         data = response;
@@ -519,7 +520,7 @@ router.post('/messages', function(req, res, next) {
             res.status(500).send(err);
           } else {
             if (row && filterDupes) {
-              console.log('Ignoring duplicate: ', message);
+              logger.main.info('Ignoring duplicate: ', message);
               res.status(200);
               res.send('Ignoring duplicate');
             } else {
@@ -527,11 +528,11 @@ router.post('/messages', function(req, res, next) {
                 var insert;
                 var alias_id = null;
   
-                if (err) { console.error(err) }
+                if (err) { logger.main.error(err) }
                 if (row) {
                   if (row.ignore == '1') {
                     insert = false;
-                    console.log('Ignoring filtered address: '+address+' alias: '+row.id);
+                    logger.main.info('Ignoring filtered address: '+address+' alias: '+row.id);
                   } else {
                     insert = true;
                     alias_id = row.id;
@@ -577,10 +578,10 @@ router.post('/messages', function(req, res, next) {
                             } else {
                               row.pluginconf = {};
                             }
-                            console.log('afterMessage start');
+                            logger.main.debug('afterMessage start');
                             pluginHandler.handle('message', 'after', row, function(response) {
-                              console.log(response);
-                              console.log('afterMessage done');
+                              logger.main.debug(response);
+                              logger.main.debug('afterMessage done');
                               // remove the pluginconf object before firing socket message
                               delete row.pluginconf;
                               if (HideCapcode || apiSecurity) {
@@ -664,7 +665,7 @@ router.post('/capcodes', function(req, res, next) {
           }
         }
       });
-      console.log(req.body || 'no request body');
+      logger.main.debug(req.body || 'no request body');
     });
   } else {
     res.status(500).json({message: 'Error - address or alias missing'});
@@ -679,7 +680,7 @@ router.post('/capcodes/:id', function(req, res, next) {
     // do delete multiple
     var idList = req.body.deleteList || [0, 0];
     if (!idList.some(isNaN)) {
-      console.log('Deleting: '+idList);
+      logger.main.info('Deleting: '+idList);
       db.serialize(() => {
         db.run(inParam('DELETE FROM capcodes WHERE id IN (?#)', idList), idList, function(err){
           if (err) {
@@ -729,7 +730,7 @@ router.post('/capcodes/:id', function(req, res, next) {
             if (updateAlias == 1) {
               console.time('updateMap');
               db.run("UPDATE messages SET alias_id = (SELECT id FROM capcodes WHERE messages.address LIKE address ORDER BY REPLACE(address, '_', '%') DESC LIMIT 1);", function(err){
-                if (err) { console.error(err); console.timeEnd('updateMap'); }
+                if (err) { logger.main.error(err); console.timeEnd('updateMap'); }
                 else { console.timeEnd('updateMap'); }
               });
             } else {
@@ -741,7 +742,7 @@ router.post('/capcodes/:id', function(req, res, next) {
             res.status(200).send({'status': 'ok', 'id': this.lastID});
           }
         });
-        console.log(req.body || 'request body empty');
+        logger.main.debug(req.body || 'request body empty');
       });
     } else {
       res.status(500).json({message: 'Error - address or alias missing'});
@@ -754,7 +755,7 @@ router.delete('/capcodes/:id', function(req, res, next) {
   var id = parseInt(req.params.id, 10);
   nconf.load();
   var updateRequired = nconf.get('database:aliasRefreshRequired');
-  console.log('Deleting '+id);
+  logger.main.info('Deleting '+id);
   db.serialize(() => {
     //db.run("UPDATE tbl SET name = ? WHERE id = ?", [ "bar", 2 ]);
     db.run("DELETE FROM capcodes WHERE id=?", id, function(err){
@@ -768,7 +769,7 @@ router.delete('/capcodes/:id', function(req, res, next) {
         }
       }
     });
-    console.log(req.body || 'request body empty');
+    logger.main.debug(req.body || 'request body empty');
   });
 });
 
@@ -776,7 +777,7 @@ router.post('/capcodeRefresh', function(req, res, next) {
   nconf.load();
   console.time('updateMap');
   db.run("UPDATE messages SET alias_id = (SELECT id FROM capcodes WHERE messages.address LIKE address ORDER BY REPLACE(address, '_', '%') DESC LIMIT 1);", function(err){
-    if (err) { console.error(err); console.timeEnd('updateMap'); }
+    if (err) { logger.main.error(err); console.timeEnd('updateMap'); }
     else {
       console.timeEnd('updateMap');
       nconf.set('database:aliasRefreshRequired', 0);

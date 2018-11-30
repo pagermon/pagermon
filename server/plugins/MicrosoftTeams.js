@@ -1,11 +1,12 @@
-var request = require('request')
+var request = require('request');
+var logger = require('../log');
 
 function run(trigger, scope, data, config, callback) {
     var msConf = data.pluginconf.MicrosoftTeams;
     if (msConf && msConf.enable) {
         //Ensure webhook ID and Token have been entered into the alias. 
         if (msConf.webhookuri == 0 || !msConf.webhookuri) {
-            console.error('MSTeams: ' + data.address + ' No Webhook URL set. Please enter Webhook URL.');
+            logger.main.error('MSTeams: ' + data.address + ' No Webhook URL set. Please enter Webhook URL.');
             callback();
         } else {
             var uri = msConf.webhookuri
@@ -23,10 +24,10 @@ function run(trigger, scope, data, config, callback) {
                 body: messageData
             }, function (error, response, body) {
                 if (!error && response.statusCode === 200) {
-                    console.log('Teams: Message Sent')
+                    logger.main.info('Teams: Message Sent')
                 }
                 else {
-                    console.log("Teams: " + error + response.statusCode + response.statusText)
+                    logger.main.error("Teams: " + error + response.statusCode + response.statusText)
                 }
             })
             callback();

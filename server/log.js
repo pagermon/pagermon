@@ -1,11 +1,18 @@
 const winston = require('winston');
 const { format } = winston;
 // const { combine, label, json, cli } = format;
+// load the config file
+var nconf = require('nconf');
+var conf_file = './config/config.json';
+nconf.file({file: conf_file});
+nconf.load();
+
+var loglevel = nconf.get('global:loglevel');
 
 winston.loggers.add('pagermon', {
     format: format.combine(
         format.colorize(),
-        format.label({ label: '[pagermon]' }),
+        format.label({ label: '[pmon]' }),
         format.timestamp({format:"YYYY-MM-DD HH:MM:SS"}),
         format.printf(
             info => `${info.label}  ${info.timestamp}  ${info.level} : ${info.message}`
@@ -13,14 +20,14 @@ winston.loggers.add('pagermon', {
     ),
     transports: [
         new winston.transports.File({
-            level: 'info',
+            level: loglevel,
             filename: './logs/pagermon.log',
             handleExceptions: true,
             maxsize: 10485760,
             maxFiles: 5
         }),
         new winston.transports.Console({
-            level: 'debug',
+            level: loglevel,
             handleExceptions: true
         })
     ]
@@ -37,14 +44,14 @@ winston.loggers.add('http', {
     ),
     transports: [
         new winston.transports.File({
-            level: 'info',
+            level: loglevel,
             filename: './logs/http.log',
             handleExceptions: true,
             maxsize: 10485760,
             maxFiles: 5
         }),
         new winston.transports.Console({
-            level: 'debug',
+            level: loglevel,
             handleExceptions: true
         })
     ]

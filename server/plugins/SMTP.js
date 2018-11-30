@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+var logger = require('../log');
 
 function run(trigger, scope, data, config, callback) {
     var sConf = data.pluginconf.SMTP;
@@ -29,10 +30,10 @@ function run(trigger, scope, data, config, callback) {
         // send mail with defined transport object
         transporter.sendMail(mailOptions, (error, info) => {
           if (error) {
-            console.error('SMTP:' + error);
+            logger.main.error('SMTP:' + error);
             callback();
           } else {
-            console.log('SMTP:' + 'Message sent: %s', info.messageId);
+            logger.main.info('SMTP:' + 'Message sent: %s', info.messageId);
             callback();
           }
         });

@@ -1,5 +1,6 @@
 var telegram = require('telegram-bot-api');
-var util = require('util')
+var util = require('util');
+var logger = require('../log');
 
 function run(trigger, scope, data, config, callback) {
     var tConf = data.pluginconf.Telegram;
@@ -9,7 +10,7 @@ function run(trigger, scope, data, config, callback) {
           token: telekey
         });
         if (tConf.chat == 0 || !tConf.chat) {
-            console.error('Telegram: ' + data.address + ' No ChatID key set. Please enter ChatID.');
+            logger.main.error('Telegram: ' + data.address + ' No ChatID key set. Please enter ChatID.');
             callback();
         } else {
             //Notification formatted in Markdown for pretty notifications
@@ -21,11 +22,10 @@ function run(trigger, scope, data, config, callback) {
                 text: notificationText,
                 parse_mode: "Markdown"
             }).then(function(data) {
-                //uncomment below line to debug messages at the console!
-                console.log('Telegram: ' + util.inspect(data, false, null));
+                logger.main.debug('Telegram: ' + util.inspect(data, false, null));
                 callback();
             }).catch(function(err) {
-                console.log('Telegram: ' + err);
+                logger.main.error('Telegram: ' + err);
                 callback();
             });
         }

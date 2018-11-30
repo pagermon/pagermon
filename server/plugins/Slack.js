@@ -1,11 +1,12 @@
-var Slack = require('slack')
+var Slack = require('slack');
+var logger = require('../log');
 
 function run(trigger, scope, data, config, callback) {
     var slConf = data.pluginconf.Slack;
     if (slConf && slConf.enable) {
         //Ensure webhook ID and Token have been entered into the alias. 
         if(config.bottoken == 0 || !config.bottoken || slConf.channel == 0 || !slConf.channel) {
-            console.error('Slack: ' + data.address + ' No Bot Token or Channel Set.');
+            logger.main.error('Slack: ' + data.address + ' No Bot Token or Channel Set.');
             callback();
         } else {
             var token = config.bottoken
@@ -17,7 +18,7 @@ function run(trigger, scope, data, config, callback) {
                 channel: slConf.channel,
                 text: messageData
             }, function(err, data, response) {
-                if (err) { console.error('Slack: ' + err); } else { console.log('Slack: ' + 'Message Sent') }
+                if (err) { logger.main.error('Slack: ' + err); } else { logger.main.info('Slack: ' + 'Message Sent') }
                 callback();
             })
         }

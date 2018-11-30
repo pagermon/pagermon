@@ -1,11 +1,12 @@
 var push = require('pushover-notifications');
+var logger = require('../log');
 
 function run(trigger, scope, data, config, callback) {
     var pConf = data.pluginconf.Pushover;
     if (pConf && pConf.enable) {
         //ensure key has been entered before trying to push
         if (pConf.group == 0 || pConf.group == '0' || !pConf.group) {
-            console.error('Pushover: ' + data.address + ' No User/Group key set. Please enter User/Group Key.');
+          logger.main.error('Pushover: ' + data.address + ' No User/Group key set. Please enter User/Group Key.');
             callback();
           } else {
             var p = new push({
@@ -19,7 +20,7 @@ function run(trigger, scope, data, config, callback) {
               sound: pConf.sound.value,
               priority: pConf.priority.value,
               onerror: function(err) {
-                console.log('Pushover:', err);
+                logger.main.error('Pushover:', err);
                 }
             };
 
@@ -27,12 +28,12 @@ function run(trigger, scope, data, config, callback) {
               //emergency message
               msg.retry = 60;
               msg.expire = 240;
-              console.log("SENDING EMERGENCY PUSH NOTIFICATION")
+              logger.main.info("SENDING EMERGENCY PUSH NOTIFICATION")
             }
 
             p.send(msg, function (err, result) {
-              if (err) { console.error('Pushover:' + err); }
-              console.log('Pushover:' + result);
+              if (err) { logger.main.error('Pushover:' + err); }
+              logger.main.debug('Pushover:' + result);
               callback();
             });
           }

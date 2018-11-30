@@ -1,10 +1,11 @@
 var sqlite3 = require('sqlite3').verbose();
 var fs = require('fs');
+var logger = require('./log');
 
 // initialize the database if it does not already exist
 function init(release) {
     var db = new sqlite3.Database('./messages.db', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, function (err) {
-        if (err) { console.log(err.message); } else {
+        if (err) { logger.main.error(err.message); } else {
             // initialise capcodes table
             var sql =  "CREATE TABLE IF NOT EXISTS capcodes ( ";
                 sql += "id INTEGER PRIMARY KEY AUTOINCREMENT, ";
@@ -62,16 +63,16 @@ function init(release) {
 
             db.serialize(() => {
                 db.exec(sql, function(err) {
-                    if (err) { console.log(err); }
+                    if (err) { logger.main.error(err); }
                     // now we want to check pragma user_version - this uses YYYYMMDD format as it is an int
                     db.get("pragma user_version;",function(err,res){
                         if(err) {
-                            console.log("Something went wrong getting user_version");
+                            logger.main.error("Something went wrong getting user_version");
                         } else {
-                            console.log("Current DB version: "+res.user_version);
-                            console.log("Latest DB version: "+release);
+                            logger.main.info("Current DB version: "+res.user_version);
+                            logger.main.info("Latest DB version: "+release);
                             if (res.user_version < release) {
-                                console.log("DB schema out of date, updating");
+                                logger.main.info("DB schema out of date, updating");
                                 // we now run alter table commands for every column that has been added since the early versions
                                 // this is inefficient, but should only run once per upgrade, and will skip over errors of adding columns that already exist
                                 // TODO: revise below logic to be smarter and less bloaty over time
@@ -143,12 +144,12 @@ COMMIT;
 PRAGMA foreign_keys=on;
 CREATE UNIQUE INDEX IF NOT EXISTS cc_pk_idx ON capcodes (id,address DESC);`;
                                         db.exec(upgradeSql, function(err) {
-                                            if (err) { console.log(err); }
+                                            if (err) { logger.main.error(err); }
                                             // scary db stuff done, phew
                                             db.run("PRAGMA user_version = "+release, function(err){ /* ignore error */ });
-                                            console.log("DB schema update complete");
+                                            logger.main.info("DB schema update complete");
                                             // Switch config file over to plugin format
-                                            console.log("Updating config file");
+                                            logger.main.info("Updating config file");
                                             var nconf = require('nconf');
                                             var conf_file = './config/config.json';
                                             var conf_backup = './config/backup.json';
@@ -205,7 +206,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS cc_pk_idx ON capcodes (id,address DESC);`;
                                             delete curConfig.twitter;
                                             fs.writeFileSync( conf_file, JSON.stringify(curConfig,null, 2) );
                                             nconf.load();
-                                            console.log("Config file updated!");
+                                            logger.main.info("Config file updated!");
                                         });
                                     });
                                 } else {
@@ -213,7 +214,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS cc_pk_idx ON capcodes (id,address DESC);`;
                                     // nothing to do here for now
                                 }
                             } else {
-                                console.log("DB schema up to date!");
+                                logger.main.info("DB schema up to date!");
                             }
                         }
                     });

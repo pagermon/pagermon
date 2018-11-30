@@ -1,10 +1,11 @@
 var twit = require('twit');
+var logger = require('../log');
 
 function run(trigger, scope, data, config, callback) {
     var tConf = data.pluginconf.Twitter;
     if (tConf && tConf.enable) {
         if ((config.consKey == 0 || !config.consKey) || (config.consSecret == 0 || !config.consSecret) || (config.accToken == 0 || !config.accToken) || (config.accSecret == 0 || !config.accSecret)) {
-            console.error('Twitter: ' + data.address + ' No API keys set. Please check API keys.');
+            logger.main.error('Twitter: ' + data.address + ' No API keys set. Please check API keys.');
             callback();
         } else {
             var tw = new twit({
@@ -21,7 +22,7 @@ function run(trigger, scope, data, config, callback) {
               tw.post('statuses/update', {
                 status: twittertext
               }, function (err, data, response) {
-                if (err) { console.error('Twitter: ' + err); }else{ console.log('Twitter: ' + 'Tweet Posted')}
+                if (err) { logger.main.error('Twitter: ' + err); }else{ logger.main.info('Twitter: ' + 'Tweet Posted')}
                 callback();
               })
         }
