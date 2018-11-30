@@ -1,0 +1,17 @@
+{
+    "name": "Shell",
+    "description": "Exec shell script",
+    "disable": false,
+    "trigger": "message",
+    "scope": "after",
+    "config": [
+    ],
+    "aliasConfig": [ 
+        {
+            "name": "enable",
+            "label": "Enable",
+            "description": "Enable shell script that match this alias. File must be named script-ID.sh, replace \"ID\" by alias id. ",
+            "type": "checkbox"
+        }
+    ]
+}
