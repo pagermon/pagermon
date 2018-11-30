@@ -11,11 +11,11 @@
 <% include global/menu.ejs %>
 
 <div id="content" class="container-fluid" ng-cloak>
-  
+
   <ng-view></ng-view>
 
   <!-- Template -->
-  
+
   <script type="text/ng-template" id="/messages.html">
   <div ng-show="loading" class="loading"><i class="fa fa-spinner fa-spin"></i></div>
     <p></p>
@@ -84,10 +84,7 @@
               <strong style="vertical-align: middle;"></strong>
             </td>
             <td class="shrink noTiny clickable-td" uib-popover-template="'templates/popover.html'" popover-append-to-body=true ng-click="popoverEl = 'alias'" popover-trigger="'outsideClick'">
-              <span style="color: Maroon;">{{message.alias || 'Unknown'}}</span>
-            </td>
-            <td class="shrink noTiny" ng-if="!user">
-              <span>{{message.alias || ''}}</span>
+              <span style="color: Maroon;">{{ user ? message.alias || 'Unknown' : message.alias}}</span>
             </td>
             <td class="expand"><div highlight="message.message" replacement="init.replaceText" class="pagerMessage"></td>
         </tbody>
@@ -133,17 +130,17 @@
 
     </div>
   </script>
-  
+
   <script type="text/ng-template" id="/messageDetails.html">
     <h1>{{ message.address }}</h1>
     note: <textarea>{{ message.message }}</textarea>
   </script>
-  
+
   <script>
 var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-highlight', 'ui.bootstrap'])
-    
+
     .factory('socket', function ($rootScope) {
-      
+
     var socket = io({transports: ['websocket'], upgrade: false});
       return {
         open: function() {
@@ -151,7 +148,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
           socket.open();
         },
         on: function (eventName, callback) {
-          socket.on(eventName, function () {  
+          socket.on(eventName, function () {
             var args = arguments;
             $rootScope.$apply(function () {
               callback.apply(socket, args);
@@ -173,8 +170,8 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
         }
       };
     })
-    
-  
+
+
   .factory('adminSocket', function ($rootScope) {
 
     var adminSocket = io('/adminio', {transports: ['websocket'], upgrade: false});
@@ -184,7 +181,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
           adminSocket.open();
         },
         on: function (eventName, callback) {
-          adminSocket.on(eventName, function () {  
+          adminSocket.on(eventName, function () {
             var args = arguments;
             $rootScope.$apply(function () {
               callback.apply(adminSocket, args);
@@ -206,7 +203,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
         }
       };
     })
-  
+
     .factory('Api', ['$resource',
      function($resource) {
       return {
@@ -215,7 +212,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
         MessageSearch: $resource('/api/messageSearch/')
       };
     }])
-    
+
 
     .run(function($anchorScroll, $window) {
       // hack to scroll to top when navigating to new URLS but not back/forward
@@ -230,7 +227,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
       wrap('pushState');
       wrap('replaceState');
     })
-    
+
     // Controller
     // TODO: optimise this whole section, consider popping this entire controller out to a separate file
     .controller('MessageController', ['$scope', '$routeParams', 'Api', 'socket', 'adminSocket', '$cookies', '$location', '$window', function ($scope, $routeParams, Api, socket, adminSocket, $cookies, $location, $window) {
@@ -242,7 +239,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
       <% } %>
       // get new message on socket event
       $scope.$on('$viewContentLoaded', function() {
-      
+
     // register a new socket when scope changes and set Socket Typle
 
   //Manage the sockets
@@ -262,7 +259,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
       var socketMode = socket
       socket.open();
       adminSocket.close()
-    <% } %>	
+    <% } %>
   <% } else { %>
     <% if (login) { %>
       var socketMode = adminSocket
@@ -273,16 +270,16 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
       adminSocket.close();
       <% } %>
   <% } %>
-  
+
     socketMode.on('messagePost', function(message) {
-        // Send Browser Notifications  
+        // Send Browser Notifications
     <% if (apisecurity) { %>
         <% if (login) { %>
         if ($scope.notificationEnabled == 'true') {
         if (!message.agency) {
           //Not showing messages for things that we don't know
         } else {
-        
+
           notify("PagerMon - " +message.agency + " - " + message.alias,message.message);
         }
         }
@@ -292,14 +289,14 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
         if (!message.agency) {
           //Not showing messages for things that we don't know
         } else {
-        
+
           notify("PagerMon - " +message.agency + " - " + message.alias,message.message);
         }
         }
        <% } %>
-      
-      
-    
+
+
+
           // only bother getting the new message if we're on page 1
           if ($scope.init.currentPage === 1) {
             console.log('New Message ID: '+message.id + ' currentPage: '+$scope.init.currentPage);
@@ -335,9 +332,9 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
               $scope.messages.pop();
             }
           }
-        });	
+        });
       });
-      
+
       // this should be popped out into a separate file
       $scope.updateData = function(page, query){
         // check if browser supports notifications
@@ -352,11 +349,11 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
         var curPage = page || $routeParams.page || '1';
         var limit = $cookies.get('messageLimit') || '';
         $scope.notificationEnabled = $cookies.get('notificationEnabled') || 'true';
-        
+
         var queryObj = {};
             queryObj.page = curPage;
             queryObj.limit = limit;
-            
+
         if ($routeParams.q || query) {
           $scope.query = query || $routeParams.q;
           $scope.origQuery = query || $routeParams.q;
@@ -366,7 +363,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
           $scope.query = '';
           $scope.hasQuery = false;
         }
-        
+
         if ($routeParams.agency || $routeParams.address) {
           $scope.filter = $routeParams.agency || $routeParams.address;
           $scope.hasQuery = true;
@@ -392,7 +389,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
           qString = '?'+qArray.join('&');
         }
         window.history.pushState('', '', qString);
-        
+
         if (queryObj.q || queryObj.agency || queryObj.address) {
           Api.MessageSearch.get(queryObj).$promise.then(function(results) {
             //console.log(results);
@@ -459,7 +456,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
             }
             var pages = $scope.range(startPage, endPage);
             results.init.pages = pages;
-            $scope.init = results.init;          
+            $scope.init = results.init;
             angular.forEach(results.messages, function(result) {
               var datetime = moment.unix(result.timestamp);
               result.date = datetime.format("YYYY-MM-DD");
@@ -481,7 +478,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
       };
       // run the updateData function on load
       $scope.updateData();
-      
+
       // helper functions below
       $scope.range = function(min, max, step) {
           step = step || 1;
@@ -491,20 +488,20 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
           }
           return input;
       };
-      
+
       $scope.htmlEntities = function(str) {
           return String(str).replace(/&/g, '&amp;').replace(/</g, ' ').replace(/>/g, ' ').replace(/"/g, '&quot;');
       }
-      
+
       $scope.padDigits = function(number, digits) {
           return Array(Math.max(digits - String(number).length + 1, 0)).join(0) + number;
       }
-      
+
       $scope.setCookie = function(cookie, value) {
           $cookies.put(cookie, value);
           $scope.updateData($scope.init.currentPage);
       };
-      
+
       $scope.toggleNotifications = function() {
           if ($scope.notificationEnabled == 'true') {
             $scope.setCookie('notificationEnabled', 'false');
@@ -517,16 +514,16 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
             });
           }
       };
-      
+
       $scope.clearSearch = function(){
         $scope.query = '';
       };
-      
+
       // destroy socket when we navigate away
       $scope.$on('$destroy', function() {
         socket.close();
       });
-      
+
     }])
     // Routes
     .config(['$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider) {
