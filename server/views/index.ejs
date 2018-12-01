@@ -84,10 +84,7 @@
               <strong style="vertical-align: middle;"></strong>
             </td>
             <td class="shrink noTiny clickable-td" uib-popover-template="'templates/popover.html'" popover-append-to-body=true ng-click="popoverEl = 'alias'" popover-trigger="'outsideClick'">
-              <span style="color: Maroon;">{{message.alias || 'Unknown'}}</span>
-            </td>
-            <td class="shrink noTiny" ng-if="!user">
-              <span>{{message.alias || ''}}</span>
+              <span style="color: Maroon;">{{ user ? message.alias || 'Unknown' : message.alias}}</span>
             </td>
             <td class="expand"><div highlight="message.message" replacement="init.replaceText" class="pagerMessage"></td>
         </tbody>

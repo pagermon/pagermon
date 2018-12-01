@@ -84,3 +84,6 @@ client/config/backup.json
 #idea
 .idea
 server/sessions
+
+#macOS
+.DS_Store
