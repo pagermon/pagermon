@@ -40,7 +40,7 @@ function run(trigger, scope, data, config, callback) {
                 notificationembed.setAuthor('PagerMon', '', `${hostname}`);
             }
             //Print notification template when debugging enabled
-            logger.main.debug(notificationembed)
+            logger.main.debug(util.format('%o',notificationembed));
             d.send(notificationembed)
                 .then(
                     logger.main.info(`Discord: Message Sent`))

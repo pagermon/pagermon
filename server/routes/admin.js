@@ -4,6 +4,7 @@ var router = express.Router();
 var bcrypt = require('bcryptjs');
 var fs = require('fs');
 var logger = require('../log');
+var util = require('util');
 var passport = require('passport');
 require('../config/passport')(passport); // pass passport for configuration
 
@@ -65,7 +66,7 @@ router.route('/settingsData')
     .get(isLoggedIn, function(req, res, next) {
         nconf.load();
         let settings = nconf.get();
-        logger.main.debug(settings);
+        // logger.main.debug(util.format('Config:\n\n%o',settings));
         let plugins = [];
         fs.readdirSync('./plugins').forEach(file => {
             if (file.endsWith('.json')) {
@@ -74,7 +75,7 @@ router.route('/settingsData')
                     plugins.push(pConf);
             }
         });
-        logger.main.debug(plugins);
+        // logger.main.debug(util.format('Plugin Config:\n\n%o',plugins));
         let data = {"settings": settings, "plugins": plugins}
         res.json(data);
     })

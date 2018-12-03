@@ -14,6 +14,7 @@ winston.loggers.add('pagermon', {
         format.colorize(),
         format.label({ label: '[pmon]' }),
         format.timestamp({format:"YYYY-MM-DD HH:MM:SS"}),
+        format.prettyPrint(),
         format.printf(
             info => `${info.label}  ${info.timestamp}  ${info.level} : ${info.message}`
         )

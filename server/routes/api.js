@@ -4,7 +4,7 @@ var router = express.Router();
 var basicAuth = require('express-basic-auth');
 var bcrypt = require('bcryptjs');
 var passport = require('passport');
-var util = require('util')
+var util = require('util');
 var pluginHandler = require('../plugins/pluginHandler');
 var logger = require('../log');
 require('../config/passport')(passport); // pass passport for configuration
@@ -483,7 +483,7 @@ router.post('/messages', function(req, res, next) {
     // send data to pluginHandler before proceeding
     logger.main.debug('beforeMessage start');
     pluginHandler.handle('message', 'before', data, function(response) {
-      logger.main.debug(response);
+      logger.main.debug(util.format('%o',response));
       logger.main.debug('beforeMessage done');
       if (response && response.pluginData) {
         // only set data to the response if it's non-empty and still contains the pluginData object
@@ -520,7 +520,7 @@ router.post('/messages', function(req, res, next) {
             res.status(500).send(err);
           } else {
             if (row && filterDupes) {
-              logger.main.info('Ignoring duplicate: ', message);
+              logger.main.info(util.format('Ignoring duplicate: %o', message));
               res.status(200);
               res.send('Ignoring duplicate');
             } else {
@@ -580,7 +580,7 @@ router.post('/messages', function(req, res, next) {
                             }
                             logger.main.debug('afterMessage start');
                             pluginHandler.handle('message', 'after', row, function(response) {
-                              logger.main.debug(response);
+                              logger.main.debug(util.format('%o',response));
                               logger.main.debug('afterMessage done');
                               // remove the pluginconf object before firing socket message
                               delete row.pluginconf;
@@ -665,7 +665,7 @@ router.post('/capcodes', function(req, res, next) {
           }
         }
       });
-      logger.main.debug(req.body || 'no request body');
+      logger.main.debug(util.format('%o', req.body || 'no request body'));
     });
   } else {
     res.status(500).json({message: 'Error - address or alias missing'});
@@ -742,7 +742,7 @@ router.post('/capcodes/:id', function(req, res, next) {
             res.status(200).send({'status': 'ok', 'id': this.lastID});
           }
         });
-        logger.main.debug(req.body || 'request body empty');
+        logger.main.debug(util.format('%o',req.body || 'request body empty'));
       });
     } else {
       res.status(500).json({message: 'Error - address or alias missing'});
@@ -769,7 +769,7 @@ router.delete('/capcodes/:id', function(req, res, next) {
         }
       }
     });
-    logger.main.debug(req.body || 'request body empty');
+    logger.main.debug(util.format('%o',req.body || 'request body empty'));
   });
 });
 
