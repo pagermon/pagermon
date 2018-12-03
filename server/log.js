@@ -39,12 +39,12 @@ winston.loggers.add('http', {
         format.label({ label: '[http]' }),
         format.timestamp({format:"YYYY-MM-DD HH:MM:SS"}),
         format.printf(
-            info => `${info.label}  ${info.timestamp}  ${info.level} : ${info.message}`
+            info => `${info.message}`
         )
     ),
     transports: [
         new winston.transports.File({
-            level: loglevel,
+            level: 'debug',
             filename: './logs/http.log',
             handleExceptions: true,
             maxsize: 10485760,
@@ -64,6 +64,6 @@ module.exports = {
 module.exports.http.stream = {
     write: function(message, encoding){
         var httpLog = winston.loggers.get('http');
-        httpLog.info(message.substring(0,message.lastIndexOf('\n')));
+        httpLog.debug(message.substring(0,message.lastIndexOf('\n')));
     }
 };
