@@ -3,6 +3,8 @@ var bodyParser = require('body-parser');
 var router = express.Router();
 var bcrypt = require('bcryptjs');
 var fs = require('fs');
+var logger = require('../log');
+var util = require('util');
 var passport = require('passport');
 require('../config/passport')(passport); // pass passport for configuration
 
@@ -17,7 +19,7 @@ var conf_backup = './config/backup.json';
 nconf.file({file: conf_file});
 nconf.load();
 
-router.use( bodyParser.json() );       // to support JSON-encoded bodies
+router.use(bodyParser.json());       // to support JSON-encoded bodies
 router.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: true
 }));
@@ -63,7 +65,19 @@ router.post('/resetPass', isLoggedIn, function(req, res, next) {
 router.route('/settingsData')
     .get(isLoggedIn, function(req, res, next) {
         nconf.load();
-        res.json(nconf.get());
+        let settings = nconf.get();
+        // logger.main.debug(util.format('Config:\n\n%o',settings));
+        let plugins = [];
+        fs.readdirSync('./plugins').forEach(file => {
+            if (file.endsWith('.json')) {
+                let pConf = require(`../plugins/${file}`);
+                if (!pConf.disable)
+                    plugins.push(pConf);
+            }
+        });
+        // logger.main.debug(util.format('Plugin Config:\n\n%o',plugins));
+        let data = {"settings": settings, "plugins": plugins}
+        res.json(data);
     })
     .post(isLoggedIn, function(req, res, next) {
         nconf.load();

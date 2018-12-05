@@ -1,5 +1,5 @@
-var version = "0.1.9-beta";
-var release = 20181116;
+var version = "0.2.0-beta";
+var release = 20181118;
 
 var debug = require('debug')('pagermon:server');
 var pmx = require('pmx').init({
@@ -15,7 +15,7 @@ var compression = require('compression');
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
-var logger = require('morgan');
+var logger = require('./log');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var fs = require('fs');
@@ -30,14 +30,6 @@ process.on('SIGINT', function() {
     process.exit(1);
 });
 
-var db = require('./db');
-    db.init(release);
-
-// routes
-var index = require('./routes/index');
-var admin = require('./routes/admin');
-var api = require('./routes/api');
-
 // create config file if it does not exist, and set defaults
 var conf_defaults = require('./config/default.json');
 var conf_file = './config/config.json';
@@ -48,6 +40,14 @@ if( ! fs.existsSync(conf_file) ) {
 var nconf = require('nconf');
     nconf.file({file: conf_file});
     nconf.load();
+
+var db = require('./db');
+    db.init(release);
+
+// routes
+var index = require('./routes/index');
+var admin = require('./routes/admin');
+var api = require('./routes/api');
 
 var port = normalizePort(process.env.PORT || '3000');
 var app = express();
@@ -97,7 +97,7 @@ app.use(function(req,res,next){
 var secret = nconf.get('global:sessionSecret');
 // compress all responses
 app.use(compression());
-app.use(logger('combined'));
+app.use(require("morgan")("combined", { "stream": logger.http.stream }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -197,5 +197,5 @@ function onListening() {
   var bind = typeof addr === 'string'
     ? 'pipe ' + addr
     : 'port ' + addr.port;
-    console.info('Listening on ' + bind);
+    logger.main.info('Listening on ' + bind);
 }

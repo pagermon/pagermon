@@ -1,6 +1,4 @@
 # Logs
-server/logs
-logs
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -84,3 +82,5 @@ client/config/backup.json
 #idea
 .idea
 server/sessions
+
+client/samples/testymctest.sh

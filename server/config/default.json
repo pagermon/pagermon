@@ -48,34 +48,5 @@
       }
     ]
   },
-  "pushover":{
-    "pushenable": false,
-    "pushAPIKEY":  ""
-  },
-  "telegram":{
-    "teleenable": false,
-    "teleAPIKEY": ""
-  },
-  "twitter":{
-    "twitenable": false,
-    "twitconskey": "",
-    "twitconssecret": "",
-    "twitacctoken": "",
-    "twitaccsecret": "",
-    "twitglobalhashtags": ""
-  },
-  "discord":{
-    "discenable": false
-  
-  },
-  "STMP":{
-    "MailEnable": false,
-    "MailFrom": "",
-    "MailFromName": "",
-    "SMTPServer":  "",
-    "SMTPPort":   "",
-    "STMPUsername": "",
-    "STMPPassword": "",
-    "STMPSecure": true
-  }
+  "plugins": {}
 }

@@ -1,4 +1,4 @@
-angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 'color.picker', 'ui.validate'])
+angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'ui.bootstrap', 'color.picker', 'ui.validate'])
     // Service
     .factory('Api', ['$resource',
      function($resource) {
@@ -204,6 +204,21 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
           $scope.aliasLoading = false;
           $scope.existingAddress = false;
           $scope.loading = false;
+
+          if (results.pluginconf) {
+            $scope.plugins.forEach(plugin => {
+              if (!$scope.alias.pluginconf[plugin.name]) {
+                $scope.alias.pluginconf[plugin.name] = {};
+              }
+            });
+          } else {
+            // populate pluginconf
+            $scope.alias.pluginconf = {};
+            $scope.plugins.forEach(plugin => {
+              $scope.alias.pluginconf[plugin.name] = {};
+            });
+          }
+
           if (results.address) {
             $scope.alias.originalAddress = results.address;
             $scope.isNew = false;
@@ -236,7 +251,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
               $scope.existingAddress = false;
               return false;
             }
-          });          
+          });
         } else {
           $scope.aliasLoading = false;
           $scope.existingAddress = false;
@@ -351,9 +366,11 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
           if (results.database && results.database.aliasRefreshRequired == 1) {
             $scope.aliasRefreshRequired = 1;
           }
+          $scope.settings = results.settings;
+          $scope.plugins = results.plugins;
         }
+        $scope.aliasLoad();
       });
-      $scope.aliasLoad();
     }])
     
     // handles password resets, needs cleanup
@@ -390,14 +407,15 @@ angular.module('app', ['ngRoute', 'ngResource', 'angular-uuid', 'ui.bootstrap', 
     }])
     
     // needs cleanup
-    .controller('SettingsController', ['$scope', '$routeParams', 'Api', 'uuid', '$uibModal', '$filter', '$timeout', function ($scope, $routeParams, Api, uuid, $uibModal, $filter, $timeout) {
+    .controller('SettingsController', ['$scope', '$routeParams', 'Api', 'uuid', '$uibModal', '$filter', '$timeout', '$sanitize', function ($scope, $routeParams, Api, uuid, $uibModal, $filter, $timeout, $sanitize) {
       $scope.alertMessage = {};
       Api.Settings.get(null, function(results) {
-        if (!results.messages.replaceText)
-          results.messages.replaceText = [{}];
-        if (!results.auth.keys)
-          results.auth.keys = [{}];
-        $scope.settings = results;
+        if (!results.settings.messages.replaceText)
+          results.settings.messages.replaceText = [{}];
+        if (!results.settings.auth.keys)
+          results.settings.auth.keys = [{}];
+        $scope.settings = results.settings;
+        $scope.plugins = results.plugins;
       });
 
       $scope.settingsSubmit = function() {

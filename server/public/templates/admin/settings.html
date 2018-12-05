@@ -164,7 +164,7 @@
                 <label>
                 <input type="checkbox" name="messages.SecureApi" ng-model="settings.messages.apiSecurity">
                 Secures all API's and WebInterface from being accessed unless logged in.
-			<p><b> Note: You must restart the application after making this change.</b>
+                  <p><b> Note: You must restart the application after making this change.</b>
                 </label>
               </div>
               </div>
@@ -213,175 +213,6 @@
               </table>
               </div>
             </div>
-
-            <h5>Notifications</h5>
-            <h6>Pushover</h6>
-            <div class="form-group">
-              <label for="pushover.pushenable" class="col-xs-4 col-sm-3 control-label">Enable</label>
-              <div class="col-xs-8 col-sm-9">
-                <div class="checkbox">
-                  <label>
-                    <input type="checkbox" name="pushover.pushenable" ng-model="settings.pushover.pushenable">
-                    Enable or disable for selected alias's
-                  </label>
-                </div>
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="pushover.pushAPIKEY" class="col-xs-4 col-sm-3 control-label">App Key</label>
-              <div class="col-xs-8 col-sm-9">
-                <input type="text" class="form-control" name="pushover.pushAPIKEY" ng-model="settings.pushover.pushAPIKEY">
-                <span id="helpBlock" class="help-block">Application key supplied by Pushover.</span>
-              </div>
-            </div>
-		  
-	          <h6>Telegram</h6>
-            <div class="form-group">
-              <label for="telegram.teleenable" class="col-xs-4 col-sm-3 control-label">Enable</label>
-              <div class="col-xs-8 col-sm-9">
-                <div class="checkbox">
-                  <label>
-                    <input type="checkbox" name="telegram.teleenable" ng-model="settings.telegram.teleenable">
-                    Enable or disable for selected alias's
-                  </label>
-                </div>
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="telegram.teleAPIKEY" class="col-xs-4 col-sm-3 control-label">Bot API Key</label>
-              <div class="col-xs-8 col-sm-9">
-                <input type="text" class="form-control" name="telegram.teleAPIKEY" ng-model="settings.telegram.teleAPIKEY">
-                <span id="helpBlock" class="help-block">API Key supplied by Telegram.</span>
-              </div>
-            </div>
-
-            <h6>Twitter</h6>
-            <div class="form-group">
-              <label for="twitter.twitenable" class="col-xs-4 col-sm-3 control-label">Enable</label>
-              <div class="col-xs-8 col-sm-9">
-                <div class="checkbox">
-                  <label>
-                    <input type="checkbox" name="twitter.twitenable" ng-model="settings.twitter.twitenable">
-                    Enable or disable for selected alias's
-                  </label>
-                </div>
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="twitter.twitconskey" class="col-xs-4 col-sm-3 control-label">Twitter Consumer Key</label>
-              <div class="col-xs-8 col-sm-9">
-                <input type="text" class="form-control" name="twitter.twitconskey" ng-model="settings.twitter.twitconskey">
-                <span id="helpBlock" class="help-block">Twitter Consumer API Key</span>
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="twitter.twitconssecret" class="col-xs-4 col-sm-3 control-label">Twitter Consumer Secret</label>
-              <div class="col-xs-8 col-sm-9">
-                <input type="text" class="form-control" name="twitter.twitconssecret" ng-model="settings.twitter.twitconssecret">
-                <span id="helpBlock" class="help-block">Twitter Consumer Secret Key</span>
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="twitter.twitacctoken" class="col-xs-4 col-sm-3 control-label">Twitter Access Token</label>
-              <div class="col-xs-8 col-sm-9">
-                <input type="text" class="form-control" name="twitter.twitacctoken" ng-model="settings.twitter.twitacctoken">
-                <span id="helpBlock" class="help-block">Twitter Acces Token</span>
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="twitter.twitaccsecret" class="col-xs-4 col-sm-3 control-label">Twitter Access Token Secret</label>
-              <div class="col-xs-8 col-sm-9">
-                <input type="text" class="form-control" name="twitter.twitaccsecret" ng-model="settings.twitter.twitaccsecret">
-                <span id="helpBlock" class="help-block">Twitter Access Token Secret</span>
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="twitter.twitglobalhashtags" class="col-xs-4 col-sm-3 control-label">Twitter Global Hashtags</label>
-              <div class="col-xs-8 col-sm-9">
-                <input type="text" class="form-control" name="twitter.twitglobalhashtags" ng-model="settings.twitter.twitglobalhashtags">
-                <span id="helpBlock" class="help-block">Global Hashtags to be added to all tweets. Space Seperated</span>
-              </div>
-            </div>
-            
-            <h6>Discord</h6>
-            <div class="form-group">
-              <label for="discord.discenable" class="col-xs-4 col-sm-3 control-label">Enable</label>
-              <div class="col-xs-8 col-sm-9">
-                <div class="checkbox">
-                  <label>
-                    <input type="checkbox" name="discord.discenable" ng-model="settings.discord.discenable">
-                    Enable or disable for selected alias's
-                  </label>
-                </div>
-              </div>
-            </div>
-            
-            <h6>Email</h6>
-            <div class="form-group">
-              <label for="STMP.MailEnable" class="col-xs-4 col-sm-3 control-label">Enable</label>
-              <div class="col-xs-8 col-sm-9">
-                <div class="checkbox">
-                  <label>
-                    <input type="checkbox" name="STMP.MailEnable" ng-model="settings.STMP.MailEnable">
-                    Enable or disable for selected alias's
-                  </label>
-                </div>
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="STMP.MailFrom" class="col-xs-4 col-sm-3 control-label">Mail from address</label>
-              <div class="col-xs-8 col-sm-9">
-                <input type="text" class="form-control" name="STMP.MailFrom" ng-model="settings.STMP.MailFrom">
-                <span id="helpBlock" class="help-block">Mail will be sent form this address</span>
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="STMP.MailFromName" class="col-xs-4 col-sm-3 control-label">From Name</label>
-              <div class="col-xs-8 col-sm-9">
-                <input type="text" class="form-control" name="STMP.MailFromName" ng-model="settings.STMP.MailFromName">
-                <span id="helpBlock" class="help-block">Name to appear from</span>
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="STMP.SMTPServer" class="col-xs-4 col-sm-3 control-label">SMTP Server</label>
-              <div class="col-xs-8 col-sm-9">
-                <input type="text" class="form-control" name="STMP.SMTPServer" ng-model="settings.STMP.SMTPServer">
-                <span id="helpBlock" class="help-block">SMTP Server to connect to</span>
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="STMP.SMTPPort" class="col-xs-4 col-sm-3 control-label">SMTP Port</label>
-              <div class="col-xs-8 col-sm-9">
-                <input type="text" class="form-control" name="STMP.SMTPPort" ng-model="settings.STMP.SMTPPort">
-                <span id="helpBlock" class="help-block">SMTP Server port to connect to</span>
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="STMP.STMPUsername" class="col-xs-4 col-sm-3 control-label">SMTP Username</label>
-              <div class="col-xs-8 col-sm-9">
-                <input type="text" class="form-control" name="STMP.STMPUsername" ng-model="settings.STMP.STMPUsername">
-                <span id="helpBlock" class="help-block">SMTP server username</span>
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="STMP.STMPPassword" class="col-xs-4 col-sm-3 control-label">SMTP Password</label>
-              <div class="col-xs-8 col-sm-9">
-                <input type="text" class="form-control" name="STMP.STMPPassword" ng-model="settings.STMP.STMPPassword">
-                <span id="helpBlock" class="help-block">SMTP server password</span>
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="STMP.STMPSecure" class="col-xs-4 col-sm-3 control-label">Enable SSL/TLS</label>
-              <div class="col-xs-8 col-sm-9">
-                <div class="checkbox">
-                  <label>
-                    <input type="checkbox" name="STMP.STMPSecure" ng-model="settings.STMP.STMPSecure">
-                    Enable or disable SSL/TLS
-                  </label>
-                </div>
-              </div>
-            </div>
-
 
             <h5>Auth</h5>
             <div class="form-group">
@@ -434,6 +265,47 @@
                   </tr>
                 </tbody>
               </table>
+              </div>
+            </div>
+
+            <h4>Plugins</h4>
+            <div class="plugin-group" ng-repeat="plugin in plugins">
+              <hr />
+              <div class="row">
+                <div class="col-xs-12 col-sm-6"><h5>{{plugin.name}}</h5><p><em ng-bind-html="plugin.description"></em></p></div>
+              </div>
+              <div class="form-group">
+                <label for="{{plugin.name}}.enable" class="col-xs-4 col-sm-3 control-label">Enable</label>
+                <div class="col-xs-8 col-sm-9">
+                  <div class="checkbox">
+                    <label>
+                      <input type="checkbox" name="{{plugin.name}}.enable" ng-model="settings.plugins[plugin.name].enable">
+                      Enable the {{plugin.name}} plugin
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group" ng-repeat="configItem in plugin.config">
+                <div ng-hide="!settings.plugins[plugin.name].enable">
+                  <label for="{{plugin.name}}.{{configItem.name}}" class="col-xs-4 col-sm-3 control-label">{{configItem.label}}</label>
+                  <div class="col-xs-8 col-sm-9">
+                    <div ng-if="configItem.type == 'checkbox'" class="checkbox">
+                      <label>
+                        <input type="checkbox" name="{{plugin.name}}.{{configItem.name}}" ng-model="settings.plugins[plugin.name][configItem.name]">
+                        {{configItem.description}}
+                      </label>
+                    </div>
+                    <div ng-if="configItem.type == 'select'">
+                        <select name="{{plugin.name}}.{{configItem.name}}" ng-model="settings.plugins[plugin.name][configItem.name]" class="form-control" ng-options="obj.text for obj in configItem.options track by obj.value" ng-hide="!settings.plugins[plugin.name].enable" ng-required="settings.plugins[plugin.name].enable && configItem.required">
+                          </select>
+                          <span id="helpBlock" class="help-block">{{configItem.description}}</span>
+                    </div>
+                    <div ng-if="configItem.type != 'checkbox' && configItem.type != 'select'">
+                      <input type="{{configItem.type}}" class="form-control" name="{{plugin.name}}.{{configItem.name}}" ng-model="settings.plugins[plugin.name][configItem.name]" ng-hide="!settings.plugins[plugin.name].enable" ng-required="settings.plugins[plugin.name].enable && configItem.required">
+                      <span id="helpBlock" class="help-block">{{configItem.description}}</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
