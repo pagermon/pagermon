@@ -3,7 +3,6 @@
   "cwd"              : "/home/ubuntu/workspace/server",
   "script"           : "app.js",
   "node_args"        : ["--harmony"],
-  "log_date_format"  : "YYYY-MM-DD HH:mm Z",
   "error_file"       : "logs/node-app.stderr.log",
   "out_file"         : "logs/node-app.stdout.log",
   "pid_file"         : "pids/node-geo-api.pid",
