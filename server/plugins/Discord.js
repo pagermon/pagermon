@@ -1,6 +1,7 @@
 var discord = require('discord.js');
 var toHex = require('colornames');
 var logger = require('../log');
+var util = require('util');
 
 function run(trigger, scope, data, config, callback) {
     var dConf = data.pluginconf.Discord;
