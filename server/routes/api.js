@@ -578,10 +578,8 @@ router.post('/messages', function(req, res, next) {
                             } else {
                               row.pluginconf = {};
                             }
-                            console.log(row);
                             logger.main.debug('afterMessage start');
                             pluginHandler.handle('message', 'after', row, function(response) {
-                              console.log(row);
                               logger.main.debug(util.format('%o',response));
                               logger.main.debug('afterMessage done');
                               // remove the pluginconf object before firing socket message
