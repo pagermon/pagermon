@@ -304,7 +304,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
           if ($scope.init.currentPage === 1) {
             console.log('New Message ID: '+message.id + ' currentPage: '+$scope.init.currentPage);
             var datetime = moment.unix(message.timestamp);
-            message.date = datetime.format("YYYY-MM-DD")
+            message.date = datetime.format("YYYY-MM-DD");
             message.timestamp = datetime.format("HH:mm");
           //  result.padAddress = $scope.padDigits(result.address,7);
           //  result.aliasMatch = result['MAX(capcodes.address)'];
