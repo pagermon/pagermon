@@ -2,6 +2,7 @@ var fs = require('fs');
 var _ = require('underscore');
 var async = require('async');
 var nconf = require('nconf');
+var util = require('util');
 var conf_file = './config/config.json';
 nconf.file({file: conf_file});
 nconf.load();
@@ -13,9 +14,9 @@ function handle(trigger, scope, data, callback) {
     logger.main.debug(`trigger: ${trigger} scope: ${scope}`);
     logger.main.debug('======================');
     logger.main.debug('data object');
-    logger.main.debug(data);
+    logger.main.debug(util.format('%o',data));
     logger.main.debug('plugins object');
-    logger.main.debug(plugins);
+    logger.main.debug(util.format('%o',plugins));
     logger.main.debug('======================');
 
     async.eachOf(plugins, function(conf, plugin, cb) {
