@@ -71,7 +71,9 @@ server/bin/
 client/config/config.json
 client/config/backup.json
 
-server/plugins-scripts/*.sh
+server/plugins/Shell/*.sh
+server/plugins/Shell/*.php
+server/plugins/Shell/*.py
 
 # sqlite
 
