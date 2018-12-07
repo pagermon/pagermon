@@ -10,8 +10,26 @@
         {
             "name": "enable",
             "label": "Enable",
-            "description": "Enable shell script that match this alias. File must be named script-ID.sh, replace \"ID\" by alias id. ",
+            "description": "Enable shell script that match this alias. File must be named {ID}.sh, replace \"ID\" by alias id. ",
             "type": "checkbox"
+        },
+        {
+            "name": "overrideAlias",
+            "label": "Override Alias",
+            "description": "Override filename, use another alias id. (only number) ",
+            "type": "number"
+        },
+        {
+            "name": "language",
+            "label": "Language",
+            "description": "Choose language",
+            "type": "select",
+            "options": [
+                {"value": "sh", "text": "Shell"},
+                {"value": "php", "text": "PHP"},
+                {"value": "python", "text": "Python"},
+                {"value": "python3", "text": "Python 3"}
+            ]
         }
     ]
 }
