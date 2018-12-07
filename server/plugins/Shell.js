@@ -23,8 +23,8 @@ function run(trigger, scope, data, config, callback) {
 
       var file_path = process.cwd()+'/plugins/Shell/';
       var file_name = data.alias_id+'.'+used_ext;
-      
-      if(typeof available_language[data.pluginconf.Shell.language.value] != "undefined"){
+
+      if(typeof data.pluginconf.Shell.language != "undefined" && typeof available_language[data.pluginconf.Shell.language.value] != "undefined"){
         used_program = available_language[data.pluginconf.Shell.language.value];
         used_ext = language_ext[data.pluginconf.Shell.language.value];
       }
@@ -53,7 +53,7 @@ function run(trigger, scope, data, config, callback) {
           });
           //console.log('Shell Cmd: started.');
       }else{
-        console.log('file not exist');
+        console.log('File '+file_name+' not exist');
       }
     }
 }
