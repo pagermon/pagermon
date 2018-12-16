@@ -73,9 +73,10 @@ These instructions will get you a copy of the project up and running on your loc
     $ sudo apt-get install npm sqlite3
     $ npm install npm@latest -g
     $ npm install pm2 -g
+    $ cd server
     $ npm install
     $ export NODE_ENV=production
-    $ pm2 start server/process.json
+    $ pm2 start process.json
 ```
 3) To start on boot, let pm2 handle it:
 ```
