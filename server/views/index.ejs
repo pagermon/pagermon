@@ -62,17 +62,19 @@
                 <span class="small" style="color: white; font-family: monospace;"><strong>{{message.source}}</strong></span>
               </td>
             <% } %>
-            <td ng-if="message.otherAddresses.length > 0" colspan="{{colspan}}" style="text-align: center; padding: 0;">
-              <span class="fa-stack fa-lg fa-fw" style="color: {{message.color || 'grey'}};">
-                <i class="fa fa-circle fa-stack-2x"></i>
-                <i class="fa fa-plus fa-stack-1x fa-inverse"></i>
-              </span>
-              <span style="text-align: center"><em>Multiple Recipients</em></span>
-              <table class="table-condensed valign" style="width: 100%">
+            <td class="shrink" ng-if="message.otherAddresses.length > 0" colspan="{{colspan}}" style="padding: 0;" >
+              <div class="clickable-td" style="text-align: center; padding-top: 5px; padding-bottom: 5px; background-color: {{message.color || 'grey'}};" ng-click="row.showAddr = !row.showAddr">
+                <span class="fa-stack fa-lg fa-fw" style="color: {{message.color || 'grey'}};">
+                  <i class="fa fa-circle fa-stack-2x"></i>
+                  <i class="fa fa-plus fa-stack-1x fa-inverse"></i>
+                </span>
+                <span style="text-align: center; color: white;"><em>Multiple Recipients</em></span>
+              </div>
+              <table class="table-condensed valign" style="width: 100%;" class="check-element animate-show" ng-show="row.showAddr">
                 <tr>
                   <% if (!hidecapcode || login) { %>
-                  <td class="shrink noMobile clickable-td" uib-popover-template="'templates/popover.html'" popover-append-to-body=true ng-click="popoverEl = 'address'" popover-trigger="'outsideClick'" style="background-color: {{message.color || 'grey'}}; text-align: center;">
-                    <span class="small" style="color: white; font-family: monospace;"><strong>{{message.address}}</strong></span>
+                  <td class="shrink noMobile clickable-td" uib-popover-template="'templates/popover.html'" popover-append-to-body=true ng-click="popoverEl = 'address'" popover-trigger="'outsideClick'" style="text-align: center;">
+                    <span class="small" style="font-family: monospace;"><strong>{{message.address}}</strong></span>
                   </td>
                   <% } %>
                   <td class="shrink clickable-td" ng-if="message.agency" uib-popover-template="'templates/popover.html'" popover-append-to-body=true ng-click="popoverEl = 'agency'" popover-trigger="'outsideClick'">
@@ -99,8 +101,8 @@
                   </td>
                 <tr ng-repeat="addressRow in message.otherAddresses">
                   <% if (!hidecapcode || login) { %>
-                  <td class="shrink noMobile clickable-td" uib-popover-template="'templates/popover.html'" popover-append-to-body=true ng-click="popoverEl = 'address'" popover-trigger="'outsideClick'" style="background-color: {{message.color || 'grey'}}; text-align: center;">
-                    <span class="small" style="color: white; font-family: monospace;"><strong>{{addressRow.address}}</strong></span>
+                  <td class="shrink noMobile clickable-td" uib-popover-template="'templates/popover.html'" popover-append-to-body=true ng-click="popoverEl = 'address'" popover-trigger="'outsideClick'" style="text-align: center;">
+                    <span class="small" style="font-family: monospace;"><strong>{{addressRow.address}}</strong></span>
                   </td>
                   <% } %>
                   <td class="shrink clickable-td" ng-if="addressRow.agency" uib-popover-template="'templates/popover.html'" popover-append-to-body=true ng-click="popoverEl = 'agency'" popover-trigger="'outsideClick'">
