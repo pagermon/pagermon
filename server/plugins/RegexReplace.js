@@ -10,7 +10,7 @@ function run(trigger, scope, data, config, callback) {
     if (config.regexReplaceMatchRegex) {
         if (data.message.match(new RegExp(config.regexReplaceMatchRegex))) {
             logger.main.info('RegexReplace: Found a match, replacing it');
-						data.message.replace(config.regexReplaceMatchRegex, config.regexReplaceString)
+	    data.message.replace(config.regexReplaceMatchRegex, config.regexReplaceString)
             logger.main.debug('RegexReplace: Message has change to: '  + data.message)
         }
     }
