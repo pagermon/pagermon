@@ -63,16 +63,16 @@ rl.on('line', (line) => {
   // TODO: pad address with zeros for better address matching
 //  if (line.indexOf('POCSAG512: Address:') > -1) {	
   if (/^POCSAG(\d+): Address: /.test(line) ) {
-  	address = line.match(/POCSAG(\d+): Address:(.*?)Function/)[2].trim();
+    address = line.match(/POCSAG(\d+): Address:(.*?)Function/)[2].trim();
     if (line.indexOf('Alpha:') > -1) {
-    	message = line.match(/Alpha:(.*?)$/)[1].trim();
-    	trimMessage = message.replace(/<[A-Za-z]{3}>/g,'').replace(/Ä/g,'[').replace(/Ü/g,']');
+      message = line.match(/Alpha:(.*?)$/)[1].trim();
+      trimMessage = message.replace(/<[A-Za-z]{3}>/g,'').replace(/Ä/g,'[').replace(/Ü/g,']');
     } else if (line.indexOf('Numeric:') > -1) {
       message = line.match(/Numeric:(.*?)$/)[1].trim();
       trimMessage = message.replace(/<[A-Za-z]{3}>/g,'').replace(/Ä/g,'[').replace(/Ü/g,']');
     } else {
-    	message = false;
-    	trimMessage = '';
+      message = false;
+      trimMessage = '';
     }
   } else if (line.indexOf('FLEX: ') > -1) {
     address = line.match(/FLEX:.*?\[(\d*?)\] /)[1].trim();
@@ -106,31 +106,31 @@ rl.on('line', (line) => {
   // if too much junk data, make sure '-p' option isn't enabled in multimon
   if (address.length > 2 && message) {
     var padAddress = padDigits(address,7);
-  	console.log(colors.red(time+': ')+colors.yellow(padAddress+': ')+colors.success(trimMessage));
-  	// now send the message
-  	var options = {
-  		method: 'POST',
-  		uri: uri,
-  		headers: {
-  			'X-Requested-With': 'XMLHttpRequest',
-  			apikey: apikey
-  		},
-  		form: {
-  			address: padAddress,
-  			message: trimMessage,
-  			datetime: datetime,
-  			source: identifier
-  		}
-  	};
-  	rp(options)
-  	    .then(function (body) {
-  	    //    console.log(colors.success('Message delivered. ID: '+body)); 
-  	    })
-  	    .catch(function (err) {
-  	        console.log(colors.yellow('Message failed to deliver. '+err));
-  	    });
+    console.log(colors.red(time+': ')+colors.yellow(padAddress+': ')+colors.success(trimMessage));
+    // now send the message
+    var options = {
+      method: 'POST',
+      uri: uri,
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        apikey: apikey
+      },
+      form: {
+        address: padAddress,
+        message: trimMessage,
+        datetime: datetime,
+        source: identifier
+      }
+    };
+    rp(options)
+        .then(function (body) {
+        //    console.log(colors.success('Message delivered. ID: '+body)); 
+        })
+        .catch(function (err) {
+            console.log(colors.yellow('Message failed to deliver. '+err));
+        });
   } else {
-  	console.log(colors.red(time+': ')+colors.grey(line));
+    console.log(colors.red(time+': ')+colors.grey(line));
   }
   
 }).on('close', () => {
