@@ -88,27 +88,27 @@ router.get('/messages', isSecMode, function(req, res, next) {
   } else {
     initData.limit = parseInt(defaultLimit, 10);
   }
-  var initSql;
-  if (pdwMode) {
-    initSql =  "SELECT COUNT(*) AS msgcount FROM messages WHERE alias_id IN (SELECT id FROM capcodes WHERE ignore = 0);";
-  } else {
-    initSql = "SELECT COUNT(*) AS msgcount FROM messages WHERE alias_id IS NULL OR alias_id NOT IN (SELECT id FROM capcodes WHERE ignore = 1);";
-  }
-  db.get(initSql,function(err,count){
-    if (err) {
-      logger.main.error(err);
-    } else if (count) {
-      initData.msgCount = count.msgcount;
-      initData.pageCount = Math.ceil(initData.msgCount/initData.limit);
-      if (initData.currentPage > initData.pageCount) {
-        initData.currentPage = 0;
-      }
-      initData.offset = initData.limit * initData.currentPage;
-      if (initData.offset < 0) {
-        initData.offset = 0;
-      }
-      initData.offsetEnd = initData.offset + initData.limit;
-      console.timeEnd('init');
+  // var initSql;
+  // if (pdwMode) {
+  //   initSql =  "SELECT COUNT(*) AS msgcount FROM messages WHERE alias_id IN (SELECT id FROM capcodes WHERE ignore = 0);";
+  // } else {
+  //   initSql = "SELECT COUNT(*) AS msgcount FROM messages WHERE alias_id IS NULL OR alias_id NOT IN (SELECT id FROM capcodes WHERE ignore = 1);";
+  // }
+  // db.get(initSql,function(err,count){
+  //   if (err) {
+  //     logger.main.error(err);
+  //   } else if (count) {
+  //     initData.msgCount = count.msgcount;
+  //     initData.pageCount = Math.ceil(initData.msgCount/initData.limit);
+  //     if (initData.currentPage > initData.pageCount) {
+  //       initData.currentPage = 0;
+  //     }
+  //     initData.offset = initData.limit * initData.currentPage;
+  //     if (initData.offset < 0) {
+  //       initData.offset = 0;
+  //     }
+  //     initData.offsetEnd = initData.offset + initData.limit;
+  //     console.timeEnd('init');
       console.time('sql');
 
       var sql;
@@ -119,32 +119,45 @@ router.get('/messages', isSecMode, function(req, res, next) {
       } else {
         sql += " LEFT JOIN capcodes ON capcodes.id = messages.alias_id WHERE capcodes.ignore = 0 OR capcodes.ignore IS NULL ";
       }
-      sql += " ORDER BY messages.timestamp DESC LIMIT "+initData.limit+" OFFSET "+initData.offset+";";
+      //sql += " ORDER BY messages.timestamp DESC LIMIT "+initData.limit+" OFFSET "+initData.offset+";";
+      sql += " ORDER BY messages.timestamp DESC;";
 
       var result = [];
+      var lastRow = 0;
       db.each(sql,function(err,row){
-        //outRow = JSON.parse(newrow);
-        if (HideCapcode) {
-          if (!req.isAuthenticated()) {
-            row = {
-              "id": row.id,
-              "message": row.message,
-              "source": row.source,
-              "timestamp": row.timestamp,
-              "alias_id": row.alias_id,
-              "alias": row.alias,
-              "agency": row.agency,
-              "icon": row.icon,
-              "color": row.color,
-              "ignore": row.ignore,
-              "aliasMatch": row.aliasMatch
-            };
-          }
-        }
         if (err) {
           logger.main.error(err);
         } else if (row) {
-          result.push(row);
+          row.otherAddresses = [];
+          if (HideCapcode) {
+            if (!req.isAuthenticated()) {
+              row = {
+                "id": row.id,
+                "message": row.message,
+                "source": row.source,
+                "timestamp": row.timestamp,
+                "alias_id": row.alias_id,
+                "alias": row.alias,
+                "agency": row.agency,
+                "icon": row.icon,
+                "color": row.color,
+                "ignore": row.ignore,
+                "aliasMatch": row.aliasMatch
+              };
+            }
+          }
+          if (result[lastRow] && result[lastRow].message == row.message) {
+            // this is a duplicate message
+            result[lastRow].otherAddresses.push(row);
+          } else {
+            if (pdwMode) {
+              if (row.ignore == 0)
+                lastRow = result.push(row) - 1;
+            } else {
+              if (!row.ignore || row.ignore == 0)
+                lastRow = result.push(row) - 1;
+            }
+          }
         } else {
           logger.main.info('empty results');
         }
@@ -155,18 +168,30 @@ router.get('/messages', isSecMode, function(req, res, next) {
           res.status(500).send(err);
         } else if (rowCount > 0) {
           console.timeEnd('sql');
-          //var limitResults = result.slice(initData.offset, initData.offsetEnd);
-          console.time('send');
-          res.status(200).json({'init': initData, 'messages': result});
-          console.timeEnd('send');
+          
+          console.time('initEnd');
+          initData.msgCount = result.length;
+          initData.pageCount = Math.ceil(initData.msgCount/initData.limit);
+          if (initData.currentPage > initData.pageCount) {
+            initData.currentPage = 0;
+          }
+          initData.offset = initData.limit * initData.currentPage;
+          if (initData.offset < 0) {
+            initData.offset = 0;
+          }
+          initData.offsetEnd = initData.offset + initData.limit;
+          var limitResults = result.slice(initData.offset, initData.offsetEnd);
+          console.timeEnd('initEnd');
+          res.status(200).json({'init': initData, 'messages': limitResults});
         } else {
+          console.timeEnd('sql');
           res.status(200).json({'init': {}, 'messages': []});
         }
       });
-    } else {
-      logger.main.info('empty results');
-    }
-  });
+  //   } else {
+  //     logger.main.info('empty results');
+  //   }
+  // });
 });
 
 router.get('/messages/:id', isSecMode, function(req, res, next) {
