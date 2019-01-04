@@ -1,9 +1,6 @@
 /*
-
 Regex Replace
 Allows matching and replacing
-logger.main.error('RegexReplace: Invalid config setting - Please check your settings!')
-
 */
 var logger = require('../log');
 function run(trigger, scope, data, config, callback) {
