@@ -8,14 +8,14 @@
             {
                 "name": "regexReplaceMatchRegex",
                 "label": "Regex to match with",
-                "description": "If the message content matches this regex pattern, it's matching part will be replaced with the below text.",
+                "description": "If the message content matches this regex pattern, its matching part will be replaced with the below text.",
                 "type": "text"
             },
             {
-                        "name": "regexReplaceString",
-                        "label": "Replacement test for matched Regex",
-                        "description": "This string will be what replaces the matched regex sections.",
-                        "type": "text"
+                "name": "regexReplaceString",
+                "label": "Replacement text for matched Regex",
+                "description": "This string will be what replaces the matched regex sections.",
+                "type": "text"
             }
     ],
     "aliasConfig": [
