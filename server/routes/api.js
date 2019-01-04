@@ -280,10 +280,12 @@ router.get('/messageSearch', isSecMode, function(req, res, next) {
   console.time('sql');
 
   var rows = [];
+  var lastRow = 0;
   db.each(sql,query,function(err,row){
     if (err) {
       logger.main.error(err);
     } else if (row) {
+      row.allAddresses = [];
       if (HideCapcode) {
         if (!req.isAuthenticated()) {
           row = {
@@ -301,12 +303,17 @@ router.get('/messageSearch', isSecMode, function(req, res, next) {
           };
         }
       }
-      if (pdwMode) {
-        if (row.ignore == 0)
-          rows.push(row);
+      if (rows[lastRow] && rows[lastRow].message == row.message) {
+        // this is a duplicate message
+        rows[lastRow].allAddresses.push(row);
       } else {
-        if (!row.ignore || row.ignore == 0)
-          rows.push(row);
+        if (pdwMode) {
+          if (row.ignore == 0)
+            lastRow = rows.push(row) - 1;
+        } else {
+          if (!row.ignore || row.ignore == 0)
+            lastRow = rows.push(row) - 1;
+        }
       }
     } else {
       logger.main.info('empty results');
