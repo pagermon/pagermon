@@ -285,7 +285,7 @@ router.get('/messageSearch', isSecMode, function(req, res, next) {
     if (err) {
       logger.main.error(err);
     } else if (row) {
-      row.allAddresses = [];
+      row.otherAddresses = [];
       if (HideCapcode) {
         if (!req.isAuthenticated()) {
           row = {
@@ -305,7 +305,7 @@ router.get('/messageSearch', isSecMode, function(req, res, next) {
       }
       if (rows[lastRow] && rows[lastRow].message == row.message) {
         // this is a duplicate message
-        rows[lastRow].allAddresses.push(row);
+        rows[lastRow].otherAddresses.push(row);
       } else {
         if (pdwMode) {
           if (row.ignore == 0)
