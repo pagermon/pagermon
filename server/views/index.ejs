@@ -28,6 +28,8 @@
                   <button type="button" class="btn btn-default btn-sm" ng-click="updateData();" aria-label="Refresh" title="Refresh Messages"><i class="fa fa-refresh {{spinner}}" aria-hidden="true"></i></button>
                   <button type="button" ng-if="notificationSupport == true" class="btn btn-default btn-sm" ng-class="{active: notificationEnabled == 'true'}" ng-click="toggleNotifications();" aria-label="Notifications" title="Toggle Browser Notifications">
                     <i class="fa fa-bell" aria-hidden="true"></i></button>
+                  <button type="button" class="btn btn-default btn-sm" ng-class="{active: expandEnabled == 'true'}" ng-click="toggleExpand();" aria-label="Expand Addresses" title="Expand all addresses on merged messages">
+                    <i class="fa fa-plus" aria-hidden="true"></i></button>
                 <span class="dropdown">
                   <button class="btn btn-default btn-sm dropdown-toggle" type="button" data-toggle="dropdown" title="Message Limit">{{init.limit}} <span class="caret"></span></button>
                   <ul class="dropdown-menu" role="menu" style="margin-top: 9px;">
@@ -63,14 +65,14 @@
               </td>
             <% } %>
             <td class="shrink" ng-if="message.otherAddresses.length > 0" colspan="{{colspan}}" style="padding: 0;" >
-              <div class="clickable-td" style="text-align: center; padding-top: 5px; padding-bottom: 5px; background-color: {{message.color || 'grey'}};" ng-click="row.showAddr = !row.showAddr">
+              <div class="clickable-td" style="text-align: center; padding-top: 5px; padding-bottom: 5px; background-color: {{message.color || 'grey'}};" ng-click="message.showAddr = !message.showAddr">
                 <span class="fa-stack fa-lg fa-fw" style="color: {{message.color || 'grey'}};">
                   <i class="fa fa-circle fa-stack-2x"></i>
                   <i class="fa fa-plus fa-stack-1x fa-inverse"></i>
                 </span>
                 <span style="text-align: center; color: white;"><em>Multiple Recipients</em></span>
               </div>
-              <table class="table-condensed valign" style="width: 100%;" class="check-element animate-show" ng-show="row.showAddr">
+              <table class="table-condensed valign" style="width: 100%;" class="check-element animate-show" ng-show="message.showAddr">
                 <tr>
                   <% if (!hidecapcode || login) { %>
                   <td class="shrink noMobile clickable-td" uib-popover-template="'templates/popover.html'" popover-append-to-body=true ng-click="popoverEl = 'address'" popover-trigger="'outsideClick'" style="text-align: center;">
@@ -348,22 +350,20 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
     <% if (apisecurity) { %>
         <% if (login) { %>
         if ($scope.notificationEnabled == 'true') {
-        if (!message.agency) {
-          //Not showing messages for things that we don't know
-        } else {
-        
-          notify("PagerMon - " +message.agency + " - " + message.alias,message.message);
-        }
+          if (!message.agency) {
+            //Not showing messages for things that we don't know
+          } else {
+            notify("PagerMon - " +message.agency + " - " + message.alias,message.message);
+          }
         }
         <% } %>
       <% } else { %>
         if ($scope.notificationEnabled == 'true') {
-        if (!message.agency) {
-          //Not showing messages for things that we don't know
-        } else {
-        
-          notify("PagerMon - " +message.agency + " - " + message.alias,message.message);
-        }
+          if (!message.agency) {
+            //Not showing messages for things that we don't know
+          } else {
+            notify("PagerMon - " +message.agency + " - " + message.alias,message.message);
+          }
         }
        <% } %>
 
@@ -419,6 +419,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
         var curPage = page || $routeParams.page || '1';
         var limit = $cookies.get('messageLimit') || '';
         $scope.notificationEnabled = $cookies.get('notificationEnabled') || 'true';
+        $scope.expandEnabled = $cookies.get('expandEnabled') || 'false';
 
         // set colspan to make life easier
         $scope.colspan = 2;
@@ -496,6 +497,12 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
                 result.date = datetime.format("YYYY-MM-DD");
                 result.timestamp = datetime.format("HH:mm");
                 result.message = $scope.htmlEntities(result.message);
+                if ($scope.expandEnabled == 'true') {
+                  // lol this is lazy
+                  result.showAddr = true;
+                } else {
+                  result.showAddr = false;
+                }
               //  result.padAddress = $scope.padDigits(result.address,7);
             //    result.aliasMatch = result['MAX(capcodes.address)'];
               });
@@ -538,6 +545,13 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
               result.date = datetime.format("YYYY-MM-DD");
               result.timestamp = datetime.format("HH:mm");
               result.message = $scope.htmlEntities(result.message);
+              if ($scope.expandEnabled == 'true') {
+                console.log(result);
+                // lol this is lazy
+                result.showAddr = true;
+              } else {
+                result.showAddr = false;
+              }
             //  result.padAddress = $scope.padDigits(result.address,7);
             //  result.aliasMatch = result['MAX(capcodes.address)'];
             });
@@ -590,6 +604,16 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
             });
           }
       };
+
+      $scope.toggleExpand = function() {
+          if ($scope.expandEnabled == 'true') {
+            $scope.setCookie('expandEnabled', 'false');
+          } else {
+            $scope.setCookie('expandEnabled', 'true');
+          }
+      };
+
+      
       
       $scope.clearSearch = function(){
         $scope.query = '';
