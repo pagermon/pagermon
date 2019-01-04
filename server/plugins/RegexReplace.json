@@ -1,6 +1,6 @@
 {
     "name": "RegexReplace",
-    "description": "Option to allow matching and replacing incoming messages",
+    "description": "Option to allow matching and replacing against incoming messages",
     "disable": false,
     "trigger": "message",
     "scope": "before",
@@ -8,13 +8,13 @@
             {
                 "name": "regexReplaceMatchRegex",
                 "label": "Regex to match with",
-                "description": "If message content matchs this regex pattern, it matching part will be replaced with the below.",
+                "description": "If the message content matches this regex pattern, it's matching part will be replaced with the below text.",
                 "type": "text"
             },
             {
                         "name": "regexReplaceString",
                         "label": "Replacement test for matched Regex",
-                        "description": "This string will be what replaced the matched regex sections.",
+                        "description": "This string will be what replaces the matched regex sections.",
                         "type": "text"
             }
     ],
