@@ -51,7 +51,7 @@ const rl = readline.createInterface({
     terminal: true
 });
 
-var frag;
+var frag = {};
 
 rl.on('line', (line) => {
   //console.log(`Received: ${line.trim()}`);
@@ -79,13 +79,14 @@ rl.on('line', (line) => {
     if (line.match( /( ALN | GPN | NUM)/ )) {
       if (line.match( / [0-9]{4}\/[0-9]\/F\/. / )) {
         // message is fragmented, hold onto it for next line
-        frag = line.match(/FLEX:.*?\[\d*\] ... (.*?)$/)[1].trim();
+        frag[address] = line.match(/FLEX:.*?\[\d*\] ... (.*?)$/)[1].trim();
         message = false;
         trimMessage = '';
       } else if (line.match( / [0-9]{4}\/[0-9]\/C\/. / )) {
         // message is a completion of the last fragmented message
         message = line.match(/FLEX:.*?\[\d*\] ... (.*?)$/)[1].trim();
-        trimMessage = frag+message;
+        trimMessage = frag[address]+message;
+        delete frag[address];
       } else if (line.match( / [0-9]{4}\/[0-9]\/K\/. / )) {
         // message is a full message
         message = line.match(/FLEX:.*?\[\d*\] ... (.*?)$/)[1].trim();
