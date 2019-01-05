@@ -130,6 +130,7 @@ var sendPage = function(message,retries) {
     uri: uri,
     headers: {
       'X-Requested-With': 'XMLHttpRequest',
+      'User-Agent': 'PagerMon reader.js',
       apikey: apikey
     },
     form: message
