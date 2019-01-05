@@ -102,7 +102,7 @@ router.get('/messages', isSecMode, function(req, res, next) {
       this.from('messages').where('alias_id', 'not in', subquery).orWhereNull('alias_id')
     }
   }).count('* as msgcount')
-    .then((count) => {
+    .then(function(count) {
     if (count) {
       initData.msgCount = count.msgcount;
       initData.pageCount = Math.ceil(initData.msgCount/initData.limit);
@@ -120,48 +120,51 @@ router.get('/messages', isSecMode, function(req, res, next) {
       var orderby;
       orderby = "messages.timestamp DESC LIMIT "+initData.limit+" OFFSET "+initData.offset;
       var result = [];
-      
-      db.from('messages').select(function () {
-        if (pdwMode) {
-          this.select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', 'capcodes.id', 'as', 'aliasMatch').innerJoin(function () {
-            this.on('capcodes', 'capcodes.id', '=', 'messages.alias_id').where('capcodes.ignore', '=', 0)
-          })
-        } else {
-          this.select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', 'capcodes.id', 'as', 'aliasMatch').leftJoin(function () {
-            this.on('capcodes', 'capcodes.id', '=', 'messages.alias_id').where('capcodes.ignore', '=', 0).orWhereNull('capcodes.ignore')
-          })
-        }
-      }).orderByRaw(orderby).then((rows) => {
-        for (row of rows) {
-            //outRow = JSON.parse(newrow);
-            if (HideCapcode) {
-              if (!req.isAuthenticated()) {
-                row = {
-                  "id": row.id,
-                  "message": row.message,
-                  "source": row.source,
-                  "timestamp": row.timestamp,
-                  "alias_id": row.alias_id,
-                  "alias": row.alias,
-                  "agency": row.agency,
-                  "icon": row.icon,
-                  "color": row.color,
-                  "ignore": row.ignore,
-                  "aliasMatch": row.aliasMatch
-                };
+      var rowCount
+
+      db.from('messages')
+        .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', 'capcodes.id')
+        .as('aliasMatch')
+        .modify(function(queryBuilder) {
+          if (pdwMode) {
+            queryBuilder.innerJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id').where('capcodes.ignore', '=', '0')
+          } else {
+            queryBuilder.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id').where('capcodes.ignore', '=', '0').orWhereNull('capcodes.ignore')
+          }
+        })
+        .orderByRaw(orderby)
+        .then(rows => {
+          rowCount = rows.length
+          for (row of rows) {
+              //outRow = JSON.parse(newrow);
+              if (HideCapcode) {
+                if (!req.isAuthenticated()) {
+                  row = {
+                    "id": row.id,
+                    "message": row.message,
+                    "source": row.source,
+                    "timestamp": row.timestamp,
+                    "alias_id": row.alias_id,
+                    "alias": row.alias,
+                    "agency": row.agency,
+                    "icon": row.icon,
+                    "color": row.color,
+                    "ignore": row.ignore,
+                    "aliasMatch": row.aliasMatch
+                  };
+                }
               }
-            }
-            if (err) {
-              logger.main.error(err);
-            } else if (row) {
-              result.push(row);
-            } else {
-              logger.main.info('empty results');
-            }
-            } 
-        }).catch((err) => { 
-          logger.main.error(err); 
-        }).finally(() => {
+              if (row) {
+                result.push(row);
+              } else {
+                logger.main.info('empty results');
+              }
+          } 
+        })
+        .catch(err => { 
+          console.log(err); 
+        })
+        .finally(() => {
           if (rowCount > 0) {
             console.timeEnd('sql');
             //var limitResults = result.slice(initData.offset, initData.offsetEnd);
