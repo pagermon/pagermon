@@ -28,6 +28,7 @@ function init(release) {
                 // create indexes and the fts table
                 sql += "CREATE INDEX IF NOT EXISTS `msg_index` ON `messages` (`address`,`id` DESC); ";
                 sql += "CREATE INDEX IF NOT EXISTS `msg_alias` ON `messages` (`id` DESC, `alias_id`); ";
+                sql += "CREATE INDEX IF NOT EXISTS `msg_timestamp` ON `messages` (`timestamp` DESC, `alias_id`);"
                 sql += "CREATE UNIQUE INDEX IF NOT EXISTS `cc_pk_idx` ON `capcodes` (`id`,`address` DESC); ";
                 sql += "CREATE VIRTUAL TABLE IF NOT EXISTS messages_search_index USING fts3(message, alias, agency); ";
                 // Create triggers to update the search table on insert/update/delete
