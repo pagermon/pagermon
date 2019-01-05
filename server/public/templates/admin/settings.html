@@ -42,7 +42,7 @@
               <div class="col-xs-8 col-sm-9">
                 <select name="database.type" ng-model="settings.database.type" class="form-control">
                   <option value="sqlite">SQLite</option>
-                  <option value="postgress">Postgress</option>
+                  <option value="postgres">Postgres</option>
                   <option value="mysql">MySQL</option>
                   <option value="mssql">MSSQL</option>
                   <option value="maria">MariaDB</option>
@@ -56,18 +56,39 @@
               <span id="helpBlock" class="help-block">Configure the path to the SQLite Database</span>
               </div>
             </div>
-            <div class="form-group" ng-if="settings.database.type == 'postgress' || settings.database.type == 'mysql' || settings.database.type == 'mssql' || settings.database.type == 'maria'">
+            <div class="form-group" ng-if="settings.database.type == 'postgres' || settings.database.type == 'mysql' || settings.database.type == 'mssql' || settings.database.type == 'maria'">
               <label for="database.server" class="col-xs-4 col-sm-3 control-label">Database Server</label>
               <div class="col-xs-8 col-sm-9">
               <input type="url" class="form-control" name="database.server" ng-model="settings.database.server" >
               <span id="helpBlock" class="help-block">Database Server Address</span>
               </div>
             </div>
-            <div class="form-group" ng-if="settings.database.type == 'postgress' || settings.database.type == 'mysql' || settings.database.type == 'mssql' || settings.database.type == 'maria'">
+            <div class="form-group" ng-if="settings.database.type == 'postgres' || settings.database.type == 'mysql' || settings.database.type == 'mssql' || settings.database.type == 'maria'">
               <label for="database.port" class="col-xs-4 col-sm-3 control-label">Database Server Port</label>
               <div class="col-xs-8 col-sm-9">
               <input type="number" class="form-control" name="database.port" ng-model="settings.database.port" >
               <span id="helpBlock" class="help-block">Database Server Port</span>
+              </div>
+            </div>
+            <div class="form-group" ng-if="settings.database.type == 'postgres' || settings.database.type == 'mysql' || settings.database.type == 'mssql' || settings.database.type == 'maria'">
+              <label for="database.database" class="col-xs-4 col-sm-3 control-label">Database Name</label>
+              <div class="col-xs-8 col-sm-9">
+              <input type="number" class="form-control" name="database.database" ng-model="settings.database.database" >
+              <span id="helpBlock" class="help-block">Name of the database.</span>
+              </div>
+            </div>
+            <div class="form-group" ng-if="settings.database.type == 'postgres' || settings.database.type == 'mysql' || settings.database.type == 'mssql' || settings.database.type == 'maria'">
+              <label for="database.username" class="col-xs-4 col-sm-3 control-label">Database Username</label>
+              <div class="col-xs-8 col-sm-9">
+              <input type="number" class="form-control" name="database.username" ng-model="settings.database.username" >
+              <span id="helpBlock" class="help-block">Database Username</span>
+              </div>
+            </div>
+            <div class="form-group" ng-if="settings.database.type == 'postgres' || settings.database.type == 'mysql' || settings.database.type == 'mssql' || settings.database.type == 'maria'">
+              <label for="database.password" class="col-xs-4 col-sm-3 control-label">Database Password</label>
+              <div class="col-xs-8 col-sm-9">
+              <input type="number" class="form-control" name="database.password" ng-model="settings.database.password" >
+              <span id="helpBlock" class="help-block">Database Password</span>
               </div>
             </div>
             
