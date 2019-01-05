@@ -111,6 +111,9 @@ function init(release) {
                 table.text('discwebhook');
                 table.text('pluginconf');
             });
+            db.schema.table('messages', table => {
+                table.index(['timestamp', 'alias_id'], 'msg_timestamp');
+            });
         }
         if (res[0].user_version < '20181118') {
             // begin scary stuff, consider hiding behind a solid object during this bit - not converting this to knex because it should only be a once off thing
