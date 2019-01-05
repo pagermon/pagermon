@@ -109,27 +109,13 @@ rl.on('line', (line) => {
     var padAddress = padDigits(address,7);
     console.log(colors.red(time+': ')+colors.yellow(padAddress+': ')+colors.success(trimMessage));
     // now send the message
-    var options = {
-      method: 'POST',
-      uri: uri,
-      headers: {
-        'X-Requested-With': 'XMLHttpRequest',
-        apikey: apikey
-      },
-      form: {
-        address: padAddress,
-        message: trimMessage,
-        datetime: datetime,
-        source: identifier
-      }
+    var form = {
+      address: padAddress,
+      message: trimMessage,
+      datetime: datetime,
+      source: identifier
     };
-    rp(options)
-        .then(function (body) {
-        //    console.log(colors.success('Message delivered. ID: '+body)); 
-        })
-        .catch(function (err) {
-            console.log(colors.yellow('Message failed to deliver. '+err));
-        });
+    sendPage(form, 0);
   } else {
     console.log(colors.red(time+': ')+colors.grey(line));
   }
@@ -137,6 +123,33 @@ rl.on('line', (line) => {
 }).on('close', () => {
   console.log('Input died!');
 });
+
+var sendPage = function(message,retries) {
+  var options = {
+    method: 'POST',
+    uri: uri,
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest',
+      apikey: apikey
+    },
+    form: message
+  };
+  rp(options)
+  .then(function (body) {
+    // console.log(colors.success('Message delivered. ID: '+body)); 
+  })
+  .catch(function (err) {
+    console.log(colors.yellow('Message failed to deliver. '+err));
+    if (retries < 10) {
+      var retryTime = Math.pow(2, retries) * 1000;
+      retries++;
+      console.log(colors.yellow(`Retrying in ${retryTime} ms`));
+      setTimeout(sendPage, retryTime, message, retries);
+    } else {
+      console.log(colors.yellow('Message failed to deliver after 10 retries, giving up'));
+    }
+  });
+};
 
 var padDigits = function(number, digits) {
     return Array(Math.max(digits - String(number).length + 1, 0)).join(0) + number;
