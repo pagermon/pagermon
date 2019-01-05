@@ -43,6 +43,7 @@ function init(release) {
                 table.foreign('alias_id').references('capcodes.id');
                 table.index(['address', 'id'], 'msg_index');
                 table.index(['id', 'alias_id'], 'msg_alias');
+                table.index(['timestamp', 'alias_id'], 'msg_timestamp');
             }).then(function (result) {
                 console.log('Created Table ', result);
             }).catch(function (err) {
