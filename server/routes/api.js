@@ -690,19 +690,18 @@ router.post('/capcodes/:id', function(req, res, next) {
     var idList = req.body.deleteList || [0, 0];
     if (!idList.some(isNaN)) {
       logger.main.info('Deleting: '+idList);
-      db.serialize(() => {
-        db.run(inParam('DELETE FROM capcodes WHERE id IN (?#)', idList), idList, function(err){
-          if (err) {
-            res.status(500).send(err);
-          } else {
+        db.from('capcodes')
+          .del()
+          .where('id', 'in', idList)
+          .then(() => {
             res.status(200).send({'status': 'ok'});
             if (!updateRequired || updateRequired == 0) {
               nconf.set('database:aliasRefreshRequired', 1);
               nconf.save();
             }
-          }
-        });
-      });
+          }).catch((err) => {
+            res.status(500).send(err);
+          })
     } else {
       res.status(500).send({'status': 'id list contained non-numbers'});
     }
@@ -720,7 +719,6 @@ router.post('/capcodes/:id', function(req, res, next) {
       var updateAlias = req.body.updateAlias || 0;
       console.time('insert');
       db.serialize(() => {
-        //db.run("UPDATE tbl SET name = ? WHERE id = ?", [ "bar", 2 ]);
         db.run("REPLACE INTO capcodes (id, address, alias, agency, color, icon, ignore, pluginconf) VALUES ($mesID, $mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore, $mesPluginconf);", {
           $mesID: id,
           $mesAddress: address,
@@ -738,10 +736,18 @@ router.post('/capcodes/:id', function(req, res, next) {
             console.timeEnd('insert');
             if (updateAlias == 1) {
               console.time('updateMap');
-              db.run("UPDATE messages SET alias_id = (SELECT id FROM capcodes WHERE messages.address LIKE address ORDER BY REPLACE(address, '_', '%') DESC LIMIT 1);", function(err){
-                if (err) { logger.main.error(err); console.timeEnd('updateMap'); }
-                else { console.timeEnd('updateMap'); }
-              });
+              db('messages').update('alias_id', function() {
+                this.select('id')
+                .from('capcodes')
+                .where('messages.address', 'like', 'address')
+                .orderByRaw("REPLACE(address, '_', '%') DESC LIMIT 1")
+              })
+              .catch((err) => {
+                logger.main.error(err);
+              })
+              .finally(() => {
+                console.timeEnd('updateMap');
+              })
             } else {
               if (!updateRequired || updateRequired == 0) {
                 nconf.set('database:aliasRefreshRequired', 1);
@@ -765,21 +771,20 @@ router.delete('/capcodes/:id', function(req, res, next) {
   nconf.load();
   var updateRequired = nconf.get('database:aliasRefreshRequired');
   logger.main.info('Deleting '+id);
-  db.serialize(() => {
-    //db.run("UPDATE tbl SET name = ? WHERE id = ?", [ "bar", 2 ]);
-    db.run("DELETE FROM capcodes WHERE id=?", id, function(err){
-      if (err) {
-        res.status(500).send(err);
-      } else {
+    db.from('capcodes')
+      .del()
+      .where('id', id)
+      .then(() => {
         res.status(200).send({'status': 'ok'});
         if (!updateRequired || updateRequired == 0) {
           nconf.set('database:aliasRefreshRequired', 1);
           nconf.save();
         }
-      }
-    });
+      })
+      .catch((err) => {
+        res.status(500).send(err);
+      }) 
     logger.main.debug(util.format('%o',req.body || 'request body empty'));
-  });
 });
 
 router.post('/capcodeRefresh', function(req, res, next) {
