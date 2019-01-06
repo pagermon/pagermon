@@ -1,4 +1,5 @@
 var fs = require('fs');
+var logger = require('./log');
 
 // initialize the database if it does not already exist
 function init(release) {
