@@ -15,9 +15,7 @@ Notification set to messages
 import asyncore
 from datetime import datetime
 import email
-from flexcodes import CODES
 from clint.textui import puts, colored
-import serial
 import time
 import smtpd
 import requests
