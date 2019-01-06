@@ -23,7 +23,8 @@ frag = " "
 def apost(flexcode, msg, when):
 		headers = {
 			'X-Requested-With': 'XMLHttpRequest',
-			"apikey": "", #pagermon APIKey
+			'apikey': "", #pagermon APIKey
+			'User-Agent': 'PagerMon pdw2pagermon.py',
 		}
 		params = {
 			"address": flexcode,
