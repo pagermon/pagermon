@@ -183,15 +183,12 @@ router.get('/messages/:id', isSecMode, function(req, res, next) {
   nconf.load();
   var pdwMode = nconf.get('messages:pdwMode');
   var id = req.params.id;
-  var sql =  "SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch ";
-      sql += " FROM messages";
-      sql += " LEFT JOIN capcodes ON capcodes.id = messages.alias_id ";
-      sql += " WHERE messages.id = "+id;
-  db.serialize(() => {
-    db.get(sql,function(err,row){
-      if (err) {
-        res.status(500).send(err);
-      } else {
+
+  db.from('messages')
+    .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', 'capcodes.id').as('aliasMatch')
+    .leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id')
+    .where(['messages.id', id])
+    .then((row) => {
         if (HideCapcode) {
           if (!req.isAuthenticated()) {
             row = {
@@ -218,9 +215,10 @@ router.get('/messages/:id', isSecMode, function(req, res, next) {
             res.status(200).json(row);
           }
         }
-      }
-    });
-  });
+    })
+    .catch((err) => {
+      res.status(500).send(err);
+    })
 });
 
 /* GET message search */
@@ -366,34 +364,32 @@ router.get('/capcodes/init', isSecMode, function(req, res, next) {
     if (page > 0)
       initData.currentPage = page - 1;
   }
-  db.serialize(() => {
-    db.get("SELECT id FROM capcodes ORDER BY id DESC LIMIT 1", [], function(err, row) {
-      if (err) {
-        logger.main.error(err);
-      } else {
-        initData.msgCount = parseInt(row['id'], 10);
-        //console.log(initData.msgCount);
-        initData.pageCount = Math.ceil(initData.msgCount/initData.limit);
-        var offset = initData.limit * initData.currentPage;
-        initData.offset = initData.msgCount - offset;
-        if (initData.offset < 0) {
-          initData.offset = 0;
-        }
-        res.json(initData);
+  db.from('capcodes')
+    .select('id')
+    .orderByRaw('id DESC LIMIT 1')
+    .then((row) => {
+      initData.msgCount = parseInt(row['id'], 10);
+      //console.log(initData.msgCount);
+      initData.pageCount = Math.ceil(initData.msgCount/initData.limit);
+      var offset = initData.limit * initData.currentPage;
+      initData.offset = initData.msgCount - offset;
+      if (initData.offset < 0) {
+        initData.offset = 0;
       }
-    });
-  });
+      res.json(initData);
+    })
+    .catch((err) => {
+      logger.main.error(err);
+    })
 });
 
 // all capcode get methods are only used in admin area, so lock down to logged in users as they may contain sensitive data
 router.get('/capcodes/:id', isLoggedIn, function(req, res, next) {
   var id = req.params.id;
-  db.serialize(() => {
-    db.get("SELECT * from capcodes WHERE id=?", id, function(err, row){
-      if (err) {
-        res.status(500);
-        res.send(err);
-      } else {
+    db.from('capcodes')
+      .select('*')
+      .where('id', id)
+      .then((row) => {
         if (row) {
           row.pluginconf = parseJSON(row.pluginconf);
           res.status(200);
@@ -412,19 +408,19 @@ router.get('/capcodes/:id', isLoggedIn, function(req, res, next) {
           res.status(200);
           res.json(row);
         }
-      }
-    });
-  });
+      })
+      .catch((err) => {
+        res.status(500);
+        res.send(err);
+      })
 });
 
 router.get('/capcodeCheck/:id', isLoggedIn, function(req, res, next) {
   var id = req.params.id;
-  db.serialize(() => {
-    db.get("SELECT * from capcodes WHERE address=?", id, function(err, row){
-      if (err) {
-        res.status(500);
-        res.send(err);
-      } else {
+    db.from('capcodes')
+      .select('*')
+      .where('address', id)
+      .then((row) => {
         if (row) {
           row.pluginconf = parseJSON(row.pluginconf);
           res.status(200);
@@ -443,24 +439,26 @@ router.get('/capcodeCheck/:id', isLoggedIn, function(req, res, next) {
           res.status(200);
           res.json(row);
         }
-      }
-    });
-  });
+    })
+    .catch((err) => {
+      res.status(500);
+      res.send(err);
+    })
 });
 
 router.get('/capcodes/agency/:id', isLoggedIn, function(req, res, next) {
   var id = req.params.id;
-  db.serialize(() => {
-    db.all("SELECT * from capcodes WHERE agency LIKE ?", id, function(err,rows){
-      if (err) {
-        res.status(500);
-        res.send(err);
-      } else {
+    db.from('capcodes')
+      .select('*')
+      .where('agency', 'like', id)
+      .then((rows) => {    
         res.status(200);
         res.json(rows);
-      }
-    });
-  });
+      })
+      .catch((err) => {
+        res.status(500);
+        res.send(err);
+      })
 });
 
 // lock down POST routes
