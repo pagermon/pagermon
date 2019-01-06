@@ -114,6 +114,11 @@ function init(release) {
             db.schema.table('messages', table => {
                 table.index(['timestamp', 'alias_id'], 'msg_timestamp');
             });
+            var vervar = 'pragma user_version = ' + release + ';'
+                db.raw(vervar)
+                  .catch(function (err) {
+                    console.log(err)
+            });
         }
         if (res[0].user_version < '20181118') {
             // begin scary stuff, consider hiding behind a solid object during this bit - not converting this to knex because it should only be a once off thing
@@ -168,9 +173,9 @@ function init(release) {
                 `).catch(function (err) {
                     console.error('Failed to convert database ... aborting ' + err)
                 });
-                
-                var vervar = 'pragma user_version = ' + release
-                db.raw(vervar).catch(function (err) {
+                var vervar = 'pragma user_version = ' + release + ';'
+                db.raw(vervar)
+                  .catch(function (err) {
                     console.log(err)
                 });
                 console.log("DB schema update complete");

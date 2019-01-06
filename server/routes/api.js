@@ -30,6 +30,7 @@ var db = require('knex')({
     filename: "./messages.db"
   },
   useNullAsDefault: true,
+  debug: true,
 });
 
 // defaults
