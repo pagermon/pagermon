@@ -13,18 +13,28 @@ function run(trigger, scope, data, config, callback) {
               user: pConf.group,
               token: config.pushAPIKEY,
             });
+
+            var pushSound;
+            if (pConf.sound) {
+              pushSound = pConf.sound.value;
+            }
+
+            var pushPri = 0; // default
+            if (pConf.priority) {
+              pushPri = pConf.priority.value;
+            }
             
             var msg = {
               message: data.message,
               title: data.agency+' - '+data.alias,
-              sound: pConf.sound.value,
-              priority: pConf.priority.value,
+              sound: pushSound,
+              priority: pushPri,
               onerror: function(err) {
                 logger.main.error('Pushover:', err);
                 }
             };
 
-            if (pConf.priority.value == 2 || pConf.priority.value == '2') {
+            if (pushPri == 2 || pushPri == '2') {
               //emergency message
               msg.retry = 60;
               msg.expire = 240;
