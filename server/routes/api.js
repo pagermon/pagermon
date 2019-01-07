@@ -423,10 +423,10 @@ router.get('/capcodeCheck/:id', isLoggedIn, function(req, res, next) {
       .select('*')
       .where('address', id)
       .then((row) => {
-        if (row) {
-          row.pluginconf = parseJSON(row.pluginconf);
+        if (row.length > 0) {
+          row[0].pluginconf = parseJSON(row[0].pluginconf);
           res.status(200);
-          res.json(row);
+          res.json(row[0]);
         } else {
           row = {
             "id": "",
@@ -556,13 +556,13 @@ router.post('/messages', function(req, res, next) {
                   .then((row) => {
                     var insert;
                     var alias_id = null;
-                    if (row) {
+                    if (row.length > 0) {
                       if (row.ignore == '1') {
                         insert = false;
                         logger.main.info('Ignoring filtered address: '+address+' alias: '+row.id);
                       } else {
                         insert = true;
-                        alias_id = row.id;
+                        alias_id = row[0].id;
                       }
                     } else {
                       insert = true;
@@ -578,28 +578,26 @@ router.post('/messages', function(req, res, next) {
                       db('messages').insert(insertmsg)
                                     .then((result) => {
                                       // emit the full message
-                                      var reqLastID = this.lastID;
                                       db.from('messages')
-                                      .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', 'capcodes.id', 'capcodes.pluginconf')
-                                      .as('aliasMatch')
-                                      .modify(function(queryBuilder) {
-                                        if (pdwMode) {
-                                          queryBuilder.innerJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id')
-                                          .catch((err) => {console.log(err)})
-                                        } else {
-                                          queryBuilder.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id')
-                                                      .where('messages.id', '=', this.lastID)
-                                                      .catch((err) => {console.log(err)})
-                                        }
-                                      })
-                                      .then((row) => {
+                                        .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', 'capcodes.id', 'capcodes.pluginconf')
+                                        .as('aliasMatch')
+                                        .modify(function(queryBuilder) {
+                                          if (pdwMode) {
+                                            queryBuilder.innerJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id')
+                                          } else {
+                                            queryBuilder.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id')
+                                          }
+                                        })
+                                        .where('messages.id', '=', result[0])
+                                        .then((row) => {
+                                        console.log(row)
                                         if(row.length > 0) {
                                           // send data to pluginHandler after processing
-                                          row.pluginData = data.pluginData;
-                                          if (row.pluginconf) {
-                                            row.pluginconf = parseJSON(row.pluginconf);
+                                          row[0].pluginData = data.pluginData;
+                                          if (row[0].pluginconf) {
+                                            row[0].pluginconf = parseJSON(row[0].pluginconf);
                                           } else {
-                                            row.pluginconf = {};
+                                            row[0].pluginconf = {};
                                           }
                                           logger.main.debug('afterMessage start');
                                           pluginHandler.handle('message', 'after', row, function(response) {
@@ -613,28 +611,28 @@ router.post('/messages', function(req, res, next) {
                                               //Only emit to normal socket if HideCapcode is on and ApiSecurity is off.
                                               if (HideCapcode && !apiSecurity) {
                                                 // Emit No capcode to normal socket
-                                                row = {
-                                                  "id": row.id,
-                                                  "message": row.message,
-                                                  "source": row.source,
-                                                  "timestamp": row.timestamp,
-                                                  "alias_id": row.alias_id,
-                                                  "alias": row.alias,
-                                                  "agency": row.agency,
-                                                  "icon": row.icon,
-                                                  "color": row.color,
-                                                  "ignore": row.ignore,
-                                                  "aliasMatch": row.aliasMatch
+                                                row[0] = {
+                                                  "id": row[0].id,
+                                                  "message": row[0].message,
+                                                  "source": row[0].source,
+                                                  "timestamp": row[0].timestamp,
+                                                  "alias_id": row[0].alias_id,
+                                                  "alias": row[0].alias,
+                                                  "agency": row[0].agency,
+                                                  "icon": row[0].icon,
+                                                  "color": row[0].color,
+                                                  "ignore": row[0].ignore,
+                                                  "aliasMatch": row[0].aliasMatch
                                                 };
-                                                req.io.emit('messagePost', row);
+                                                req.io.emit('messagePost', row[0]);
                                               }
                                             } else {
                                               //Just emit - No Security enabled
-                                              req.io.emit('messagePost', row);
+                                              req.io.emit('messagePost', row[0]);
                                             }
                                           });
                                         }
-                                        res.status(200).send(''+reqLastID);
+                                        res.status(200).send(''+result);
                                       })
                                       .catch((err) => {
                                         res.status(500).send(err);
