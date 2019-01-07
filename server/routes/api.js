@@ -24,10 +24,21 @@ router.use(function (req, res, next) {
   next();
 });
 
+var dbtype = nconf.get('database:type')
+var dbfile = nconf.get('database:file')
+var dbserver = nconf.get('database:server')
+var dbdb = nconf.get('database:database')
+var dbusername = nconf.get('database:username')
+var dbpassword = nconf.get('database.password')
+
 var db = require('knex')({
-  client: 'sqlite3',
+  client: dbtype,
   connection: {
-    filename: "./messages.db"
+    filename: dbfile,
+    host : dbserver,
+    user : dbusername,
+    password : dbpassword,
+    database : dbdb
   },
   useNullAsDefault: true,
   debug: true,
@@ -590,14 +601,13 @@ router.post('/messages', function(req, res, next) {
                                         })
                                         .where('messages.id', '=', result[0])
                                         .then((row) => {
-                                        console.log(row)
                                         if(row.length > 0) {
                                           // send data to pluginHandler after processing
-                                          row[0].pluginData = data.pluginData;
-                                          if (row[0].pluginconf) {
-                                            row[0].pluginconf = parseJSON(row[0].pluginconf);
+                                          row.pluginData = data.pluginData;
+                                          if (row.pluginconf) {
+                                            row.pluginconf = parseJSON(row.pluginconf);
                                           } else {
-                                            row[0].pluginconf = {};
+                                            row.pluginconf = {};
                                           }
                                           logger.main.debug('afterMessage start');
                                           pluginHandler.handle('message', 'after', row, function(response) {

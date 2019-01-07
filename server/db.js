@@ -1,18 +1,32 @@
 var fs = require('fs');
 var logger = require('./log');
+var nconf = require('nconf');
+var conf_file = './config/config.json';
+nconf.file({file: conf_file});
+nconf.load();
 
 // initialize the database if it does not already exist
 function init(release) {
+    var dbtype = nconf.get('database:type')
+    var dbfile = nconf.get('database:file')
+    var dbserver = nconf.get('database:server')
+    var dbdb = nconf.get('database:database')
+    var dbusername = nconf.get('database:username')
+    var dbpassword = nconf.get('database.password')
+
     var db = require('knex')({
-        client: 'sqlite3',
-        connection: {
-            filename: "./messages.db"
-        },
-        useNullAsDefault: true,
+    client: dbtype,
+    connection: {
+        filename: dbfile,
+        host : dbserver,
+        user : dbusername,
+        password : dbpassword,
+        database : dbdb
+    },
+    useNullAsDefault: true,
+    debug: true,
     });
 
-    var dbtype = db.client.config.client
-    
     db.schema.hasTable('capcodes').then(function (exists) {
         if (!exists) {
             db.schema.createTable('capcodes', table => {
