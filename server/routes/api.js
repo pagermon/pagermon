@@ -793,7 +793,7 @@ router.post('/capcodeRefresh', function(req, res, next) {
   db('messages').update('alias_id', function() {
     this.select('id')
         .from('capcodes')
-        .where('messages.address', 'like', 'address')
+        .where('address', 'like', db.ref('messages.address'))
         .orderByRaw("REPLACE(address, '_', '%') DESC LIMIT 1")
   })
   .then(() => {
@@ -803,7 +803,8 @@ router.post('/capcodeRefresh', function(req, res, next) {
       res.status(200).send({'status': 'ok'});
   })
   .catch((err) => {
-    logger.main.error(err); console.timeEnd('updateMap'); 
+    logger.main.error(err); 
+    console.timeEnd('updateMap'); 
   })
 });
 
