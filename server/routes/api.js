@@ -391,7 +391,7 @@ router.get('/capcodes/:id', isLoggedIn, function(req, res, next) {
       .select('*')
       .where('id', id)
       .then(function (row) {
-        if (row) {
+        if (row.length > 0) {
           row[0].pluginconf = parseJSON(row[0].pluginconf);
           res.status(200);
           console.log(row)
