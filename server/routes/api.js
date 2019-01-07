@@ -390,11 +390,12 @@ router.get('/capcodes/:id', isLoggedIn, function(req, res, next) {
     db.from('capcodes')
       .select('*')
       .where('id', id)
-      .then((row) => {
+      .then(function (row) {
         if (row) {
-          row.pluginconf = parseJSON(row.pluginconf);
+          row[0].pluginconf = parseJSON(row[0].pluginconf);
           res.status(200);
-          res.json(row);
+          console.log(row)
+          res.json(row[0]);
         } else {
           row = {
             "id": "",
