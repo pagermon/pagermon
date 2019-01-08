@@ -51,7 +51,7 @@ const rl = readline.createInterface({
     terminal: true
 });
 
-var frag;
+var frag = {};
 
 rl.on('line', (line) => {
   //console.log(`Received: ${line.trim()}`);
@@ -63,29 +63,30 @@ rl.on('line', (line) => {
   // TODO: pad address with zeros for better address matching
 //  if (line.indexOf('POCSAG512: Address:') > -1) {	
   if (/^POCSAG(\d+): Address: /.test(line) ) {
-  	address = line.match(/POCSAG(\d+): Address:(.*?)Function/)[2].trim();
+    address = line.match(/POCSAG(\d+): Address:(.*?)Function/)[2].trim();
     if (line.indexOf('Alpha:') > -1) {
-    	message = line.match(/Alpha:(.*?)$/)[1].trim();
-    	trimMessage = message.replace(/<[A-Za-z]{3}>/g,'').replace(/Ä/g,'[').replace(/Ü/g,']');
+      message = line.match(/Alpha:(.*?)$/)[1].trim();
+      trimMessage = message.replace(/<[A-Za-z]{3}>/g,'').replace(/Ä/g,'[').replace(/Ü/g,']');
     } else if (line.indexOf('Numeric:') > -1) {
       message = line.match(/Numeric:(.*?)$/)[1].trim();
       trimMessage = message.replace(/<[A-Za-z]{3}>/g,'').replace(/Ä/g,'[').replace(/Ü/g,']');
     } else {
-    	message = false;
-    	trimMessage = '';
+      message = false;
+      trimMessage = '';
     }
   } else if (line.indexOf('FLEX: ') > -1) {
     address = line.match(/FLEX:.*?\[(\d*?)\] /)[1].trim();
     if (line.match( /( ALN | GPN | NUM)/ )) {
       if (line.match( / [0-9]{4}\/[0-9]\/F\/. / )) {
         // message is fragmented, hold onto it for next line
-        frag = line.match(/FLEX:.*?\[\d*\] ... (.*?)$/)[1].trim();
+        frag[address] = line.match(/FLEX:.*?\[\d*\] ... (.*?)$/)[1].trim();
         message = false;
         trimMessage = '';
       } else if (line.match( / [0-9]{4}\/[0-9]\/C\/. / )) {
         // message is a completion of the last fragmented message
         message = line.match(/FLEX:.*?\[\d*\] ... (.*?)$/)[1].trim();
-        trimMessage = frag+message;
+        trimMessage = frag[address]+message;
+        delete frag[address];
       } else if (line.match( / [0-9]{4}\/[0-9]\/K\/. / )) {
         // message is a full message
         message = line.match(/FLEX:.*?\[\d*\] ... (.*?)$/)[1].trim();
@@ -106,36 +107,50 @@ rl.on('line', (line) => {
   // if too much junk data, make sure '-p' option isn't enabled in multimon
   if (address.length > 2 && message) {
     var padAddress = padDigits(address,7);
-  	console.log(colors.red(time+': ')+colors.yellow(padAddress+': ')+colors.success(trimMessage));
-  	// now send the message
-  	var options = {
-  		method: 'POST',
-  		uri: uri,
-  		headers: {
-  			'X-Requested-With': 'XMLHttpRequest',
-  			apikey: apikey
-  		},
-  		form: {
-  			address: padAddress,
-  			message: trimMessage,
-  			datetime: datetime,
-  			source: identifier
-  		}
-  	};
-  	rp(options)
-  	    .then(function (body) {
-  	    //    console.log(colors.success('Message delivered. ID: '+body)); 
-  	    })
-  	    .catch(function (err) {
-  	        console.log(colors.yellow('Message failed to deliver. '+err));
-  	    });
+    console.log(colors.red(time+': ')+colors.yellow(padAddress+': ')+colors.success(trimMessage));
+    // now send the message
+    var form = {
+      address: padAddress,
+      message: trimMessage,
+      datetime: datetime,
+      source: identifier
+    };
+    sendPage(form, 0);
   } else {
-  	console.log(colors.red(time+': ')+colors.grey(line));
+    console.log(colors.red(time+': ')+colors.grey(line));
   }
   
 }).on('close', () => {
   console.log('Input died!');
 });
+
+var sendPage = function(message,retries) {
+  var options = {
+    method: 'POST',
+    uri: uri,
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest',
+      'User-Agent': 'PagerMon reader.js',
+      apikey: apikey
+    },
+    form: message
+  };
+  rp(options)
+  .then(function (body) {
+    // console.log(colors.success('Message delivered. ID: '+body)); 
+  })
+  .catch(function (err) {
+    console.log(colors.yellow('Message failed to deliver. '+err));
+    if (retries < 10) {
+      var retryTime = Math.pow(2, retries) * 1000;
+      retries++;
+      console.log(colors.yellow(`Retrying in ${retryTime} ms`));
+      setTimeout(sendPage, retryTime, message, retries);
+    } else {
+      console.log(colors.yellow('Message failed to deliver after 10 retries, giving up'));
+    }
+  });
+};
 
 var padDigits = function(number, digits) {
     return Array(Math.max(digits - String(number).length + 1, 0)).join(0) + number;
