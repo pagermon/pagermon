@@ -237,6 +237,7 @@ router.get('/messages/:id', isSecMode, function(req, res, next) {
 router.get('/messageSearch', isSecMode, function(req, res, next) {
   nconf.load();
   console.time('init');
+  var dbtype = nconf.get('database:type')
   var pdwMode = nconf.get('messages:pdwMode');
   var maxLimit = nconf.get('messages:maxLimit');
   var defaultLimit = nconf.get('messages:defaultLimit');
@@ -256,6 +257,7 @@ router.get('/messageSearch', isSecMode, function(req, res, next) {
     initData.limit = parseInt(defaultLimit, 10);
   }
 
+  var rowCount;
   var query;
   var agency;
   var address;
@@ -266,99 +268,109 @@ router.get('/messageSearch', isSecMode, function(req, res, next) {
   } else { agency = ''; }
   if (typeof req.query.address !== 'undefined') { address = req.query.address;
   } else { address = ''; }
-  var sql;
 
   // set select commands based on query type
   // address can be address or source field
-  if (query != '') {
-    sql = `SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch
-    FROM messages_search_index
-    LEFT JOIN messages ON messages.id = messages_search_index.rowid `;
-  } else {
-    sql = `SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch 
-    FROM messages `;
-  }
-  if(pdwMode) {
-    sql += " INNER JOIN capcodes ON capcodes.id = messages.alias_id";
-  } else {
-    sql += " LEFT JOIN capcodes ON capcodes.id = messages.alias_id ";
-  }
-  sql += ' WHERE';
-  if(query != '') {
-    sql += ` messages_search_index MATCH ?`;
-  } else {
-    if(address != '')
-      sql += ` messages.address LIKE "${address}" OR messages.source = "${address}" OR `;
-    if(agency != '')
-      sql += ` messages.alias_id IN (SELECT id FROM capcodes WHERE agency = "${agency}" AND ignore = 0) OR `;
-    sql += ' messages.id IS ?';
-  }
   
-  sql += " ORDER BY messages.timestamp DESC;";
-
-  console.timeEnd('init');
-  console.time('sql');
-
-  var rows = [];
-  db.each(sql,query,function(err,row){
-    if (err) {
-      logger.main.error(err);
-    } else if (row) {
-      if (HideCapcode) {
-        if (!req.isAuthenticated()) {
-          row = {
-            "id": row.id,
-            "message": row.message,
-            "source": row.source,
-            "timestamp": row.timestamp,
-            "alias_id": row.alias_id,
-            "alias": row.alias,
-            "agency": row.agency,
-            "icon": row.icon,
-            "color": row.color,
-            "ignore": row.ignore,
-            "aliasMatch": row.aliasMatch
-          };
+  if(dbtype == 'sqlite3') {
+    db.from('messages_search_index')
+      .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', 'capcodes.id')
+      .as('aliasMatch')
+      .modify(function(queryBuilder) {
+        if(query != ''){
+          queryBuilder.leftJoin('messages', 'messages.id', '=', 'messages_search_index.rowid')
         }
-      }
-      if (pdwMode) {
-        if (row.ignore == 0)
-          rows.push(row);
+        if(pdwMode) {
+          queryBuilder.innerJoin('capcodes', db.ref('capcodes.id'), '=', db.ref('messages.alias_id'))
+        } else {
+          queryBuilder.leftJoin('capcodes', db.ref('capcodes.id'), '=', db.ref('messages.alias_id'))
+        }
+        console.timeEnd('init');
+        console.time('sql');
+      })
+      .modify(function(queryBuilder) {
+        if (query != '') {
+          queryBuilder.where('messages_search_index', 'like', '%'+query+'%')
+        } else {
+            if (address != '') {
+              queryBuilder.where(db.ref('messages.address'), 'like', '%'+address+'%')
+                          .orWhere(db.ref('messages.source'), '=', 'address')
+                          .orWhere(db.ref('messages.id'), '=', address)
+            }
+            if (agency != '') {
+              queryBuilder.where(db.ref('messages.alias_id'), 'in', function () {
+                db.select('id')
+                  .from('capcodes')
+                  .where('agency', '=', agency)
+                  .andWhere('ignore', '=', 0)
+              })
+              .orWhere(db.ref('messages.id'), '=', query)
+            }
+        }
+      })
+      .orderBy('messages.timestamp', 'DESC')
+      .then ((rows) => {
+       if (rows) { 
+        rowCount = rows.length
+        for (row of rows) {
+          console.log(row)
+          if (HideCapcode) {
+            if (!req.isAuthenticated()) {
+              row = {
+                "id": row.id,
+                "message": row.message,
+                "source": row.source,
+                "timestamp": row.timestamp,
+                "alias_id": row.alias_id,
+                "alias": row.alias,
+                "agency": row.agency,
+                "icon": row.icon,
+                "color": row.color,
+                "ignore": row.ignore,
+                "aliasMatch": row.aliasMatch
+              };
+            }
+          }
+          if (pdwMode) {
+            if (row.ignore == 0)
+              rows.push(row);
+          } else {
+            if (!row.ignore || row.ignore == 0)
+              rows.push(row);
+          }
+        } 
       } else {
-        if (!row.ignore || row.ignore == 0)
-          rows.push(row);
+        logger.main.info('empty results');
       }
-    } else {
-      logger.main.info('empty results');
-    }
-  },function(err,rowCount){
-    if (err) {
-      console.timeEnd('sql');
-      logger.main.error(err);
-      res.status(500).send(err);
-    } else if (rowCount > 0) {
-      console.timeEnd('sql');
-      var result = rows;
-      console.time('initEnd');
-      initData.msgCount = result.length;
-      initData.pageCount = Math.ceil(initData.msgCount/initData.limit);
-      if (initData.currentPage > initData.pageCount) {
-        initData.currentPage = 0;
+      if (rowCount > 0) {
+        console.timeEnd('sql');
+        var result = rows;
+        console.time('initEnd');
+        initData.msgCount = result.length;
+        initData.pageCount = Math.ceil(initData.msgCount/initData.limit);
+        if (initData.currentPage > initData.pageCount) {
+          initData.currentPage = 0;
+        }
+        initData.offset = initData.limit * initData.currentPage;
+        if (initData.offset < 0) {
+          initData.offset = 0;
+        }
+        initData.offsetEnd = initData.offset + initData.limit;
+        var limitResults = result.slice(initData.offset, initData.offsetEnd);
+  
+        console.timeEnd('initEnd');
+        res.json({'init': initData, 'messages': limitResults});
+      } else {
+        console.timeEnd('sql');
+        res.status(200).json({'init': {}, 'messages': []});
       }
-      initData.offset = initData.limit * initData.currentPage;
-      if (initData.offset < 0) {
-        initData.offset = 0;
-      }
-      initData.offsetEnd = initData.offset + initData.limit;
-      var limitResults = result.slice(initData.offset, initData.offsetEnd);
-
-      console.timeEnd('initEnd');
-      res.json({'init': initData, 'messages': limitResults});
-    } else {
-      console.timeEnd('sql');
-      res.status(200).json({'init': {}, 'messages': []});
-    }
-  });
+      })
+      .catch ((err) => {
+        console.timeEnd('sql');
+        logger.main.error(err);
+        res.status(500).send(err);
+      })
+  }
 });
 
 ///////////////////
@@ -690,30 +702,31 @@ router.post('/capcodes', function(req, res, next) {
     var icon = req.body.icon || 'question';
     var ignore = req.body.ignore || 0;
     var pluginconf = JSON.stringify(req.body.pluginconf) || "{}";
-    db.serialize(() => {
-      db.run("REPLACE INTO capcodes (id, address, alias, agency, color, icon, ignore, pluginconf) VALUES ($mesID, $mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore, $mesPluginconf);", {
-        $mesID: id,
-        $mesAddress: address,
-        $mesAlias: alias,
-        $mesAgency: agency,
-        $mesColor: color,
-        $mesIcon: icon,
-        $mesIgnore: ignore,
-        $mesPluginconf : pluginconf
-      }, function(err){
-        if (err) {
-          res.status(500).send(err);
-        } else {
+      db.from('capcodes')
+        .where('id', '=', id)
+        .update({
+          id: id,
+          address: address,
+          alias: alias,
+          agency: agency,
+          color: color,
+          icon: icon,
+          ignore: ignore,
+          pluginconf: pluginconf
+        })
+        .then((result) => { 
           res.status(200);
-          res.send(''+this.lastID);
+          res.send(''+result.lastID);
           if (!updateRequired || updateRequired == 0) {
             nconf.set('database:aliasRefreshRequired', 1);
             nconf.save();
           }
-        }
-      });
+        })
+        .catch ((err) => {
+          console.log(err)
+          .status(500).send(err);
+        })
       logger.main.debug(util.format('%o', req.body || 'no request body'));
-    });
   } else {
     res.status(500).json({message: 'Error - address or alias missing'});
   }
@@ -756,21 +769,19 @@ router.post('/capcodes/:id', function(req, res, next) {
       var pluginconf = JSON.stringify(req.body.pluginconf) || "{}";
       var updateAlias = req.body.updateAlias || 0;
       console.time('insert');
-      db.serialize(() => {
-        db.run("REPLACE INTO capcodes (id, address, alias, agency, color, icon, ignore, pluginconf) VALUES ($mesID, $mesAddress, $mesAlias, $mesAgency, $mesColor, $mesIcon, $mesIgnore, $mesPluginconf);", {
-          $mesID: id,
-          $mesAddress: address,
-          $mesAlias: alias,
-          $mesAgency: agency,
-          $mesColor: color,
-          $mesIcon: icon,
-          $mesIgnore: ignore,
-          $mesPluginconf : pluginconf
-        }, function(err){
-          if (err) {
-            console.timeEnd('insert');
-            res.status(500).send(err);
-          } else {
+      db.from('capcodes')
+        .where('id', '=', id)
+        .update({
+          id: id,
+          address: address,
+          alias: alias,
+          agency: agency,
+          color: color,
+          icon: icon,
+          ignore: ignore,
+          pluginconf: pluginconf
+        })
+        .then((result) => { 
             console.timeEnd('insert');
             if (updateAlias == 1) {
               console.time('updateMap');
@@ -793,10 +804,12 @@ router.post('/capcodes/:id', function(req, res, next) {
               }
             }
             res.status(200).send({'status': 'ok', 'id': this.lastID});
-          }
-        });
+        })
+        .catch((err) => {
+          console.timeEnd('insert');
+          res.status(500).send(err);
+        })
         logger.main.debug(util.format('%o',req.body || 'request body empty'));
-      });
     } else {
       res.status(500).json({message: 'Error - address or alias missing'});
     }
