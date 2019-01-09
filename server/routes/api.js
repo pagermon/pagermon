@@ -403,10 +403,10 @@ router.get('/capcodes/:id', isLoggedIn, function(req, res, next) {
       .where('id', id)
       .then(function (row) {
         if (row.length > 0) {
-          row[0].pluginconf = parseJSON(row[0].pluginconf);
+          row = row[0]
+          row.pluginconf = parseJSON(row.pluginconf);
           res.status(200);
-          console.log(row)
-          res.json(row[0]);
+          res.json(row);
         } else {
           row = {
             "id": "",
@@ -435,9 +435,10 @@ router.get('/capcodeCheck/:id', isLoggedIn, function(req, res, next) {
       .where('address', id)
       .then((row) => {
         if (row.length > 0) {
-          row[0].pluginconf = parseJSON(row[0].pluginconf);
+          row = row[0]
+          row.pluginconf = parseJSON(row.pluginconf);
           res.status(200);
-          res.json(row[0]);
+          res.json(row);
         } else {
           row = {
             "id": "",
@@ -568,12 +569,13 @@ router.post('/messages', function(req, res, next) {
                     var insert;
                     var alias_id = null;
                     if (row.length > 0) {
+                      row = row[0]
                       if (row.ignore == '1') {
                         insert = false;
                         logger.main.info('Ignoring filtered address: '+address+' alias: '+row.id);
                       } else {
                         insert = true;
-                        alias_id = row[0].id;
+                        alias_id = row.id;
                       }
                     } else {
                       insert = true;
@@ -602,10 +604,13 @@ router.post('/messages', function(req, res, next) {
                                         .where('messages.id', '=', result[0])
                                         .then((row) => {
                                         if(row.length > 0) {
+                                          row = row[0]
                                           // send data to pluginHandler after processing
                                           row.pluginData = data.pluginData;
+                                          
                                           if (row.pluginconf) {
                                             row.pluginconf = parseJSON(row.pluginconf);
+                                            console.log('DEBUG: ' +row.pluginconf)
                                           } else {
                                             row.pluginconf = {};
                                           }
@@ -621,24 +626,24 @@ router.post('/messages', function(req, res, next) {
                                               //Only emit to normal socket if HideCapcode is on and ApiSecurity is off.
                                               if (HideCapcode && !apiSecurity) {
                                                 // Emit No capcode to normal socket
-                                                row[0] = {
-                                                  "id": row[0].id,
-                                                  "message": row[0].message,
-                                                  "source": row[0].source,
-                                                  "timestamp": row[0].timestamp,
-                                                  "alias_id": row[0].alias_id,
-                                                  "alias": row[0].alias,
-                                                  "agency": row[0].agency,
-                                                  "icon": row[0].icon,
-                                                  "color": row[0].color,
-                                                  "ignore": row[0].ignore,
-                                                  "aliasMatch": row[0].aliasMatch
+                                                row = {
+                                                  "id": row.id,
+                                                  "message": row.message,
+                                                  "source": row.source,
+                                                  "timestamp": row.timestamp,
+                                                  "alias_id": row.alias_id,
+                                                  "alias": row.alias,
+                                                  "agency": row.agency,
+                                                  "icon": row.icon,
+                                                  "color": row.color,
+                                                  "ignore": row.ignore,
+                                                  "aliasMatch": row.aliasMatch
                                                 };
-                                                req.io.emit('messagePost', row[0]);
+                                                req.io.emit('messagePost', row);
                                               }
                                             } else {
                                               //Just emit - No Security enabled
-                                              req.io.emit('messagePost', row[0]);
+                                              req.io.emit('messagePost', row);
                                             }
                                           });
                                         }
