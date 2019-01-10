@@ -87,3 +87,4 @@ client/config/backup.json
 server/sessions
 
 client/samples/testymctest.sh
+server/messages.db.full

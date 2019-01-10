@@ -301,7 +301,8 @@ router.get('/messageSearch', isSecMode, function(req, res, next) {
     sql += " ORDER BY messages.timestamp DESC;";
     db.raw(sql, query)
       .then ((rows) => {
-       if (rows) { 
+       console.log(query)
+        if (rows) { 
         rowCount = rows.length
         for (row of rows) {
           if (HideCapcode) {

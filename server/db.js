@@ -67,7 +67,13 @@ function init(release) {
         }
     });
     if (dbtype == 'sqlite3') {
-        db.raw(`CREATE VIRTUAL TABLE IF NOT EXISTS messages_search_index USING fts3(message, alias, agency);`)
+        db.raw('CREATE VIRTUAL TABLE IF NOT EXISTS messages_search_index USING fts3(message, alias, agency);')
+        .then((result) => {
+
+        })
+        .catch((err) => {
+
+        })   
         db.raw(`
         CREATE TRIGGER IF NOT EXISTS messages_search_index_insert AFTER INSERT ON messages BEGIN
         INSERT INTO messages_search_index(
@@ -84,6 +90,12 @@ function init(release) {
                     );
         END;
         `)
+        .then((result) => {
+
+        })
+        .catch((err) => {
+            
+        })
         db.raw(`
         CREATE TRIGGER IF NOT EXISTS messages_search_index_update AFTER UPDATE ON messages BEGIN
                     UPDATE messages_search_index SET
@@ -93,17 +105,35 @@ function init(release) {
                     WHERE rowid = old.id;
                     END;
         `)
+        .then((result) => {
+
+        })
+        .catch((err) => {
+            
+        })
         db.raw(`
         CREATE TRIGGER IF NOT EXISTS messages_search_index_delete AFTER DELETE ON messages BEGIN
                     DELETE FROM messages_search_index WHERE rowid = old.id;
                     END;
         `)
+        .then((result) => {
+
+        })
+        .catch((err) => {
+            
+        })
         db.raw(`
         INSERT INTO messages_search_index (rowid, message, alias, agency)
                     SELECT messages.id, messages.message, capcodes.alias, capcodes.agency 
                     FROM messages LEFT JOIN capcodes ON capcodes.id = messages.alias_id
                     WHERE messages.id NOT IN (SELECT rowid FROM messages_search_index);
         `)
+        .then((result) => {
+
+        })
+        .catch((err) => {
+            
+        })
     }
     db.raw(`pragma user_version;`).then(function (res) {
         console.log("Current DB version: " + res[0].user_version);
