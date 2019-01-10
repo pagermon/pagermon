@@ -273,47 +273,37 @@ router.get('/messageSearch', isSecMode, function(req, res, next) {
   // address can be address or source field
   
   if(dbtype == 'sqlite3') {
-    db.from('messages_search_index')
-      .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', 'capcodes.id')
-      .as('aliasMatch')
-      .modify(function(queryBuilder) {
-        if(query != ''){
-          queryBuilder.leftJoin('messages', 'messages.id', '=', 'messages_search_index.rowid')
-        }
-        if(pdwMode) {
-          queryBuilder.innerJoin('capcodes', db.ref('capcodes.id'), '=', db.ref('messages.alias_id'))
-        } else {
-          queryBuilder.leftJoin('capcodes', db.ref('capcodes.id'), '=', db.ref('messages.alias_id'))
-        }
-        console.timeEnd('init');
-        console.time('sql');
-      })
-      .modify(function(queryBuilder) {
-        if (query != '') {
-          queryBuilder.where('messages_search_index', 'like', '%'+query+'%')
-        } else {
-            if (address != '') {
-              queryBuilder.where(db.ref('messages.address'), 'like', '%'+address+'%')
-                          .orWhere(db.ref('messages.source'), '=', 'address')
-                          .orWhere(db.ref('messages.id'), '=', address)
-            }
-            if (agency != '') {
-              queryBuilder.where(db.ref('messages.alias_id'), 'in', function () {
-                db.select('id')
-                  .from('capcodes')
-                  .where('agency', '=', agency)
-                  .andWhere('ignore', '=', 0)
-              })
-              .orWhere(db.ref('messages.id'), '=', query)
-            }
-        }
-      })
-      .orderBy('messages.timestamp', 'DESC')
+    var sql
+    if (query != '') {
+      sql = `SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch
+      FROM messages_search_index
+      LEFT JOIN messages ON messages.id = messages_search_index.rowid `;
+    } else {
+      sql = `SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch 
+      FROM messages `;
+    }
+    if(pdwMode) {
+      sql += " INNER JOIN capcodes ON capcodes.id = messages.alias_id";
+    } else {
+      sql += " LEFT JOIN capcodes ON capcodes.id = messages.alias_id ";
+    }
+    sql += ' WHERE';
+    if(query != '') {
+      sql += ` messages_search_index MATCH ?`;
+    } else {
+      if(address != '')
+        sql += ` messages.address LIKE "${address}" OR messages.source = "${address}" OR `;
+      if(agency != '')
+        sql += ` messages.alias_id IN (SELECT id FROM capcodes WHERE agency = "${agency}" AND ignore = 0) OR `;
+      sql += ' messages.id IS ?';
+    }
+  
+    sql += " ORDER BY messages.timestamp DESC;";
+    db.raw(sql, query)
       .then ((rows) => {
        if (rows) { 
         rowCount = rows.length
         for (row of rows) {
-          console.log(row)
           if (HideCapcode) {
             if (!req.isAuthenticated()) {
               row = {
