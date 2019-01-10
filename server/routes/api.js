@@ -299,11 +299,11 @@ router.get('/messageSearch', isSecMode, function(req, res, next) {
     }
   
     sql += " ORDER BY messages.timestamp DESC;";
+    var data = []
     db.raw(sql, query)
       .then ((rows) => {
        console.log(query)
         if (rows) { 
-        rowCount = rows.length
         for (row of rows) {
           if (HideCapcode) {
             if (!req.isAuthenticated()) {
@@ -324,18 +324,19 @@ router.get('/messageSearch', isSecMode, function(req, res, next) {
           }
           if (pdwMode) {
             if (row.ignore == 0)
-              rows.push(row);
+              data.push(row);
           } else {
             if (!row.ignore || row.ignore == 0)
-              rows.push(row);
+              data.push(row);
           }
         } 
       } else {
         logger.main.info('empty results');
       }
+      rowCount = data.length
       if (rowCount > 0) {
         console.timeEnd('sql');
-        var result = rows;
+        var result = data;
         console.time('initEnd');
         initData.msgCount = result.length;
         initData.pageCount = Math.ceil(initData.msgCount/initData.limit);
