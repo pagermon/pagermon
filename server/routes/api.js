@@ -781,7 +781,6 @@ router.post('/capcodes/:id', function(req, res, next) {
         .where('id', '=', id)
         .modify(function(queryBuilder) {
           if (id == null) {
-            console.log(id)
             queryBuilder.insert({
               id: id,
               address: address,
@@ -793,7 +792,6 @@ router.post('/capcodes/:id', function(req, res, next) {
               pluginconf: pluginconf
             })
           } else {
-            console.log(id)
             queryBuilder.update({
               id: id,
               address: address,
@@ -807,7 +805,6 @@ router.post('/capcodes/:id', function(req, res, next) {
           } 
         })
         .then((result) => { 
-          console.log(result)  
           console.timeEnd('insert');
             if (updateAlias == 1) {
               console.time('updateMap');
@@ -833,7 +830,6 @@ router.post('/capcodes/:id', function(req, res, next) {
             res.status(200).send({'status': 'ok', 'id': result[0]});
         })
         .catch((err) => {
-          console.log('ERROR: '+err)
           console.timeEnd('insert');
           res.status(500).send(err);
         })
