@@ -532,18 +532,28 @@ router.post('/messages', function(req, res, next) {
           .modify(function (queryBuilder) {
             if ((dupeLimit != 0) && (dupeTime != 0)) {
               queryBuilder.where('id', 'in', function () {
-                this.select('id')
-                    .from('messages')
-                    .where('timestamp', '>', timeDiff)
-                    .orderByRaw(dupeorderby)
+                this.select('*')
+                    //this wierd subquery is to keep mysql happy 
+                    .from(function () {
+                      this.select('id')
+                      .from('messages')
+                      .where('timestamp', '>', timeDiff)
+                      .orderByRaw(dupeorderby)
+                      .as('temp_tab')
+                    })  
               })
               .andWhere('message', 'like', message)
               .andWhere('address', 'like', address)
             } else if ((dupeLimit) !=0 && (dupeTime == 0)) {
               queryBuilder.where('id', 'in', function () {
-                this.select('id')
-                    .from('messages')
-                    .orderByRaw(dupeorderby)
+                this.select('*')
+                    //this wierd subquery is to keep mysql happy
+                    .from(function () {
+                      this.select('id')
+                          .from('messages')
+                          .orderByRaw(dupeorderby)
+                          .as('temp_tab')
+                    })
               })
               .andWhere('message', 'like', message)
               .andWhere('address', 'like', address)
