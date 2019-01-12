@@ -696,20 +696,35 @@ router.post('/capcodes', function(req, res, next) {
     var ignore = req.body.ignore || 0;
     var pluginconf = JSON.stringify(req.body.pluginconf) || "{}";
       db.from('capcodes')
-        .where('id', '=', id)
-        .update({
-          id: id,
-          address: address,
-          alias: alias,
-          agency: agency,
-          color: color,
-          icon: icon,
-          ignore: ignore,
-          pluginconf: pluginconf
+        .where('id', '=', id)  
+        .modify(function (queryBuilder) {
+          if (id == null) {
+            queryBuilder.insert({
+              id: id,
+              address: address,
+              alias: alias,
+              agency: agency,
+              color: color,
+              icon: icon,
+              ignore: ignore,
+              pluginconf: pluginconf
+            })
+          } else {
+            queryBuilder.update({
+              id: id,
+              address: address,
+              alias: alias,
+              agency: agency,
+              color: color,
+              icon: icon,
+              ignore: ignore,
+              pluginconf: pluginconf
+            })
+          }
         })
         .then((result) => { 
           res.status(200);
-          res.send(''+result.lastID);
+          res.send(''+result[0].lastID);
           if (!updateRequired || updateRequired == 0) {
             nconf.set('database:aliasRefreshRequired', 1);
             nconf.save();
@@ -764,21 +779,40 @@ router.post('/capcodes/:id', function(req, res, next) {
       console.time('insert');
       db.from('capcodes')
         .where('id', '=', id)
-        .update({
-          id: id,
-          address: address,
-          alias: alias,
-          agency: agency,
-          color: color,
-          icon: icon,
-          ignore: ignore,
-          pluginconf: pluginconf
+        .modify(function(queryBuilder) {
+          if (id == null) {
+            console.log(id)
+            queryBuilder.insert({
+              id: id,
+              address: address,
+              alias: alias,
+              agency: agency,
+              color: color,
+              icon: icon,
+              ignore: ignore,
+              pluginconf: pluginconf
+            })
+          } else {
+            console.log(id)
+            queryBuilder.update({
+              id: id,
+              address: address,
+              alias: alias,
+              agency: agency,
+              color: color,
+              icon: icon,
+              ignore: ignore,
+              pluginconf: pluginconf
+            })
+          } 
         })
         .then((result) => { 
-            console.timeEnd('insert');
+          console.log(result)  
+          console.timeEnd('insert');
             if (updateAlias == 1) {
               console.time('updateMap');
-              db('messages').update('alias_id', function() {
+              db('messages')
+              .update('alias_id', function() {
                 this.select('id')
                 .from('capcodes')
                 .where('messages.address', 'like', 'address')
@@ -796,9 +830,10 @@ router.post('/capcodes/:id', function(req, res, next) {
                 nconf.save();
               }
             }
-            res.status(200).send({'status': 'ok', 'id': this.lastID});
+            res.status(200).send({'status': 'ok', 'id': result[0]});
         })
         .catch((err) => {
+          console.log('ERROR: '+err)
           console.timeEnd('insert');
           res.status(500).send(err);
         })
