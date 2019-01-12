@@ -724,7 +724,7 @@ router.post('/capcodes', function(req, res, next) {
         })
         .then((result) => { 
           res.status(200);
-          res.send(''+result[0].lastID);
+          res.send(''+result[0]);
           if (!updateRequired || updateRequired == 0) {
             nconf.set('database:aliasRefreshRequired', 1);
             nconf.save();
