@@ -114,8 +114,9 @@ router.get('/messages', isSecMode, function(req, res, next) {
       this.from('messages').where('alias_id', 'not in', subquery).orWhereNull('alias_id')
     }
   }).count('* as msgcount')
-    .then(function(count) {
-    if (count) {
+    .then(function(initcount) {
+      var count = initcount[0]
+      if (count) {
       initData.msgCount = count.msgcount;
       initData.pageCount = Math.ceil(initData.msgCount/initData.limit);
       if (initData.currentPage > initData.pageCount) {
