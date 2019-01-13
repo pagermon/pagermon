@@ -29,6 +29,7 @@ var nconf = require('nconf');
 var hostname = nconf.get('hostname');
 var apikey = nconf.get('apikey');
 var identifier = nconf.get('identifier');
+var sendFunctionCode = nconf.get('sendFunctionCode') || false;
 
 var uri = hostname+"/api/messages";
 
@@ -64,6 +65,9 @@ rl.on('line', (line) => {
 //  if (line.indexOf('POCSAG512: Address:') > -1) {	
   if (/^POCSAG(\d+): Address: /.test(line) ) {
     address = line.match(/POCSAG(\d+): Address:(.*?)Function/)[2].trim();
+    if (sendFunctionCode) {
+      address += line.match(/POCSAG(\d+): Address:(.*?)Function: (\d)/)[3];
+    }
     if (line.indexOf('Alpha:') > -1) {
       message = line.match(/Alpha:(.*?)$/)[1].trim();
       trimMessage = message.replace(/<[A-Za-z]{3}>/g,'').replace(/Ä/g,'[').replace(/Ü/g,']');
