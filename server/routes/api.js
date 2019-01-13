@@ -581,10 +581,11 @@ router.post('/messages', function(req, res, next) {
               res.status(200);
               res.send('Ignoring duplicate');
             } else {
-                db.from('capcodes')
-                  .select('id', 'ignore')
-                  .where('address', 'like', address)
+              db.from('capcodes', function () {
+                  this.select('id', 'ignore')
+                  .where(db.ref('capcodes.address'), 'like', address)
                   .orderByRaw("REPLACE(address, '_', '%') DESC LIMIT 1")
+                })
                   .then((row) => {
                     var insert;
                     var alias_id = null;
