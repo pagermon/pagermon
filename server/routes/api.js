@@ -885,7 +885,7 @@ router.post('/capcodeRefresh', function(req, res, next) {
   db('messages').update('alias_id', function() {
     this.select('id')
         .from('capcodes')
-        .where('address', 'like', db.ref('messages.address'))
+        .where(db.ref('messages.address'), 'like', db.ref('capcodes.address') )
         .orderByRaw("REPLACE(address, '_', '%') DESC LIMIT 1")
   })
   .then((result) => {
