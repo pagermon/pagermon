@@ -29,7 +29,7 @@ var dbfile = nconf.get('database:file')
 var dbserver = nconf.get('database:server')
 var dbdb = nconf.get('database:database')
 var dbusername = nconf.get('database:username')
-var dbpassword = nconf.get('database.password')
+var dbpassword = nconf.get('database:password')
 
 var db = require('knex')({
   client: dbtype,

@@ -14,6 +14,7 @@ function init(release) {
     var dbusername = nconf.get('database:username')
     var dbpassword = nconf.get('database:password')
 
+    //This is here for compatibility with old versions. 
     if (dbtype == null || dbtype == 'sqlite') {
         nconf.set('database:type', 'sqlite3');
         nconf.set('database:file', './server/messages.db');
@@ -51,7 +52,7 @@ function init(release) {
                 db.schema.hasTable('messages').then(function (exists) {
                     if (!exists) {
                         db.schema.createTable('messages', table => {
-                            table.integer('id').primary().unique();
+                            table.increments('id').primary().unique().notNullable();
                             table.string('address', [255]).notNullable();
                             table.text('message').notNullable();
                             table.text('source').notNullable();

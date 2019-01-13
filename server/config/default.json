@@ -5,7 +5,7 @@
   },
   "database": {
     "file": "./messages.db",
-    "type": "sqlite"
+    "type": "sqlite3"
   },
   "messages": {
     "maxLimit": 120,
