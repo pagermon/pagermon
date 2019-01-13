@@ -12,7 +12,7 @@ function init(release) {
     var dbserver = nconf.get('database:server')
     var dbdb = nconf.get('database:database')
     var dbusername = nconf.get('database:username')
-    var dbpassword = nconf.get('database.password')
+    var dbpassword = nconf.get('database:password')
 
     if (dbtype == null || dbtype == 'sqlite') {
         nconf.set('database:type', 'sqlite3');
@@ -30,15 +30,15 @@ function init(release) {
         },
         useNullAsDefault: true,
         debug: true,
-    });
+    })
 
 
 
     db.schema.hasTable('capcodes').then(function (exists) {
         if (!exists) {
             db.schema.createTable('capcodes', table => {
-                table.increments('id').primary();
-                table.text('address').notNullable();
+                table.integer('id').primary().unique();
+                table.string('address', [255]).notNullable();
                 table.text('alias').notNullable();
                 table.text('agency');
                 table.text('icon');
@@ -52,7 +52,7 @@ function init(release) {
                     if (!exists) {
                         db.schema.createTable('messages', table => {
                             table.integer('id').primary().unique();
-                            table.text('address').notNullable();
+                            table.string('address', [255]).notNullable();
                             table.text('message').notNullable();
                             table.text('source').notNullable();
                             table.integer('timestamp');
@@ -289,17 +289,20 @@ function init(release) {
                         });
                     }
                 });
-            var vervar = 'pragma user_version = ' + release + ';'
-            db.raw(vervar)
+                if (dbtype == 'sqlite3') {
+                    var vervar = 'pragma user_version = ' + release + ';'
+                    db.raw(vervar)
+                }
+            })
                 .catch(function (err) {
                     console.log(err)
                 });
+        }
             }).catch(function (err) {
                 console.error('Error Creating Table ', err);
             })
         }
-    });
-}
+
 
 module.exports = {
     init: init
