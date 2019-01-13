@@ -39,7 +39,7 @@ module.exports = function (passport) {
   passport.use('localapikey', new LocalAPIKeyStrategy(
     function (apikey, done) {
       var auth = getAuth()
-      var key = auth.keys.find(x => x.key ==== apikey)
+      var key = auth.keys.find(x => x.key === apikey)
       // var key = auth.keys.find({ key: apikey });
       if (key) {
         // do a bcrypt compare
