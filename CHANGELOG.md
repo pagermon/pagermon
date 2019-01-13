@@ -1,6 +1,6 @@
 # 0.2.1 - 2019-01-13
 
-* Added CHANGELOG.md (hey, that's this thing!)
+* Added CHANGELOG.md (hey, that's this thing!) #192
 * Stopped naughty Winston from modifying objects #152
 * Added missing dependencies #153
 * Updated README.md #163
