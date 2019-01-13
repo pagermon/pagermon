@@ -584,7 +584,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
           return response
         },
         responseError: function (response) {
-          if (response.status ==== 401) { $location.absUrl('/login') }
+          if (response.status === 401) { $location.absUrl('/login') }
           return $q.reject(response)
         }
       }

@@ -23,7 +23,7 @@ function run (trigger, scope, data, config, callback) {
         },
         body: messageData
       }, function (error, response, body) {
-        if (!error && response.statusCode ==== 200) {
+        if (!error && response.statusCode === 200) {
           logger.main.info('Teams: Message Sent')
         } else {
           logger.main.error('Teams: ' + error + response.statusCode + response.statusText)
