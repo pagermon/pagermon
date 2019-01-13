@@ -14,6 +14,11 @@ function init(release) {
     var dbusername = nconf.get('database:username')
     var dbpassword = nconf.get('database.password')
 
+    if (dbtype == null || dbtype == 'sqlite') {
+        nconf.set('database:type', 'sqlite3');
+        nconf.set('database:file', './server/messages.db');
+    }
+
     var db = require('knex')({
         client: dbtype,
         connection: {
@@ -26,6 +31,8 @@ function init(release) {
         useNullAsDefault: true,
         debug: true,
     });
+
+
 
     db.schema.hasTable('capcodes').then(function (exists) {
         if (!exists) {
