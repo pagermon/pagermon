@@ -17,7 +17,7 @@ function init(release) {
     //This is here for compatibility with old versions. 
     if (dbtype == null || dbtype == 'sqlite') {
         nconf.set('database:type', 'sqlite3');
-        nconf.set('database:file', './server/messages.db');
+        nconf.set('database:file', './messages.db');
         nconf.save()
     }
 
