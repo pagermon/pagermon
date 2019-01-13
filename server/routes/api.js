@@ -136,8 +136,10 @@ router.get('/messages', isSecMode, function(req, res, next) {
       var rowCount
 
       db.from('messages')
-        .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', 'capcodes.id')
-        .as('aliasMatch')
+        .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', function () {
+          this.select('capcodes.id')
+          .as('aliasMatch')
+        })
         .modify(function(queryBuilder) {
           if (pdwMode) {
             queryBuilder.innerJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id').where('capcodes.ignore', '=', '0')
@@ -198,7 +200,10 @@ router.get('/messages/:id', isSecMode, function(req, res, next) {
   var id = req.params.id;
 
   db.from('messages')
-    .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', 'capcodes.id').as('aliasMatch')
+    .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', function () {
+      this.select('capcodes.id')
+        .as('aliasMatch')
+    })
     .leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id')
     .where(['messages.id', id])
     .then((row) => {
@@ -607,8 +612,10 @@ router.post('/messages', function(req, res, next) {
                                     .then((result) => {
                                       // emit the full message
                                       db.from('messages')
-                                        .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', 'capcodes.id', 'capcodes.pluginconf')
-                                        .as('aliasMatch')
+                                        .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', 'capcodes.pluginconf', function () {
+                                          this.select('capcodes.id')
+                                            .as('aliasMatch')
+                                        })
                                         .modify(function(queryBuilder) {
                                           if (pdwMode) {
                                             queryBuilder.innerJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id')
