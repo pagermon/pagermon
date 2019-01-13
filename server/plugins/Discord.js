@@ -9,7 +9,7 @@ function run (trigger, scope, data, config, callback) {
     // var hostname = nconf.get('hostname');
     var hostname = process.env.HOSTNAME || ''
     // Ensure webhook ID and Token have been entered into the alias.
-    if (dConf.webhook == 0 || !dConf.webhook) {
+    if (dConf.webhook === 0 || !dConf.webhook) {
       logger.main.error('Discord: ' + data.address + ' No Webhook URL set. Please enter Webhook URL.')
       callback()
     } else {
@@ -26,7 +26,7 @@ function run (trigger, scope, data, config, callback) {
       })
       // toHex doesn't support putting HEX in, needs to check and skip over if already hex.
       var isHex = /^#[0-9A-F]{6}$/i.test(data.color)
-      if (!isHex || isHex == false) {
+      if (!isHex || isHex === false) {
         var discordcolor = toHex(data.color)
       } else {
         var discordcolor = data.color
@@ -34,7 +34,7 @@ function run (trigger, scope, data, config, callback) {
       notificationembed.setColor(discordcolor)
       notificationembed.setTitle(`**${data.agency} - ${data.alias}**`)
       notificationembed.setDescription(`${data.message}`)
-      if (hostname == undefined || !hostname) {
+      if (hostname === undefined || !hostname) {
         logger.main.debug('Discord: Hostname not set in config file using pagermon github')
         notificationembed.setAuthor('PagerMon', '', `https://github.com/davidmckenzie/pagermon`)
       } else {

@@ -19,7 +19,7 @@ angular.module('angular-highlight', []).directive('highlight', function () {
 
     scope.$watch('keywords', function () {
       // console.log("scope.keywords",scope.keywords);
-      if (!scope.keywords || scope.keywords == '') {
+      if (!scope.keywords || scope.keywords === '') {
         element.html(scope.highlight)
         return false
       }

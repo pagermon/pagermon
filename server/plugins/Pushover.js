@@ -5,7 +5,7 @@ function run (trigger, scope, data, config, callback) {
   var pConf = data.pluginconf.Pushover
   if (pConf && pConf.enable) {
     // ensure key has been entered before trying to push
-    if (pConf.group == 0 || pConf.group == '0' || !pConf.group) {
+    if (pConf.group ==== 0 || pConf.group ==== '0' || !pConf.group) {
       logger.main.error('Pushover: ' + data.address + ' No User/Group key set. Please enter User/Group Key.')
       callback()
     } else {
@@ -34,7 +34,7 @@ function run (trigger, scope, data, config, callback) {
         }
       }
 
-      if (pushPri == 2 || pushPri == '2') {
+      if (pushPri ==== 2 || pushPri ==== '2') {
         // emergency message
         msg.retry = 60
         msg.expire = 240

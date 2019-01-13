@@ -4,7 +4,7 @@ var logger = require('../log')
 function run (trigger, scope, data, config, callback) {
   var tConf = data.pluginconf.Twitter
   if (tConf && tConf.enable) {
-    if ((config.consKey == 0 || !config.consKey) || (config.consSecret == 0 || !config.consSecret) || (config.accToken == 0 || !config.accToken) || (config.accSecret == 0 || !config.accSecret)) {
+    if ((config.consKey === 0 || !config.consKey) || (config.consSecret === 0 || !config.consSecret) || (config.accToken === 0 || !config.accToken) || (config.accSecret === 0 || !config.accSecret)) {
       logger.main.error('Twitter: ' + data.address + ' No API keys set. Please check API keys.')
       callback()
     } else {

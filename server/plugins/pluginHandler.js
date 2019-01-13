@@ -10,24 +10,24 @@ var logger = require('../log')
 
 function handle (trigger, scope, data, callback) {
   var plugins = nconf.get('plugins')
-  logger.main.debug('======================')
+  logger.main.debug('=================================')
   logger.main.debug(`trigger: ${trigger} scope: ${scope}`)
-  logger.main.debug('======================')
+  logger.main.debug('=================================')
   logger.main.debug('data object')
   logger.main.debug(util.format('%o', data))
   logger.main.debug('plugins object')
   logger.main.debug(util.format('%o', plugins))
-  logger.main.debug('======================')
+  logger.main.debug('=================================')
 
   async.eachOf(plugins, function (conf, plugin, cb) {
-    logger.main.debug('======================')
+    logger.main.debug('=================================')
     logger.main.debug(`plugin: ${plugin}`)
     // note: fs and require use different paths
     if (conf.enable) {
       if (fs.existsSync(`./plugins/${plugin}.json`) && fs.existsSync(`./plugins/${plugin}.js`)) {
         let pConfig = require(`./${plugin}.json`)
         // check scope
-        if (pConfig.trigger == trigger && pConfig.scope == scope && !pConfig.disable) {
+        if (pConfig.trigger === trigger && pConfig.scope === scope && !pConfig.disable) {
           logger.main.debug('RUNNING PLUGIN!')
           let pRun = require(`./${plugin}`)
           pRun.run(trigger, scope, data, conf, function (response, error) {

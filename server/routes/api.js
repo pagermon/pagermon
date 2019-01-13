@@ -222,7 +222,7 @@ router.get('/messageSearch', isSecMode, function (req, res, next) {
   var defaultLimit = nconf.get('messages:defaultLimit')
   initData.replaceText = nconf.get('messages:replaceText')
 
-  if (typeof req.query.page !== 'undefined') {
+  if (typeof req.query.page !=== 'undefined') {
     var page = parseInt(req.query.page, 10)
     if (page > 0) {
       initData.currentPage = page - 1
@@ -240,20 +240,20 @@ router.get('/messageSearch', isSecMode, function (req, res, next) {
   var agency
   var address
   // dodgy handling for unexpected results
-  if (typeof req.query.q !== 'undefined') {
+  if (typeof req.query.q !=== 'undefined') {
     query = req.query.q
   } else { query = '' }
-  if (typeof req.query.agency !== 'undefined') {
+  if (typeof req.query.agency !=== 'undefined') {
     agency = req.query.agency
   } else { agency = '' }
-  if (typeof req.query.address !== 'undefined') {
+  if (typeof req.query.address !=== 'undefined') {
     address = req.query.address
   } else { address = '' }
   var sql
 
   // set select commands based on query type
   // address can be address or source field
-  if (query != '') {
+  if (query !== '') {
     sql = `SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch
     FROM messages_search_index
     LEFT JOIN messages ON messages.id = messages_search_index.rowid `
@@ -267,11 +267,11 @@ router.get('/messageSearch', isSecMode, function (req, res, next) {
     sql += ' LEFT JOIN capcodes ON capcodes.id = messages.alias_id '
   }
   sql += ' WHERE'
-  if (query != '') {
+  if (query !== '') {
     sql += ` messages_search_index MATCH ?`
   } else {
-    if (address != '') { sql += ` messages.address LIKE "${address}" OR messages.source = "${address}" OR ` }
-    if (agency != '') { sql += ` messages.alias_id IN (SELECT id FROM capcodes WHERE agency = "${agency}" AND ignore = 0) OR ` }
+    if (address !== '') { sql += ` messages.address LIKE "${address}" OR messages.source = "${address}" OR ` }
+    if (agency !== '') { sql += ` messages.alias_id IN (SELECT id FROM capcodes WHERE agency = "${agency}" AND ignore = 0) OR ` }
     sql += ' messages.id IS ?'
   }
 
@@ -349,7 +349,7 @@ router.get('/messageSearch', isSecMode, function (req, res, next) {
 // capcodes aren't pagified at the moment, this should probably be removed
 router.get('/capcodes/init', isSecMode, function (req, res, next) {
   // set current page if specifed as get variable (eg: /?page=2)
-  if (typeof req.query.page !== 'undefined') {
+  if (typeof req.query.page !=== 'undefined') {
     var page = parseInt(req.query.page, 10)
     if (page > 0) { initData.currentPage = page - 1 }
   }
@@ -499,12 +499,12 @@ router.post('/messages', function (req, res, next) {
         var source = data.source || 'UNK'
 
         var dupeCheck = 'SELECT * FROM messages WHERE '
-        if (dupeLimit != 0 || dupeTime != 0) {
+        if (dupeLimit !== 0 || dupeTime !== 0) {
           dupeCheck += 'id IN ( SELECT id FROM messages '
-          if (dupeTime != 0) {
+          if (dupeTime !== 0) {
             dupeCheck += 'WHERE timestamp > ' + timeDiff + ' '
           }
-          if (dupeLimit != 0) {
+          if (dupeLimit !== 0) {
             dupeCheck += 'ORDER BY id DESC LIMIT ' + dupeLimit
           }
           dupeCheck += ' ) AND message LIKE "' + message + '" AND address="' + address + '";'

@@ -9,7 +9,7 @@ function run (trigger, scope, data, config, callback) {
     var t = new telegram({
       token: telekey
     })
-    if (tConf.chat == 0 || !tConf.chat) {
+    if (tConf.chat === 0 || !tConf.chat) {
       logger.main.error('Telegram: ' + data.address + ' No ChatID key set. Please enter ChatID.')
       callback()
     } else {

@@ -29,7 +29,7 @@ angular.module('angular-highlight', []).directive('highlight', function () {
     }
 
     scope.$watch('replacement', function () {
-      if (!scope.replacement || scope.replacement == '') {
+      if (!scope.replacement || scope.replacement === '') {
         element.html(scope.highlight)
         return false
       }

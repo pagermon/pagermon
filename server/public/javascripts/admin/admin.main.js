@@ -35,7 +35,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
     })
     Api.Settings.get(null, function (results) {
       if (results) {
-        if (results.database && results.database.aliasRefreshRequired == 1) {
+        if (results.database && results.database.aliasRefreshRequired === 1) {
           $scope.aliasRefreshRequired = 1
           $scope.alertMessage.text = 'Alias refresh required!'
           $scope.alertMessage.type = 'alert-warning'
@@ -51,7 +51,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
       Api.AliasRefresh.post(null, null).$promise.then(function (response) {
         console.log(response)
         $scope.loading = false
-        if (response.status == 'ok') {
+        if (response.status === 'ok') {
           $scope.alertMessage.text = 'Alias refresh complete!'
           $scope.alertMessage.type = 'alert-success'
           $scope.alertMessage.show = true
@@ -119,7 +119,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
       Api.AliasDetail.post({ id: 'deleteMultiple' }, data).$promise.then(function (response) {
         console.log(response)
         $scope.loading = false
-        if (response.status == 'ok') {
+        if (response.status === 'ok') {
           $scope.alertMessage.text = 'Alias deleted!'
           $scope.alertMessage.type = 'alert-success'
           $scope.alertMessage.show = true
@@ -175,7 +175,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
       Api.AliasRefresh.post(null, null).$promise.then(function (response) {
         // console.log(response);
         $scope.loading = false
-        if (response.status == 'ok') {
+        if (response.status === 'ok') {
           $scope.alertMessage.text = 'Alias refresh complete!'
           $scope.alertMessage.type = 'alert-success'
           $scope.alertMessage.show = true
@@ -238,7 +238,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         Api.AliasDupeCheck.get({ id: $scope.alias.address }, function (results) {
           if (results.address) {
             $scope.aliasLoading = false
-            if (results.address == $scope.alias.originalAddress) {
+            if (results.address === $scope.alias.originalAddress) {
               $scope.existingAddress = false
               return false
             } else {
@@ -260,7 +260,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
     }
 
     $scope.aliasSubmit = function () {
-      if (($scope.alias.push) && (!$scope.alias.pushgroup || $scope.alias.pushgroup == 0)) {
+      if (($scope.alias.push) && (!$scope.alias.pushgroup || $scope.alias.pushgroup === 0)) {
         $scope.alertMessage.text = 'Error saving alias: Pushover key cannot be blank when pushover enabled.'
         $scope.alertMessage.type = 'alert-danger'
         $scope.alertMessage.show = true
@@ -280,7 +280,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         }
         Api.AliasDetail.save({ id: id }, $scope.alias).$promise.then(function (response) {
           console.log(response)
-          if (response.status == 'ok') {
+          if (response.status === 'ok') {
             $scope.alertMessage.text = 'Alias saved!'
             $scope.alertMessage.type = 'alert-success'
             $scope.alertMessage.show = true
@@ -328,7 +328,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
       $scope.loading = true
       Api.AliasDetail.delete({ id: $routeParams.id }, $scope.alias).$promise.then(function (response) {
         console.log(response)
-        if (response.status == 'ok') {
+        if (response.status === 'ok') {
           $scope.alertMessage.text = 'Alias deleted!'
           $scope.alertMessage.type = 'alert-success'
           $scope.alertMessage.show = true
@@ -363,7 +363,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
     // get data on load
     Api.Settings.get(null, function (results) {
       if (results) {
-        if (results.database && results.database.aliasRefreshRequired == 1) {
+        if (results.database && results.database.aliasRefreshRequired === 1) {
           $scope.aliasRefreshRequired = 1
         }
         $scope.settings = results.settings
@@ -384,7 +384,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
       Api.ResetPass.post(null, pass).$promise.then(function (response) {
         console.log(response)
         $scope.loading = false
-        if (response.status == 'ok') {
+        if (response.status === 'ok') {
           $scope.alertMessage.text = 'Password changed!'
           $scope.alertMessage.type = 'alert-success'
           $scope.alertMessage.show = true
@@ -421,7 +421,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
       Api.Settings.save(null, $scope.settings).$promise.then(function (response) {
         console.log(response)
         $scope.loading = false
-        if (response.status == 'ok') {
+        if (response.status === 'ok') {
           $scope.alertMessage.text = 'Settings saved!'
           $scope.alertMessage.type = 'alert-success'
           $scope.alertMessage.show = true
@@ -459,7 +459,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
       //  var kf = k1+k2+k3;
       var kf = k1 + k3
       var key = kf.toUpperCase()
-      if (index == 'sessionSecret') {
+      if (index === 'sessionSecret') {
         $scope.settings.global.sessionSecret = key
       } else {
         $scope.settings.auth.keys[index].key = key
@@ -584,7 +584,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
           return response
         },
         responseError: function (response) {
-          if (response.status === 401) { $location.absUrl('/login') }
+          if (response.status ==== 401) { $location.absUrl('/login') }
           return $q.reject(response)
         }
       }

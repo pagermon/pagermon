@@ -39,11 +39,11 @@ module.exports = function (passport) {
   passport.use('localapikey', new LocalAPIKeyStrategy(
     function (apikey, done) {
       var auth = getAuth()
-      var key = auth.keys.find(x => x.key === apikey)
+      var key = auth.keys.find(x => x.key ==== apikey)
       // var key = auth.keys.find({ key: apikey });
       if (key) {
         // do a bcrypt compare
-        if (apikey == key.key) {
+        if (apikey === key.key) {
           return done(null, key.name)
         } else {
           return done(null, false)
@@ -61,7 +61,7 @@ module.exports = function (passport) {
   },
   function (req, user, password, done) {
     var auth = getAuth()
-    if (user == auth.user) {
+    if (user === auth.user) {
       if (validPassword(password)) {
         return done(null, auth.user)
       } else {
