@@ -13,6 +13,7 @@
 * Added User-Agent to Powershell client script #184
 * Fixed bug on Pushover plugin when configuration partially missing #186
 * Made cookie hostname configuration optional, to make bad stuff less bad #188
+* Added optional flag to include function codes with address on POCSAG messages #191
 
 
 # 0.2.0 - 2018-12-06
