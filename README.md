@@ -120,6 +120,14 @@ __NOTE:__
 
 3) Follow __Step 5__ from __Running the server____
 
+## Support 
+
+General PagerMon support can be requested in the #support channel of the PagerMon discord server.
+
+[Click Here](https://discord.gg/3VK7gSD) to join
+
+Bugs and Feature requests can be logged via the GitHub issues page. 
+
 ## Contributing
 
 All are welcome to contribute. Contributors should submit a pull request with the requested changes.
@@ -130,11 +138,11 @@ If a pull request is the first pull request since a [release](https://github.com
 
 ## Versioning
 
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/davidmckenzie/pagermon/tags).
+We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/pagermon/pagermon/tags).
 
 ## Authors
 
-See the list of [contributors](https://github.com/davidmckenzie/pagermon/contributors) who participated in this project.
+See the list of [contributors](https://github.com/pagermon/pagermon/contributors) who participated in this project.
 
 ## License
 
