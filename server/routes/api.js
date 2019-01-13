@@ -199,7 +199,7 @@ router.get('/messages/:id', isSecMode, function (req, res, next) {
             }
           }
         }
-        if (row.ignore == 1) {
+        if (row.ignore === 1) {
           res.status(200).json({})
         } else {
           if (pdwMode && !row.alias) {
@@ -222,7 +222,7 @@ router.get('/messageSearch', isSecMode, function (req, res, next) {
   var defaultLimit = nconf.get('messages:defaultLimit')
   initData.replaceText = nconf.get('messages:replaceText')
 
-  if (typeof req.query.page !=== 'undefined') {
+  if (typeof req.query.page !== 'undefined') {
     var page = parseInt(req.query.page, 10)
     if (page > 0) {
       initData.currentPage = page - 1
@@ -240,13 +240,13 @@ router.get('/messageSearch', isSecMode, function (req, res, next) {
   var agency
   var address
   // dodgy handling for unexpected results
-  if (typeof req.query.q !=== 'undefined') {
+  if (typeof req.query.q !== 'undefined') {
     query = req.query.q
   } else { query = '' }
-  if (typeof req.query.agency !=== 'undefined') {
+  if (typeof req.query.agency !== 'undefined') {
     agency = req.query.agency
   } else { agency = '' }
-  if (typeof req.query.address !=== 'undefined') {
+  if (typeof req.query.address !== 'undefined') {
     address = req.query.address
   } else { address = '' }
   var sql
@@ -303,9 +303,9 @@ router.get('/messageSearch', isSecMode, function (req, res, next) {
         }
       }
       if (pdwMode) {
-        if (row.ignore == 0) { rows.push(row) }
+        if (row.ignore === 0) { rows.push(row) }
       } else {
-        if (!row.ignore || row.ignore == 0) { rows.push(row) }
+        if (!row.ignore || row.ignore === 0) { rows.push(row) }
       }
     } else {
       logger.main.info('empty results')
@@ -349,7 +349,7 @@ router.get('/messageSearch', isSecMode, function (req, res, next) {
 // capcodes aren't pagified at the moment, this should probably be removed
 router.get('/capcodes/init', isSecMode, function (req, res, next) {
   // set current page if specifed as get variable (eg: /?page=2)
-  if (typeof req.query.page !=== 'undefined') {
+  if (typeof req.query.page !== 'undefined') {
     var page = parseInt(req.query.page, 10)
     if (page > 0) { initData.currentPage = page - 1 }
   }
@@ -527,7 +527,7 @@ router.post('/messages', function (req, res, next) {
 
                 if (err) { logger.main.error(err) }
                 if (row) {
-                  if (row.ignore == '1') {
+                  if (row.ignore === '1') {
                     insert = false
                     logger.main.info('Ignoring filtered address: ' + address + ' alias: ' + row.id)
                   } else {
@@ -543,7 +543,7 @@ router.post('/messages', function (req, res, next) {
                   alias_id = data.pluginData.aliasId
                 }
 
-                if (insert == true) {
+                if (insert === true) {
                   db.run('INSERT INTO messages (address, message, timestamp, source, alias_id) VALUES ($mesAddress, $mesBody, $mesDT, $mesSource, $aliasId);', {
                     $mesAddress: address,
                     $mesBody: message,
@@ -656,7 +656,7 @@ router.post('/capcodes', function (req, res, next) {
         } else {
           res.status(200)
           res.send('' + this.lastID)
-          if (!updateRequired || updateRequired == 0) {
+          if (!updateRequired || updateRequired === 0) {
             nconf.set('database:aliasRefreshRequired', 1)
             nconf.save()
           }
@@ -673,7 +673,7 @@ router.post('/capcodes/:id', function (req, res, next) {
   var id = req.params.id || req.body.id || null
   nconf.load()
   var updateRequired = nconf.get('database:aliasRefreshRequired')
-  if (id == 'deleteMultiple') {
+  if (id === 'deleteMultiple') {
     // do delete multiple
     var idList = req.body.deleteList || [0, 0]
     if (!idList.some(isNaN)) {
@@ -684,7 +684,7 @@ router.post('/capcodes/:id', function (req, res, next) {
             res.status(500).send(err)
           } else {
             res.status(200).send({ 'status': 'ok' })
-            if (!updateRequired || updateRequired == 0) {
+            if (!updateRequired || updateRequired === 0) {
               nconf.set('database:aliasRefreshRequired', 1)
               nconf.save()
             }
@@ -696,7 +696,7 @@ router.post('/capcodes/:id', function (req, res, next) {
     }
   } else {
     if (req.body.address && req.body.alias) {
-      if (id == 'new') { id = null }
+      if (id === 'new') { id = null }
       var address = req.body.address || 0
       var alias = req.body.alias || 'null'
       var agency = req.body.agency || 'null'
@@ -723,13 +723,13 @@ router.post('/capcodes/:id', function (req, res, next) {
             res.status(500).send(err)
           } else {
             console.timeEnd('insert')
-            if (updateAlias == 1) {
+            if (updateAlias === 1) {
               console.time('updateMap')
               db.run("UPDATE messages SET alias_id = (SELECT id FROM capcodes WHERE messages.address LIKE address ORDER BY REPLACE(address, '_', '%') DESC LIMIT 1);", function (err) {
                 if (err) { logger.main.error(err); console.timeEnd('updateMap') } else { console.timeEnd('updateMap') }
               })
             } else {
-              if (!updateRequired || updateRequired == 0) {
+              if (!updateRequired || updateRequired === 0) {
                 nconf.set('database:aliasRefreshRequired', 1)
                 nconf.save()
               }
@@ -758,7 +758,7 @@ router.delete('/capcodes/:id', function (req, res, next) {
         res.status(500).send(err)
       } else {
         res.status(200).send({ 'status': 'ok' })
-        if (!updateRequired || updateRequired == 0) {
+        if (!updateRequired || updateRequired === 0) {
           nconf.set('database:aliasRefreshRequired', 1)
           nconf.save()
         }
