@@ -122,7 +122,11 @@ __NOTE:__
 
 ## Contributing
 
-All are welcome to contribute.
+All are welcome to contribute. Contributors should submit a pull request with the requested changes.
+
+CHANGELOG.md is to be updated on each pull request.
+
+If a pull request is the first pull request since a [release](https://github.com/pagermon/pagermon/releases), then the version number should be bumped in `CHANGELOG.md`, `server/app.js`, and `server/package.json`.
 
 ## Versioning
 
