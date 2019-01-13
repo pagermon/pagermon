@@ -581,11 +581,10 @@ router.post('/messages', function(req, res, next) {
               res.status(200);
               res.send('Ignoring duplicate');
             } else {
-              db.from('capcodes', function () {
-                  this.select('id', 'ignore')
-                  .where(db.ref('capcodes.address'), 'like', address)
-                  .orderByRaw("REPLACE(address, '_', '%') DESC LIMIT 1")
-                })
+              db.from('capcodes')
+                  .select('id', 'ignore')
+                  .whereRaw(address+ " LIKE address")
+                  .orderByRaw("REPLACE(address, '_', '%') DESC")
                   .then((row) => {
                     var insert;
                     var alias_id = null;
@@ -633,7 +632,6 @@ router.post('/messages', function(req, res, next) {
                                           
                                           if (row.pluginconf) {
                                             row.pluginconf = parseJSON(row.pluginconf);
-                                            console.log('DEBUG: ' +row.pluginconf)
                                           } else {
                                             row.pluginconf = {};
                                           }
