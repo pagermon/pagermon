@@ -769,7 +769,7 @@ router.post('/capcodes/:id', function(req, res, next) {
           .del()
           .where('id', 'in', idList)
           .then((result) => {
-            res.status(200).send({'status': 'ok'});
+            res.status(200).send({ 'status': 'ok' });
             if (!updateRequired || updateRequired == 0) {
               nconf.set('database:aliasRefreshRequired', 1);
               nconf.save();
@@ -821,6 +821,7 @@ router.post('/capcodes/:id', function(req, res, next) {
           } 
         })
         .then((result) => { 
+          console.log('RESULT: ' +result[0])
           console.timeEnd('insert');
             if (updateAlias == 1) {
               console.time('updateMap');

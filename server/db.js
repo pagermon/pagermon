@@ -38,13 +38,13 @@ function init(release) {
     db.schema.hasTable('capcodes').then(function (exists) {
         if (!exists) {
             db.schema.createTable('capcodes', table => {
-                table.integer('id').primary().unique();
+                table.integer('id').primary().notNullable();
                 table.string('address', [255]).notNullable();
                 table.text('alias').notNullable();
                 table.text('agency');
                 table.text('icon');
                 table.text('color');
-                table.text('pluginconf');
+                table.text('pluginconf')
                 table.integer('ignore').defaultTo(0);
                 table.unique(['id', 'address'], 'cc_pk_idx');
             }).then(function (result) {
@@ -52,7 +52,7 @@ function init(release) {
                 db.schema.hasTable('messages').then(function (exists) {
                     if (!exists) {
                         db.schema.createTable('messages', table => {
-                            table.increments('id').primary().unique().notNullable();
+                            table.increments('id').primary().unique();
                             table.string('address', [255]).notNullable();
                             table.text('message').notNullable();
                             table.text('source').notNullable();
@@ -284,6 +284,24 @@ function init(release) {
                                     console.log('Error getting DB Version')
                                 });
                             
+                            }
+                            if (dbtype == 'mysql') {
+                                db.raw(`
+                                        CREATE TRIGGER capcodes_insert_id 
+                                        BEFORE INSERT 
+                                        ON capcodes 
+                                        FOR EACH ROW BEGIN
+                                            SET NEW.id = (SELECT MAX(id) + 1 FROM capcodes);
+                                            IF ( NEW.id IS NULL ) THEN SET NEW.id = 1;
+                                            END IF;
+                                        END;
+                                        `)
+                                    .then((result) => {
+                                        console.log(result[0])
+                                    })
+                                    .catch((err) => {
+                                        console.log(err)
+                                    })  
                             }
                         }).catch(function (err) {
                             console.error('Error Creating Table ', err);
