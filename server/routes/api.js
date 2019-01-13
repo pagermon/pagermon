@@ -142,9 +142,9 @@ router.get('/messages', isSecMode, function(req, res, next) {
         })
         .modify(function(queryBuilder) {
           if (pdwMode) {
-            queryBuilder.innerJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id').where('capcodes.ignore', '=', '0')
+            queryBuilder.innerJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id').where('capcodes.ignore', 0)
           } else {
-            queryBuilder.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id').where('capcodes.ignore', '=', '0').orWhereNull('capcodes.ignore')
+            queryBuilder.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id').where('capcodes.ignore', 0).orWhereNull('capcodes.ignore')
           }
         })
         .orderByRaw(orderby)
@@ -308,7 +308,7 @@ router.get('/messageSearch', isSecMode, function(req, res, next) {
     var data = []
     db.raw(sql, query)
       .then ((rows) => {
-       console.log(query)
+       console.log(rows.length)
         if (rows) { 
         for (row of rows) {
           if (HideCapcode) {
@@ -590,7 +590,7 @@ router.post('/messages', function(req, res, next) {
                     var alias_id = null;
                     if (row.length > 0) {
                       row = row[0]
-                      if (row.ignore == '1') {
+                      if (row.ignore == 1) {
                         insert = false;
                         logger.main.info('Ignoring filtered address: '+address+' alias: '+row.id);
                       } else {
