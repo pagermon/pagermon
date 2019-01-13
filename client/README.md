@@ -23,6 +23,8 @@ cp config/default.json config/config.json
 
 Edit config/config.json to suit your environment. Identifier should be a small string that will show up in the 'source' column of the messages display.
 
+Some environments send additional information via the "Function Code" in the pager message. Change `sendFunctionCode` to `true` to send this appended to the end of the address of each message. E.g. `POCSAG512: Address: 1000022  Function: 3  Alpha: test` would land on the server with an address of `10000223`.
+
 Check the samples dir for example usage.
 
 ## Contributing
