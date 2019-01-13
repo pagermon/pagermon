@@ -18,6 +18,7 @@ function init(release) {
     if (dbtype == null || dbtype == 'sqlite') {
         nconf.set('database:type', 'sqlite3');
         nconf.set('database:file', './server/messages.db');
+        nconf.save()
     }
 
     var db = require('knex')({
