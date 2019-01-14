@@ -24,7 +24,7 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **Environment information:**
- - OS: [e.g. iOS]
+ - OS: [e.g. Server on Ubuntu on Amazon EC2, Client on MacOS High Sierra]
  - Other details:
 
 **Additional context**
