@@ -738,6 +738,7 @@ router.post('/capcodes', function(req, res, next) {
             })
           }
         })
+        .returning('id')
         .then((result) => { 
           res.status(200);
           res.send(''+result[0]);
@@ -820,6 +821,7 @@ router.post('/capcodes/:id', function(req, res, next) {
             })
           } 
         })
+        .returning('id')
         .then((result) => { 
           console.log('RESULT: ' +result[0])
           console.timeEnd('insert');
