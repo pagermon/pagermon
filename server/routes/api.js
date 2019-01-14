@@ -740,6 +740,21 @@ router.post('/capcodes', function(req, res, next) {
         })
         .returning('id')
         .then((result) => { 
+          if (dbtype != 'sqlite' || dbtype != 'postgres') {
+            // this is handling for the trigger creating the alias - previous command doesn't return correct result. 
+            db.from('capcodes')
+              .max('id as latestid')
+              .first()
+              .returning('latestid')
+              .then((result) => {
+                console.log(result.latestid)
+                resul = result.latestid
+                //handle 0 or null aliases when no aliases exist
+                if (result == null || result == 0) {
+                  result = 1
+                }
+              })
+          }
           res.status(200);
           res.send(''+result);
           if (!updateRequired || updateRequired == 0) {
@@ -793,6 +808,7 @@ router.post('/capcodes/:id', function(req, res, next) {
       var ignore = req.body.ignore || 0;
       var pluginconf = JSON.stringify(req.body.pluginconf) || "{}";
       var updateAlias = req.body.updateAlias || 0;
+      var result
       console.time('insert');
       db.from('capcodes')
         .where('id', '=', id)
@@ -821,32 +837,82 @@ router.post('/capcodes/:id', function(req, res, next) {
             })
           } 
         })
-        .returning('id')
         .then((result) => { 
-          console.log('RESULT: ' +result)
-          console.timeEnd('insert');
+          if (dbtype != 'sqlite' || dbtype != 'postgres') {
+            // this is handling for the trigger creating the alias - previous command doesn't return correct result. 
+            db.from('capcodes')
+              .max('id as latestid')
+              .first()
+              .returning('latestid')
+              .then((result) => {
+                console.log(result.latestid)
+                result = result.latestid
+                //handle 0 or null aliases when no aliases exist
+                 if (result == null || result == 0) {
+                  result = 1
+                 }
+                console.log('RESULT: ' + result)
+                console.timeEnd('insert');
+                if (updateAlias == 1) {
+                  console.time('updateMap');
+                  db('messages')
+                    .update('alias_id', function () {
+                      this.select('id')
+                        .from('capcodes')
+                        .where('messages.address', 'like', 'address')
+                        .orderByRaw("REPLACE(address, '_', '%') DESC LIMIT 1")
+                    })
+                    .catch((err) => {
+                      logger.main.error(err);
+                    })
+                    .finally(() => {
+                      console.timeEnd('updateMap');
+                    })
+                } else {
+                  if (!updateRequired || updateRequired == 0) {
+                    nconf.set('database:aliasRefreshRequired', 1);
+                    nconf.save();
+                  }
+                }
+              })
+              .catch((err) => {
+                //add error logging
+              })
+              .finally((result) => {
+                res.status(200).send({ 'status': 'ok', 'id': result });
+                console.log('DEBUGGERED:' + result)
+              })
+          } else {
+            console.log('RESULT: ' + result)
+            console.timeEnd('insert');
             if (updateAlias == 1) {
               console.time('updateMap');
               db('messages')
-              .update('alias_id', function() {
-                this.select('id')
-                .from('capcodes')
-                .where('messages.address', 'like', 'address')
-                .orderByRaw("REPLACE(address, '_', '%') DESC LIMIT 1")
-              })
-              .catch((err) => {
-                logger.main.error(err);
-              })
-              .finally(() => {
-                console.timeEnd('updateMap');
-              })
+                .update('alias_id', function () {
+                  this.select('id')
+                    .from('capcodes')
+                    .where('messages.address', 'like', 'address')
+                    .orderByRaw("REPLACE(address, '_', '%') DESC LIMIT 1")
+                })
+                .then(() => {
+                  res.status(200).send({ 'status': 'ok', 'id': result });
+                  console.log('DEBUGGERED:' + result)
+                })
+                .catch((err) => {
+                  logger.main.error(err);
+                })
+                .finally(() => {
+                  console.timeEnd('updateMap');
+                })
             } else {
               if (!updateRequired || updateRequired == 0) {
                 nconf.set('database:aliasRefreshRequired', 1);
                 nconf.save();
               }
             }
-            res.status(200).send({'status': 'ok', 'id': result});
+            res.status(200).send({ 'status': 'ok', 'id': result });
+            console.log('DEBUGGERED:' + result)
+          }
         })
         .catch((err) => {
           console.timeEnd('insert');
