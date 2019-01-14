@@ -845,13 +845,11 @@ router.post('/capcodes/:id', function(req, res, next) {
               .first()
               .returning('latestid')
               .then((result) => {
-                console.log(result.latestid)
-                result = result.latestid
+                resultid = result.latestid
                 //handle 0 or null aliases when no aliases exist
-                 if (result == null || result == 0) {
-                  result = 1
+                 if (resultid == null || resultid == 0) {
+                  resultid = 1
                  }
-                console.log('RESULT: ' + result)
                 console.timeEnd('insert');
                 if (updateAlias == 1) {
                   console.time('updateMap');
@@ -874,13 +872,13 @@ router.post('/capcodes/:id', function(req, res, next) {
                     nconf.save();
                   }
                 }
+                return resultid
+              })
+              .then((result) => {
+                res.status(200).send({ 'status': 'ok', 'id': result });
               })
               .catch((err) => {
                 //add error logging
-              })
-              .finally((result) => {
-                res.status(200).send({ 'status': 'ok', 'id': result });
-                console.log('DEBUGGERED:' + result)
               })
           } else {
             console.log('RESULT: ' + result)
@@ -906,8 +904,7 @@ router.post('/capcodes/:id', function(req, res, next) {
                 nconf.save();
               }
             }
-            res.status(200).send({ 'status': 'ok', 'id': result });
-            console.log('DEBUGGERED:' + result)
+            res.status(200).send({ 'status': 'ok', 'id': result })
           }
         })
         .catch((err) => {
