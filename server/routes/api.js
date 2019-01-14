@@ -306,12 +306,12 @@ router.get('/messageSearch', isSecMode, function(req, res, next) {
     sql += " ORDER BY messages.timestamp DESC;";
   } else if (dbtype == 'mysql' || dbtype == 'mariadb') {
     if (query != '') {
-      sql = `SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch
-      FROM messages_search_index
-      LEFT JOIN messages ON messages.id = messages_search_index.rowid `;
+      sql = `SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch,
+            MATCH(messages.message, messages.address, messages.alias_id, messages.source) AGAINST ('?' IN BOOLEAN MODE) as messagematch
+            MATCH(capcodes.alias, capcodes.agency) AGAINST ('?' IN BOOLEAN MODE) as capcodematch;`;
     } else {
       sql = `SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch 
-      FROM messages `;
+            FROM messages `;
     }
     if (pdwMode) {
       sql += " INNER JOIN capcodes ON capcodes.id = messages.alias_id";
@@ -320,17 +320,18 @@ router.get('/messageSearch', isSecMode, function(req, res, next) {
     }
     sql += ' WHERE';
     if (query != '') {
-      sql += ` MATCH ?`;
+      sql += `MATCH(messages.message, messages.address, messages.alias_id, messages.source) AGAINST ('?' IN BOOLEAN MODE)`;
     } else {
       if (address != '')
-        sql += ` messages.address LIKE "${address}" OR messages.source = "${address}" OR `;
+        sql += ` messages.address LIKE "${address}" OR messages.source = "${address}" `;
       if (agency != '')
-        sql += ` messages.alias_id IN (SELECT id FROM capcodes WHERE agency = "${agency}" AND ignore = 0) OR `;
-      sql += ' messages.id IS ?';
+        sql += ` messages.alias_id IN (SELECT id FROM capcodes WHERE agency = "${agency}" AND ignore = 0)`;
     }
     sql += " ORDER BY messages.timestamp DESC;";
   }
+
   if (sql) {
+    console.log(sql)
     var data = []
     db.raw(sql, query)
       .then((rows) => {
@@ -390,6 +391,7 @@ router.get('/messageSearch', isSecMode, function(req, res, next) {
         }
       })
       .catch((err) => {
+        console.log(err)
         console.timeEnd('sql');
         logger.main.error(err);
         res.status(500).send(err);

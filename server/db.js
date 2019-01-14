@@ -304,7 +304,15 @@ function init(release) {
                                         console.log(err)
                                     })
                                 db.raw(`
-                                        ALTER TABLE messages ADD FULLTEXT (message, source);
+                                        ALTER TABLE messages ADD FULLTEXT (message, source, alias_id, address);
+                                        `)
+                                    .then((result) => {
+                                        console.log(result[0])
+                                    })
+                                    .catch((err) => {
+                                        console.log(err)
+                                    })
+                                db.raw(`
                                         ALTER TABLE capcodes ADD FULLTEXT (alias, agency);
                                         `)
                                     .then((result) => {
