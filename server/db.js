@@ -64,7 +64,7 @@ function init(release) {
                             table.index(['id', 'alias_id'], 'msg_alias');
                             table.index(['timestamp', 'alias_id'], 'msg_timestamp');
                         }).then(function (result) {
-                            console.log('Created Table ', result[0]);
+                            console.log('Created Table '+ result[0]);
                             if (dbtype == 'sqlite3') {
                                 db.raw('CREATE VIRTUAL TABLE IF NOT EXISTS messages_search_index USING fts3(message, alias, agency);')
                                     .then((result) => {
@@ -302,7 +302,17 @@ function init(release) {
                                     })
                                     .catch((err) => {
                                         console.log(err)
-                                    })  
+                                    })
+                                db.raw(`
+                                        ALTER TABLE messages ADD FULLTEXT (message, source);
+                                        ALTER TABLE capcodes ADD FULLTEXT (alias, agency);
+                                        `)
+                                    .then((result) => {
+                                        console.log(result[0])
+                                    })
+                                    .catch((err) => {
+                                        console.log(err)
+                                    })
                             }
                         }).catch(function (err) {
                             console.error('Error Creating Table ', err);

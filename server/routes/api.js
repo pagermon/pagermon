@@ -278,7 +278,7 @@ router.get('/messageSearch', isSecMode, function(req, res, next) {
   // set select commands based on query type
   // address can be address or source field
   
-  if(dbtype == 'sqlite3') {
+  if (dbtype == 'sqlite3') {
     var sql
     if (query != '') {
       sql = `SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch
@@ -288,82 +288,108 @@ router.get('/messageSearch', isSecMode, function(req, res, next) {
       sql = `SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch 
       FROM messages `;
     }
-    if(pdwMode) {
+    if (pdwMode) {
       sql += " INNER JOIN capcodes ON capcodes.id = messages.alias_id";
     } else {
       sql += " LEFT JOIN capcodes ON capcodes.id = messages.alias_id ";
     }
     sql += ' WHERE';
-    if(query != '') {
+    if (query != '') {
       sql += ` messages_search_index MATCH ?`;
     } else {
-      if(address != '')
+      if (address != '')
         sql += ` messages.address LIKE "${address}" OR messages.source = "${address}" OR `;
-      if(agency != '')
+      if (agency != '')
         sql += ` messages.alias_id IN (SELECT id FROM capcodes WHERE agency = "${agency}" AND ignore = 0) OR `;
       sql += ' messages.id IS ?';
     }
-  
     sql += " ORDER BY messages.timestamp DESC;";
+  } else if (dbtype == 'mysql' || dbtype == 'mariadb') {
+    if (query != '') {
+      sql = `SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch
+      FROM messages_search_index
+      LEFT JOIN messages ON messages.id = messages_search_index.rowid `;
+    } else {
+      sql = `SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch 
+      FROM messages `;
+    }
+    if (pdwMode) {
+      sql += " INNER JOIN capcodes ON capcodes.id = messages.alias_id";
+    } else {
+      sql += " LEFT JOIN capcodes ON capcodes.id = messages.alias_id ";
+    }
+    sql += ' WHERE';
+    if (query != '') {
+      sql += ` MATCH ?`;
+    } else {
+      if (address != '')
+        sql += ` messages.address LIKE "${address}" OR messages.source = "${address}" OR `;
+      if (agency != '')
+        sql += ` messages.alias_id IN (SELECT id FROM capcodes WHERE agency = "${agency}" AND ignore = 0) OR `;
+      sql += ' messages.id IS ?';
+    }
+    sql += " ORDER BY messages.timestamp DESC;";
+  }
+  if (sql) {
     var data = []
     db.raw(sql, query)
-      .then ((rows) => {
-       console.log(rows.length)
-        if (rows) { 
-        for (row of rows) {
-          if (HideCapcode) {
-            if (!req.isAuthenticated()) {
-              row = {
-                "id": row.id,
-                "message": row.message,
-                "source": row.source,
-                "timestamp": row.timestamp,
-                "alias_id": row.alias_id,
-                "alias": row.alias,
-                "agency": row.agency,
-                "icon": row.icon,
-                "color": row.color,
-                "ignore": row.ignore,
-                "aliasMatch": row.aliasMatch
-              };
+      .then((rows) => {
+        console.log(rows.length)
+        if (rows) {
+          for (row of rows) {
+            if (HideCapcode) {
+              if (!req.isAuthenticated()) {
+                row = {
+                  "id": row.id,
+                  "message": row.message,
+                  "source": row.source,
+                  "timestamp": row.timestamp,
+                  "alias_id": row.alias_id,
+                  "alias": row.alias,
+                  "agency": row.agency,
+                  "icon": row.icon,
+                  "color": row.color,
+                  "ignore": row.ignore,
+                  "aliasMatch": row.aliasMatch
+                };
+              }
+            }
+            if (pdwMode) {
+              if (row.ignore == 0)
+                data.push(row);
+            } else {
+              if (!row.ignore || row.ignore == 0)
+                data.push(row);
             }
           }
-          if (pdwMode) {
-            if (row.ignore == 0)
-              data.push(row);
-          } else {
-            if (!row.ignore || row.ignore == 0)
-              data.push(row);
+        } else {
+          logger.main.info('empty results');
+        }
+        rowCount = data.length
+        if (rowCount > 0) {
+          console.timeEnd('sql');
+          var result = data;
+          console.time('initEnd');
+          initData.msgCount = result.length;
+          initData.pageCount = Math.ceil(initData.msgCount / initData.limit);
+          if (initData.currentPage > initData.pageCount) {
+            initData.currentPage = 0;
           }
-        } 
-      } else {
-        logger.main.info('empty results');
-      }
-      rowCount = data.length
-      if (rowCount > 0) {
-        console.timeEnd('sql');
-        var result = data;
-        console.time('initEnd');
-        initData.msgCount = result.length;
-        initData.pageCount = Math.ceil(initData.msgCount/initData.limit);
-        if (initData.currentPage > initData.pageCount) {
-          initData.currentPage = 0;
-        }
-        initData.offset = initData.limit * initData.currentPage;
-        if (initData.offset < 0) {
-          initData.offset = 0;
-        }
-        initData.offsetEnd = initData.offset + initData.limit;
-        var limitResults = result.slice(initData.offset, initData.offsetEnd);
+          initData.offset = initData.limit * initData.currentPage;
+          if (initData.offset < 0) {
+            initData.offset = 0;
+          }
+          initData.offsetEnd = initData.offset + initData.limit;
+          var limitResults = result.slice(initData.offset, initData.offsetEnd);
   
-        console.timeEnd('initEnd');
-        res.json({'init': initData, 'messages': limitResults});
-      } else {
-        console.timeEnd('sql');
-        res.status(200).json({'init': {}, 'messages': []});
-      }
+          console.timeEnd('initEnd');
+          res.json({ 'init': initData, 'messages': limitResults });
+        } else {
+          console.timeEnd('sql');
+          res.status(200).json({ 'init': {}, 'messages': [] });
+        }
       })
-      .catch ((err) => {
+      .catch((err) => {
         console.timeEnd('sql');
         logger.main.error(err);
         res.status(500).send(err);
@@ -878,7 +904,7 @@ router.post('/capcodes/:id', function(req, res, next) {
                 res.status(200).send({ 'status': 'ok', 'id': result });
               })
               .catch((err) => {
-                //add error logging
+                res.status(500).send(err);
               })
           } else {
             console.log('RESULT: ' + result)
