@@ -894,10 +894,6 @@ router.post('/capcodes/:id', function(req, res, next) {
                     .where('messages.address', 'like', 'address')
                     .orderByRaw("REPLACE(address, '_', '%') DESC LIMIT 1")
                 })
-                .then(() => {
-                  res.status(200).send({ 'status': 'ok', 'id': result });
-                  console.log('DEBUGGERED:' + result)
-                })
                 .catch((err) => {
                   logger.main.error(err);
                 })
