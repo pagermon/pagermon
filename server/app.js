@@ -1,4 +1,4 @@
-var version = "0.2.1-beta";
+var version = "0.2.2-beta";
 var release = 20181118;
 
 var debug = require('debug')('pagermon:server');

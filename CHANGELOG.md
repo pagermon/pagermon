@@ -1,3 +1,7 @@
+# 0.2.2 - 2019-01-15
+
+* Fix security vulnerability - /api/capcodes route unsecured and leaking confidential info when hideCapcode and secMode both disabled
+
 # 0.2.1 - 2019-01-13
 
 * Added CHANGELOG.md (hey, that's this thing!) #192
