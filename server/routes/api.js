@@ -41,26 +41,6 @@ var initData = {};
 var HideCapcode = nconf.get('messages:HideCapcode');
 var apiSecurity = nconf.get('messages:apiSecurity');
 
-if (HideCapcode) {
-  router.get('/capcodes', isLoggedIn, function(req, res, next) {
-    db.serialize(() => {
-      db.all("SELECT * from capcodes ORDER BY REPLACE(address, '_', '%')",function(err,rows){
-        if (err) return next(err);
-        res.json(rows);
-      });
-    });
-  });
-} else {
-  router.get('/capcodes', isSecMode, function(req, res, next) {
-    db.serialize(() => {
-      db.all("SELECT * from capcodes ORDER BY REPLACE(address, '_', '%')",function(err,rows){
-        if (err) return next(err);
-        res.json(rows);
-      });
-    });
-  });
-}
-
 ///////////////////
 //               //
 // GET messages  //
@@ -376,6 +356,16 @@ router.get('/capcodes/init', isSecMode, function(req, res, next) {
 });
 
 // all capcode get methods are only used in admin area, so lock down to logged in users as they may contain sensitive data
+
+router.get('/capcodes', isLoggedIn, function(req, res, next) {
+  db.serialize(() => {
+    db.all("SELECT * from capcodes ORDER BY REPLACE(address, '_', '%')",function(err,rows){
+      if (err) return next(err);
+      res.json(rows);
+    });
+  });
+});
+
 router.get('/capcodes/:id', isLoggedIn, function(req, res, next) {
   var id = req.params.id;
   db.serialize(() => {
