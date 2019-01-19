@@ -304,7 +304,7 @@ function init(release) {
                                         console.log(err)
                                     })
                                 db.raw(`
-                                        ALTER TABLE messages ADD FULLTEXT (message, source, alias_id, address);
+                                        ALTER TABLE messages ADD FULLTEXT (message, source, address);
                                         `)
                                     .then((result) => {
                                         console.log(result[0])

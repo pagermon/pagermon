@@ -306,12 +306,11 @@ router.get('/messageSearch', isSecMode, function(req, res, next) {
     sql += " ORDER BY messages.timestamp DESC;";
   } else if (dbtype == 'mysql' || dbtype == 'mariadb') {
     if (query != '') {
-      sql = `SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch,
-            MATCH(messages.message, messages.address, messages.alias_id, messages.source) AGAINST ('?' IN BOOLEAN MODE) as messagematch
-            MATCH(capcodes.alias, capcodes.agency) AGAINST ('?' IN BOOLEAN MODE) as capcodematch;`;
+      sql = `SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch
+              FROM messages`;
     } else {
       sql = `SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch 
-            FROM messages `;
+              FROM messages`;
     }
     if (pdwMode) {
       sql += " INNER JOIN capcodes ON capcodes.id = messages.alias_id";
@@ -320,24 +319,26 @@ router.get('/messageSearch', isSecMode, function(req, res, next) {
     }
     sql += ' WHERE';
     if (query != '') {
-      sql += `MATCH(messages.message, messages.address, messages.alias_id, messages.source) AGAINST ('?' IN BOOLEAN MODE)`;
+      sql += ` MATCH(messages.message, messages.address, messages.source) AGAINST (? IN BOOLEAN MODE)`;
     } else {
       if (address != '')
-        sql += ` messages.address LIKE "${address}" OR messages.source = "${address}" `;
+        sql += ` messages.address LIKE ? OR messages.source = ? `;
+        query = address
       if (agency != '')
-        sql += ` messages.alias_id IN (SELECT id FROM capcodes WHERE agency = "${agency}" AND ignore = 0)`;
+        sql += ` messages.alias_id IN (SELECT id FROM capcodes WHERE agency = ? AND ignore = 0)`;
+        query = agency
     }
     sql += " ORDER BY messages.timestamp DESC;";
   }
 
   if (sql) {
-    console.log(sql)
+    console.log(query)
     var data = []
     db.raw(sql, query)
       .then((rows) => {
-        console.log(rows.length)
         if (rows) {
-          for (row of rows) {
+          for (row of rows[0]) {
+            console.log(row)
             if (HideCapcode) {
               if (!req.isAuthenticated()) {
                 row = {
