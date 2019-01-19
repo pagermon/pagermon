@@ -501,10 +501,12 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
       }
       
       $scope.setCookie = function(cookie, value) {
-          $cookies.put(cookie, value);
+          var expireDate = new Date();
+          expireDate.setDate(expireDate.getDate() + 30);
+          $cookies.put(cookie, value, {'expires': expireDate});
           $scope.updateData($scope.init.currentPage);
       };
-      
+
       $scope.toggleNotifications = function() {
           if ($scope.notificationEnabled == 'true') {
             $scope.setCookie('notificationEnabled', 'false');
