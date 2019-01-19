@@ -332,6 +332,7 @@ router.get('/messageSearch', isSecMode, function(req, res, next) {
 
   if (sql) {
     var data = []
+    console.time('sql')
     db.raw(sql, query)
       .then((rows) => {
         if (rows) {
@@ -340,7 +341,6 @@ router.get('/messageSearch', isSecMode, function(req, res, next) {
             rows = rows[0]
           }
           for (row of rows) {
-            console.log(row)
             if (HideCapcode) {
               if (!req.isAuthenticated()) {
                 row = {
