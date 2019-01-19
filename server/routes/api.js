@@ -322,16 +322,16 @@ router.get('/messageSearch', isSecMode, function(req, res, next) {
       sql += ` MATCH(messages.message, messages.address, messages.source) AGAINST (? IN BOOLEAN MODE)`;
     } else {
       if (address != '')
-        sql += ` messages.address LIKE "${address}" OR messages.source = "${address}" `;
+        sql += ` messages.address LIKE "${address}" OR messages.source = "${address}" OR`;
       if (agency != '')
-        sql += ` messages.alias_id IN (SELECT id FROM capcodes WHERE agency = "${agency}" AND ignore = 0)`;
+        sql += ` messages.alias_id IN (SELECT id FROM capcodes WHERE agency = "${agency}" AND ignore = 0) OR`;
+      sql += ' messages.id = ?';
     }
     sql += " ORDER BY messages.timestamp DESC;";
   }
 
   if (sql) {
     var data = []
-    console.log('QUERY:'+sql)
     db.raw(sql, query)
       .then((rows) => {
         if (rows) {
