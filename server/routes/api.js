@@ -322,22 +322,24 @@ router.get('/messageSearch', isSecMode, function(req, res, next) {
       sql += ` MATCH(messages.message, messages.address, messages.source) AGAINST (? IN BOOLEAN MODE)`;
     } else {
       if (address != '')
-        sql += ` messages.address LIKE ? OR messages.source = ? `;
-        query = address
+        sql += ` messages.address LIKE "${address}" OR messages.source = "${address}" `;
       if (agency != '')
-        sql += ` messages.alias_id IN (SELECT id FROM capcodes WHERE agency = ? AND ignore = 0)`;
-        query = agency
+        sql += ` messages.alias_id IN (SELECT id FROM capcodes WHERE agency = "${agency}" AND ignore = 0)`;
     }
     sql += " ORDER BY messages.timestamp DESC;";
   }
 
   if (sql) {
-    console.log(query)
     var data = []
+    console.log('QUERY:'+sql)
     db.raw(sql, query)
       .then((rows) => {
         if (rows) {
-          for (row of rows[0]) {
+          if (dbtype == 'mysql' || dbtype == 'mariadb') {
+            // This is required for MySQL Compatibility - SQLite doesn't need this. 
+            rows = rows[0]
+          }
+          for (row of rows) {
             console.log(row)
             if (HideCapcode) {
               if (!req.isAuthenticated()) {
