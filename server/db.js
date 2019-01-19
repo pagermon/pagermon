@@ -286,7 +286,7 @@ function init(release) {
                                 });
                             
                             }
-                            if (dbtype == 'mysql') {
+                            if (dbtype == 'mysql' || dbtype == 'mariadb') {
                                 db.raw(`
                                         CREATE TRIGGER capcodes_insert_id 
                                         BEFORE INSERT 

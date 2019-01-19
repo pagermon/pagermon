@@ -614,7 +614,7 @@ router.post('/messages', function(req, res, next) {
             } else {
               db.from('capcodes')
                   .select('id', 'ignore')
-                  .whereRaw(address+ " LIKE address")
+                .whereRaw(`"${address}" LIKE address`)
                   .orderByRaw("REPLACE(address, '_', '%') DESC")
                   .then((row) => {
                     var insert;
@@ -779,7 +779,7 @@ router.post('/capcodes', function(req, res, next) {
               .returning('latestid')
               .then((result) => {
                 console.log(result.latestid)
-                resul = result.latestid
+                result = result.latestid
                 //handle 0 or null aliases when no aliases exist
                 if (result == null || result == 0) {
                   result = 1
