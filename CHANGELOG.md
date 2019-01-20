@@ -1,3 +1,8 @@
+# 0.2.3 - Unreleased
+
+* Fix cookies expiring on browser close #206
+* Fix refresh aliases button not appearing #194
+
 # 0.2.2 - 2019-01-15
 
 * Fix security vulnerability - /api/capcodes route unsecured and leaking confidential info when hideCapcode and secMode both disabled
