@@ -324,7 +324,7 @@ router.get('/messageSearch', isSecMode, function(req, res, next) {
       if (address != '')
         sql += ` messages.address LIKE "${address}" OR messages.source = "${address}" OR`;
       if (agency != '')
-        sql += ` messages.alias_id IN (SELECT id FROM capcodes WHERE agency = "${agency}" AND ignore = 0) OR`;
+        sql += ` messages.alias_id IN (SELECT id FROM capcodes WHERE agency = "${agency}" AND capcodes.ignore = 0) OR`;
       sql += ' messages.id = ?';
     }
     sql += " ORDER BY messages.timestamp DESC;";
