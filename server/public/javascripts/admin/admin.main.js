@@ -35,7 +35,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
       });
       Api.Settings.get(null, function(results) {
         if (results) {
-          if (results.database && results.database.aliasRefreshRequired == 1) {
+          if (results.settings.database && results.settings.database.aliasRefreshRequired == 1) {
             $scope.aliasRefreshRequired = 1;
             $scope.alertMessage.text = 'Alias refresh required!';
             $scope.alertMessage.type = 'alert-warning';
