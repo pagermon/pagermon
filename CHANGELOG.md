@@ -2,6 +2,7 @@
 
 * Fix cookies expiring on browser close #206
 * Fix refresh aliases button not appearing #194
+* Remove solid white background from Icon images #216
 
 # 0.2.2 - 2019-01-15
 
