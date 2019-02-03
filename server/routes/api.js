@@ -778,7 +778,7 @@ function inParam (sql, arr) {
 function isLoggedIn(req, res, next) {
   // Check if user is logged in for GET methods and API Security
   if (req.method == 'GET') {
-    if (apiSecurity || req.url == '/capcodes') {
+    if (apiSecurity || req.url.match(/capcodes/)) {
       // if user is authenticated in the session, carry on
       if (req.isAuthenticated()) {
         return next();
