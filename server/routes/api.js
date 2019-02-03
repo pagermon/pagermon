@@ -804,7 +804,6 @@ function isLoggedIn(req, res, next) {
           next();
         },
         function (res) {
-          logger.main.debug('API key auth failed, attempting basic auth');
           return res.status(401).json({ error: 'Authentication failed.' });
         }
     }
