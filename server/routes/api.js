@@ -784,7 +784,7 @@ function isLoggedIn(req, res, next) {
         return next();
       } else {
         //logger.main.debug('Basic auth failed, attempting API auth');
-        passport.authenticate('localapikey', { session: false, failWithError: true }),
+        passport.authenticate('localapikey', { session: false, failWithError: true }) (req, res, next),
           function (next) {
             next();
           },
@@ -799,7 +799,7 @@ function isLoggedIn(req, res, next) {
     if (req.isAuthenticated()) {
       return next();
     } else {
-      passport.authenticate('localapikey', { session: false, failWithError: true }),
+      passport.authenticate('localapikey', { session: false, failWithError: true }) (req,res,next),
         function (next) {
           next();
         },
