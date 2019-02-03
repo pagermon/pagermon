@@ -780,39 +780,34 @@ function isLoggedIn(req, res, next) {
   if (req.method == 'GET') {
     if (apiSecurity || req.url == '/capcodes') {
       // if user is authenticated in the session, carry on
-      passport.authenticate('localapikey', { session: false, failWithError: true }),
-        function (req, res, next) {
-          return next();
-        },
-        function (err, req, res, next) {
-          console.log('Error?')
-          console.log(req)
-          logger.main.debug('API key auth failed, attempting basic auth');
-          if (req.isAuthenticated()) {
-            return next();
-          } else {
+      if (req.isAuthenticated()) {
+        return next();
+      } else {
+        //logger.main.debug('Basic auth failed, attempting API auth');
+        passport.authenticate('localapikey', { session: false, failWithError: true }),
+          function (next) {
+            next();
+          },
+          function (res) {
             return res.status(401).json({ error: 'Authentication failed.' });
           }
         }
-      } else {
+    } else {
       return next();
     }
   } else if (req.method == 'POST') { //Check if user is authenticated for POST methods
-    passport.authenticate('localapikey', { session: false, failWithError: true }),
-      function (req, res, next) {
-        return next();
-      },
-      function (err, req, res, next) {
-        logger.main.debug('API key auth failed, attempting basic auth');
-        if (req.isAuthenticated()) {
-          return next();
-        } else {
+    if (req.isAuthenticated()) {
+      return next();
+    } else {
+      passport.authenticate('localapikey', { session: false, failWithError: true }),
+        function (next) {
+          next();
+        },
+        function (res) {
+          logger.main.debug('API key auth failed, attempting basic auth');
           return res.status(401).json({ error: 'Authentication failed.' });
         }
-      }
-    } else {
-    // if not sec mode then continue
-    return next();
+    }
   }
 }
 
