@@ -776,15 +776,14 @@ function inParam (sql, arr) {
 
 // route middleware to make sure a user is logged in
 function isLoggedIn(req, res, next) {
-  // Check if user is logged in for GET methods and API Security
-  if (req.method == 'GET') {
-    if (apiSecurity || req.url.match(/capcodes/)) {
-      // if user is authenticated in the session, carry on
+  if (req.method == 'GET') { 
+    if (apiSecurity || req.url.match(/capcodes/)) { //checkc if Secure mode is on, or if the route is a capcode route
       if (req.isAuthenticated()) {
+        // if user is authenticated in the session, carry on
         return next();
       } else {
         //logger.main.debug('Basic auth failed, attempting API auth');
-        passport.authenticate('localapikey', { session: false, failWithError: true }) (req, res, next),
+        passport.authenticate('localapikey', { session: false, failWithError: true })(req, res, next),
           function (next) {
             next();
           },
