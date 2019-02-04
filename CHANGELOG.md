@@ -1,3 +1,10 @@
+# 0.2.3 - Unreleased
+
+* Fix cookies expiring on browser close #206
+* Fix refresh aliases button not appearing #194
+* Remove solid white background from Icon images #216
+* Fix capcode route not allowing API authentication #218
+
 # 0.2.2 - 2019-01-15
 
 * Fix security vulnerability - /api/capcodes route unsecured and leaking confidential info when hideCapcode and secMode both disabled
