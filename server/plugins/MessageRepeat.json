@@ -8,7 +8,7 @@
         {
             "name": "repeatURI",
             "label": "API URL to forward messaeges to",
-            "description": "This is the URL we should repeat new messages to",
+            "description": "This is the URL we should repeat new messages to. EG: http://yourdomain.com:3000/api/messages",
             "type": "text",
             "required": true
         },
