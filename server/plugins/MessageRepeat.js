@@ -11,7 +11,7 @@ function run (trigger, scope, data, config, callback) {
     var uri = config.repeatURI
     var apikey = config.repeatAPIKEY
     var messageData = {
-      address: data.capcode,
+      address: data.address,
       message: data.message,
       source: data.source
     }
