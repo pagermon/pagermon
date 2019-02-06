@@ -19,7 +19,7 @@ function run (trigger, scope, data, config, callback) {
       url: uri,
       headers: {
         'X-Requested-With': 'XMLHttpRequest',
-        "content-type": 'application/json',
+        'content-type': 'application/json',
         'User-Agent': 'PagerMon Plugin - Message Repeat',
         apikey: apikey,
         json: true
