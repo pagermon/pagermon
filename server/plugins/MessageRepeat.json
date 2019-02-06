@@ -1,0 +1,27 @@
+{
+    "name": "MessageRepeat",
+    "description": "A Plugin to forward message to another PagerMon Server",
+    "disable": false,
+    "trigger": "message",
+    "scope": "before",
+    "config": [
+        {
+            "name": "repeatURI",
+            "label": "API URL to forward messaeges to",
+            "description": "This is the URL we should repeat new messages to",
+            "type": "text",
+            "required": true
+        },
+        {
+            "name": "repeatAPIKEY",
+            "label": "API Key for the URL above",
+            "description": "This is the API key used to authenticate to with the above URL",
+            "type": "text",
+            "required": true
+        }
+
+    ],
+    "aliasConfig": [
+
+    ]
+}
