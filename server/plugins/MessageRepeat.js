@@ -19,10 +19,12 @@ function run (trigger, scope, data, config, callback) {
       url: uri,
       headers: {
         'X-Requested-With': 'XMLHttpRequest',
+        "content-type": "application/json",
         'User-Agent': 'PagerMon Plugin - Message Repeat',
-        apikey: apikey
+        apikey: apikey,
+        json: true
       },
-      body: messageData
+      form: messageData
     }, function (error, response, body) {
       //if (!error && response.statusCode === 200) {
         //logger.main.info('MessageRepeat: Message Sent')
