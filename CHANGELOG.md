@@ -1,11 +1,14 @@
-# 0.2.4 - Unreleased
-
-* Fixed docker support for server app
-* Passed env vars to process-default.json from docker commands
-* Fixed Docker persistence for configuration and messages
-* Added basic docker-compose.yml to start server
-
+<<<<<<< HEAD
 # 0.2.3 - Unreleased
+=======
+# 0.3.0 - Unreleased
+
+* Fix 404 error when trailing slash added to hostname in client config #223
+* Patch Total.js CVE #232
+* Message Repeat Plugin #222
+
+# 0.2.3 - 2019-02-05
+>>>>>>> Update changelog
 
 * Fix cookies expiring on browser close #206
 * Fix refresh aliases button not appearing #194
