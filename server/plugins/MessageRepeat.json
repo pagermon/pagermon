@@ -18,6 +18,13 @@
             "description": "This is the API key used to authenticate to with the above URL",
             "type": "text",
             "required": true
+        },
+        {
+            "name": "repeatUUID",
+            "label": "UUID for outgoing messages",
+            "description": "This is used to stop messages entering a loop - You can enter any random text here",
+            "type": "text",
+            "required": true
         }
 
     ],
