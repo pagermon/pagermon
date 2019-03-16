@@ -13,11 +13,11 @@ function run (trigger, scope, data, config, callback) {
     var uri = config.repeatURI
     var apikey = config.repeatAPIKEY
 
-    if (config.uuid == 0 || !config.uuid) {
+    if (config.repeatUUID == 0 || !config.repeatUUID) {
         logger.main.console.error('MessageRepeat: UUID is not set - Please enter a UUID');
       }
     //Check for message loop
-    if  (data.UUID == config.uuid) {
+    if  (data.UUID == config.repeatUUID) {
       //Loop detected - Close
       logger.main.info('MessageRepeat: Loop detected - Message not forwarded')
       callback()
@@ -27,7 +27,7 @@ function run (trigger, scope, data, config, callback) {
       address: data.address,
       message: data.message,
       source: data.source,
-      UUID: config.uuid,
+      UUID: config.repeatUUID,
     }
     request.post({
       url: uri,
