@@ -7,13 +7,27 @@ var request = require('request')
 var logger = require('../log')
 
 function run (trigger, scope, data, config, callback) {
+
+
   if (config.repeatURI) {
     var uri = config.repeatURI
     var apikey = config.repeatAPIKEY
+
+    if (config.uuid == 0 || !config.uuid) {
+        //UUID is missing - gen
+      }
+    //Check for message loop
+    if  (data.UUID == config.uuid) {
+      //Loop detected - Close
+      logger.main.info('MessageRepeat: Loop detected - Message not forwarded')
+      callback()
+    }
+
     var messageData = {
       address: data.address,
       message: data.message,
-      source: data.source
+      source: data.source,
+      UUID: config.uuid,
     }
     request.post({
       url: uri,
