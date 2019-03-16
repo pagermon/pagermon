@@ -31,7 +31,12 @@ var apikey = nconf.get('apikey');
 var identifier = nconf.get('identifier');
 var sendFunctionCode = nconf.get('sendFunctionCode') || false;
 
-var uri = hostname+"/api/messages";
+//Check if hostname is in a valid format - currently only removes trailing slash - possibly expand to validate the whole URI? 
+if(hostname.substr(-1) === '/') {
+  var uri = hostname.substr(0, hostname.length - 1)+'/api/messages';
+} else {
+  var uri = hostname+'/api/messages'
+}
 
 var http = require('http');
 var request = require('request');
