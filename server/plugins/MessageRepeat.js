@@ -29,6 +29,7 @@ function run (trigger, scope, data, config, callback) {
       address: data.address,
       message: data.message,
       source: data.source,
+      datetime: data.datetime,
       UUID: config.repeatUUID,
     }
     if (do_not_forward == false){
