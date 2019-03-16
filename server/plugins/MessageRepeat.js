@@ -14,7 +14,7 @@ function run (trigger, scope, data, config, callback) {
     var apikey = config.repeatAPIKEY
 
     if (config.uuid == 0 || !config.uuid) {
-        //UUID is missing - gen
+        logger.main.console.error('MessageRepeat: UUID is not set - Please enter a UUID');
       }
     //Check for message loop
     if  (data.UUID == config.uuid) {
