@@ -68,7 +68,7 @@ rl.on('line', (line) => {
   var trimMessage;
   // TODO: pad address with zeros for better address matching
 //  if (line.indexOf('POCSAG512: Address:') > -1) {	
-  if (/^POCSAG(\d+): Address: /.test(line) ) {
+  if (/POCSAG(\d+): Address: /.test(line) ) {
     address = line.match(/POCSAG(\d+): Address:(.*?)Function/)[2].trim();
     if (sendFunctionCode) {
       address += line.match(/POCSAG(\d+): Address:(.*?)Function: (\d)/)[3];
