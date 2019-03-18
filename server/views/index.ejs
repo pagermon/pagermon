@@ -387,11 +387,17 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
         if (queryObj.page > 1)
           qArray.push('page='+queryObj.page);
 
-        var qString = '';
+        // default query string is "/" - this prevents the state from not passing on firefox
+        var qString = '/';
         if (qArray.length > 0) {
           qString = '?'+qArray.join('&');
         }
-        window.history.pushState('', '', qString);
+        // get the current query string - if it's blank or matches the one we're trying to set to, do nothing. This prevents duplicate history entries
+        var curQuery = window.location.search;
+        if (curQuery == '')
+          curQuery = '/';
+        if (curQuery != qString)
+          window.history.pushState('', '', qString);
         
         if (queryObj.q || queryObj.agency || queryObj.address) {
           Api.MessageSearch.get(queryObj).$promise.then(function(results) {
