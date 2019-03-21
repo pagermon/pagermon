@@ -177,7 +177,7 @@ router.get('/messages', isSecMode, function(req, res, next) {
           } 
         })
         .catch(err => { 
-          console.log(err); 
+          logger.main.error(err); 
         })
         .finally(() => {
           if (rowCount > 0) {
@@ -394,7 +394,6 @@ router.get('/messageSearch', isSecMode, function(req, res, next) {
         }
       })
       .catch((err) => {
-        console.log(err)
         console.timeEnd('sql');
         logger.main.error(err);
         res.status(500).send(err);
@@ -703,12 +702,12 @@ router.post('/messages', function(req, res, next) {
                                       })
                                       .catch((err) => {
                                         res.status(500).send(err);
-                                        console.log(err)
+                                        logger.main.error(err)
                                       })          
                             })
                             .catch ((err) => {
                               res.status(500).send(err);
-                              console.log(err)
+                              logger.main.error(err)
                             })
                     } else {
                         res.status(200);
@@ -722,7 +721,7 @@ router.post('/messages', function(req, res, next) {
             })
             .catch((err) => {
              res.status(500).send(err);
-             console.log(err)
+             logger.main.error(err)
             })
       })
   } else {
@@ -778,7 +777,6 @@ router.post('/capcodes', function(req, res, next) {
               .first()
               .returning('latestid')
               .then((result) => {
-                console.log(result.latestid)
                 result = result.latestid
                 //handle 0 or null aliases when no aliases exist
                 if (result == null || result == 0) {
@@ -794,7 +792,7 @@ router.post('/capcodes', function(req, res, next) {
           }
         })
         .catch ((err) => {
-          console.log(err)
+          logger.main.error(err)
           .status(500).send(err);
         })
       logger.main.debug(util.format('%o', req.body || 'no request body'));
@@ -912,7 +910,6 @@ router.post('/capcodes/:id', function(req, res, next) {
                 res.status(500).send(err);
               })
           } else {
-            console.log('RESULT: ' + result)
             console.timeEnd('insert');
             if (updateAlias == 1) {
               console.time('updateMap');
