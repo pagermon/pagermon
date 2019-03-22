@@ -136,6 +136,8 @@ CHANGELOG.md is to be updated on each pull request.
 
 If a pull request is the first pull request since a [release](https://github.com/pagermon/pagermon/releases), then the version number should be bumped in `CHANGELOG.md`, `server/app.js`, and `server/package.json`.
 
+If a database schema change is required, this must be done using KnexJS Migration files. **Insert Instructions for this here**
+
 ## Versioning
 
 We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/pagermon/pagermon/tags).

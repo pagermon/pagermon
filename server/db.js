@@ -24,8 +24,44 @@ function init(release) {
             if (res[0].user_version < 20181118 && res[0].user_version != 0) {
                 logger.main.error("Unsupported Upgrade Version - Upgrade Pagermon Database to v0.2.3 BEFORE upgrading to v0.3.0");
                 process.exit(1)
-            }
-            if (res[0].user_version == 20181118 || res[0].user_version == 0) {
+            } else if (res[0].user_version == 20181118) {
+                logger.main.info('Manually marking database migrations as complete')
+                //This code manually marks migrations complete for existing databases, prevents errors on startup for existing DB's 
+                Promise.all([
+                db('knex_migrations')
+                    .insert({id:1},{name: '20190322204646_create_capcodes_table.js'},{migration_time: moment().unix()})
+                    .then((result) => { 
+                        logger.main.debug('Marking migration 1 as complete for existing database')
+                    })
+                    .catch ((err) => {
+                        logger.main.error('Error marking migration 1 as complete for existing database')
+                    }),
+                db('knex_migrations')
+                    .insert({id:2},{name: '20190322204706_create_messages_table.js'},{migration_time: moment().unix()})
+                    .then((result) => { 
+                        logger.main.debug('Marking migration 2 as complete for existing database')
+                    })
+                    .catch ((err) => {
+                        logger.main.error('Error marking migration 2 as complete for existing database')
+                    }),
+                db('knex_migrations')
+                    .insert({id:3},{name: '20190322204710_create_indexes_triggers.js'},{migration_time: moment().unix()})
+                    .then((result) => {
+                        logger.main.debug('Marking migration 3 as complete for existing database')
+                    })
+                    .catch ((err) => {
+                        logger.main.error('Error marking migration 3 as complete for existing database')
+                    })
+                ])
+                .then ((result) => {
+                    var vervar = 'pragma user_version = ' + release + ';'
+                    db.raw(vervar)
+                })
+                .catch ((err) => {
+                    logger.main.error('Failed to upgrade database')
+                })
+            } else {
+                logger.main.info('Checking for database upgrades')
                 db.migrate.latest()
                 .then((result) => {
                     logger.main.info(result)
