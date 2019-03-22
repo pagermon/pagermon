@@ -420,12 +420,15 @@ router.get('/capcodes/init', isLoggedIn, function(req, res, next) {
 // all capcode get methods are only used in admin area, so lock down to logged in users as they may contain sensitive data
 
 router.get('/capcodes', isLoggedIn, function(req, res, next) {
-  db.serialize(() => {
-    db.all("SELECT * from capcodes ORDER BY REPLACE(address, '_', '%')",function(err,rows){
-      if (err) return next(err);
+  db.from('capcodes')
+    .select('*')
+    .orderByRaw("REPLACE(address, '_', '%')")
+    .then((rows) => {
       res.json(rows);
-    });
-  });
+    })
+    .catch((err) => {
+      return next(err)
+    })
 });
 
 router.get('/capcodes/:id', isLoggedIn, function(req, res, next) {

@@ -1,6 +1,6 @@
 {
   "name": "pagermon",
-  "version": "0.3.0-alpha",
+  "version": "0.3.0-beta",
   "private": true,
   "license": "Unlicense",
   "scripts": {
@@ -26,7 +26,7 @@
     "express-basic-auth": "^1.1.1",
     "express-messages": "^1.0.1",
     "express-session": "^1.15.3",
-    "knex": "latest",
+    "knex": "^0.16.3",
     "moment": "^2.18.1",
     "morgan": "~1.9.1",
     "mysql": "^2.16.0",
