@@ -64,7 +64,8 @@ function init(release) {
                 logger.main.info('Checking for database upgrades')
                 db.migrate.latest()
                 .then((result) => {
-                    logger.main.info(result)
+                    var vervar = 'pragma user_version = ' + release + ';'
+                    db.raw(vervar)
                 })
                 .catch((err) => {
                     logger.main.error(err)
@@ -74,7 +75,6 @@ function init(release) {
     } else {
         db.migrate.latest()
         .then((result) => {
-            logger.main.info(result)
         })
         .catch((err) => {
             logger.main.error(err)
