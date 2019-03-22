@@ -26,7 +26,7 @@ function init(release) {
                 logger.main.error("Unsupported Upgrade Version - Upgrade Pagermon Database to v0.2.3 BEFORE upgrading to v0.3.0");
                 process.exit(1)
             }
-            if (res[0].user_version == 20181118 || res[0].user_version != 0) {
+            if (res[0].user_version == 20181118 || res[0].user_version == 0) {
                 db.migrate.latest()
                 .then((result) => {
                     logger.main.info(result)
