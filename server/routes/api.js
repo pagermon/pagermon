@@ -37,6 +37,7 @@ var initData = {};
 // auth variables
 var HideCapcode = nconf.get('messages:HideCapcode');
 var apiSecurity = nconf.get('messages:apiSecurity');
+var dbtype = nconf.get('database:type')
 
 if (HideCapcode) {
   router.get('/capcodes', isLoggedIn, function(req, res, next) {
@@ -808,8 +809,9 @@ router.post('/capcodes/:id', function(req, res, next) {
     }
   } else {
     if (req.body.address && req.body.alias) {
-      if (id == 'new')
+      if (id == 'new') {
         id = null;
+      }
       var address = req.body.address || 0;
       var alias = req.body.alias || 'null';
       var agency = req.body.agency || 'null';
@@ -918,6 +920,7 @@ router.post('/capcodes/:id', function(req, res, next) {
         })
         .catch((err) => {
           console.timeEnd('insert');
+          logger.main.error(err)
           res.status(500).send(err);
         })
         logger.main.debug(util.format('%o',req.body || 'request body empty'));
