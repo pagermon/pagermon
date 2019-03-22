@@ -7,6 +7,7 @@ var passport = require('passport');
 var util = require('util');
 var pluginHandler = require('../plugins/pluginHandler');
 var logger = require('../log');
+var db = require('../knex/knex.js');
 require('../config/passport')(passport); // pass passport for configuration
 
 var nconf = require('nconf');
@@ -22,26 +23,6 @@ router.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 router.use(function (req, res, next) {
   res.locals.login = req.isAuthenticated();
   next();
-});
-
-var dbtype = nconf.get('database:type')
-var dbfile = nconf.get('database:file')
-var dbserver = nconf.get('database:server')
-var dbdb = nconf.get('database:database')
-var dbusername = nconf.get('database:username')
-var dbpassword = nconf.get('database:password')
-
-var db = require('knex')({
-  client: dbtype,
-  connection: {
-    filename: dbfile,
-    host : dbserver,
-    user : dbusername,
-    password : dbpassword,
-    database : dbdb
-  },
-  useNullAsDefault: true,
-  debug: true,
 });
 
 // defaults
