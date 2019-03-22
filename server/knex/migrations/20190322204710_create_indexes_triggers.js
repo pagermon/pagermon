@@ -108,6 +108,6 @@ exports.up = function(db, Promise) {
     } else return
 };
 
-exports.down = function(knex, Promise) {
+exports.down = function(db, Promise) {
   
 };

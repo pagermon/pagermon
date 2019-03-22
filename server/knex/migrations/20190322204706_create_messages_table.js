@@ -15,6 +15,6 @@ exports.up = function(db, Promise) {
 }
 
 
-exports.down = function(knex, Promise) {
+exports.down = function(db, Promise) {
   
 };
