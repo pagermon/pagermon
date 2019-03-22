@@ -81,7 +81,7 @@ exports.up = function(db, Promise) {
                 END;
             `)
             .then((result) => {
-                logger.main.info(result[0])
+
             })
             .catch((err) => {
 
@@ -90,7 +90,7 @@ exports.up = function(db, Promise) {
                 ALTER TABLE messages ADD FULLTEXT (message, source, address);
             `)
             .then((result) => {
-                logger.main.info(result[0])
+
             })
             .catch((err) => {
 
@@ -99,10 +99,10 @@ exports.up = function(db, Promise) {
                 ALTER TABLE capcodes ADD FULLTEXT (alias, agency);
             `)
             .then((result) => {
-                logger.main.info(result[0])
+
             })
             .catch((err) => {
-                logger.main.error(err)
+
             })
         ])
     } else return
