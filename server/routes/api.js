@@ -39,24 +39,6 @@ var HideCapcode = nconf.get('messages:HideCapcode');
 var apiSecurity = nconf.get('messages:apiSecurity');
 var dbtype = nconf.get('database:type')
 
-if (HideCapcode) {
-  router.get('/capcodes', isLoggedIn, function(req, res, next) {
-    db.select('*').from('capcodes').orderByRaw("REPLACE(address, '_', '%')").then((rows) => {
-      res.json(rows);
-    }).catch((err) => {
-      return next(err);
-    })
-});
-} else {
-  router.get('/capcodes', isSecMode, function(req, res, next) {
-    db.select('*').from('capcodes').orderByRaw("REPLACE(address, '_', '%')").then((rows) => {
-      res.json(rows);
-    }).catch((err) => {
-      return next(err);
-    })
-});
-}
-
 ///////////////////
 //               //
 // GET messages  //
