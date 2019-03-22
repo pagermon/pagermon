@@ -109,9 +109,9 @@ var sessSet = {
     resave: 'true',
     secret: secret
 }
-var hostname = process.env.HOSTNAME;
-if (hostname)
-    sessSet.cookie.domain = '.'+hostname;
+
+if (process.env.HOSTNAME && process.env.USE_COOKIE_HOST)
+    sessSet.cookie.domain = '.'+process.env.HOSTNAME;
 
 app.use(session(sessSet));
 app.use(passport.initialize());

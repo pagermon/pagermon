@@ -15,6 +15,6 @@ $url = $appurl
 			source=$sourcename
    }
 $json = $data | ConvertTo-Json
-$response = Invoke-RestMethod $url -Method post -Body $json -Header @{"apikey"=$apikey} -ContentType 'application/json'
+$response = Invoke-RestMethod $url -Method post -Body $json -Header @{"apikey"=$apikey} -ContentType 'application/json' -UserAgent 'PagerMon psclient.ps1'
 
 exit

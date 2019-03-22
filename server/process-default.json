@@ -20,6 +20,7 @@
   "env": {
     "NODE_ENV": "production",
     "HOSTNAME": "",
+    "USE_COOKIE_HOST": false,
     "APP_NAME": "pagermon"
   }
 }

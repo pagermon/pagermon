@@ -64,7 +64,7 @@ if (HideCapcode) {
 ///////////////////
 
 /* GET message listing. */
-router.get('/messages', isSecMode, function(req, res, next) {
+router.get('/messages', isLoggedIn, function(req, res, next) {
   nconf.load();
   console.time('init');
   var pdwMode = nconf.get('messages:pdwMode');
@@ -176,7 +176,7 @@ router.get('/messages', isSecMode, function(req, res, next) {
 });
 });
 
-router.get('/messages/:id', isSecMode, function(req, res, next) {
+router.get('/messages/:id', isLoggedIn, function(req, res, next) {
   nconf.load();
   var pdwMode = nconf.get('messages:pdwMode');
   var id = req.params.id;
@@ -222,7 +222,7 @@ router.get('/messages/:id', isSecMode, function(req, res, next) {
 });
 
 /* GET message search */
-router.get('/messageSearch', isSecMode, function(req, res, next) {
+router.get('/messageSearch', isLoggedIn, function(req, res, next) {
   nconf.load();
   console.time('init');
   var dbtype = nconf.get('database:type')
@@ -391,7 +391,7 @@ router.get('/messageSearch', isSecMode, function(req, res, next) {
 
 
 // capcodes aren't pagified at the moment, this should probably be removed
-router.get('/capcodes/init', isSecMode, function(req, res, next) {
+router.get('/capcodes/init', isLoggedIn, function(req, res, next) {
   //set current page if specifed as get variable (eg: /?page=2)
   if (typeof req.query.page !== 'undefined') {
     var page = parseInt(req.query.page, 10);
@@ -418,6 +418,16 @@ router.get('/capcodes/init', isSecMode, function(req, res, next) {
 });
 
 // all capcode get methods are only used in admin area, so lock down to logged in users as they may contain sensitive data
+
+router.get('/capcodes', isLoggedIn, function(req, res, next) {
+  db.serialize(() => {
+    db.all("SELECT * from capcodes ORDER BY REPLACE(address, '_', '%')",function(err,rows){
+      if (err) return next(err);
+      res.json(rows);
+    });
+  });
+});
+
 router.get('/capcodes/:id', isLoggedIn, function(req, res, next) {
   var id = req.params.id;
     db.from('capcodes')
@@ -497,24 +507,12 @@ router.get('/capcodes/agency/:id', isLoggedIn, function(req, res, next) {
       })
 });
 
-// lock down POST routes
-router.all('*',
-  passport.authenticate('localapikey', { session: false, failWithError: true }),
-  function(req, res, next) {
-    next();
-  },
-  function(err, req, res, next) {
-    logger.main.debug('API key auth failed, attempting basic auth');
-    isLoggedIn(req, res, next);
-  }
-);
-
 //////////////////////////////////
 //
 // POST calls below
 //
 //////////////////////////////////
-router.post('/messages', function(req, res, next) {
+router.post('/messages', isLoggedIn, function(req, res, next) {
   nconf.load();
   if (req.body.address && req.body.message) {
     var filterDupes = nconf.get('messages:duplicateFiltering');
@@ -711,7 +709,7 @@ router.post('/messages', function(req, res, next) {
   }
 });
 
-router.post('/capcodes', function(req, res, next) {
+router.post('/capcodes', isLoggedIn, function(req, res, next) {
   nconf.load();
   var updateRequired = nconf.get('database:aliasRefreshRequired');
   if (req.body.address && req.body.alias) {
@@ -783,7 +781,7 @@ router.post('/capcodes', function(req, res, next) {
   }
 });
 
-router.post('/capcodes/:id', function(req, res, next) {
+router.post('/capcodes/:id', isLoggedIn, function(req, res, next) {
   var id = req.params.id || req.body.id || null;
   nconf.load();
   var updateRequired = nconf.get('database:aliasRefreshRequired');
@@ -930,7 +928,7 @@ router.post('/capcodes/:id', function(req, res, next) {
   }
 });
 
-router.delete('/capcodes/:id', function(req, res, next) {
+router.delete('/capcodes/:id', isLoggedIn, function(req, res, next) {
   // delete single alias
   var id = parseInt(req.params.id, 10);
   nconf.load();
@@ -952,7 +950,7 @@ router.delete('/capcodes/:id', function(req, res, next) {
     logger.main.debug(util.format('%o',req.body || 'request body empty'));
 });
 
-router.post('/capcodeRefresh', function(req, res, next) {
+router.post('/capcodeRefresh', isLoggedIn, function(req, res, next) {
   nconf.load();
   console.time('updateMap');
   db('messages').update('alias_id', function() {
@@ -983,26 +981,36 @@ function inParam (sql, arr) {
 
 // route middleware to make sure a user is logged in
 function isLoggedIn(req, res, next) {
-  // if user is authenticated in the session, carry on
-  if (req.isAuthenticated()) {
-    return next();
-  } else {
-    return res.status(401).json({error: 'Authentication failed.'});
-  }
-}
-
-// route middleware to make sure a user is logged in, only if in sec mode
-function isSecMode(req, res, next) {
-  if (apiSecurity) {
-    // if user is authenticated in the session, carry on
+  if (req.method == 'GET') { 
+    if (apiSecurity || req.url.match(/capcodes/)) { //checkc if Secure mode is on, or if the route is a capcode route
+      if (req.isAuthenticated()) {
+        // if user is authenticated in the session, carry on
+        return next();
+      } else {
+        //logger.main.debug('Basic auth failed, attempting API auth');
+        passport.authenticate('localapikey', { session: false, failWithError: true })(req, res, next),
+          function (next) {
+            next();
+          },
+          function (res) {
+            return res.status(401).json({ error: 'Authentication failed.' });
+          }
+        }
+    } else {
+      return next();
+    }
+  } else if (req.method == 'POST') { //Check if user is authenticated for POST methods
     if (req.isAuthenticated()) {
       return next();
     } else {
-      return res.status(401).json({error: 'Authentication failed.'});
+      passport.authenticate('localapikey', { session: false, failWithError: true }) (req,res,next),
+        function (next) {
+          next();
+        },
+        function (res) {
+          return res.status(401).json({ error: 'Authentication failed.' });
+        }
     }
-  } else {
-    // if not sec mode then continue
-    return next();
   }
 }
 

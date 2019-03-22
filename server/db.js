@@ -9,7 +9,6 @@ nconf.load();
 // initialize the database if it does not already exist
 function init(release) {
     var dbtype = nconf.get('database:type')
-
     //This is here for compatibility with old versions. Will set the DB type then exit. 
     if (dbtype == null || dbtype == 'sqlite') {
         nconf.set('database:type', 'sqlite3');
