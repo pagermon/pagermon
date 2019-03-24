@@ -22,12 +22,13 @@ function init(release) {
     if (dbtype == 'sqlite3') {
         db.raw(`pragma user_version;`).then(function (res) {
             logger.main.info("Current DB version: " + res[0].user_version);
+            // Check if database is currently v0.2.3 if not force upgrade to that first
             if (res[0].user_version < 20181118 && res[0].user_version != 0) {
                 logger.main.error("Unsupported Upgrade Version - Upgrade Pagermon Database to v0.2.3 BEFORE upgrading to v0.3.0");
                 process.exit(1)
             } else if (res[0].user_version == 20181118) {
-                logger.main.info('Performing upgrade to v0.3.0 - Manually marking database migrations as complete')
-                //This code manually marks migrations complete for existing databases, prevents errors on startup for existing DB's 
+                //This code manually marks migrations complete for existing databases, prevents errors on startup for existing DB's
+                logger.main.info('Performing upgrade to v0.3.0 - Manually marking database migrations as complete') 
                 var datetime = moment().unix()
                 var migration1 = {id:1,name: '20190322204646_create_capcodes_table.js',batch:1,migration_time: datetime}
                 var migration2 = {id:2,name: '20190322204706_create_messages_table.js',batch:1,migration_time: datetime}
