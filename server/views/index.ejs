@@ -68,7 +68,11 @@
               </td>
             <% } %>
             <td class="shrink clickable-td" ng-if="message.agency" uib-popover-template="'templates/popover.html'" popover-append-to-body=true ng-click="popoverEl = 'agency'" popover-trigger="'outsideClick'">
+              <% if (iconsize == 'small') { %>
+              <span class="fa-stack fa-fw" style="color: {{message.color || 'grey'}};">
+              <% } else { %>
               <span class="fa-stack fa-lg fa-fw" style="color: {{message.color || 'grey'}};">
+              <% } %>
                 <i class="fa fa-circle fa-stack-2x"></i>
                 <i ng-if="message.icon" class="fa fa-{{message.icon}} fa-stack-1x fa-inverse"></i>
                 <i ng-if="!message.icon" class="fa fa-question fa-stack-1x fa-inverse"></i>
@@ -76,7 +80,11 @@
               <strong style="vertical-align: middle;">{{message.agency || ''}}</strong>
             </td>
             <td class="shrink" ng-if="!message.agency">
+              <% if (iconsize == 'small') { %>
+              <span class="fa-stack fa-fw" style="color: {{message.color || 'grey'}};">
+              <% } else { %>
               <span class="fa-stack fa-lg fa-fw" style="color: {{message.color || 'grey'}};">
+              <% } %>
                 <i class="fa fa-circle fa-stack-2x"></i>
                 <i ng-if="message.icon" class="fa fa-{{message.icon}} fa-stack-1x fa-inverse"></i>
                 <i ng-if="!message.icon" class="fa fa-question fa-stack-1x fa-inverse"></i>
