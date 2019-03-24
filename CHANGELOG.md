@@ -1,5 +1,6 @@
 # 0.3.0 - Unreleased
 
+* Add ability to select the icon size on the homepage
 * Fix 404 error when trailing slash added to hostname in client config #223
 * Patch Total.js CVE #232
 * Message Repeat Plugin #222
