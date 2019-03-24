@@ -26,7 +26,7 @@ function init(release) {
                 logger.main.error("Unsupported Upgrade Version - Upgrade Pagermon Database to v0.2.3 BEFORE upgrading to v0.3.0");
                 process.exit(1)
             } else if (res[0].user_version == 20181118) {
-                logger.main.info('Manually marking database migrations as complete')
+                logger.main.info('Performing upgrade to v0.3.0 - Manually marking database migrations as complete')
                 //This code manually marks migrations complete for existing databases, prevents errors on startup for existing DB's 
                 var datetime = moment().unix()
                 var migration1 = {id:1,name: '20190322204646_create_capcodes_table.js',batch:1,migration_time: datetime}
