@@ -14,6 +14,7 @@ router.use(function (req, res, next) {
   res.locals.hidecapcode = nconf.get('messages:HideCapcode');
   res.locals.hidesource = nconf.get('messages:HideSource');
   res.locals.apisecurity = nconf.get('messages:apiSecurity');
+  res.locals.iconsize = nconf.get('messages:iconsize')
   next();
 });
 
