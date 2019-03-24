@@ -1,5 +1,6 @@
 var fs = require('fs');
 var logger = require('./log');
+var moment = require('moment');
 var nconf = require('nconf');
 var conf_file = './config/config.json';
 var db = require('./knex/knex.js');
@@ -27,9 +28,13 @@ function init(release) {
             } else if (res[0].user_version == 20181118) {
                 logger.main.info('Manually marking database migrations as complete')
                 //This code manually marks migrations complete for existing databases, prevents errors on startup for existing DB's 
+                var datetime = moment().unix()
+                var migration1 = {id:1,name: '20190322204646_create_capcodes_table.js',batch:1,migration_time: datetime}
+                var migration2 = {id:2,name: '20190322204706_create_messages_table.js',batch:1,migration_time: datetime}
+                var migration3 = {id:3,name: '20190322204710_create_indexes_triggers.js',batch:1,migration_time: datetime}
                 Promise.all([
                 db('knex_migrations')
-                    .insert({id:1},{name: '20190322204646_create_capcodes_table.js'},{migration_time: moment().unix()})
+                    .insert(migration1)
                     .then((result) => { 
                         logger.main.debug('Marking migration 1 as complete for existing database')
                     })
@@ -37,7 +42,7 @@ function init(release) {
                         logger.main.error('Error marking migration 1 as complete for existing database')
                     }),
                 db('knex_migrations')
-                    .insert({id:2},{name: '20190322204706_create_messages_table.js'},{migration_time: moment().unix()})
+                    .insert(migration2)
                     .then((result) => { 
                         logger.main.debug('Marking migration 2 as complete for existing database')
                     })
@@ -45,7 +50,7 @@ function init(release) {
                         logger.main.error('Error marking migration 2 as complete for existing database')
                     }),
                 db('knex_migrations')
-                    .insert({id:3},{name: '20190322204710_create_indexes_triggers.js'},{migration_time: moment().unix()})
+                    .insert(migration3)
                     .then((result) => {
                         logger.main.debug('Marking migration 3 as complete for existing database')
                     })
@@ -56,6 +61,12 @@ function init(release) {
                 .then ((result) => {
                     var vervar = 'pragma user_version = ' + release + ';'
                     db.raw(vervar)
+                    .then((result) => {
+                        logger.main.info('Setting DB to version: ' + release)
+                    })
+                    .catch((err) => {
+                        logger.main.error('Error setting DB Version' + err)
+                    })
                 })
                 .catch ((err) => {
                     logger.main.error('Failed to upgrade database')
