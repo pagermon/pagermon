@@ -53,6 +53,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/davidmckenzie/pagermon.git"
+    "url": "https://github.com/pagermon/pagermon.git"
   }
 }
