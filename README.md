@@ -96,27 +96,28 @@ These instructions will get you a copy of the project up and running on your loc
 
 1) Build the container:
 ```
-    $ docker build -f docker/Dockerfile -t pagermon .
+    $ docker-compose build
 ```
 
 2) Run the container
 
 ​	In __foreground__:
 ```
-    $ docker run --name pagermon -p 3000:3000 -v $(pwd)/data:/data --rm -it pagermon
+    $ docker-compose up 
 ```
 
 OR
 
-​	As __daemon__ (`-d`) with autorun (`--restart always` = startup ):
+​	As __daemon__ (`-d`):
 ```
-    $ docker run --restart --name pagermon -d -p 3000:3000 -v $(pwd)/data:/data pagermon
+    $ docker-compose up -d
 ```
 __NOTE:__
    - The database will be located relativ to your current working directory under `./data/messages.db` (by `-v $(pwd)/data:/data`)
    - The local port `3000` will be forwarded to the docker container to port `3000` (by `-p 3000:3000`)
    - In case you would like to follow the logfile, run `docker logs -f pagermon` (by `--name pagermon `)
-   - To shutdown and remove the container, run `docker rm -fv pagermon`
+   - To shutdown and remove the container, run `docker-compose down`
+   - If you make changes to the app for testing, you will need to re-build the image, run `docker-compose down && docker-compose up --build`
 
 3) Follow __Step 5__ from __Running the server____
 
