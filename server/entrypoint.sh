@@ -2,19 +2,10 @@
 
 cd /app
 
-<<<<<<< HEAD
-if [ -f /data/messages.db ]; then
-    ln -s "/data/messages.db" ./messages.db
-else
-    # create file on first run, use existing file thereafter
-    mkdir -p /data && touch /data/messages.db && ln -s "/data/messages.db" ./messages.db
-fi
-=======
 if [ -z "$NODE_ENV" ]; then
   echo "NODE_ENV was not set -- Defaulting to production"
   NODE_ENV=production
 fi
-
 
 if [ -z "$HOSTNAME" ]; then
   echo "HOSTNAME was not set -- Defaulting to localhost"
@@ -46,11 +37,17 @@ else
 fi
 
 ## Create and link default config.json file, if it doesn't exist
->>>>>>> 45c79fa150d1d4fb9237171b48950537f5e20af2
 if [ -f /data/config.json ]; then
     ln -s "/data/config.json" ./config/config.json
 else
     cp ./config/default.json /data/config.json && ln -s "/data/config.json" ./config/config.json
+fi
+
+## Create and link default process.json file for PM2 server
+if [ -f /data/process.json ]; then
+    ln -s "/data/process.json" ./process.json
+else
+    cp ./process-default.json /data/process.json && ln -s "/data/process.json" ./process.json
 fi
 
 node app.js
