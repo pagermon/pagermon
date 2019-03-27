@@ -96,7 +96,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 1) Build the container:
 ```
-    $ docker build -f docker/Dockerfile -t pagermon .
+    $ docker build -f Dockerfile -t pagermon .
 ```
 
 2) Run the container
