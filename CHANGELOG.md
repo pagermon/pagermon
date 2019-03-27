@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 # 0.3.0 - Unreleased
 
 * Fix display issues on large resolution mobile devices #241
@@ -16,9 +17,14 @@
 <<<<<<< HEAD
 # 0.2.3 - Unreleased
 =======
+=======
+>>>>>>> fix changelog
 # 0.3.0 - Unreleased
 
 * Update old repository URL in package.json #240
+=======
+* Fix display issues on large resolution mobile devices #241
+>>>>>>> Update CHANGELOG.md
 * Add ability to select the icon size on the homepage #239
 * Fix 404 error when trailing slash added to hostname in client config #223
 * Patch Total.js CVE #232
