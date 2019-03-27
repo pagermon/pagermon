@@ -1,46 +1,21 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
 # 0.3.0 - Unreleased
 
-* Fix display issues on large resolution mobile devices #241
 * Update old repository URL in package.json #240
+* Fix display issues on large resolution mobile devices #241
 * Add ability to select the icon size on the homepage #239
 * Fix 404 error when trailing slash added to hostname in client config #223
 * Patch Total.js CVE #232
 * Message Repeat Plugin #222
 * Parse timestamps in messages #72
 * Compatibility with multimon timestamp option #57
-* Fix URL state not updating properly on Firefox #229
+* Proper support for Docker / docker-compose
 
 # 0.2.3 - 2019-02-05
-=======
-<<<<<<< HEAD
-# 0.2.3 - Unreleased
-=======
-=======
->>>>>>> fix changelog
-# 0.3.0 - Unreleased
-
-* Update old repository URL in package.json #240
-=======
-* Fix display issues on large resolution mobile devices #241
->>>>>>> Update CHANGELOG.md
-* Add ability to select the icon size on the homepage #239
-* Fix 404 error when trailing slash added to hostname in client config #223
-* Patch Total.js CVE #232
-* Message Repeat Plugin #222
-* Parse timestamps in messages #72
-* Compatibility with multimon timestamp option #57
-
-# 0.2.3 - 2019-02-05
->>>>>>> Update changelog
->>>>>>> Update changelog
 
 * Fix cookies expiring on browser close #206
 * Fix refresh aliases button not appearing #194
 * Remove solid white background from Icon images #216
 * Fix capcode route not allowing API authentication #218
-
 # 0.2.2 - 2019-01-15
 
 * Fix security vulnerability - /api/capcodes route unsecured and leaking confidential info when hideCapcode and secMode both disabled
