@@ -1,228 +1,97 @@
-var sqlite3 = require('sqlite3').verbose();
 var fs = require('fs');
 var logger = require('./log');
+var moment = require('moment');
+var nconf = require('nconf');
+var conf_file = './config/config.json';
+var db = require('./knex/knex.js');
+nconf.file({file: conf_file});
+nconf.load();
 
 // initialize the database if it does not already exist
 function init(release) {
-    var db = new sqlite3.Database('./messages.db', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, function (err) {
-        if (err) { logger.main.error(err.message); } else {
-            // initialise capcodes table
-            var sql =  "CREATE TABLE IF NOT EXISTS capcodes ( ";
-                sql += "id INTEGER PRIMARY KEY AUTOINCREMENT, ";
-                sql += "address TEXT NOT NULL, ";
-                sql += "alias TEXT NOT NULL, ";
-                sql += "agency TEXT, ";
-                sql += "icon TEXT, ";
-                sql += "color TEXT, ";
-                sql += "pluginconf TEXT, ";
-                sql += "ignore INTEGER DEFAULT 0 ); ";
-                // initialise messages table
-                sql += "CREATE TABLE IF NOT EXISTS messages ( ";
-                sql += "id INTEGER UNIQUE, ";
-                sql += "address TEXT NOT NULL, ";
-                sql += "message TEXT NOT NULL, ";
-                sql += "source TEXT NOT NULL, ";
-                sql += "timestamp INTEGER, ";
-                sql += "alias_id INTEGER, ";
-                sql += "PRIMARY KEY(`id`), FOREIGN KEY(`alias_id`) REFERENCES capcodes(id) ); ";
-                // create indexes and the fts table
-                sql += "CREATE INDEX IF NOT EXISTS `msg_index` ON `messages` (`address`,`id` DESC); ";
-                sql += "CREATE INDEX IF NOT EXISTS `msg_alias` ON `messages` (`id` DESC, `alias_id`); ";
-                sql += "CREATE INDEX IF NOT EXISTS `msg_timestamp` ON `messages` (`timestamp` DESC, `alias_id`);"
-                sql += "CREATE UNIQUE INDEX IF NOT EXISTS `cc_pk_idx` ON `capcodes` (`id`,`address` DESC); ";
-                sql += "CREATE VIRTUAL TABLE IF NOT EXISTS messages_search_index USING fts3(message, alias, agency); ";
-                // Create triggers to update the search table on insert/update/delete
-                sql += `CREATE TRIGGER IF NOT EXISTS messages_search_index_insert AFTER INSERT ON messages BEGIN
-                    INSERT INTO messages_search_index (
-                        rowid,
-                        message,
-                        alias,
-                        agency
-                    )
-                    VALUES(
-                        new.id,
-                        new.message,
-                        (SELECT alias FROM capcodes WHERE id = new.alias_id),
-                        (SELECT agency FROM capcodes WHERE id = new.alias_id)
-                    );
-                    END;`;
-                sql += `CREATE TRIGGER IF NOT EXISTS messages_search_index_update AFTER UPDATE ON messages BEGIN
-                    UPDATE messages_search_index SET
-                        message = new.message,
-                        alias = (SELECT alias FROM capcodes WHERE id = new.alias_id),
-                        agency = (SELECT agency FROM capcodes WHERE id = new.alias_id)
-                    WHERE rowid = old.id;
-                    END;`;
-                sql += `CREATE TRIGGER IF NOT EXISTS messages_search_index_delete AFTER DELETE ON messages BEGIN
-                    DELETE FROM messages_search_index WHERE rowid = old.id;
-                    END;`;
-                // Populate the search index if not already populated
-                sql += `INSERT INTO messages_search_index (rowid, message, alias, agency)
-                    SELECT messages.id, messages.message, capcodes.alias, capcodes.agency 
-                    FROM messages LEFT JOIN capcodes ON capcodes.id = messages.alias_id
-                    WHERE messages.id NOT IN (SELECT rowid FROM messages_search_index);`;
-
-            db.serialize(() => {
-                db.exec(sql, function(err) {
-                    if (err) { logger.main.error(err); }
-                    // now we want to check pragma user_version - this uses YYYYMMDD format as it is an int
-                    db.get("pragma user_version;",function(err,res){
-                        if(err) {
-                            logger.main.error("Something went wrong getting user_version");
-                        } else {
-                            logger.main.info("Current DB version: "+res.user_version);
-                            logger.main.info("Latest DB version: "+release);
-                            if (res.user_version < release) {
-                                logger.main.info("DB schema out of date, updating");
-                                // we now run alter table commands for every column that has been added since the early versions
-                                // this is inefficient, but should only run once per upgrade, and will skip over errors of adding columns that already exist
-                                // TODO: revise below logic to be smarter and less bloaty over time
-                                if (res.user_version < 20181118) {
-                                    // we are updating from a pre-plugin release
-                                    db.serialize(() => {
-                                        // need to make sure all the old source columns are present before we convert to new format
-                                        // probably look at removing this on next release, or making it so it only runs when upgrading from ancient version
-                                        db.run("ALTER TABLE capcodes ADD push INTEGER DEFAULT 0", function(err){ /* ignore error */ });
-                                        db.run("ALTER TABLE capcodes ADD pushpri TEXT", function(err){ /* ignore error */ });
-                                        db.run("ALTER TABLE capcodes ADD pushgroup TEXT", function(err){ /* ignore error */ });
-                                        db.run("ALTER TABLE capcodes ADD pushsound TEXT", function(err){ /* ignore error */ });
-                                        db.run("ALTER TABLE capcodes ADD mailenable INTEGER DEFAULT 0", function(err){ /* ignore error */ });
-                                        db.run("ALTER TABLE capcodes ADD mailto TEXT", function(err){ /* ignore error */ });
-                                        db.run("ALTER TABLE capcodes ADD telegram INTEGER DEFAULT 0", function(err){ /* ignore error */ });
-                                        db.run("ALTER TABLE capcodes ADD telechat TEXT", function(err){ /* ignore error */ });
-                                        db.run("ALTER TABLE capcodes ADD ignore INTEGER DEFAULT 0", function (err) { /* ignore error */ });
-                                        db.run("ALTER TABLE capcodes ADD twitter INTEGER DEFAULT 0", function (err) { /* ignore error */ });
-                                        db.run("ALTER TABLE capcodes ADD twitterhashtag TEXT", function (err) { /* ignore error */ });
-                                        db.run("ALTER TABLE capcodes ADD discord INTEGER DEFAULT 0", function (err) { /* ignore error */ });
-                                        db.run("ALTER TABLE capcodes ADD discwebhook TEXT", function (err) { /* ignore error */ });
-                                        db.run("ALTER TABLE capcodes ADD pluginconf TEXT", function (err) { /* ignore error */ });
-                                        // begin scary stuff, consider hiding behind a solid object during this bit
-                                        var upgradeSql = `PRAGMA foreign_keys=off;
-BEGIN TRANSACTION;
-ALTER TABLE capcodes RENAME TO _capcodes_backup;
-DROP INDEX IF EXISTS cc_pk_idx;
-UPDATE _capcodes_backup SET pluginconf = '{}';
-UPDATE _capcodes_backup SET pluginconf = '{
-    "Discord": {
-        "enable": ' || REPLACE(REPLACE(COALESCE(discord,0),0,'false'),1,'true') || ',
-        "webhook": "' || COALESCE(discwebhook,'') || '"
-    },
-    "Pushover": {
-        "enable": ' || REPLACE(REPLACE(COALESCE(push,0),0,'false'),1,'true') || ',
-        "priority": {"value": "' || COALESCE(pushpri,'') || '"},
-        "group": "' || COALESCE(pushgroup,'') || '",
-        "sound": {"value": "' || COALESCE(pushsound,'') || '"}
-    },
-    "SMTP": {
-        "enable": ' || REPLACE(REPLACE(COALESCE(mailenable,0),0,'false'),1,'true') || ',
-        "mailto": "' || COALESCE(mailto,'') || '"
-    },
-    "Telegram": {
-        "enable": ' || REPLACE(REPLACE(COALESCE(telegram,0),0,'false'),1,'true') || ',
-        "chat": "' || COALESCE(telechat,'') || '"
-    },
-    "Twitter": {
-        "enable": ' || REPLACE(REPLACE(COALESCE(twitter,0),0,'false'),1,'true') || ',
-        "hashtag": "' || COALESCE(twitterhashtag,'') || '"
+    var dbtype = nconf.get('database:type')
+    //This is here for compatibility with old versions. Will set the DB type then exit. 
+    if (dbtype == null || dbtype == 'sqlite') {
+        nconf.set('database:type', 'sqlite3');
+        nconf.set('database:file', './messages.db');
+        nconf.save()
+        logger.main.error('Error reading database type. Defaulting to SQLITE3. Killing application')
+        process.exit(1)
     }
-}';
-
-CREATE TABLE IF NOT EXISTS "capcodes" (
-id INTEGER PRIMARY KEY AUTOINCREMENT,
-address TEXT NOT NULL,
-alias TEXT NOT NULL,
-agency TEXT,
-icon TEXT,
-color TEXT,
-ignore INTEGER DEFAULT 0,
-pluginconf TEXT);
-
-INSERT INTO capcodes (id, address, alias, agency, icon, color, ignore, pluginconf)
-    SELECT id, address, alias, agency, icon, color, ignore, pluginconf
-    FROM _capcodes_backup;
-
-COMMIT;
-PRAGMA foreign_keys=on;
-CREATE UNIQUE INDEX IF NOT EXISTS cc_pk_idx ON capcodes (id,address DESC);`;
-                                        db.exec(upgradeSql, function(err) {
-                                            if (err) { logger.main.error(err); }
-                                            // scary db stuff done, phew
-                                            db.run("PRAGMA user_version = "+release, function(err){ /* ignore error */ });
-                                            logger.main.info("DB schema update complete");
-                                            // Switch config file over to plugin format
-                                            logger.main.info("Updating config file");
-                                            var nconf = require('nconf');
-                                            var conf_file = './config/config.json';
-                                            var conf_backup = './config/backup.json';
-                                            nconf.file({file: conf_file});
-                                            nconf.load();
-                                            var curConfig = nconf.get();
-                                            fs.writeFileSync( conf_backup, JSON.stringify(curConfig,null, 2) );
-                                            if (!curConfig.plugins)
-                                                curConfig.plugins = {};
-                                            
-                                            if (curConfig.discord) {
-                                                curConfig.plugins.Discord = {
-                                                    "enable": curConfig.discord.discenable
-                                                };
-                                            }
-                                            if (curConfig.pushover) {
-                                                curConfig.plugins.Pushover = {
-                                                    "enable": curConfig.pushover.pushenable,
-                                                    "pushAPIKEY": curConfig.pushover.pushAPIKEY
-                                                };
-                                            }
-                                            if (curConfig.STMP) {
-                                                curConfig.plugins.SMTP = {
-                                                    "enable": curConfig.STMP.MailEnable,
-                                                    "mailFrom": curConfig.STMP.MailFrom,
-                                                    "mailFromName": curConfig.STMP.MailFromName,
-                                                    "server": curConfig.STMP.SMTPServer,
-                                                    "port": curConfig.STMP.SMTPPort,
-                                                    "username": curConfig.STMP.STMPUsername,
-                                                    "password": curConfig.STMP.STMPPassword,
-                                                    "secure": curConfig.STMP.STMPSecure
-                                                };
-                                            }
-                                            if (curConfig.telegram) {
-                                                curConfig.plugins.Telegram = {
-                                                    "enable": curConfig.telegram.teleenable,
-                                                    "teleAPIKEY": curConfig.telegram.teleAPIKEY
-                                                };
-                                            }
-                                            if (curConfig.twitter) {
-                                                curConfig.plugins.Twitter = {
-                                                    "enable": curConfig.twitter.twitenable,
-                                                    "consKey": curConfig.twitter.twitconskey,
-                                                    "consSecret": curConfig.twitter.twitconssecret,
-                                                    "accToken": curConfig.twitter.twitacctoken,
-                                                    "accSecret": curConfig.twitter.twitaccsecret,
-                                                    "globalHashtags": curConfig.twitter.twitglobalhashtags
-                                                };
-                                            }
-                                            delete curConfig.discord;
-                                            delete curConfig.pushover;
-                                            delete curConfig.STMP;
-                                            delete curConfig.telegram;
-                                            delete curConfig.twitter;
-                                            fs.writeFileSync( conf_file, JSON.stringify(curConfig,null, 2) );
-                                            nconf.load();
-                                            logger.main.info("Config file updated!");
-                                        });
-                                    });
-                                } else {
-                                    // we are updating from after the plugin release
-                                    // nothing to do here for now
-                                }
-                            } else {
-                                logger.main.info("DB schema up to date!");
-                            }
-                        }
-                    });
-                });
-            });
-        }
-    });
+    //legacy compatibility for SQLITE3 i don't like this at all :\
+    if (dbtype == 'sqlite3') {
+        db.raw(`pragma user_version;`).then(function (res) {
+            logger.main.info("Current DB version: " + res[0].user_version);
+            // Check if database is currently v0.2.3 if not force upgrade to that first
+            if (res[0].user_version < 20181118 && res[0].user_version != 0) {
+                logger.main.error("Unsupported Upgrade Version - Upgrade Pagermon Database to v0.2.3 BEFORE upgrading to v0.3.0");
+                process.exit(1)
+            } else if (res[0].user_version == 20181118) {
+                //This code manually marks migrations complete for existing databases, prevents errors on startup for existing DB's
+                logger.main.info('Performing upgrade to v0.3.0 - Manually marking database migrations as complete') 
+                var datetime = moment().unix()
+                var migration1 = {id:1,name: '20190322204646_create_capcodes_table.js',batch:1,migration_time: datetime}
+                var migration2 = {id:2,name: '20190322204706_create_messages_table.js',batch:1,migration_time: datetime}
+                var migration3 = {id:3,name: '20190322204710_create_indexes_triggers.js',batch:1,migration_time: datetime}
+                Promise.all([
+                db('knex_migrations')
+                    .insert(migration1)
+                    .then((result) => { 
+                        logger.main.debug('Marking migration 1 as complete for existing database')
+                    })
+                    .catch ((err) => {
+                        logger.main.error('Error marking migration 1 as complete for existing database')
+                    }),
+                db('knex_migrations')
+                    .insert(migration2)
+                    .then((result) => { 
+                        logger.main.debug('Marking migration 2 as complete for existing database')
+                    })
+                    .catch ((err) => {
+                        logger.main.error('Error marking migration 2 as complete for existing database')
+                    }),
+                db('knex_migrations')
+                    .insert(migration3)
+                    .then((result) => {
+                        logger.main.debug('Marking migration 3 as complete for existing database')
+                    })
+                    .catch ((err) => {
+                        logger.main.error('Error marking migration 3 as complete for existing database')
+                    })
+                ])
+                .then ((result) => {
+                    var vervar = 'pragma user_version = ' + release + ';'
+                    db.raw(vervar)
+                    .then((result) => {
+                        logger.main.info('Setting DB to version: ' + release)
+                    })
+                    .catch((err) => {
+                        logger.main.error('Error setting DB Version' + err)
+                    })
+                })
+                .catch ((err) => {
+                    logger.main.error('Failed to upgrade database')
+                })
+            } else {
+                logger.main.info('Checking for database upgrades')
+                db.migrate.latest()
+                .then((result) => {
+                    var vervar = 'pragma user_version = ' + release + ';'
+                    db.raw(vervar)
+                })
+                .catch((err) => {
+                    logger.main.error(err)
+                })
+            }
+        })
+    } else {
+        db.migrate.latest()
+        .then((result) => {
+        })
+        .catch((err) => {
+            logger.main.error(err)
+        })
+    }
 }
 
 module.exports = {

@@ -1,5 +1,12 @@
 # 0.3.0 - Unreleased
 
+* Compeletly rebuilt database driver to use the [KnexJS](https://knexjs.org/) query builder. #174
+    * **Upgrades of existing SQLite databases must be performed from v0.2.3**
+    * Adds support for **MySQL**.
+    * MariaDB should also work however this has not been tested. 
+    * Conversion of existing databases is up to the user. We recommend starting a new database due to issues we've encountered trying the process. 
+    * This is super BETA, it has been tested as best as possible but bugs WILL exist. Please report via github bugtracker. 
+    * Database upgrades are now handled by migration files to make upgrades easier in the future. 
 * Fix display issues on large resolution mobile devices #241
 * Update old repository URL in package.json #240
 * Add ability to select the icon size on the homepage #239

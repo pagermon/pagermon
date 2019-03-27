@@ -1,5 +1,5 @@
-var version = "0.2.3-beta";
-var release = 20181118;
+var version = "0.3.0-beta";
+var release = 20190106;
 
 var debug = require('debug')('pagermon:server');
 var pmx = require('pmx').init({
@@ -64,6 +64,10 @@ var io = require('socket.io').listen(server);
     server.listen(port);
     server.on('error', onError);
     server.on('listening', onListening);
+    //Set connection timeout to prevent long running queries failing on large databases - mostly capacode refresh on MySQL
+    server.on('connection', function(connection) {
+      connection.setTimeout(600 * 1000);
+    });
     //Lets set setMaxListeners to a decent number - not to high to allow the memory leak warking to still trigger
     io.sockets.setMaxListeners(20);
 io.sockets.on('connection', function (socket) {
