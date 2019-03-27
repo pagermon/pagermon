@@ -1,3 +1,10 @@
+# 0.2.4 - Unreleased
+
+* Fixed docker support for server app
+* Passed env vars to process-default.json from docker commands
+* Fixed Docker persistence for configuration and messages
+* Added basic docker-compose.yml to start server
+
 # 0.2.3 - Unreleased
 
 * Fix cookies expiring on browser close #206
