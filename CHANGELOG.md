@@ -1,5 +1,6 @@
 # 0.3.0 - Unreleased
 
+* Proper support for Docker / docker-compose #243
 * Update old repository URL in package.json #240
 * Fix display issues on large resolution mobile devices #241
 * Add ability to select the icon size on the homepage #239
@@ -8,7 +9,7 @@
 * Message Repeat Plugin #222
 * Parse timestamps in messages #72
 * Compatibility with multimon timestamp option #57
-* Proper support for Docker / docker-compose
+
 
 # 0.2.3 - 2019-02-05
 
