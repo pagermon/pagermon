@@ -4,7 +4,7 @@ RUN apk add --no-cache sqlite
 
 ENV NODE_ENV production
 
-ADD ./server /app
+ADD . /app
 
 WORKDIR /app
 
