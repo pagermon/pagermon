@@ -24,6 +24,8 @@ fi
 
 ## Make required changes to process-default.json for environment variable support
 sed -i "/cwd/c\   \"cwd\" : \"/app\"," /app/process-default.json
+sed -i "/error_file/c\   \"error_file\" : \"../data/logs/node-app.stderr.log\"," /app/process-default.json
+sed -i "/out_file/c\   \"out_file\" : \"../data/logs/node-app.stdout.log\"," /app/process-default.json
 sed -i "/NODE_ENV/c\   \"NODE_ENV\" : \"$NODE_ENV\"," /app/process-default.json
 sed -i "/HOSTNAME/c\   \"HOSTNAME\" : \"$HOSTNAME\"," /app/process-default.json
 sed -i "/USE_COOKIE_HOST/c\   \"USE_COOKIE_HOST\" : $USE_COOKIE_HOST," /app/process-default.json
@@ -50,4 +52,7 @@ else
     cp ./process-default.json /data/process.json && ln -s "/data/process.json" ./process.json
 fi
 
-pm2 start process.json
+## Lets link logs, so they persist and we can see what's happening
+ln -s /data/logs/ /app/logs/
+
+pm2 start process.json  --no-daemon

@@ -2,13 +2,11 @@ FROM node:9.4.0-alpine
 
 RUN apk add --no-cache sqlite
 
-ENV NODE_ENV production
-
 ADD . /app
 
 WORKDIR /app
 
-RUN npm install
+RUN npm install pm2 -g && npm install
 
 VOLUME ["/data"]
 
