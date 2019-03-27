@@ -50,4 +50,4 @@ else
     cp ./process-default.json /data/process.json && ln -s "/data/process.json" ./process.json
 fi
 
-node app.js
+pm2 start process.json
