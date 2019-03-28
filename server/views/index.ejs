@@ -20,6 +20,7 @@
   <div ng-show="loading" class="loading"><i class="fa fa-spinner fa-spin"></i></div>
     <p></p>
     <div class="row">
+    <% if (!apisecurity) { %>
       <table class="table table-condensed table-hover table-striped valign">
         <thead class="thead-default">
           <tr>
@@ -110,18 +111,19 @@
         </div>
       </div>
     </div>
+    <% } %>
     <% if (apisecurity) { %>
       <% if (!login) { %>
         <div class="row">
           <div class="col-sm-8 col-sm-offset-2" style="text-align: center; vertical-align: middle;">
             <h2>Secure Mode Enabled</h2>
-            <h4>Please <a href="/login">sign in</a> to view messages</h4>
+            <h4>Please <a href="/auth/login">sign in</a> to view messages</h4>
               <p>If you believe you reached this message by error, <a href="https://github.com/davidmckenzie/pagermon/issues" target="_blank">log an issue.</a></p>
             </div>
           </div>
         </div>
       <% } %>
-    <% } %>
+    <% }else{ %>
     <div class="row">
       <div class="col-xs-offset-1 col-xs-10">
       <form action="/" method="get">
@@ -136,6 +138,7 @@
       </form>
       </div>
     </div>
+<% } %>
 
     <% include global/pagination.ejs %>
 
