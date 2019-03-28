@@ -1,12 +1,12 @@
 var conf_file = './config/config.json';
 var express = require('express');
 var router = express.Router();
-var passport = require('passport');
 var nconf = require('nconf');
 nconf.file({file: conf_file});
 nconf.load();
 
-require('../config/passport')(passport); // pass passport for configuration
+const authHelpers = require('../auth/_helpers');
+const passport = require('../auth/local');
 
 router.use(function (req, res, next) {
   res.locals.login = req.isAuthenticated();
@@ -17,6 +17,32 @@ router.use(function (req, res, next) {
   res.locals.iconsize = nconf.get('messages:iconsize')
   next();
 });
+
+router.route('/register')
+  // show login form
+  .get(function(req, res, next) {
+        var user = '';
+        if (typeof req.user != 'undefined') {
+            user = req.user;
+        }
+       res.render('register', { 
+           title: 'PagerMon - Sign Up',
+           message: req.flash('signupMessage'),
+           user: user
+       }); 
+  
+  })
+
+// Create user on register post
+  .post(function(req, res, next){
+    return authHelpers.createUser(req, res)
+    .then((response) => {
+      passport.authenticate('local', (err, user, info) => {
+        if (user) { res.redirect('/'); }
+      })(req, res, next);
+    })
+    .catch((err) => { res.redirect('/register'); });
+  });
 
 router.route('/login')
     .get(function(req, res, next) {
