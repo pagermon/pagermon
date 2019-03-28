@@ -22,6 +22,24 @@ function createUser (req) {
   .returning('*');
 }
 
+function adminRequired(req, res, next) {
+  if (!req.user){
+	  res.status(401).json({status: 'Please log in'});
+  }
+  return db('users').where({username: req.user.username}).first()
+  .then((user) => {
+    if (!user.admin){
+	    req.flash('info', 'You need to be logged in to access this page');
+	    res.redirect('/index');
+    }
+    return next();
+  })
+  .catch((err) => {
+    req.flash('info', 'You need to be logged in to access this page');
+    res.redirect('/index');
+  });
+}
+
 module.exports = {
   comparePass, createUser
 };

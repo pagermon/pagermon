@@ -24,43 +24,9 @@ router.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: true
 }));
 
-router.route('/login')
-    .get(function(req, res, next) {
-       res.render('login', { 
-           title: 'PagerMon - Login',
-           message: req.flash('loginMessage'),
-           user: req.user
-       }); 
-    })
-    // process the login form
-    .post(passport.authenticate('local-login', {
-        successRedirect : '/admin', // redirect to the secure profile section
-        failureRedirect : '/login', // redirect back to the signup page if there is an error
-        failureFlash : true // allow flash messages
-    }));
-
 router.post('/resetPass', isLoggedIn, function(req, res, next) {
-    nconf.load();
-    // find a user via passport
-        var password = req.body.password;
-        // bcrypt function
-        if (password) {
-            bcrypt.hash(password, 8, function(err, hash) {
-                if (err) {
-                    res.status(500);
-                    res.json({'error': err});
-                } else {
-                    nconf.set('auth:encPass', hash);
-                    nconf.save();
-                    res.status(200).send({'status': 'ok'});
-                }
-            });
-        } else {
-            res.status(500);
-            res.json({'error': 'Password empty'});
-        }
-        // save the password to config
-    });
+	// TODO: Impliment Cange Password based on new auth framework
+});
 
 router.route('/settingsData')
     .get(isLoggedIn, function(req, res, next) {
@@ -107,5 +73,6 @@ function isLoggedIn(req, res, next) {
         return next();
 
     // if they aren't redirect them to the home page
-    res.redirect('/login');
+    req.flash('loginMessage', 'You need to be logged in to access this page');
+    res.redirect('/auth/login');
 }

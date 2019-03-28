@@ -12,21 +12,28 @@ router.post('/register', (req, res, next)  => {
   return authHelpers.createUser(req, res)
   .then((response) => {
     passport.authenticate('local', (err, user, info) => {
-      if (user) { res.redirect('/'); }
+      if (user) {
+	      req.logIn(user, function (err) {
+		      if(err){
+			      req.flash('signupMessage', 'Failed to create account, please try again.');
+			      res.redirect('/auth/register');
+		      }
+		      req.flash('signupMessage', 'Account created successfully, Welcome.');
+		      res.redirect('/');
+	      });
+      }else{
+	      req.flash('signupMessage', 'Failed to create account, please try again.');
+	      res.redirect('/auth/register');
+      }
     })(req, res, next);
   })
-  .catch((err) => { res.redirect('/auth/register'); });
+  .catch((err) => { req.flash('signupMessage', 'Failed to create account, please try again.'); res.redirect('/auth/register'); });
 });
 
 router.get('/register', (req, res, next) => {
-        var username = 'test';
-        if (typeof req.username != 'undefined') {
-            user = req.username;
-        }
        res.render('auth/register', {
            title: 'PagerMon - Sign Up',
-           message: req.flash('signupMessage'),
-           username: username
+           message: req.flash('signupMessage')
        });
 
 });
@@ -45,11 +52,12 @@ router.get('/login', (req, res, next) => {
 
 router.post('/login', (req, res, next) => {
   passport.authenticate('local', (err, user, info) => {
-    if (err) { res.redirect('/'); }
-    if (!user) { res.redirect('/'); }
+    console.log(err);
+    if (err) { req.flash('loginMessage', '1. An error has occured, please try again.'); res.redirect('/auth/login'); }
+    if (!user) { req.flash('loginMessage', '2. Failed to authenticate supplied credentials'); res.redirect('/auth/login'); }
     if (user) {
       req.logIn(user, function (err) {
-        if (err) { res.redirect('/'); }
+        if (err) { req.flash('loginMessage', '3. Failed to authenticate supplied credentials'); res.redirect('/auth/login'); }
         res.redirect('/myaccount');
       });
     }
