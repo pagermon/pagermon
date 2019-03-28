@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-<% include global/header.ejs %>
+<% include ../global/header.ejs %>
 <base href="/">
 </head>
 
 
 <body id="admin-body">
-  <% include global/menu.ejs %>
+  <% include ../global/menu.ejs %>
   <div id="content" class="container">
     <div class="row" style="padding-top: 15px;">
       <div class="col-xs-8 col-xs-offset-2">
@@ -16,10 +16,10 @@
         <% } %>
         <hr />
         <!-- LOGIN FORM -->
-        <form action="/register" method="post">
+        <form action="/auth/register" method="post">
             <div class="form-group">
                 <label>Username</label>
-                <input type="text" class="form-control" name="user">
+                <input type="text" class="form-control" name="username">
             </div>
             <div class="form-group">
                 <label>Password</label>
@@ -38,4 +38,4 @@
       </div>
     </div>
   </div>
-<% include global/footer.ejs %>
+<% include ../global/footer.ejs %>

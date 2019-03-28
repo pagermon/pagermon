@@ -18,51 +18,15 @@ router.use(function (req, res, next) {
   next();
 });
 
-router.route('/register')
-  // show login form
-  .get(function(req, res, next) {
-        var user = '';
-        if (typeof req.user != 'undefined') {
-            user = req.user;
-        }
-       res.render('register', { 
-           title: 'PagerMon - Sign Up',
-           message: req.flash('signupMessage'),
-           user: user
-       }); 
-  
-  })
-
-// Create user on register post
-  .post(function(req, res, next){
-    return authHelpers.createUser(req, res)
-    .then((response) => {
-      passport.authenticate('local', (err, user, info) => {
-        if (user) { res.redirect('/'); }
-      })(req, res, next);
-    })
-    .catch((err) => { res.redirect('/register'); });
-  });
 
 router.route('/login')
-    .get(function(req, res, next) {
-        var user = '';
-        if (typeof req.user != 'undefined') {
-            user = req.user;
-        }
-       res.render('login', { 
-           title: 'PagerMon - Login',
-           message: req.flash('loginMessage'),
-           user: user
-       }); 
-    })
     // process the login form
     .post(passport.authenticate('local-login', {
         successRedirect : '/admin', // redirect to the secure profile section
         failureRedirect : '/login', // redirect back to the signup page if there is an error
         failureFlash : true // allow flash messages
     }));
-    
+
 router.route('/logout')
     .get(function(req, res, next) {
         req.logout();
@@ -76,7 +40,7 @@ router.get('/testLogin', isLoggedIn, function(req, res) {
             title: 'PagerMon'
         });
     });
-    
+
 /* GET home page. */
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'PagerMon' });
@@ -87,7 +51,7 @@ module.exports = router;
 // route middleware to make sure a user is logged in
 function isLoggedIn(req, res, next) {
 
-    // if user is authenticated in the session, carry on 
+    // if user is authenticated in the session, carry on
     if (req.isAuthenticated())
         return next();
 

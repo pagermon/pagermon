@@ -1,5 +1,8 @@
 const bcrypt = require('bcryptjs');
 const db = require('../knex/knex.js');
+db.on( 'query', function( queryData ) {
+    console.log( queryData );
+});
 
 function comparePass(userPassword, databasePassword) {
   return bcrypt.compareSync(userPassword, databasePassword);
@@ -11,7 +14,10 @@ function createUser (req) {
   return db('users')
   .insert({
     username: req.body.username,
-    password: hash
+    password: hash,
+    firstName: req.body.firstName,
+    lastName: req.body.lastName,
+    admin: 0
   })
   .returning('*');
 }

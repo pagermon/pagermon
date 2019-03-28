@@ -1,10 +1,10 @@
 {
   "name"             : "pagermon",
-  "cwd"              : "/home/ubuntu/workspace/server",
+   "cwd" : "/app",
   "script"           : "app.js",
   "node_args"        : ["--harmony"],
-  "error_file"       : "logs/node-app.stderr.log",
-  "out_file"         : "logs/node-app.stdout.log",
+   "error_file" : "../data/logs/node-app.stderr.log",
+   "out_file" : "../data/logs/node-app.stdout.log",
   "pid_file"         : "pids/node-geo-api.pid",
   "instances"        : 1, //or 0 => 'max'
   "min_uptime"       : "200s", // 200 seconds, defaults to 1000
@@ -18,9 +18,9 @@
   "autorestart"      : true, // enable/disable automatic restart when an app crashes or exits
   "vizion"           : false, // enable/disable vizion features (versioning control)
   "env": {
-    "NODE_ENV": "production",
-    "HOSTNAME": "",
-    "USE_COOKIE_HOST": false,
-    "APP_NAME": "pagermon"
+   "NODE_ENV" : "production",
+   "HOSTNAME" : "localhost",
+   "USE_COOKIE_HOST" : false,
+   "APP_NAME" : "pagermon"
   }
 }

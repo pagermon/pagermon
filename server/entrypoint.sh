@@ -12,7 +12,6 @@ cat <<"EOT"
               __/ |
              |___/
 
-
 EOT
 
 if [ -z "$NODE_ENV" ]; then
@@ -66,6 +65,7 @@ fi
 
 ## Create default process.json file for pm2 server
 if [ -f /data/process.json ]; then
+    rm -rf ./process.json
     ln -s "/data/process.json" ./process.json
 else
     cp ./process-default.json /data/process.json && ln -s "/data/process.json" ./process.json

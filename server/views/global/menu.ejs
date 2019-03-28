@@ -24,10 +24,10 @@
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <% if (login) { %>
-        <li><a href="/logout"><span class="fa fa-fw fa-sign-out"></span> Sign Out</a></li>
+        <li><a href="/auth/logout"><span class="fa fa-fw fa-sign-out"></span> Sign Out</a></li>
         <% } else { %>
-          <li><a href="/login"><span class="fa fa-fw fa-sign-in"></span> Sign In</a></li>
-          <li><a href="/register"><span class="fa fa-fw fa-user"></span> Sign Up</a></li>
+          <li><a href="/auth/login"><span class="fa fa-fw fa-sign-in"></span> Sign In</a></li>
+          <li><a href="/auth/register"><span class="fa fa-fw fa-user"></span> Sign Up</a></li>
         <% } %>
       </ul>
     </div>

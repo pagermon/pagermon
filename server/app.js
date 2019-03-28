@@ -48,6 +48,7 @@ var db = require('./db');
 var index = require('./routes/index');
 var admin = require('./routes/admin');
 var api = require('./routes/api');
+var auth = require('./routes/auth');
 
 var port = normalizePort(process.env.PORT || '3000');
 var app = express();
@@ -134,6 +135,7 @@ app.use('/', index);
 app.use('/admin', admin);
 app.use('/post', api);
 app.use('/api', api);
+app.use('/auth', auth);
 
 
 // catch 404 and forward to error handler
