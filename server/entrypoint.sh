@@ -2,24 +2,33 @@
 
 cd /app
 
+cat <<"EOT"
+  _____                      __  __
+ |  __ \                    |  \/  |
+ | |__) |_ _  __ _  ___ _ __| \  / | ___  _ __
+ |  ___/ _` |/ _` |/ _ \ '__| |\/| |/ _ \| '_ \
+ | |  | (_| | (_| |  __/ |  | |  | | (_) | | | |
+ |_|   \__,_|\__, |\___|_|  |_|  |_|\___/|_| |_|
+              __/ |
+             |___/
+
+
+EOT
+
 if [ -z "$NODE_ENV" ]; then
-  echo "NODE_ENV was not set -- Defaulting to production"
   NODE_ENV=production
 fi
 
 
 if [ -z "$HOSTNAME" ]; then
-  echo "HOSTNAME was not set -- Defaulting to localhost"
   HOSTNAME=localhost
 fi
 
 if [ -z "$USE_COOKIE_HOST" ]; then
-  echo "USE_COOKIE_HOST was not set -- Defaulting to false"
   USE_COOKIE_HOST=FALSE
 fi
 
 if [ -z "$APP_NAME" ]; then
-  echo "APP_NAME was not set -- Defaulting to pagermon"
   APP_NAME=pagermon
 fi
 
@@ -43,6 +52,7 @@ else
 node > /data/config.json <<EOF
 var data = require('/app/config/default.json');
 
+data.database.file = '';
 data.database.type = 'mysql';
 data.database.server = '$MYSQL_HOST';
 data.database.username = '$MYSQL_USER';
@@ -66,9 +76,7 @@ echo "=== Waiting for MySQL to come up ==="
 while ! mysqladmin ping -h $MYSQL_HOST --silent; do
     sleep 1
 done
-echo "=== MySQL is up =="
+echo "=== MySQL is up ==="
 
-#knex migrate:latest
-
-node app.js
-#pm2 start process.json --no-daemon
+echo "=== Starting PM2 App Server ==="
+pm2 start process.json --no-daemon
