@@ -18,32 +18,13 @@ router.use(function (req, res, next) {
   next();
 });
 
-
-router.route('/login')
-    // process the login form
-    .post(passport.authenticate('local-login', {
-        successRedirect : '/admin', // redirect to the secure profile section
-        failureRedirect : '/login', // redirect back to the signup page if there is an error
-        failureFlash : true // allow flash messages
-    }));
-
-router.route('/logout')
-    .get(function(req, res, next) {
-        req.logout();
-        res.redirect('/');
-    });
-
-router.get('/testLogin', isLoggedIn, function(req, res) {
-        console.log(req.user);
-        res.render('index', {
-            user : req.user, // get the user out of session and pass to template
-            title: 'PagerMon'
-        });
-    });
-
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'PagerMon' });
+
+    if(nconf.get('messages:apiSecurity') && !req.isAuthenticated()){
+        res.redirect('/auth/login');
+    }
+    res.render('index', { title: 'PagerMon' });
 });
 
 module.exports = router;
