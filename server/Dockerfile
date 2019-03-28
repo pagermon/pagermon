@@ -1,14 +1,10 @@
-FROM node:9.4.0-alpine
-
-RUN apk add --no-cache sqlite
-
-ENV NODE_ENV production
+FROM node:11.11.0-alpine
 
 ADD . /app
-
 WORKDIR /app
 
-RUN npm install pm2@latest -g && npm install
+RUN apk add --no-cache sqlite && apk add --no-cache mysql-client
+RUN npm install pm2@latest -g && npm install knex -g  && npm install sqlite3 && npm install 
 
 VOLUME ["/data"]
 

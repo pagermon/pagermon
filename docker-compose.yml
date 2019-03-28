@@ -7,9 +7,12 @@ services:
         ports:
             - 3000:3000
         volumes:
-            - ./data:/data
-        environment:
-            - NODE_ENV=production
-            - HOSTNAME=localhost
-            - USE_COOKIE_HOST=false
-            - APP_NAME=pagermon
+            - ./data/pagermon:/data
+        env_file:
+            - ./default.env
+    mysql:
+        image: mysql:5.7
+        volumes:
+            - ./data/mysql:/var/lib/mysql
+        env_file:
+            - ./default.env
