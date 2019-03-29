@@ -5,11 +5,11 @@ var bcrypt = require('bcryptjs');
 var fs = require('fs');
 var logger = require('../log');
 var util = require('util');
-var passport = require('passport');
-require('../config/passport')(passport); // pass passport for configuration
+var passport = require('../auth/local');
 
 router.use(function (req, res, next) {
   res.locals.login = req.isAuthenticated();
+  res.locals.user = req.user;
   next();
 });
 
@@ -24,12 +24,8 @@ router.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: true
 }));
 
-router.post('/resetPass', isLoggedIn, function(req, res, next) {
-	// TODO: Impliment Cange Password based on new auth framework
-});
-
 router.route('/settingsData')
-    .get(isLoggedIn, function(req, res, next) {
+    .get(isAdmin, function(req, res, next) {
         nconf.load();
         let settings = nconf.get();
         // logger.main.debug(util.format('Config:\n\n%o',settings));
@@ -45,7 +41,7 @@ router.route('/settingsData')
         let data = {"settings": settings, "plugins": plugins}
         res.json(data);
     })
-    .post(isLoggedIn, function(req, res, next) {
+    .post(isAdmin, function(req, res, next) {
         nconf.load();
         if (req.body) {
             //console.log(req.body);
@@ -59,20 +55,19 @@ router.route('/settingsData')
         }
     });
 
-router.get('*', isLoggedIn, function(req, res, next) {
+router.get('*', isAdmin, function(req, res, next) {
   res.render('admin', { title: 'PagerMon - Admin' });
 });
 
 module.exports = router;
 
-// route middleware to make sure a user is logged in
-function isLoggedIn(req, res, next) {
+function isAdmin(req, res, next) {
 
     // if user is authenticated in the session, carry on 
-    if (req.isAuthenticated())
+    if (req.isAuthenticated() && req.user.admin == true)
         return next();
 
     // if they aren't redirect them to the home page
-    req.flash('loginMessage', 'You need to be logged in to access this page');
-    res.redirect('/auth/login');
+    req.flash('loginMessage', 'Administrators only, please.');
+    res.redirect('/');
 }

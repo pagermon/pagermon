@@ -46,6 +46,7 @@ var db = require('./db');
 // routes
 var index = require('./routes/index');
 var admin = require('./routes/admin');
+var apiv2 = require('./routes/apiv2');
 var api = require('./routes/api');
 var auth = require('./routes/auth');
 
@@ -133,6 +134,7 @@ app.use(function(req, res, next) {
 app.use('/', index);
 app.use('/admin', admin);
 app.use('/post', api);
+app.use('/apiv2', apiv2);
 app.use('/api', api);
 app.use('/auth', auth);
 
