@@ -159,7 +159,7 @@ app.use(function(err, req, res, next) {
 // Add cronjob to automatically refresh aliases
 var refreshRequired = nconf.get('database:aliasRefreshRequired')
 var aliasRefreshJob = require('cron').CronJob;
-new aliasRefreshJob('0 0,50 * * * *', function() {
+new aliasRefreshJob('0 5,35 * * * *', function() {
   logger.main.debug('CRON: Running Cronjob AliasRefresh')
   if (refreshRequired == 1) {
     console.time('updateMap');
