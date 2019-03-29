@@ -10,20 +10,25 @@
       <ul class="nav navbar-nav">
         <li><a href="/"><span class="fa fa-fw fa-home"></span> Home</a></li>
         <% if (login) { %>
+	<li class="dropdown">
+		<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="fa fa-fw fa-lock"></span> My Account <span class="caret"></span></a>
+		<ul class="dropdown-menu">
+			<li><a href="/auth/aliases"><span class="fa fa-fw fa-address-card"></span> Aliases</a></li>
+            		<li class="disabled" disabled><a href="#"><span class="fa fa-fw fa-inbox"></span> Messages</a></li>
+            		<li role="separator" class="divider"></li>
+            		<li><a href="/auth/myaccount"><span class="fa fa-fw fa-key"></span> My Account</a></li>
+		</ul>
+	</li>
+	<% } %>
+        <% if (admin) { %>
         <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="fa fa-fw fa-lock"></span> Admin <span class="caret"></span></a>
-          <ul class="dropdown-menu">
-            <li><a href="/admin/aliases"><span class="fa fa-fw fa-address-card"></span> Aliases</a></li>
-            <li class="disabled" disabled><a href="#"><span class="fa fa-fw fa-inbox"></span> Messages</a></li>
-            <li role="separator" class="divider"></li>
-            <li><a href="/admin/settings"><span class="fa fa-fw fa-cogs"></span> Settings</a></li>
-            <li><a href="/admin/reset"><span class="fa fa-fw fa-key"></span> Reset Password</a></li>
-          </ul>
+        	<li><a href="/admin/settings"><span class="fa fa-fw fa-cogs"></span> Settings</a></li>
         </li>
         <% } %>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <% if (login) { %>
+	<li><span class="fa"> Welcome, <%= user %></span></li>
         <li><a href="/auth/logout"><span class="fa fa-fw fa-sign-out"></span> Sign Out</a></li>
         <% } else { %>
           <li><a href="/auth/login"><span class="fa fa-fw fa-sign-in"></span> Sign In</a></li>

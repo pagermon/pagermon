@@ -8,9 +8,16 @@ function comparePass(userPassword, databasePassword) {
   return bcrypt.compareSync(userPassword, databasePassword);
 }
 
+function usernameExists(req, res){
+	var userExists = false;
+	db.table('users').where({username: req.body.username}).pluck('id').then(function(ids) { userExists = true; });
+	return userExists;
+}
+
 function createUser (req) {
   const salt = bcrypt.genSaltSync();
   const hash = bcrypt.hashSync(req.body.password, salt);
+  // TODO: confirm username not taken before register
   return db('users')
   .insert({
     username: req.body.username,
@@ -22,24 +29,22 @@ function createUser (req) {
   .returning('*');
 }
 
-function adminRequired(req, res, next) {
-  if (!req.user){
-	  res.status(401).json({status: 'Please log in'});
-  }
+function isAdmin(req, res, next) {
+  if (!req.user) return false;
   return db('users').where({username: req.user.username}).first()
   .then((user) => {
-    if (!user.admin){
-	    req.flash('info', 'You need to be logged in to access this page');
-	    res.redirect('/index');
-    }
-    return next();
+    if (!user.admin) return false;
+    return true;
   })
   .catch((err) => {
-    req.flash('info', 'You need to be logged in to access this page');
-    res.redirect('/index');
+    return false;
   });
+    return false;
 }
 
 module.exports = {
-  comparePass, createUser
+	comparePass,
+	createUser,
+	usernameExists,
+	isAdmin
 };

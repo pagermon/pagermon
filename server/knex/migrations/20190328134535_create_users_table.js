@@ -8,7 +8,7 @@ exports.up = function(db, Promise) {
     table.string('apiKeys').nullable();
     table.string('pustKeys').nullable();
     table.integer('admin').notNullable().defaultTo(0);
-    table.timestamp('created_at').nullable().defaultTo('');
+    table.timestamp('created_at').notNullable().defaultTo(db.fn.now());
   });
 }
 
