@@ -13,7 +13,7 @@ const options = {};
 init();
 
 passport.use(new LocalStrategy(options, function(username, password, done) {
-	db('users').where({ username }).first()
+	db('users').where({ username: username }).first()
 	  .then((user) => {
 	    if (!user) return done(null, false);
 	    if (!authHelpers.comparePass(password, user.password)) {

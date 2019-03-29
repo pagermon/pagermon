@@ -14,7 +14,7 @@ router.post('/register', (req, res, next)  => {
 		req.flash('signupMessage', 'Username Already Exists');
 		res.redirect('/auth/register');
 	}
-	
+
 
   return authHelpers.createUser(req, res)
   .then((response) => {
@@ -59,13 +59,15 @@ router.get('/login', (req, res, next) => {
 
 router.post('/login', (req, res, next) => {
   passport.authenticate('local', (err, user, info) => {
-    console.log(err);
     if (err) { req.flash('loginMessage', '1. An error has occured, please try again.'); res.redirect('/auth/login'); }
     if (!user) { req.flash('loginMessage', '2. Failed to authenticate supplied credentials'); res.redirect('/auth/login'); }
     if (user) {
+      console.log('====================');
+      console.log(user);
+      console.log('====================');
       req.logIn(user, function (err) {
         if (err) { req.flash('loginMessage', '3. Failed to authenticate supplied credentials'); res.redirect('/auth/login'); }
-        res.redirect('/myaccount');
+        res.redirect('/');
       });
     }
   })(req, res, next);

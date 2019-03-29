@@ -11,7 +11,7 @@ const passport = require('../auth/local');
 router.use(function (req, res, next) {
   res.locals.login = req.isAuthenticated();
   res.locals.user = req.user || '';
-  res.locals.admin = authHelpers.isAdmin(req, res, next) === true;
+  res.locals.admin = authHelpers.isAdmin(req, res, next) || false;
   res.locals.hidecapcode = nconf.get('messages:HideCapcode');
   res.locals.hidesource = nconf.get('messages:HideSource');
   res.locals.apisecurity = nconf.get('messages:apiSecurity');
@@ -21,6 +21,10 @@ router.use(function (req, res, next) {
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
+
+	console.log('=================== NICK DEBUG ===================');
+	console.log(authHelpers.isAdmin(req, res, next) == true);
+	console.log('=================== NICK DEBUG ===================');
 
     if(nconf.get('messages:apiSecurity') && !req.isAuthenticated()){
 	req.flash('loginMessage', 'You need to be logged in to access this page');

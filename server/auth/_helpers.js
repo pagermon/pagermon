@@ -24,7 +24,7 @@ function createUser (req) {
     password: hash,
     firstName: req.body.firstName,
     lastName: req.body.lastName,
-    admin: 0
+    admin: false
   })
   .returning('*');
 }
