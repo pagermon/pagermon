@@ -9,13 +9,6 @@ const authHelpers = require('../auth/_helpers');
 const passport = require('../auth/local');
 
 router.post('/register', (req, res, next)  => {
-	if(authHelpers.usernameExists(req, res)){
-		// Username taken -- lets fail.
-		req.flash('signupMessage', 'Username Already Exists');
-		res.redirect('/auth/register');
-	}
-
-
   return authHelpers.createUser(req, res)
   .then((response) => {
     passport.authenticate('local', (err, user, info) => {
