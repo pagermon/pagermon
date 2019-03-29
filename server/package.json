@@ -19,6 +19,7 @@
     "connect-sqlite3": "^0.9.9",
     "cookie-parser": "~1.4.3",
     "core-js": "^2.4.1",
+    "cron": "^1.7.0",
     "debug": "~2.6.3",
     "discord.js": "latest",
     "ejs": "~2.5.6",

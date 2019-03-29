@@ -20,6 +20,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var fs = require('fs');
 var session = require('express-session');
+var request = require('request');
 var SQLiteStore = require('connect-sqlite3')(session);
 var passport = require('passport');
 var flash    = require('connect-flash');
@@ -153,6 +154,12 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('global/error', { title: 'PagerMon' });
 });
+
+// Add cronjob to automatically refresh aliases
+var aliasRefreshJob = require('cron').CronJob;
+new aliasRefreshJob('0 0,30 * * * *', function() {
+  console.log('CRONJOB RAN')
+}, null, true);
 
 module.exports = app;
 
