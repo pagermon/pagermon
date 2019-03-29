@@ -18,11 +18,11 @@ function init(release) {
         logger.main.error('Error reading database type. Defaulting to SQLITE3. Killing application')
         process.exit(1)
     }
-    //legacy compatibility for SQLITE3 i don't like this at all :\
     if (dbtype == 'sqlite3') {
         db.raw(`pragma user_version;`).then(function (res) {
             logger.main.info("Current DB version: " + res[0].user_version);
             // Check if database is currently v0.2.3 if not force upgrade to that first
+            //Begin legacy support - at some point in the future a breaking change can be put in to remove this code
             if (res[0].user_version < 20181118 && res[0].user_version != 0) {
                 logger.main.error("Unsupported Upgrade Version - Upgrade Pagermon Database to v0.2.3 BEFORE upgrading to v0.3.0");
                 process.exit(1)
@@ -73,6 +73,7 @@ function init(release) {
                     logger.main.error('Failed to upgrade database')
                 })
             } else {
+                //End Legacy Support
                 logger.main.info('Checking for database upgrades')
                 db.migrate.latest()
                 .then((result) => {
