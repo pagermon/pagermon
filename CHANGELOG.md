@@ -7,6 +7,7 @@
     * Conversion of existing databases is up to the user. We recommend starting a new database due to issues we've encountered trying the process. 
     * This is super BETA, it has been tested as best as possible but bugs WILL exist. Please report via github bugtracker. 
     * Database upgrades are now handled by migration files to make upgrades easier in the future. 
+* Convince Winston to follow the laws of Physics #251
 * More complete docker support #243, #249
 * Fix display issues on large resolution mobile devices #241
 * Update old repository URL in package.json #240
