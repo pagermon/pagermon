@@ -7,7 +7,6 @@ if [ -z "$NODE_ENV" ]; then
   NODE_ENV=production
 fi
 
-
 if [ -z "$HOSTNAME" ]; then
   echo "HOSTNAME was not set -- Defaulting to localhost"
   HOSTNAME=localhost
@@ -15,7 +14,7 @@ fi
 
 if [ -z "$USE_COOKIE_HOST" ]; then
   echo "USE_COOKIE_HOST was not set -- Defaulting to false"
-  USE_COOKIE_HOST=FALSE
+  USE_COOKIE_HOST=false
 fi
 
 if [ -z "$APP_NAME" ]; then
