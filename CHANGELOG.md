@@ -1,5 +1,6 @@
 # 0.3.0 - Unreleased
 
+* Convince Winston to follow the laws of Physics #251
 * More complete docker support #243, #249
 * Fix display issues on large resolution mobile devices #241
 * Update old repository URL in package.json #240
