@@ -157,33 +157,36 @@ app.use(function(err, req, res, next) {
 });
 
 // Add cronjob to automatically refresh aliases
-var refreshRequired = nconf.get('database:aliasRefreshRequired')
-var aliasRefreshJob = require('cron').CronJob;
-new aliasRefreshJob('0 5,35 * * * *', function() {
-  logger.main.debug('CRON: Running Cronjob AliasRefresh')
-  if (refreshRequired == 1) {
-    console.time('updateMap');
-    logger.main.info('CRON: Alias Refresh required, running.')
-    db('messages').update('alias_id', function() {
-      this.select('id')
-          .from('capcodes')
-          .where(db.ref('messages.address'), 'like', db.ref('capcodes.address') )
-          .orderByRaw("REPLACE(address, '_', '%') DESC LIMIT 1")
-    })
-    .then((result) => {
-        console.timeEnd('updateMap');
-        nconf.set('database:aliasRefreshRequired', 0);
-        nconf.save();
-        logger.main.info('CRON: Alias Refresh Successful')
-    })
-    .catch((err) => {
-      logger.main.error('CRON: Error refreshing aliases' + err); 
-      console.timeEnd('updateMap'); 
-    })
-  } else {
-    logger.main.debug('CRON: Alias Refresh not Required, Skipping.')
-  }
-}, null, true);
+var dbtype = nconf.get('database:type')
+if (dbtype == 'mysql' || dbtype == 'mariadb') {
+  var refreshRequired = nconf.get('database:aliasRefreshRequired')
+  var aliasRefreshJob = require('cron').CronJob;
+  new aliasRefreshJob('0 5,35 * * * *', function() {
+    logger.main.debug('CRON: Running Cronjob AliasRefresh')
+    if (refreshRequired == 1) {
+      console.time('updateMap');
+      logger.main.info('CRON: Alias Refresh required, running.')
+      db('messages').update('alias_id', function() {
+        this.select('id')
+            .from('capcodes')
+            .where(db.ref('messages.address'), 'like', db.ref('capcodes.address') )
+            .orderByRaw("REPLACE(address, '_', '%') DESC LIMIT 1")
+      })
+      .then((result) => {
+          console.timeEnd('updateMap');
+          nconf.set('database:aliasRefreshRequired', 0);
+          nconf.save();
+          logger.main.info('CRON: Alias Refresh Successful')
+      })
+      .catch((err) => {
+        logger.main.error('CRON: Error refreshing aliases' + err); 
+        console.timeEnd('updateMap'); 
+      })
+    } else {
+      logger.main.debug('CRON: Alias Refresh not Required, Skipping.')
+    }
+  }, null, true);
+}
 
 module.exports = app;
 
