@@ -79,6 +79,12 @@ function init(release) {
                 .then((result) => {
                     var vervar = 'pragma user_version = ' + release + ';'
                     db.raw(vervar)
+                    .then((result) => {
+                        //logger.main.info('Setting DB to version: ' + release)
+                    })
+                    .catch((err) => {
+                        logger.main.error('Error setting DB Version' + err)
+                    })
                 })
                 .catch((err) => {
                     logger.main.error(err)

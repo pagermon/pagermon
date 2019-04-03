@@ -159,9 +159,9 @@ app.use(function(err, req, res, next) {
 // Add cronjob to automatically refresh aliases
 var dbtype = nconf.get('database:type')
 if (dbtype == 'mysql' || dbtype == 'mariadb') {
-  var refreshRequired = nconf.get('database:aliasRefreshRequired')
   var aliasRefreshJob = require('cron').CronJob;
-  new aliasRefreshJob('0 5,35 * * * *', function() {
+  new aliasRefreshJob('0 5,15,16,17 * * * *', function() {
+    var refreshRequired = nconf.get('database:aliasRefreshRequired')
     logger.main.debug('CRON: Running Cronjob AliasRefresh')
     if (refreshRequired == 1) {
       console.time('updateMap');
