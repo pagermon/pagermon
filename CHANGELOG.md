@@ -1,5 +1,6 @@
 # 0.3.0 - Unreleased
 
+* More complete docker support #243, #249
 * Fix display issues on large resolution mobile devices #241
 * Update old repository URL in package.json #240
 * Add ability to select the icon size on the homepage #239
