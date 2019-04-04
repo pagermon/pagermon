@@ -10,7 +10,7 @@
 * Convince Winston to follow the laws of Physics #251
 * More complete docker support #243, #249
 * Fix display issues on large resolution mobile devices #241
-* Update old repository URL in package.json #240
+* Update old repository URL in package.json and index.ejs #240 #252
 * Add ability to select the icon size on the homepage #239
 * Fix 404 error when trailing slash added to hostname in client config #223
 * Patch Total.js CVE #232
