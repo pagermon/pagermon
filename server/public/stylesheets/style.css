@@ -237,6 +237,12 @@ table .expand {
     }
 }
 
+@media screen and (max-width: 768px) {
+    table .noSmall {
+        display: none;
+    }
+}
+
 
 /* Pagination */
 
