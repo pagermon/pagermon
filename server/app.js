@@ -160,7 +160,7 @@ app.use(function(err, req, res, next) {
 var dbtype = nconf.get('database:type')
 if (dbtype == 'mysql' || dbtype == 'mariadb') {
   var aliasRefreshJob = require('cron').CronJob;
-  new aliasRefreshJob('0 5,15,16,17 * * * *', function() {
+  new aliasRefreshJob('0 5,35 * * * *', function() {
     var refreshRequired = nconf.get('database:aliasRefreshRequired')
     logger.main.debug('CRON: Running Cronjob AliasRefresh')
     if (refreshRequired == 1) {
@@ -173,6 +173,7 @@ if (dbtype == 'mysql' || dbtype == 'mariadb') {
             .orderByRaw("REPLACE(address, '_', '%') DESC LIMIT 1")
       })
       .then((result) => {
+          console.log(result)
           console.timeEnd('updateMap');
           nconf.set('database:aliasRefreshRequired', 0);
           nconf.save();
