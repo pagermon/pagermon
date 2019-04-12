@@ -1,6 +1,3 @@
 {
-  "apikey": "changeme",
-  "hostname": "http://127.0.0.1:3000",
-  "identifier": "TEST",
-  "sendFunctionCode": false
+  "identifier": "TEST"
 }
