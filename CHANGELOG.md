@@ -4,6 +4,7 @@
 * Fix refresh aliases button not appearing #194
 * Remove solid white background from Icon images #216
 * Fix capcode route not allowing API authentication #218
+* Added Gotify Plugin #257
 
 # 0.2.2 - 2019-01-15
 
