@@ -7,7 +7,7 @@
   "config": [
     {
       "name": "URL",
-      "label": "Gotify URL",
+      "label": "Gotify URL (Without http/s)",
       "type": "text",
       "required": true
 
@@ -16,6 +16,11 @@
       "name": "port",
       "label": "Gotify Port",
       "type": "text"
+    },
+    {
+      "name": "SSL",
+      "label": "Enable SSL",
+      "type": "checkbox"
     },
     {
       "name": "APIKey",

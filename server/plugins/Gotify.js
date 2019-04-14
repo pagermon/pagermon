@@ -1,4 +1,5 @@
 var http = require('http');
+var https = require('https')
 var logger = require('../log');
 
 function run(trigger, scope, data, config, callback) {
@@ -22,25 +23,52 @@ function run(trigger, scope, data, config, callback) {
             priority: priority
         });
 
-        // POST Options
-        const options = {
-            hostname: config.URL,
-            port: port,
-            path: '/message',
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Gotify-Key': config.APIKey
-            }
-        };
+        let req;
 
-        // HTTP request
-        const req = http.request(options, (res) => {
-            logger.main.debug('Gotify: ' + res.statusCode);
-            res.on('data', (d) => {
-                process.stdout.write(d)
-            })
-        });
+        // SSL
+        if (config.SSL) {
+            // SSL POST Options
+            const options = {
+                hostname: config.URL,
+                port: port,
+                path: '/message',
+                method: 'POST',
+                rejectUnauthorized: false,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Gotify-Key': config.APIKey
+                }
+            };
+
+            // HTTPS request
+            req = https.request(options, (res) => {
+                logger.main.debug('Gotify: ' + res.statusCode);
+                res.on('data', (d) => {
+                    process.stdout.write(d)
+                })
+            });
+        } else {
+            // POST Options
+            const options = {
+                hostname: config.URL,
+                port: port,
+                path: '/message',
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Gotify-Key': config.APIKey
+                }
+            };
+
+            // HTTP request
+            req = http.request(options, (res) => {
+                logger.main.debug('Gotify: ' + res.statusCode);
+                res.on('data', (d) => {
+                    process.stdout.write(d)
+                })
+            });
+
+        }
 
         // HTTP error
         req.on('error', (error) => {
