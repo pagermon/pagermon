@@ -1,6 +1,6 @@
 {
     "name": "Shell",
-    "description": "Exec shell script",
+    "description": "Exec shell script for selected alias. Enable shell plugin into alias and create file named {ID}.sh (Linux) or {ID}.ps1 (Windows), replace \"ID\" by alias id. File must be stored into \"pagermon/server/plugins/Shell/\". Place your code in this file.",
     "disable": false,
     "trigger": "message",
     "scope": "after",
@@ -10,7 +10,7 @@
         {
             "name": "enable",
             "label": "Enable",
-            "description": "Enable shell script that match this alias. File must be named {ID}.sh (Linux) or {ID}.ps1 (Windows), replace \"ID\" by alias id. ",
+            "description": "Enable shell script that match this alias. File must be named {ID}.sh (Linux) or {ID}.ps1 (Windows), replace \"ID\" by alias id. File must be stored into \"pagermon/server/plugins/Shell/\"",
             "type": "checkbox"
         },
         {
