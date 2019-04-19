@@ -5,7 +5,7 @@ var logger = require('../log');
 
 function run(trigger, scope, data, config, callback) {
 
-  if(data.pluginconf.Shell.enable){
+  if(data.pluginconf.Shell && data.pluginconf.Shell.enable){
     
     var file_name = data.alias_id;
 
