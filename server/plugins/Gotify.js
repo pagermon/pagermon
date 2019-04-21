@@ -1,9 +1,9 @@
 var http = require('http');
-var https = require('https')
+var https = require('https');
 var logger = require('../log');
 
 function run(trigger, scope, data, config, callback) {
-    var pConf = data.pluginconf.Gotify;
+    let pConf = data.pluginconf.Gotify;
     if (pConf && pConf.enable) {
 
         let port = 80; // default
@@ -23,22 +23,24 @@ function run(trigger, scope, data, config, callback) {
             priority: priority
         });
 
+        // POST Options
+        let options = {
+            hostname: config.URL,
+            port: port,
+            path: '/message',
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Gotify-Key': config.APIKey
+            }
+        };
+
         let req;
 
         // SSL
         if (config.SSL) {
             // SSL POST Options
-            const options = {
-                hostname: config.URL,
-                port: port,
-                path: '/message',
-                method: 'POST',
-                rejectUnauthorized: false,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Gotify-Key': config.APIKey
-                }
-            };
+            options.rejectUnauthorized = false;
 
             // HTTPS request
             req = https.request(options, (res) => {
@@ -48,18 +50,6 @@ function run(trigger, scope, data, config, callback) {
                 })
             });
         } else {
-            // POST Options
-            const options = {
-                hostname: config.URL,
-                port: port,
-                path: '/message',
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Gotify-Key': config.APIKey
-                }
-            };
-
             // HTTP request
             req = http.request(options, (res) => {
                 logger.main.debug('Gotify: ' + res.statusCode);
