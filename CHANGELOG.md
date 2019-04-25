@@ -10,11 +10,12 @@ Upgrades are only possible from version **0.2.3**, if you are on a lower version
 
 * Compeletly rebuilt database driver to use the [KnexJS](https://knexjs.org/) query builder. #174
     * **Upgrades of existing SQLite databases must be performed from v0.2.3**
-    * Adds support for **MySQL**.
-    * MariaDB should also work however this has not been tested. 
+    * Adds  **EXPERIMENTAL** support for **MySQL** - This is used at users own risk, limited testing has been performed however not recommended for production. 
+    * MariaDB may also work however this has not been tested at all.
     * Conversion of existing databases is up to the user. We recommend starting a new database if you would like to switch to MySQL.
     * This is super BETA, it has been tested as best as possible but bugs WILL exist. Please report via github bugtracker. 
     * Database upgrades are now handled by migration files to make upgrades easier in the future. 
+
 * Convince Winston to follow the laws of Physics #251
 * More complete docker support #243, #249
 * Fix display issues on large resolution mobile devices #241, #253
