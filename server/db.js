@@ -33,7 +33,21 @@ function init(release) {
                 var migration1 = {id:1,name: '20190322204646_create_capcodes_table.js',batch:1,migration_time: datetime}
                 var migration2 = {id:2,name: '20190322204706_create_messages_table.js',batch:1,migration_time: datetime}
                 var migration3 = {id:3,name: '20190322204710_create_indexes_triggers.js',batch:1,migration_time: datetime}
-                Promise.all([
+                db.migrate.latest()
+                .then((result) => {
+                    var vervar = 'pragma user_version = ' + release + ';'
+                    db.raw(vervar)
+                    .then((result) => {
+                        //logger.main.info('Setting DB to version: ' + release)
+                    })
+                    .catch((err) => {
+                        logger.main.error('Error setting DB Version' + err)
+                    })
+                })
+                .catch((err) => {
+                    logger.main.error(err)
+                })
+                /*Promise.all([
                 db('knex_migrations')
                     .insert(migration1)
                     .then((result) => { 
@@ -75,6 +89,7 @@ function init(release) {
                 .catch ((err) => {
                     logger.main.error('Failed to upgrade database')
                 })
+                */
             } else {
                 //End Legacy Support
                 logger.main.info('Checking for database upgrades')
