@@ -3,7 +3,7 @@
 // 2017-06-04
 // Author: Dave McKenzie
 //
-// Description: Takes a PDW filters.init file and pushes it to PagerMon server
+// Description: Takes a PDW filters.ini file and pushes it to PagerMon server
 //
 // Usage: cat filters.ini | node import.js
 //
