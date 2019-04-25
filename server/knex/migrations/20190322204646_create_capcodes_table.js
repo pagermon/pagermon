@@ -1,8 +1,8 @@
 
 exports.up = function(db, Promise) {
-  return db.schema.hasTable('capcodes').then(function(exists) {
+   db.schema.hasTable('capcodes').then(function(exists) {
     if (!exists) {
-     db.schema.createTable('capcodes', table => {
+     return db.schema.createTable('capcodes', table => {
             table.integer('id').primary().notNullable();
             table.string('address', [255]).notNullable();
             table.text('alias').notNullable();
