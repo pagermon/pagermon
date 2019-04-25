@@ -41,6 +41,7 @@ function init(release) {
                     })
                     .catch ((err) => {
                         logger.main.error('Error marking migration 1 as complete for existing database')
+                        return error
                     }),
                 db('knex_migrations')
                     .insert(migration2)
@@ -49,6 +50,7 @@ function init(release) {
                     })
                     .catch ((err) => {
                         logger.main.error('Error marking migration 2 as complete for existing database')
+                        return error
                     }),
                 db('knex_migrations')
                     .insert(migration3)
@@ -57,6 +59,7 @@ function init(release) {
                     })
                     .catch ((err) => {
                         logger.main.error('Error marking migration 3 as complete for existing database')
+                        return error
                     })
                 ])
                 .then ((result) => {
