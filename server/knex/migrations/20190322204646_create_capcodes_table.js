@@ -13,6 +13,8 @@ exports.up = function(db, Promise) {
             table.integer('ignore').defaultTo(0);
             table.unique(['id', 'address'], 'cc_pk_idx');
       })
+    } else {
+      return
     }
   })
 }
