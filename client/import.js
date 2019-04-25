@@ -5,8 +5,20 @@
 //
 // Description: Takes a PDW filters.ini file and pushes it to PagerMon server
 //
-// Usage: cat filters.ini | node import.js
+// Usage: cat filters.ini | node import.js --pdw
+//        cat aliases.csv | node import.js
 //
+
+/*     var id = req.body.id || null;
+    var address = req.body.address || 0;
+    var alias = req.body.alias || 'null';
+    var agency = req.body.agency || 'null';
+    var color = req.body.color || 'black';
+    var icon = req.body.icon || 'question';
+    var ignore = req.body.ignore || 0;
+    var pluginconf = JSON.stringify(req.body.pluginconf) || "{}";
+
+    */
 
 // CONFIG
 // create config file if it does not exist, and set defaults
@@ -48,55 +60,102 @@ const rl = readline.createInterface({
     terminal: true
 });
 
-rl.on('line', (line) => {
+var lineCount = 0;
+var columns = {};
 
+rl.on('line', (line) => {
+  lineCount++;
+
+  var id;
   var address;
-  var agency;
   var alias;
+  var agency;
   var color;
   var icon;
+  var ignore;
+  var pluginconf;
+
+  if (line.indexOf(',') > -1 && lineCount == 1 && !process.argv[2]) {
+    // if this is the first line and we're not in pdw mode, get the columns
+    var lineArray = line.split(',');
+    console.log(lineArray);
+    for (i in lineArray) {
+      switch (lineArray[i]) {
+        case 'id':
+          columns.id = i;
+          break;
+        case 'address':
+          columns.address = i;
+          break;
+        case 'alias':
+          columns.alias = i;
+          break;
+        case 'agency':
+          columns.agency = i;
+          break;
+        case 'color':
+          columns.color = i;
+          break;
+        case 'icon':
+          columns.icon = i;
+          break;
+        case 'ignore':
+          columns.ignore = i;
+          break;
+        case 'pluginconf':
+          columns.pluginconf = i;
+          break;
+      }
+    }
+    console.log(columns);
+    process.exit;
+  }
 
   // ignore non-csv lines
-  if (line.indexOf(',') > -1) {
+  if (line.indexOf(',') > -1 && lineCount != 1)  {
     parse(line, {comment: '#'}, function(err, output){
-      var ol = output[0];
-      address = ol[1].replace(/\?/g, "_");
-      if (ol[2].indexOf(" - ") > -1) {
-        agency = ol[2].match(/(.*?) - /)[1].trim();
-        alias = ol[2].match(/ - (.*?)$/)[1].trim();
+      if (process.argv[2] && process.argv[2] == '--pdw') {
+        var ol = output[0];
+        address = ol[1].replace(/\?/g, "_");
+        if (ol[2].indexOf(" - ") > -1) {
+          agency = ol[2].match(/(.*?) - /)[1].trim();
+          alias = ol[2].match(/ - (.*?)$/)[1].trim();
+        } else {
+          agency = '';
+          alias = ol[2];
+        }
+        // Agency config:
+        // for icons, see http://fontawesome.io
+        switch (agency) {
+          case 'RFS':
+            icon = "fire";
+            break;
+          case 'SES':
+            icon = "medkit";
+            break;
+          default:
+            icon = "question";
+        }
+        // Color config:
+        // change this according to your input file
+        switch (ol[7]) {
+          case '3':
+            color = "darkred";
+            break;
+          case '4':
+            color = "darkorange";
+            break;
+          case '7':
+            color = "darkgrey";
+            break;
+          case '8':
+            color = "darkgreen";
+            break;
+          default:
+            color = "green";
+        }
       } else {
-        agency = '';
-        alias = ol[2];
-      }
-      // Agency config:
-      // for icons, see http://fontawesome.io
-      switch (agency) {
-        case 'RFS':
-          icon = "fire";
-          break;
-      case 'SES':
-        icon = "medkit";
-        break;
-      default:
-        icon = "question";
-      }
-      // Color config:
-      // change this according to your input file
-      switch (ol[7]) {
-        case '3':
-          color = "darkred";
-          break;
-        case '4':
-          color = "darkorange";
-          break;
-        case '7':
-          color = "darkgrey";
-          break;
-        case '8':
-          color = "darkgreen";
-          break;
-        default:
-          color = "green";
+
       }
       if (address != '' && agency != '' && alias != '') {
         console.log('Sending capcode: '+address, agency, alias, color, icon);
@@ -114,14 +173,14 @@ rl.on('line', (line) => {
             color: color,
             icon: icon
           }
-      };
-      rp(options)
-          .then(function (body) {
-              console.log(colors.success('Success! '+body)); 
-          })
-          .catch(function (err) {
-              console.log(colors.error('Fail! '+err));
-          });
+        };
+        rp(options)
+        .then(function (body) {
+            console.log(colors.success('Success! '+body)); 
+        })
+        .catch(function (err) {
+            console.log(colors.error('Fail! '+err));
+        });
       }
     });
   }
