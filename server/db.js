@@ -33,10 +33,10 @@ function init(release) {
                     db.raw(vervar)
                     .then((result) => {
                         if (res[0].user_version < 20190106) {
-                        logger.main.info('Setting DB to version: ' + release)
+                            logger.main.info('Setting DB to version: ' + release)
                         }
                         else {
-
+                            logger.main.info('Database Upgrades Complete')
                         }
                     })
                     .catch((err) => {
@@ -51,6 +51,7 @@ function init(release) {
     } else {
         db.migrate.latest()
         .then((result) => {
+            logger.main.info('Database Upgrades Complete')
         })
         .catch((err) => {
             logger.main.error(err)
