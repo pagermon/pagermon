@@ -14,6 +14,12 @@ exports.up = function(db, Promise) {
                     table.index(['id', 'alias_id'], 'msg_alias');
                     table.index(['timestamp', 'alias_id'], 'msg_timestamp');
             })
+            .then((result) =>{
+
+            })
+            .catch((err) => {
+                
+            })
         } else {
             return
         }
