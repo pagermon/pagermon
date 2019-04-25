@@ -1,6 +1,8 @@
 
 exports.up = function(db, Promise) {
-     return db.schema.createTableIfNotExists('capcodes', table => {
+  return db.schema.hasTable('capcodes').then(function(exists) {
+    if (!exists) {
+      return db.schema.createTable('capcodes', table => {
             table.integer('id').primary().notNullable();
             table.string('address', [255]).notNullable();
             table.text('alias').notNullable();
@@ -10,9 +12,13 @@ exports.up = function(db, Promise) {
             table.text('pluginconf')
             table.integer('ignore').defaultTo(0);
             table.unique(['id', 'address'], 'cc_pk_idx');
-  })
+      })
+   } else {
+     return
+   }
+ })
 }
 
 exports.down = function(db, Promise) {
-  
+ 
 };

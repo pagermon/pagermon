@@ -32,7 +32,12 @@ function init(release) {
                     var vervar = 'pragma user_version = ' + release + ';'
                     db.raw(vervar)
                     .then((result) => {
+                        if (res[0].user_version < 20190106) {
                         logger.main.info('Setting DB to version: ' + release)
+                        }
+                        else {
+
+                        }
                     })
                     .catch((err) => {
                         logger.main.error('Error setting DB Version' + err)
