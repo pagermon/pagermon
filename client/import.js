@@ -58,72 +58,72 @@ rl.on('line', (line) => {
 
   // ignore non-csv lines
   if (line.indexOf(',') > -1) {
-  	parse(line, {comment: '#'}, function(err, output){
-  		var ol = output[0];
-  		address = ol[1].replace(/\?/g, "_");
-  		if (ol[2].indexOf(" - ") > -1) {
-  			agency = ol[2].match(/(.*?) - /)[1].trim();
-  			alias = ol[2].match(/ - (.*?)$/)[1].trim();
-  		} else {
-  			agency = '';
-  			alias = ol[2];
-  		}
-  		// Agency config:
-  		// for icons, see http://fontawesome.io
-  		switch (agency) {
-  			case 'RFS':
-  				icon = "fire";
-  				break;
-			case 'SES':
-				icon = "medkit";
-				break;
-			default:
-				icon = "question";
-  		}
-  		// Color config:
-  		// change this according to your input file
-  		switch (ol[7]) {
-  			case '3':
-  				color = "darkred";
-  				break;
-  			case '4':
-  				color = "darkorange";
-  				break;
-  			case '7':
-  				color = "darkgrey";
-  				break;
-  			case '8':
-  				color = "darkgreen";
-  				break;
-  			default:
-  				color = "green";
-  		}
-  		if (address != '' && agency != '' && alias != '') {
-  			console.log('Sending capcode: '+address, agency, alias, color, icon);
-  			var options = {
-				method: 'POST',
-				uri: uri,
-				headers: {
-					'X-Requested-With': 'XMLHttpRequest',
-					apikey: apikey
-				},
-	  			form: {
-	  				address: address,
-	  				agency: agency,
-	  				alias: alias,
-	  				color: color,
-	  				icon: icon
-	  			}
-			};
-			rp(options)
-			    .then(function (body) {
-			        console.log(colors.success('Success! '+body)); 
-			    })
-			    .catch(function (err) {
-			        console.log(colors.error('Fail! '+err));
-			    });
-  		}
-  	});
+    parse(line, {comment: '#'}, function(err, output){
+      var ol = output[0];
+      address = ol[1].replace(/\?/g, "_");
+      if (ol[2].indexOf(" - ") > -1) {
+        agency = ol[2].match(/(.*?) - /)[1].trim();
+        alias = ol[2].match(/ - (.*?)$/)[1].trim();
+      } else {
+        agency = '';
+        alias = ol[2];
+      }
+      // Agency config:
+      // for icons, see http://fontawesome.io
+      switch (agency) {
+        case 'RFS':
+          icon = "fire";
+          break;
+      case 'SES':
+        icon = "medkit";
+        break;
+      default:
+        icon = "question";
+      }
+      // Color config:
+      // change this according to your input file
+      switch (ol[7]) {
+        case '3':
+          color = "darkred";
+          break;
+        case '4':
+          color = "darkorange";
+          break;
+        case '7':
+          color = "darkgrey";
+          break;
+        case '8':
+          color = "darkgreen";
+          break;
+        default:
+          color = "green";
+      }
+      if (address != '' && agency != '' && alias != '') {
+        console.log('Sending capcode: '+address, agency, alias, color, icon);
+        var options = {
+        method: 'POST',
+        uri: uri,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          apikey: apikey
+        },
+          form: {
+            address: address,
+            agency: agency,
+            alias: alias,
+            color: color,
+            icon: icon
+          }
+      };
+      rp(options)
+          .then(function (body) {
+              console.log(colors.success('Success! '+body)); 
+          })
+          .catch(function (err) {
+              console.log(colors.error('Fail! '+err));
+          });
+      }
+    });
   }
 
   
