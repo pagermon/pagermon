@@ -34,13 +34,6 @@ function init(release) {
                 var migration2 = {id:2,name: '20190322204706_create_messages_table.js',batch:1,migration_time: datetime}
                 var migration3 = {id:3,name: '20190322204710_create_indexes_triggers.js',batch:1,migration_time: datetime}
                 Promise.all([
-                
-                db.migrate.latest()
-                    .then((result) => {
-                    })
-                    .catch((err) => {
-                    //This is expected to fail, only exists to create the knex_migration tables no need to log errors.
-                    }),
                 db('knex_migrations')
                     .insert(migration1)
                     .then((result) => { 

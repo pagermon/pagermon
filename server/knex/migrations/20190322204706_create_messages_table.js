@@ -1,6 +1,8 @@
 
 exports.up = function(db, Promise) {
-    return db.schema.createTable('messages', table => {
+    return db.schema.hasTable('messages').then(function(exists) {
+        if (!exists) {
+            db.schema.createTable('messages', table => {
                 table.increments('id').primary().unique();
                 table.string('address', [255]).notNullable();
                 table.text('message').notNullable();
@@ -11,6 +13,8 @@ exports.up = function(db, Promise) {
                 table.index(['address', 'id'], 'msg_index');
                 table.index(['id', 'alias_id'], 'msg_alias');
                 table.index(['timestamp', 'alias_id'], 'msg_timestamp');
+            })
+        }
     })
 }
 
