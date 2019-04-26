@@ -98,6 +98,10 @@ These instructions will get you a copy of the project up and running on your loc
 6) Head to /admin, change your password, and generate some API keys
 6) Grab your API keys and drop them in the PagerMon client, then you're good to go!
 
+Alternatively a production ready setup guide is available here
+https://github.com/pagermon/pagermon/wiki/Setup-Guide---Ubuntu-Server-with-NGINX-Reverse-Proxy-and-Let's-Encrypt-SSL-Certificate
+
+
 ### Docker
 
 1) Build the container:
