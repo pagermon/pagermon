@@ -557,7 +557,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
               })
               .andWhere('message', 'like', message)
               .andWhere('address', 'like', address)
-            } else if ((dupeLimit) == 0 && (dupeTime != 0)) {
+            } else if ((dupeLimit == 0) && (dupeTime != 0)) {
               queryBuilder.where('id', 'in', function () {
                 this.select('id')
                     .from('messages')
