@@ -37,25 +37,55 @@
             </div>
 
             <h5>Database</h5>
-            <fieldset disabled>
             <div class="form-group">
               <label for="database.type" class="col-xs-4 col-sm-3 control-label">Type</label>
               <div class="col-xs-8 col-sm-9">
-                <select name="database.type" ng-model="settings.database.type" class="form-control" readonly>
-                  <option value="sqlite">SQLite</option>
-                  <option value="mongo">MongoDB</option>
-                  <option value="dynamo">DynamoDB</option>
+                <select name="database.type" ng-model="settings.database.type" class="form-control">
+                  <option value="sqlite3">SQLite</option>
+                  <option value="mysql">MySQL</option>
+                  <!--<option value="mssql">MSSQL</option>
+                  <option value="pg">Postgres</option>
+                  <option value="maria">MariaDB</option>-->
                 </select>
               </div>
             </div>
-            <div class="form-group">
-              <label for="database.file" class="col-xs-4 col-sm-3 control-label">File</label>
+            <div class="form-group" ng-if="settings.database.type == 'sqlite3'">
+              <label for="database.file" class="col-xs-4 col-sm-3 control-label">Path to Database File</label>
               <div class="col-xs-8 col-sm-9">
-              <input class="form-control" type="text" name="database.file" ng-model="settings.database.file" readonly>
-              <span class="text-warning">Database configuration is not yet implemented.</span>
+              <input type="text" class="form-control" name="database.file" ng-model="settings.database.file" >
+              <span id="helpBlock" class="help-block">Configure the path to the SQLite Database</span>
               </div>
             </div>
-            </fieldset>
+            <div class="form-group" ng-if="settings.database.type == 'pg' || settings.database.type == 'mysql' || settings.database.type == 'mssql' || settings.database.type == 'maria'">
+              <label for="database.server" class="col-xs-4 col-sm-3 control-label">Database Server</label>
+              <div class="col-xs-8 col-sm-9">
+              <input type="text" class="form-control" name="database.server" ng-model="settings.database.server" >
+              <span id="helpBlock" class="help-block">Database Server Address</span>
+              </div>
+            </div>
+            <div class="form-group" ng-if="settings.database.type == 'pg' || settings.database.type == 'mysql' || settings.database.type == 'mssql' || settings.database.type == 'maria'">
+              <label for="database.database" class="col-xs-4 col-sm-3 control-label">Database Name</label>
+              <div class="col-xs-8 col-sm-9">
+              <input type="text" class="form-control" name="database.database" ng-model="settings.database.database" >
+              <span id="helpBlock" class="help-block">Name of the database.</span>
+              </div>
+            </div>
+            <div class="form-group" ng-if="settings.database.type == 'pg' || settings.database.type == 'mysql' || settings.database.type == 'mssql' || settings.database.type == 'maria'">
+              <label for="database.username" class="col-xs-4 col-sm-3 control-label">Database Username</label>
+              <div class="col-xs-8 col-sm-9">
+              <input type="text" class="form-control" name="database.username" ng-model="settings.database.username" >
+              <span id="helpBlock" class="help-block">Database Username</span>
+              </div>
+            </div>
+            <div class="form-group" ng-if="settings.database.type == 'pg' || settings.database.type == 'mysql' || settings.database.type == 'mssql' || settings.database.type == 'maria'">
+              <label for="database.password" class="col-xs-4 col-sm-3 control-label">Database Password</label>
+              <div class="col-xs-8 col-sm-9">
+              <input type="text" class="form-control" name="database.password" ng-model="settings.database.password" >
+              <span id="helpBlock" class="help-block">Database Password</span>
+              </div>
+            </div>
+            
+            
             <fieldset disabled>
             <div class="form-group">
               <div class="col-xs-8 col-xs-offset-2 col-sm-9 col-sm-offset-3">

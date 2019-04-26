@@ -1,9 +1,25 @@
 # 0.3.0 - Unreleased
+**Upgrade Notes:** 
+This is a major release with a complete rewrite of all database queries. 
+
+This may result in unintended or different behaviour to previous versions, in testing this has mainly been around searching. 
+
+Upgrades are only possible from version **0.2.3**, if you are on a lower version than this, you must first upgrade to 0.2.3 then upgrade to 0.3.0 
+
+**PLEASE ENSURE YOU TAKE A FULL BACKUP BEFORE PERFORMING THE UPGRADE** 
+
+* Compeletly rebuilt database driver to use the [KnexJS](https://knexjs.org/) query builder. #174
+    * **Upgrades of existing SQLite databases must be performed from v0.2.3**
+    * Adds  **EXPERIMENTAL** support for **MySQL** - This is used at users own risk, limited testing has been performed however not recommended for production. 
+    * MariaDB may also work however this has not been tested at all.
+    * Conversion of existing databases is up to the user. We recommend starting a new database if you would like to switch to MySQL.
+    * This is super BETA, it has been tested as best as possible but bugs WILL exist. Please report via github bugtracker. 
+    * Database upgrades are now handled by migration files to make upgrades easier in the future. 
 
 * Convince Winston to follow the laws of Physics #251
 * More complete docker support #243, #249
 * Fix display issues on large resolution mobile devices #241, #253
-* Update old repository URL in package.json #240
+* Update old repository URL in package.json and index.ejs #240 #252
 * Add ability to select the icon size on the homepage #239
 * Fix 404 error when trailing slash added to hostname in client config #223
 * Patch Total.js CVE #232
@@ -11,7 +27,8 @@
 * Parse timestamps in messages #72
 * Compatibility with multimon timestamp option #57
 * Fix URL state not updating properly on Firefox #229
-* Remove the client from the main repository #262
+* Updates import.js to support generic CSV import #60
+* Added Gotify Plugin #257
 
 # 0.2.3 - 2019-02-05
 
