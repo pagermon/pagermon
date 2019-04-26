@@ -29,6 +29,25 @@ Some environments prepend pager messages with a timestamp - by default reader.js
 
 Check the samples dir for example usage.
 
+### Import.js
+
+The `import.js` script can be used to import capcode aliases from PDW filters.ini or a generic CSV file.
+
+Usage: 
+    `cat filters.ini | node import.js --pdw`
+    `cat aliases.csv | node import.js`
+
+CSV must have columns in any order of the following: 
+    `id,address,alias,agency,color,icon,ignore,pluginconf`
+
+Only address, alias, and agency are mandatory. The file should have column headers. E.g.:
+
+```
+alias,address,something,color,agency,junk
+Warringah - UNID,1370%,words,darkgreen,RFS,description or something that isnt imported
+```
+
+
 ## Contributing
 
 All are welcome to contribute.
