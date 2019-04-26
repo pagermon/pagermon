@@ -12,6 +12,7 @@
 * Compatibility with multimon timestamp option #57
 * Fix URL state not updating properly on Firefox #229
 * Updates import.js to support generic CSV import #60
+* Added Gotify Plugin #257
 
 # 0.2.3 - 2019-02-05
 
@@ -19,7 +20,6 @@
 * Fix refresh aliases button not appearing #194
 * Remove solid white background from Icon images #216
 * Fix capcode route not allowing API authentication #218
-* Added Gotify Plugin #257
 
 # 0.2.2 - 2019-01-15
 
