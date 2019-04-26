@@ -11,7 +11,7 @@ The UI is built around a Node/Express/Angular/Bootstrap stack, while the client 
 * Capcode aliasing with colors and [FontAwesome](https://fontawesome.io/icons/) icons
 * API driven extensible architecture
 * Single user, multiple API keys
-* SQLite database backing
+* SQLite or MySQL database backing
 * Configurable via UI
 * Pagination and searching
 * Filtering by capcode or agency
@@ -20,18 +20,24 @@ The UI is built around a Node/Express/Angular/Bootstrap stack, while the client 
 * WebSockets support - messages are delivered to clients in near realtime
 * Pretty HTML5
 * Native browner notifications
-* Push notifications
-    * [Pushover](https://pushover.net/) Integration - near realtime muti-device notification service
-    * [Telegram](https://telegram.org/) Integration - near realtime cloud based multi-device messaging
-    * [Discord](https://discordapp.com/) Integration - near realtime cloud based messaging service
-    * [Twitter](www.twitter.com) Integration 
-    * Email Support for conventional SMTP email notifications 
+* Plugin Support - Current Plugins:
+    * [Pushover](https://pushover.net/) near realtime muti-device notification service
+    * [Telegram](https://telegram.org/) near realtime cloud based multi-device messaging
+    * [Discord](https://discordapp.com/) near realtime cloud based messaging service
+    * [Gotify](https://gotify.net/) Self-Hosted messaging service
+    * [Twitter](www.twitter.com)
+    * [Microsoft Teams](https://products.office.com/en-us/microsoft-teams/group-chat-software) Team colaboration platform
+    * [Slack](https://slack.com/) Team colabortation platform
+    * SMTP Email Support for conventional SMTP email notifications 
+    * Regex Filters - Filter incoming messages via regex
+    * Regex Replace - Modify incoming messages via regex
+    * Message Repeat - Repeat incoming messages to another pagermon server
 * May or may not contain cute puppies
 
 ### Planned Features
 
 * Multi-user support
-* Other database support (MongoDB and DynamoDB planned)
+* Postgres + MariaDB Support
 * Horizontal scaling
 * Enhanced message filtering
 * Bootstrap 4 + Angular 2 support
@@ -91,6 +97,10 @@ These instructions will get you a copy of the project up and running on your loc
 5) Now login via the website, default port is 3000, default credentials are 'admin' / 'changeme'
 6) Head to /admin, change your password, and generate some API keys
 6) Grab your API keys and drop them in the PagerMon client, then you're good to go!
+
+Alternatively a production ready setup guide is available here
+https://github.com/pagermon/pagermon/wiki/Setup-Guide---Ubuntu-Server-with-NGINX-Reverse-Proxy-and-Let's-Encrypt-SSL-Certificate
+
 
 ### Docker
 
