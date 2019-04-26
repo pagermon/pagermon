@@ -19,7 +19,7 @@ Upgrades are only possible from version **0.2.3**, if you are on a lower version
 * Convince Winston to follow the laws of Physics #251 @DanrwAU
 * More complete docker support #243, #249 @nicko170
 * Fix display issues on large resolution mobile devices #241, #253 @DanrwAU
-* Update old repository URL in package.json and index.ejs #240 #252 @DanrwAU @WasThisUsernameTaken
+* Update old repository URL in package.json and index.ejs #240 #252 #261 @DanrwAU @WasThisUsernameTaken
 * Add ability to select the icon size on the homepage #239 @DanrwAU
 * Fix 404 error when trailing slash added to hostname in client config #223 @DanrwAU
 * Patch Total.js CVE #232 @marshyonline
