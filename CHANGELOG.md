@@ -8,7 +8,7 @@ Upgrades are only possible from version **0.2.3**, if you are on a lower version
 
 **PLEASE ENSURE YOU TAKE A FULL BACKUP BEFORE PERFORMING THE UPGRADE** 
 
-* Compeletly rebuilt database driver to use the [KnexJS](https://knexjs.org/) query builder. #174
+* Compeletly rebuilt database driver to use the [KnexJS](https://knexjs.org/) query builder. #174 @DanrwAU
     * **Upgrades of existing SQLite databases must be performed from v0.2.3**
     * Adds  **EXPERIMENTAL** support for **MySQL** - This is used at users own risk, limited testing has been performed however not recommended for production. 
     * MariaDB may also work however this has not been tested at all.
@@ -16,19 +16,19 @@ Upgrades are only possible from version **0.2.3**, if you are on a lower version
     * This is super BETA, it has been tested as best as possible but bugs WILL exist. Please report via github bugtracker. 
     * Database upgrades are now handled by migration files to make upgrades easier in the future. 
 
-* Convince Winston to follow the laws of Physics #251
-* More complete docker support #243, #249
-* Fix display issues on large resolution mobile devices #241, #253
-* Update old repository URL in package.json and index.ejs #240 #252
-* Add ability to select the icon size on the homepage #239
-* Fix 404 error when trailing slash added to hostname in client config #223
-* Patch Total.js CVE #232
-* Message Repeat Plugin #222
-* Parse timestamps in messages #72
-* Compatibility with multimon timestamp option #57
-* Fix URL state not updating properly on Firefox #229
-* Updates import.js to support generic CSV import #60
-* Added Gotify Plugin #257
+* Convince Winston to follow the laws of Physics #251 @DanrwAU
+* More complete docker support #243, #249 @nicko170
+* Fix display issues on large resolution mobile devices #241, #253 @DanrwAU
+* Update old repository URL in package.json and index.ejs #240 #252 @DanrwAU @WasThisUsernameTaken
+* Add ability to select the icon size on the homepage #239 @DanrwAU
+* Fix 404 error when trailing slash added to hostname in client config #223 @DanrwAU
+* Patch Total.js CVE #232 @marshyonline
+* Message Repeat Plugin #222 @marshyonline
+* Parse timestamps in messages #72 @davidmckenzie
+* Compatibility with multimon timestamp option #57 @davidmckenzie
+* Fix URL state not updating properly on Firefox #229 @davidmckenzie
+* Updates import.js to support generic CSV import #260 @davidmckenzie
+* Added Gotify Plugin #257 @ryaneast
 
 # 0.2.3 - 2019-02-05
 
