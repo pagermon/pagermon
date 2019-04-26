@@ -11,6 +11,7 @@
 * Parse timestamps in messages #72
 * Compatibility with multimon timestamp option #57
 * Fix URL state not updating properly on Firefox #229
+* Updates import.js to support generic CSV import #60
 
 # 0.2.3 - 2019-02-05
 
