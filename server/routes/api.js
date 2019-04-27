@@ -564,7 +564,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                     .where('timestamp', '>', timeDiff)
               })
               .andWhere('message', 'like', message)
-              .andWhere('address', '=', address)
+              .andWhere('address', 'like', address)
             } else {
               queryBuilder.where('message', 'like', message)
                           .andWhere('address', '=', address)
