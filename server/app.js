@@ -1,5 +1,5 @@
-var version = "0.2.3-beta";
-var release = 20181118;
+var version = "0.3.0-beta";
+var release = 20190106;
 
 var debug = require('debug')('pagermon:server');
 var pmx = require('pmx').init({
@@ -20,6 +20,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var fs = require('fs');
 var session = require('express-session');
+var request = require('request');
 var SQLiteStore = require('connect-sqlite3')(session);
 var passport = require('passport');
 var flash    = require('connect-flash');
@@ -41,8 +42,9 @@ var nconf = require('nconf');
     nconf.file({file: conf_file});
     nconf.load();
 
-var db = require('./db');
-    db.init(release);
+var dbinit = require('./db');
+    dbinit.init(release);
+var db = require('./knex/knex.js');
 
 // routes
 var index = require('./routes/index');
@@ -64,6 +66,10 @@ var io = require('socket.io').listen(server);
     server.listen(port);
     server.on('error', onError);
     server.on('listening', onListening);
+    //Set connection timeout to prevent long running queries failing on large databases - mostly capacode refresh on MySQL
+    server.on('connection', function(connection) {
+      connection.setTimeout(600 * 1000);
+    });
     //Lets set setMaxListeners to a decent number - not to high to allow the memory leak warking to still trigger
     io.sockets.setMaxListeners(20);
 io.sockets.on('connection', function (socket) {
@@ -149,6 +155,39 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('global/error', { title: 'PagerMon' });
 });
+
+// Add cronjob to automatically refresh aliases
+var dbtype = nconf.get('database:type')
+if (dbtype == 'mysql' || dbtype == 'mariadb') {
+  var aliasRefreshJob = require('cron').CronJob;
+  new aliasRefreshJob('0 5,35 * * * *', function() {
+    var refreshRequired = nconf.get('database:aliasRefreshRequired')
+    logger.main.debug('CRON: Running Cronjob AliasRefresh')
+    if (refreshRequired == 1) {
+      console.time('updateMap');
+      logger.main.info('CRON: Alias Refresh required, running.')
+      db('messages').update('alias_id', function() {
+        this.select('id')
+            .from('capcodes')
+            .where(db.ref('messages.address'), 'like', db.ref('capcodes.address') )
+            .orderByRaw("REPLACE(address, '_', '%') DESC LIMIT 1")
+      })
+      .then((result) => {
+          console.log(result)
+          console.timeEnd('updateMap');
+          nconf.set('database:aliasRefreshRequired', 0);
+          nconf.save();
+          logger.main.info('CRON: Alias Refresh Successful')
+      })
+      .catch((err) => {
+        logger.main.error('CRON: Error refreshing aliases' + err); 
+        console.timeEnd('updateMap'); 
+      })
+    } else {
+      logger.main.debug('CRON: Alias Refresh not Required, Skipping.')
+    }
+  }, null, true);
+}
 
 module.exports = app;
 

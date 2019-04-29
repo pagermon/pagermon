@@ -40,13 +40,13 @@
                 </div>
             </th>
             <% if (!hidesource || login) { %>
-              <th class="noMobile" style="text-align: center;">Src</th>
+              <th class="noMobile noSmall" style="text-align: center;">Src</th>
             <% } %>
             <% if (!hidecapcode || login) { %>
               <th class="noMobile" style="text-align: center;">Capcode</th>
             <% } %>
-            <th class="noMobile"></th>
-            <th class="noMobile"></th>
+            <th class="noMobile noSmall"></th>
+            <th class="noMobile noSmall"></th>
             <th style="text-align: center;">Message
               <span ng-if="filter || hasQuery" class="pull-left" style="vertical-align: middle; padding-right: 10px;">
                   <strong>Filter:</strong> <a ng-href="/" style="margin-bottom: 3px;" class="btn btn-primary btn-xs">{{filter || origQuery}} <i class="fa fa-fw fa-times"></i></a>
@@ -55,20 +55,24 @@
         </thead>
         <tbody>
           <tr ng-repeat="message in messages | filter: search">
-            <td class="shrink noMobile">{{message.date}}</td>
+            <td class="shrink noMobile noSmall">{{message.date}}</td>
             <td class="shrink">{{message.timestamp}}</td>
             <% if (!hidesource || login) { %>
-              <td class="shrink noMobile clickable-td" uib-popover-template="'templates/popover.html'" popover-append-to-body=true ng-click="popoverEl = 'source'" popover-trigger="'outsideClick'" style="background-color: {{message.color || 'grey'}}; text-align: center;">
+              <td class="shrink noMobile noSmall clickable-td" uib-popover-template="'templates/popover.html'" popover-append-to-body=true ng-click="popoverEl = 'source'" popover-trigger="'outsideClick'" style="background-color: {{message.color || 'grey'}}; text-align: center;">
                 <span class="small" style="color: white; font-family: monospace;"><strong>{{message.source}}</strong></span>
               </td>
             <% } %>
             <% if (!hidecapcode || login) { %>
-              <td class="shrink noMobile clickable-td" uib-popover-template="'templates/popover.html'" popover-append-to-body=true ng-click="popoverEl = 'address'" popover-trigger="'outsideClick'" style="background-color: {{message.color || 'grey'}}; text-align: center;">
+              <td class="shrink noMobile noSmall clickable-td" uib-popover-template="'templates/popover.html'" popover-append-to-body=true ng-click="popoverEl = 'address'" popover-trigger="'outsideClick'" style="background-color: {{message.color || 'grey'}}; text-align: center;">
                 <span class="small" style="color: white; font-family: monospace;"><strong>{{message.address}}</strong></span>
               </td>
             <% } %>
             <td class="shrink clickable-td" ng-if="message.agency" uib-popover-template="'templates/popover.html'" popover-append-to-body=true ng-click="popoverEl = 'agency'" popover-trigger="'outsideClick'">
+              <% if (iconsize == 'small') { %>
+              <span class="fa-stack fa-fw" style="color: {{message.color || 'grey'}};">
+              <% } else { %>
               <span class="fa-stack fa-lg fa-fw" style="color: {{message.color || 'grey'}};">
+              <% } %>
                 <i class="fa fa-circle fa-stack-2x"></i>
                 <i ng-if="message.icon" class="fa fa-{{message.icon}} fa-stack-1x fa-inverse"></i>
                 <i ng-if="!message.icon" class="fa fa-question fa-stack-1x fa-inverse"></i>
@@ -76,17 +80,21 @@
               <strong style="vertical-align: middle;">{{message.agency || ''}}</strong>
             </td>
             <td class="shrink" ng-if="!message.agency">
+              <% if (iconsize == 'small') { %>
+              <span class="fa-stack fa-fw" style="color: {{message.color || 'grey'}};">
+              <% } else { %>
               <span class="fa-stack fa-lg fa-fw" style="color: {{message.color || 'grey'}};">
+              <% } %>
                 <i class="fa fa-circle fa-stack-2x"></i>
                 <i ng-if="message.icon" class="fa fa-{{message.icon}} fa-stack-1x fa-inverse"></i>
                 <i ng-if="!message.icon" class="fa fa-question fa-stack-1x fa-inverse"></i>
               </span>
               <strong style="vertical-align: middle;"></strong>
             </td>
-            <td class="shrink noTiny clickable-td" ng-if="user" uib-popover-template="'templates/popover.html'" popover-append-to-body=true ng-click="popoverEl = 'alias'" popover-trigger="'outsideClick'">
+            <td class="shrink noMobile noSmall clickable-td" ng-if="user" uib-popover-template="'templates/popover.html'" popover-append-to-body=true ng-click="popoverEl = 'alias'" popover-trigger="'outsideClick'">
               <span style="color: Maroon;">{{message.alias || 'Unknown'}}</span>
             </td>
-            <td class="shrink noTiny" ng-if="!user">
+            <td class="shrink noMobile noSmall" ng-if="!user">
               <span>{{message.alias || ''}}</span>
             </td>
             <td class="expand"><div highlight="message.message" replacement="init.replaceText" class="pagerMessage"></td>
@@ -98,7 +106,7 @@
         <h4>No messages found!</h4>
         <div ng-if="hasQuery"><p>Consider broadening your search terms and try again.</p></div>
         <div ng-if="!hasQuery"><p>Have you loaded any message data yet?</p>
-          <p>If you believe you reached this message by error, <a href="https://github.com/davidmckenzie/pagermon/issues" target="_blank">log an issue.</a></p>
+          <p>If you believe you reached this message by error, <a href="https://github.com/pagermon/pagermon/issues" target="_blank">log an issue.</a></p>
         </div>
       </div>
     </div>
@@ -108,7 +116,7 @@
           <div class="col-sm-8 col-sm-offset-2" style="text-align: center; vertical-align: middle;">
             <h2>Secure Mode Enabled</h2>
             <h4>Please <a href="/login">sign in</a> to view messages</h4>
-              <p>If you believe you reached this message by error, <a href="https://github.com/davidmckenzie/pagermon/issues" target="_blank">log an issue.</a></p>
+              <p>If you believe you reached this message by error, <a href="https://github.com/pagermon/pagermon/issues" target="_blank">log an issue.</a></p>
             </div>
           </div>
         </div>
@@ -387,11 +395,17 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
         if (queryObj.page > 1)
           qArray.push('page='+queryObj.page);
 
-        var qString = '';
+        // default query string is "/" - this prevents the state from not passing on firefox
+        var qString = '/';
         if (qArray.length > 0) {
           qString = '?'+qArray.join('&');
         }
-        window.history.pushState('', '', qString);
+        // get the current query string - if it's blank or matches the one we're trying to set to, do nothing. This prevents duplicate history entries
+        var curQuery = window.location.search;
+        if (curQuery == '')
+          curQuery = '/';
+        if (curQuery != qString)
+          window.history.pushState('', '', qString);
         
         if (queryObj.q || queryObj.agency || queryObj.address) {
           Api.MessageSearch.get(queryObj).$promise.then(function(results) {

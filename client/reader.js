@@ -30,8 +30,14 @@ var hostname = nconf.get('hostname');
 var apikey = nconf.get('apikey');
 var identifier = nconf.get('identifier');
 var sendFunctionCode = nconf.get('sendFunctionCode') || false;
+var useTimestamp = nconf.get('useTimestamp') || true;
 
-var uri = hostname+"/api/messages";
+//Check if hostname is in a valid format - currently only removes trailing slash - possibly expand to validate the whole URI? 
+if(hostname.substr(-1) === '/') {
+  var uri = hostname.substr(0, hostname.length - 1)+'/api/messages';
+} else {
+  var uri = hostname+'/api/messages'
+}
 
 var http = require('http');
 var request = require('request');
@@ -57,20 +63,36 @@ var frag = {};
 rl.on('line', (line) => {
   //console.log(`Received: ${line.trim()}`);
   var time = moment().format("YYYY-MM-DD HH:mm:ss");
+  var timeString = '';
   var datetime = moment().unix();
   var address;
   var message;
   var trimMessage;
   // TODO: pad address with zeros for better address matching
 //  if (line.indexOf('POCSAG512: Address:') > -1) {	
-  if (/^POCSAG(\d+): Address: /.test(line) ) {
+  if (/POCSAG(\d+): Address: /.test(line) ) {
     address = line.match(/POCSAG(\d+): Address:(.*?)Function/)[2].trim();
     if (sendFunctionCode) {
       address += line.match(/POCSAG(\d+): Address:(.*?)Function: (\d)/)[3];
     }
     if (line.indexOf('Alpha:') > -1) {
       message = line.match(/Alpha:(.*?)$/)[1].trim();
-      trimMessage = message.replace(/<[A-Za-z]{3}>/g,'').replace(/Ä/g,'[').replace(/Ü/g,']');
+      if (useTimestamp) {
+        if (message.match(/\d{2} \w+ \d{4} \d{2}:\d{2}:\d{2}/)) {
+          timeString = message.match(/\d+ \w+ \d+ \d{2}:\d{2}:\d{2}/)[0];
+          if (moment(timeString, 'DD MMMM YYYY HH:mm:ss').isValid()) {
+            datetime = moment(timeString, 'DD MMMM YYYY HH:mm:ss').unix();
+            message = message.replace(/\d{2} \w+ \d{4} \d{2}:\d{2}:\d{2}/,'');
+          }
+        } else if (message.match(/\d+-\d+-\d+ \d{2}:\d{2}:\d{2}/)) {
+          timeString = message.match(/\d+-\d+-\d+ \d{2}:\d{2}:\d{2}/)[0];
+          if (moment(timeString).isValid()) {
+            datetime = moment(timeString).unix();
+            message = message.replace(/\d+-\d+-\d+ \d{2}:\d{2}:\d{2}/, '');
+          }
+        }
+      }
+      trimMessage = message.replace(/<[A-Za-z]{3}>/g,'').replace(/Ä/g,'[').replace(/Ü/g,']').trim();
     } else if (line.indexOf('Numeric:') > -1) {
       message = line.match(/Numeric:(.*?)$/)[1].trim();
       trimMessage = message.replace(/<[A-Za-z]{3}>/g,'').replace(/Ä/g,'[').replace(/Ü/g,']');
@@ -80,6 +102,19 @@ rl.on('line', (line) => {
     }
   } else if (line.indexOf('FLEX: ') > -1) {
     address = line.match(/FLEX:.*?\[(\d*?)\] /)[1].trim();
+    if (useTimestamp) {
+      if (line.match(/FLEX: \d{2} \w+ \d{4} \d{2}:\d{2}:\d{2}/)) {
+        timeString = line.match(/\d+ \w+ \d+ \d{2}:\d{2}:\d{2}/)[0];
+        if (moment(timeString, 'DD MMMM YYYY HH:mm:ss').isValid()) {
+          datetime = moment(timeString, 'DD MMMM YYYY HH:mm:ss').unix();
+        }
+      } else if (line.match(/FLEX: \d+-\d+-\d+ \d{2}:\d{2}:\d{2}/)) {
+        timeString = line.match(/\d+-\d+-\d+ \d{2}:\d{2}:\d{2}/)[0];
+        if (moment(timeString).isValid()) {
+          datetime = moment(timeString).unix();
+        }
+      }
+    }
     if (line.match( /( ALN | GPN | NUM)/ )) {
       if (line.match( / [0-9]{4}\/[0-9]\/F\/. / )) {
         // message is fragmented, hold onto it for next line
