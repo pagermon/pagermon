@@ -14,7 +14,7 @@ exports.up = function(db, Promise) {
             table.unique(['id', 'address'], 'cc_pk_idx');
       })
    } else {
-     return
+     return Promise.resolve('Not Required')
    }
  })
 }
