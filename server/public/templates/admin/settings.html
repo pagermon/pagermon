@@ -80,14 +80,10 @@
             <div class="form-group" ng-if="settings.database.type == 'pg' || settings.database.type == 'mysql' || settings.database.type == 'mssql' || settings.database.type == 'maria'">
               <label for="database.password" class="col-xs-4 col-sm-3 control-label">Database Password</label>
               <div class="col-xs-8 col-sm-9">
-                  <div class="input-group">
-                    <input type="password" class="form-control" name="database.password" ng-model="settings.database.password" id="database.password">
-                    <div class="input-group-addon">
-                      <a href=""><i class="fa fa-eye-slash" aria-hidden="true"></i></a>
-                    </div>
-                  </div>
+                  <input type="password" ng-attr-type="{{ showPassword ? 'text' : 'password' }}" class="form-control" name="database.password" ng-model="settings.database.password" >
+                    <div ng-click="toggleShowPassword()" ng-class="{'fa fa-eye': showPassword,'fa fa-eye-slash': !showPassword}" style="cursor: pointer; pointer-events: all;"></div>
                 <span id="helpBlock" class="help-block">Database Password</span>
-              </div>
+                </div>
             </div> 
             
             <fieldset disabled>
