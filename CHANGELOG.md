@@ -1,3 +1,7 @@
+# 0.3.1 - Unreleased
+
+* Remove stripping of double quotes from messages #274 @DanrwAU
+
 # 0.3.0 - Unreleased
 **Upgrade Notes:** 
 This is a major release with a complete rewrite of all database queries. 
