@@ -1,4 +1,8 @@
-# 0.3.0 - Unreleased
+# 0.3.1 - Unreleased
+
+* Resolve migration did not return a promise errors 
+
+# 0.3.0 - 2019-04-28
 **Upgrade Notes:** 
 This is a major release with a complete rewrite of all database queries. 
 
