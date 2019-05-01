@@ -42,7 +42,9 @@ exports.up = function(db, Promise) {
                         WHERE messages.id NOT IN (SELECT rowid FROM messages_search_index);
             `)
     ])
-} else return
+} else {
+     return Promise.resolve('Not Required')
+    }
 };
 
 exports.down = function(db, Promise) {

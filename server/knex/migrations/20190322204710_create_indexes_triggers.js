@@ -10,6 +10,9 @@ exports.up = function(db, Promise) {
     } else if (dbtype == 'mysql' || dbtype == 'mariadb'){
         return Promise.all([
             db.raw(`
+                DROP TRIGGER IF EXISTS capcodes_insert_id;
+            `),
+            db.raw(`
                 CREATE TRIGGER capcodes_insert_id 
                 BEFORE INSERT 
                 ON capcodes 
@@ -26,7 +29,9 @@ exports.up = function(db, Promise) {
                 ALTER TABLE capcodes ADD FULLTEXT (alias, agency);
             `)
         ])
-    } else return
+    } else {
+        return Promise.resolve('How did you get here?')
+    }
 };
 
 exports.down = function(db, Promise) {
