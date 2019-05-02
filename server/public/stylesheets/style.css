@@ -149,6 +149,25 @@ a:hover, a:focus {
     box-shadow: inset 0 -2px 0 #ddd; */
 }
 
+.btn-info {
+    background-color: maroon
+}
+
+.btn-group-vertical {
+    position: fixed;
+    bottom:80px; 
+    right:50px;
+    width: 225px;
+}
+
+#buttons-capcodes {
+    position: fixed;
+    bottom:280px; 
+    right:50px;
+    width: 225px;
+}
+
+
 .btn-wide {
     width: 90%;
     margin: 5% 5%;
