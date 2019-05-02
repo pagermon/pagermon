@@ -29,7 +29,7 @@
                 <div class="input-group">
                   <input class="form-control" type="text" name="global.sessionSecret" ng-model="settings.global.sessionSecret" required readonly>
                   <span class="input-group-addon" id="global.sessionSecret.addon">
-                    <button class="btn btn-info" ng-click="generateKey('sessionSecret')" type="button">Generate</button>
+                    <button class="btn btn-default" ng-click="generateKey('sessionSecret')" type="button">Generate</button>
                   </span>
                 </div>
                 <span id="helpBlock" class="help-block">Secret key for cookie sessions, should be changed before deploying the application. Changing this will invalidate existing sessions.</span>
