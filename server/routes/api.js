@@ -522,7 +522,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
         return res.send('Ignoring filtered');
       }
         var address = data.address || '0000000';
-        var message = data.message.replace(/["]+/g, '') || 'null';
+        var message = data.message || 'null';
         var datetime = data.datetime || 1;
         var timeDiff = datetime - dupeTime;
         var source = data.source || 'UNK';

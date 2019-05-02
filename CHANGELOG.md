@@ -1,5 +1,6 @@
 # 0.3.1 - Unreleased
 
+* Remove stripping of double quotes from messages #274 @DanrwAU
 * Hide database password and add visible toggle #273 @DanrwAU
 * Resolve migration did not return a promise errors #272 @DanrwAU
 
