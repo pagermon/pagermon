@@ -153,6 +153,12 @@ a:hover, a:focus {
     background-color: maroon
 }
 
+@media screen and (max-device-width: 768px) {
+
+#buttons-capcodes {
+    display: none;
+}
+
 .btn-group-vertical {
     position: fixed;
     bottom:80px; 
