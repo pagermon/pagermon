@@ -155,8 +155,9 @@ a:hover, a:focus {
 
 @media screen and (max-device-width: 768px) {
 
-#buttons-capcodes {
-    display: none;
+    #buttons-capcodes {
+        display: none;
+    }
 }
 
 .btn-group-vertical {
@@ -172,7 +173,6 @@ a:hover, a:focus {
     right:50px;
     width: 225px;
 }
-
 
 .btn-wide {
     width: 90%;
