@@ -7,7 +7,7 @@ exports.up = function(db, Promise) {
         return db.raw(`
             CREATE VIRTUAL TABLE IF NOT EXISTS messages_search_index USING fts3(message, alias, agency);
             `)
-    } else if (dbtype == 'mysql' || dbtype == 'mariadb'){
+    } else if (dbtype == 'mysql'){
         return Promise.all([
             db.raw(`
                 DROP TRIGGER IF EXISTS capcodes_insert_id;

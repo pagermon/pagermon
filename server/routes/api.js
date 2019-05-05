@@ -268,7 +268,7 @@ router.get('/messageSearch', isLoggedIn, function(req, res, next) {
       sql += ' messages.id IS ?';
     }
     sql += " ORDER BY messages.timestamp DESC;";
-  } else if (dbtype == 'mysql' || dbtype == 'mariadb') {
+  } else if (dbtype == 'mysql') {
     if (query != '') {
       sql = `SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch
               FROM messages`;
@@ -300,7 +300,7 @@ router.get('/messageSearch', isLoggedIn, function(req, res, next) {
     db.raw(sql, query)
       .then((rows) => {
         if (rows) {
-          if (dbtype == 'mysql' || dbtype == 'mariadb') {
+          if (dbtype == 'mysql') {
             // This is required for MySQL Compatibility - SQLite doesn't need this. 
             rows = rows[0]
           }
