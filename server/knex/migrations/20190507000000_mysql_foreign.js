@@ -8,9 +8,11 @@ exports.up = function(db, Promise) {
             db.raw(`
             DROP TRIGGER IF EXISTS capcodes_insert_id;
             `),
+            // This is here to fix original broken mysql installs - probably not required going forward.
             db.schema.table('messages', function (table) {
                 table.dropForeign('alias_id');
-                table.foreign('alias_id').unsigned().references('id').inTable('capcodes').onUpdate('CASCADE').onDelete('CASCADE');
+                table.integer('alias_id').unsigned()
+                table.foreign('alias_id').references('id').inTable('capcodes').onUpdate('CASCADE').onDelete('CASCADE');
             })
         ])
     } else {
