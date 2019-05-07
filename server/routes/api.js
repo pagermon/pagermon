@@ -735,20 +735,6 @@ router.post('/capcodes', isLoggedIn, function(req, res, next) {
         })
         .returning('id')
         .then((result) => { 
-          if (dbtype != 'sqlite' || dbtype != 'postgres') {
-            // this is handling for the trigger creating the alias - previous command doesn't return correct result. 
-            db.from('capcodes')
-              .max('id as latestid')
-              .first()
-              .returning('latestid')
-              .then((result) => {
-                result = result.latestid
-                //handle 0 or null aliases when no aliases exist
-                if (result == null || result == 0) {
-                  result = 1
-                }
-              })
-          }
           res.status(200);
           res.send(''+result);
           if (!updateRequired || updateRequired == 0) {
@@ -833,49 +819,6 @@ router.post('/capcodes/:id', isLoggedIn, function(req, res, next) {
           } 
         })
         .then((result) => { 
-          if (dbtype != 'sqlite' || dbtype != 'postgres') {
-            // this is handling for the trigger creating the alias - previous command doesn't return correct result. 
-            db.from('capcodes')
-              .max('id as latestid')
-              .first()
-              .returning('latestid')
-              .then((result) => {
-                resultid = result.latestid
-                //handle 0 or null aliases when no aliases exist
-                 if (resultid == null || resultid == 0) {
-                  resultid = 1
-                 }
-                console.timeEnd('insert');
-                if (updateAlias == 1) {
-                  console.time('updateMap');
-                  db('messages')
-                    .update('alias_id', function () {
-                      this.select('id')
-                        .from('capcodes')
-                        .where('messages.address', 'like', 'address')
-                        .orderByRaw("REPLACE(address, '_', '%') DESC LIMIT 1")
-                    })
-                    .catch((err) => {
-                      logger.main.error(err);
-                    })
-                    .finally(() => {
-                      console.timeEnd('updateMap');
-                    })
-                } else {
-                  if (!updateRequired || updateRequired == 0) {
-                    nconf.set('database:aliasRefreshRequired', 1);
-                    nconf.save();
-                  }
-                }
-                return resultid
-              })
-              .then((result) => {
-                res.status(200).send({ 'status': 'ok', 'id': result });
-              })
-              .catch((err) => {
-                res.status(500).send(err);
-              })
-          } else {
             console.timeEnd('insert');
             if (updateAlias == 1) {
               console.time('updateMap');
@@ -899,7 +842,6 @@ router.post('/capcodes/:id', isLoggedIn, function(req, res, next) {
               }
             }
             res.status(200).send({ 'status': 'ok', 'id': result })
-          }
         })
         .catch((err) => {
           console.timeEnd('insert');

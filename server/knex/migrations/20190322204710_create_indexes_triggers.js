@@ -10,19 +10,6 @@ exports.up = function(db, Promise) {
     } else if (dbtype == 'mysql'){
         return Promise.all([
             db.raw(`
-                DROP TRIGGER IF EXISTS capcodes_insert_id;
-            `),
-            db.raw(`
-                CREATE TRIGGER capcodes_insert_id 
-                BEFORE INSERT 
-                ON capcodes 
-                FOR EACH ROW BEGIN
-                    SET NEW.id = (SELECT MAX(id) + 1 FROM capcodes);
-                    IF ( NEW.id IS NULL ) THEN SET NEW.id = 1;
-                    END IF;
-                END;
-            `),
-            db.raw(`
                 ALTER TABLE messages ADD FULLTEXT (message, source, address);
             `),
             db.raw(`
