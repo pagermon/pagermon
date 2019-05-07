@@ -463,6 +463,12 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         }
       };
       
+      $scope.showPassword = false;
+
+      $scope.toggleShowPassword = function() {
+        $scope.showPassword = !$scope.showPassword;
+      }
+
       $scope.addKey = function () {
         $scope.settings.auth.keys.push({
           'name': "",

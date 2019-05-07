@@ -49,9 +49,10 @@ function init(release) {
             }
         })
     } else {
+        logger.main.info('Checking for database upgrades')
         db.migrate.latest()
         .then((result) => {
-            logger.main.info('Database Upgrades Complete')
+            logger.main.info('Database upgrades complete')
         })
         .catch((err) => {
             logger.main.error(err)

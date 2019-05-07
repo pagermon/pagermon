@@ -1,4 +1,12 @@
-# 0.3.0 - Unreleased
+# 0.3.1 - 2019-05-07
+
+* **Fixes DoS vulnerability in search handling** #278 @davidmckenzie
+* Remove stripping of double quotes from messages #274 @DanrwAU
+* Hide database password and add visible toggle #273 @DanrwAU
+* Resolve migration did not return a promise errors #272 @DanrwAU
+
+# 0.3.0 - 2019-04-28
+
 **Upgrade Notes:** 
 This is a major release with a complete rewrite of all database queries. 
 
