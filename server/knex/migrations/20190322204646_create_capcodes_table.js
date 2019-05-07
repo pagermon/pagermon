@@ -11,7 +11,7 @@ exports.up = function(db, Promise) {
             table.text('agency');
             table.text('icon');
             table.text('color');
-            table.json('pluginconf')
+            table.text('pluginconf')
             table.integer('ignore').defaultTo(0);
             table.unique(['id', 'address'], 'cc_pk_idx');
       })
