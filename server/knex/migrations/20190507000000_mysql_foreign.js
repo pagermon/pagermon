@@ -16,6 +16,12 @@ exports.up = function(db, Promise) {
                 db.schema.table('messages', function (table) {
                     table.integer('alias_id').unsigned().references('id').inTable('capcodes').onUpdate('CASCADE').onDelete('CASCADE');
                  })
+                 .then (
+
+                 )
+                 .catch (
+                     
+                 )
             ).catch (
                 
             )
