@@ -11,13 +11,14 @@ exports.up = function(db, Promise) {
             `),
             db.schema.table('messages', function (table) {
                 table.dropForeign('alias_id');
-                table.dropColumn('alias_id');
+                table.dropColumn('alias_id');   
+            }).then (
+                db.schema.table('messages', function (table) {
+                    table.integer('alias_id').unsigned().references('id').inTable('capcodes').onUpdate('CASCADE').onDelete('CASCADE');
+                 })
+            ).catch (
                 
-            }),
-            db.schema.table('messages', function (table) {
-                table.integer('alias_id').unsigned()
-                table.foreign('alias_id').references('id').inTable('capcodes').onUpdate('CASCADE').onDelete('CASCADE');
-            })
+            )
             //end broken MySQL Fix
         ])
     } else {
