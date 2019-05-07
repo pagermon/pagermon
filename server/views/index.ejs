@@ -387,13 +387,13 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
 
         var qArray = [];
         if (queryObj.q)
-          qArray.push('q='+queryObj.q);
+          qArray.push('q='+encodeURIComponent(queryObj.q));
         if (queryObj.address)
-          qArray.push('address='+queryObj.address);
+          qArray.push('address='+encodeURIComponent(queryObj.address));
         if (queryObj.agency)
-          qArray.push('agency='+queryObj.agency);
+          qArray.push('agency='+encodeURIComponent(queryObj.agency));
         if (queryObj.page > 1)
-          qArray.push('page='+queryObj.page);
+          qArray.push('page='+encodeURIComponent(queryObj.page));
 
         // default query string is "/" - this prevents the state from not passing on firefox
         var qString = '/';
