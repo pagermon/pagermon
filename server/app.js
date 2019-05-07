@@ -173,7 +173,6 @@ if (dbtype == 'mysql') {
             .orderByRaw("REPLACE(address, '_', '%') DESC LIMIT 1")
       })
       .then((result) => {
-          console.log(result)
           console.timeEnd('updateMap');
           nconf.set('database:aliasRefreshRequired', 0);
           nconf.save();
