@@ -9,8 +9,8 @@ exports.up = function(db, Promise) {
             DROP TRIGGER IF EXISTS capcodes_insert_id;
             `),
             knex.schema.table('messages', function (table) {
-                table.dropForeign('alias_id')
-                table.foreign('alias_id').unsigned().references('id').inTable('capcodes').onUpdate('CASCADE').onDelete('CASCADE')
+                table.dropForeign('alias_id');
+                table.foreign('alias_id').unsigned().references('id').inTable('capcodes').onUpdate('CASCADE').onDelete('CASCADE');
             })
         ])
     } else {

@@ -8,8 +8,7 @@ exports.up = function(db, Promise) {
                 table.text('message').notNullable();
                 table.text('source').notNullable();
                 table.integer('timestamp');
-                table.integer('alias_id');
-                table.foreign('alias_id').unsigned().references('id').inTable('capcodes').onUpdate('CASCADE').onDelete('CASCADE');
+                table.integer('alias_id').unsigned().references('id').inTable('capcodes').onUpdate('CASCADE').onDelete('CASCADE');
                 table.index(['address', 'id'], 'msg_index');
                 table.index(['id', 'alias_id'], 'msg_alias');
                 table.index(['timestamp', 'alias_id'], 'msg_timestamp');
