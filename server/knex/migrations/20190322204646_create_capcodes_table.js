@@ -3,8 +3,8 @@ exports.up = function(db, Promise) {
   return db.schema.hasTable('capcodes').then(function(exists) {
     if (!exists) {
       return db.schema.createTable('capcodes', table => {
-            table.charset(utf8);
-            table.collate(utf8_general_ci);
+            table.charset('utf8');
+            table.collate('utf8_general_ci');
             table.increments('id').primary().unique().notNullable();
             table.string('address', [255]).notNullable();
             table.text('alias').notNullable();
