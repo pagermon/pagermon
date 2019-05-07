@@ -6,13 +6,9 @@ exports.up = function(db, Promise) {
  if (dbtype == 'mysql'){
         return Promise.all([
             // This is here to fix original broken mysql installs - probably not required going forward.
-            db.raw(`
-            DROP TRIGGER IF EXISTS capcodes_insert_id;
-            `),
             db.schema.table('messages', function (table) {
-                table.dropForeign('alias_id');
-                table.dropColumn('alias_id');   
-            })
+                table.integer('alias_id').unsigned().references('id').inTable('capcodes').onUpdate('CASCADE').onDelete('CASCADE');
+             })
             //end broken MySQL Fix
         ])
     } else {
@@ -25,5 +21,3 @@ exports.down = function(db, Promise) {
 };
 
 
-
-            
