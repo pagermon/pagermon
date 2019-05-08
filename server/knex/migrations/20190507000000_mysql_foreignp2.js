@@ -9,7 +9,7 @@ exports.up = function(db, Promise) {
             db.schema.table('messages', function (table) {
                 table.integer('alias_id').unsigned().references('id').inTable('capcodes').onUpdate('CASCADE').onDelete('CASCADE');
              }),
-             db.schema.alterTable('capccodes', function (table) {
+             db.schema.alterTable('capcodes', function (table) {
                 table.increments('id').primary().unique().notNullable().alter();
              })
             //end broken MySQL Fix
