@@ -475,6 +475,7 @@ router.get('/capcodeCheck/:id', isLoggedIn, function(req, res, next) {
             "icon": "question",
             "color": "black",
             "ignore": 0,
+            "storeToneOnly": 0,
             "pluginconf": {}
           };
           res.status(200);
@@ -515,6 +516,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
   nconf.load();
   if (req.body.address && req.body.message) {
     var dbtype = nconf.get('database:type');
+    var storeToneOnly = nconf.get('messages:storeToneOnly') || "never";
     var filterDupes = nconf.get('messages:duplicateFiltering');
     var dupeLimit = nconf.get('messages:duplicateLimit') || 0; // default 0
     var dupeTime = nconf.get('messages:duplicateTime') || 0; // default 0
@@ -554,6 +556,13 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
         msgBuffer.shift();
       }
       msgBuffer.push({message: data.message, datetime: data.datetime, address: data.address});
+    }
+
+    // Define if message is Tone Only
+    data.isToneOnly = false;
+    if ( data.message.match(new RegExp('^(TONE ONLY)$')) ){
+      // Marked as "Tone only" in client reader
+      data.isToneOnly = true;
     }
 
     // send data to pluginHandler before proceeding
@@ -657,6 +666,18 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                     // overwrite alias_id if set from plugin
                     if (data.pluginData.aliasId) {
                       alias_id = data.pluginData.aliasId;
+                    }
+
+                    if( data.isToneOnly ){
+                      if( storeToneOnly == "never" ){
+                        insert = false;
+                        logger.main.info('Ignoring tone only, Store:never, address: '+address);
+                      }else if( storeToneOnly == "aliases" ){
+                        if( !(typeof row !== 'undefined' && row.storeToneOnly == 1 ) ){
+                          insert = false;
+                          logger.main.info('Ignoring tone only, Store:aliases, address: '+address+' alias: '+row.id);
+                        }
+                      }
                     }
 
                     if (insert == true) {
@@ -794,6 +815,7 @@ router.post('/capcodes', isLoggedIn, function(req, res, next) {
     var agency = req.body.agency || 'null';
     var color = req.body.color || 'black';
     var icon = req.body.icon || 'question';
+    var storeToneOnly = req.body.storeToneOnly || 0;
     var ignore = req.body.ignore || 0;
     var pluginconf = JSON.stringify(req.body.pluginconf) || "{}";
       db.from('capcodes')
@@ -807,6 +829,7 @@ router.post('/capcodes', isLoggedIn, function(req, res, next) {
               agency: agency,
               color: color,
               icon: icon,
+              storeToneOnly: storeToneOnly,
               ignore: ignore,
               pluginconf: pluginconf
             })
@@ -818,6 +841,7 @@ router.post('/capcodes', isLoggedIn, function(req, res, next) {
               agency: agency,
               color: color,
               icon: icon,
+              storeToneOnly: storeToneOnly,
               ignore: ignore,
               pluginconf: pluginconf
             })
@@ -877,6 +901,7 @@ router.post('/capcodes/:id', isLoggedIn, function(req, res, next) {
       var agency = req.body.agency || 'null';
       var color = req.body.color || 'black';
       var icon = req.body.icon || 'question';
+      var storeToneOnly = req.body.storeToneOnly || 0;
       var ignore = req.body.ignore || 0;
       var pluginconf = JSON.stringify(req.body.pluginconf) || "{}";
       var updateAlias = req.body.updateAlias || 0;
@@ -894,6 +919,7 @@ router.post('/capcodes/:id', isLoggedIn, function(req, res, next) {
               agency: agency,
               color: color,
               icon: icon,
+              storeToneOnly: storeToneOnly,
               ignore: ignore,
               pluginconf: pluginconf
             })
@@ -905,6 +931,7 @@ router.post('/capcodes/:id', isLoggedIn, function(req, res, next) {
               agency: agency,
               color: color,
               icon: icon,
+              storeToneOnly: storeToneOnly,
               ignore: ignore,
               pluginconf: pluginconf
             })

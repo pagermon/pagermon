@@ -97,8 +97,8 @@ rl.on('line', (line) => {
       message = line.match(/Numeric:(.*?)$/)[1].trim();
       trimMessage = message.replace(/<[A-Za-z]{3}>/g,'').replace(/Ä/g,'[').replace(/Ü/g,']');
     } else {
-      message = false;
-      trimMessage = '';
+      message = "TONE ONLY";
+      trimMessage = message;
     }
   } else if (line.match(/FLEX[:|]/)) {
     address = line.match(/FLEX[:|] ?.*?[\[|](\d*?)[\]| ]/)[1].trim();

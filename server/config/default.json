@@ -16,6 +16,7 @@
     "duplicateFiltering": true,
     "duplicateLimit": 10,
     "duplicateTime": 60,
+    "storeToneOnly": "never",
     "rotationEnabled": true,
     "rotateDays": 7,
     "rotateKeep": 4,
