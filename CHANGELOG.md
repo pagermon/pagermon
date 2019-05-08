@@ -1,6 +1,10 @@
-# 0.3.1 - Unreleased
+# 0.3.2 - Unreleased
 
 * Add sticky buttons to all pages, standardize size and layout. #275 @DanrwAU
+
+# 0.3.1 - 2019-05-07
+
+* **Fixes DoS vulnerability in search handling** #278 @davidmckenzie
 * Remove stripping of double quotes from messages #274 @DanrwAU
 * Hide database password and add visible toggle #273 @DanrwAU
 * Resolve migration did not return a promise errors #272 @DanrwAU
