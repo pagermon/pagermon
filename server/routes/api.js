@@ -560,7 +560,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
 
     // Define if message is Tone Only
     data.isToneOnly = false;
-    if ( data.message.match(new RegExp('^(TONE ONLY)$')) ){
+    if ( data.message.length == 9 && data.message.match(new RegExp('^(TONE ONLY)$')) ){
       // Marked as "Tone only" in client reader
       data.isToneOnly = true;
     }
