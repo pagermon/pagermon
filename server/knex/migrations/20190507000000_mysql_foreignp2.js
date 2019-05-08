@@ -8,6 +8,9 @@ exports.up = function(db, Promise) {
             // This is here to fix original broken mysql installs - probably not required going forward.
             db.schema.table('messages', function (table) {
                 table.integer('alias_id').unsigned().references('id').inTable('capcodes').onUpdate('CASCADE').onDelete('CASCADE');
+             }),
+             db.schema.alterTable('capccodes', function (table) {
+                table.increments('id').primary().unique().notNullable().alter();
              })
             //end broken MySQL Fix
         ])
