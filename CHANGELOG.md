@@ -10,6 +10,7 @@
     * Sets capcodes.id column to correct autoincrementing type - ***BREAKING CHANGE***
     * Set's Foreign Key correctly between messages.alias_id and capcodes.id 
     * Sets correct Charset and Collation for MariaDB Compatibility 
+* Add sticky buttons to all pages, standardize size and layout. #275 @DanrwAU
 
 # 0.3.1 - 2019-05-07
 
