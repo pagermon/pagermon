@@ -11,7 +11,7 @@
     * Set's Foreign Key correctly between messages.alias_id and capcodes.id 
     * Sets correct Charset and Collation for MariaDB Compatibility 
 * Add sticky buttons to all pages, standardize size and layout. #275 @DanrwAU
-* Plugin: Shell Script Plugin @all3kcis
+* Plugin: Shell Script Plugin #154 @all3kcis
 
 # 0.3.1 - 2019-05-07
 
