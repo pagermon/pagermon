@@ -8,17 +8,6 @@
 <div class="row" style="padding-top: 10px">
   <div class="col-sm-6 col-xs-12">
           <h4 style="padding-left: 15px;"><a href="/admin/">Admin</a> / <a href="/admin/aliases/">Aliases</a> / {{alias.id || 'New'}} {{alias.newMessage}}</div>
-  <div class="col-sm-6 col-xs-12">
-            <div class="hidden-xs btn-group pull-right" style="margin-top: 11.5px" role="group" aria-label="Actions">
-              <button ng-if="aliasRefreshRequired == 1" type="button" ng-click="aliasRefresh();" class="btn btn-warning">Refresh Alias/Message Map</button>
-              <button ng-if="!isNew" type="button" ng-click="newButton('new');" class="btn btn-success">Add New</button>
-            </div>
-            <div class="visible-xs btn-group" style="padding-left: 15px;" role="group" aria-label="Actions">
-              <button ng-if="aliasRefreshRequired == 1" type="button" ng-click="aliasRefresh();" class="btn btn-warning">Refresh Alias/Message Map</button>
-              <button ng-if="!isNew" type="button" ng-click="newButton('new');" class="btn btn-success">Add New</button>
-            </div>
-          </h4>
-  </div>
   <div class="col-xs-12">
           <hr />
           <form ng-submit="aliasSubmit()" class="form-horizontal" name="alias">
@@ -125,11 +114,16 @@
               </div>
             </div>
 
-            <div class="btn-group pull-right" style="padding-right: 10px; padding-bottom: 10px;"role="group" aria-label="Actions">
+            <div class="btn-group-vertical" id="buttons-aliasDetail">
               <button type="button" ng-if="!isNew" ng-click="aliasDelete()" class="btn btn-danger">Delete</button>
-              <button type="button" ng-click="aliasLoad()" class="btn btn-default">Reset</button>
-              <button type="submit" class="btn btn-default">Save</button>
+              <button type="button" ng-click="aliasLoad()" class="btn btn-warning">Reset</button>
+              <button type="submit" class="btn btn-success">Save</button>
             </div>
           </form>
         </div>
+</div>
+
+<div class="btn-group-vertical" id="buttons-capcodes">
+    <button ng-if="aliasRefreshRequired == 1" type="button" ng-click="aliasRefresh();" class="btn btn-warning">Refresh Aliases</button>
+    <button ng-if="!isNew" type="button" ng-click="newButton('new');" class="btn btn-success">Add New</button>
 </div>

@@ -260,12 +260,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
       };
       
       $scope.aliasSubmit = function() {
-        if (($scope.alias.push) && (!$scope.alias.pushgroup || $scope.alias.pushgroup == 0)) {
-          $scope.alertMessage.text = 'Error saving alias: Pushover key cannot be blank when pushover enabled.';
-          $scope.alertMessage.type = 'alert-danger';
-          $scope.alertMessage.show = true;
-          $timeout(function () { $scope.alertMessage.show = false; }, 3000);
-        } else if ($scope.existingAddress) {
+        if ($scope.existingAddress) {
           $scope.alertMessage.text = 'Error saving alias: Alias with this address already exists.';
           $scope.alertMessage.type = 'alert-danger';
           $scope.alertMessage.show = true;
@@ -286,8 +281,8 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
               $scope.alertMessage.show = true;
               $timeout(function () { $scope.alertMessage.show = false; }, 3000);
               $scope.loading = false;
-              $scope.aliasRefreshRequired = 1;
               if ($scope.isNew) {
+                $scope.aliasRefreshRequired = 1;
                 $location.url('/aliases/' + response.id);
               }
             } else {
@@ -468,6 +463,12 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         }
       };
       
+      $scope.showPassword = false;
+
+      $scope.toggleShowPassword = function() {
+        $scope.showPassword = !$scope.showPassword;
+      }
+
       $scope.addKey = function () {
         $scope.settings.auth.keys.push({
           'name': "",
