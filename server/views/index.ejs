@@ -220,7 +220,8 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
       return {
         Messages: $resource('/api/messages/'),
         NewMessage: $resource('/api/messages/:id', {id: '@id'}),
-        MessageSearch: $resource('/api/messageSearch/')
+        MessageSearch: $resource('/api/messageSearch/'),
+        Agencies: $resource('/api/capcodes/agency')
       };
     }])
     
