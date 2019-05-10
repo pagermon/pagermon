@@ -5,7 +5,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # Runtime data
-server/pids
+pids
 pids
 *.pid
 *.seed
@@ -13,7 +13,7 @@ pids
 
 
 #Testing Files
-server/test.js
+
 
 # docker data directory
 data
@@ -42,12 +42,9 @@ build/Release
 
 # Dependency directories
 node_modules/
-server/node_modules/
-client/node_modules/
+pagermon-client/node_modules/
 jspm_packages/
 package-lock.json
-server/package-lock.json
-client/package-lock.json
 
 # Typescript v1 declaration files
 typings/
@@ -72,12 +69,12 @@ typings/
 
 # environment specific
 
-server/process.json
-server/config/config.json
-server/config/backup.json
-server/bin/
-client/config/config.json
-client/config/backup.json
+process.json
+config/config.json
+config/backup.json
+bin/
+pagermon-client/config/config.json
+pagermon-client/config/backup.json
 
 # sqlite
 
@@ -89,7 +86,7 @@ client/config/backup.json
 
 #idea
 .idea
-server/sessions
+sessions
 
-client/samples/testymctest.sh
+pagermon-client/samples/testymctest.sh
 
