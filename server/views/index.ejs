@@ -399,6 +399,8 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
         var qString = '/';
         if (qArray.length > 0) {
           qString = '?'+qArray.join('&');
+          //prevent loops when semicolons are used in search box
+          qString = qString.replace("%3B","")
         }
         // get the current query string - if it's blank or matches the one we're trying to set to, do nothing. This prevents duplicate history entries
         var curQuery = window.location.search;

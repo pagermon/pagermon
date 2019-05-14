@@ -2,6 +2,8 @@
 
 **MySQL/MariaDB Upgrades from 0.3.0/0.3.1 aren't possible. Databases will need to be recreated and data re-imported.**
 
+**Fixes DoS Vulerability in search handling** #286 @davidmckenzie
+
 * Multiple Bugfixes and cleanups for Knex. Mainly around MySQL/MariaDB #281 @DanrwAU
     * Makes DB Settings required when MySQL/MariaDB Selected
     * Removes MariaDB specific settings, Knex uses the MySQL library to drive MariaDB
@@ -12,6 +14,7 @@
     * Sets correct Charset and Collation for MariaDB Compatibility 
 * Add sticky buttons to all pages, standardize size and layout. #275 @DanrwAU
 * Plugin: Shell Script Plugin #154 @all3kcis
+
 
 # 0.3.1 - 2019-05-07
 
