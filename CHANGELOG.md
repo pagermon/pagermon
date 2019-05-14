@@ -2,7 +2,7 @@
 
 **MySQL/MariaDB Upgrades from 0.3.0/0.3.1 aren't possible. Databases will need to be recreated and data re-imported.**
 
-**Fixes DoS Vulerability in search handling** #286 @davidmckenzie
+**Fixes DoS Vulerability in search handling** #286, #288 @davidmckenzie
 
 * Multiple Bugfixes and cleanups for Knex. Mainly around MySQL/MariaDB #281 @DanrwAU
     * Makes DB Settings required when MySQL/MariaDB Selected
