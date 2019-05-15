@@ -40,48 +40,47 @@
             <div class="form-group">
               <label for="database.type" class="col-xs-4 col-sm-3 control-label">Type</label>
               <div class="col-xs-8 col-sm-9">
-                <select name="database.type" ng-model="settings.database.type" class="form-control">
+                <select name="database.type" ng-model="settings.database.type" class="form-control" required>
                   <option value="sqlite3">SQLite</option>
-                  <option value="mysql">MySQL</option>
+                  <option value="mysql">MySQL / MariaDB</option>
                   <!--<option value="mssql">MSSQL</option>
-                  <option value="pg">Postgres</option>
-                  <option value="maria">MariaDB</option>-->
+                  <option value="pg">Postgres</option> -->
                 </select>
               </div>
             </div>
             <div class="form-group" ng-if="settings.database.type == 'sqlite3'">
               <label for="database.file" class="col-xs-4 col-sm-3 control-label">Path to Database File</label>
               <div class="col-xs-8 col-sm-9">
-              <input type="text" class="form-control" name="database.file" ng-model="settings.database.file" >
+              <input type="text" class="form-control" name="database.file" ng-model="settings.database.file" required>
               <span id="helpBlock" class="help-block">Configure the path to the SQLite Database</span>
               </div>
             </div>
-            <div class="form-group" ng-if="settings.database.type == 'pg' || settings.database.type == 'mysql' || settings.database.type == 'mssql' || settings.database.type == 'maria'">
+            <div class="form-group" ng-if="settings.database.type == 'pg' || settings.database.type == 'mysql' || settings.database.type == 'mssql'">
               <label for="database.server" class="col-xs-4 col-sm-3 control-label">Database Server</label>
               <div class="col-xs-8 col-sm-9">
-              <input type="text" class="form-control" name="database.server" ng-model="settings.database.server" >
+              <input type="text" class="form-control" name="database.server" ng-model="settings.database.server" required>
               <span id="helpBlock" class="help-block">Database Server Address</span>
               </div>
             </div>
-            <div class="form-group" ng-if="settings.database.type == 'pg' || settings.database.type == 'mysql' || settings.database.type == 'mssql' || settings.database.type == 'maria'">
+            <div class="form-group" ng-if="settings.database.type == 'pg' || settings.database.type == 'mysql' || settings.database.type == 'mssql'">
               <label for="database.database" class="col-xs-4 col-sm-3 control-label">Database Name</label>
               <div class="col-xs-8 col-sm-9">
-              <input type="text" class="form-control" name="database.database" ng-model="settings.database.database" >
+              <input type="text" class="form-control" name="database.database" ng-model="settings.database.database" required>
               <span id="helpBlock" class="help-block">Name of the database.</span>
               </div>
             </div>
-            <div class="form-group" ng-if="settings.database.type == 'pg' || settings.database.type == 'mysql' || settings.database.type == 'mssql' || settings.database.type == 'maria'">
+            <div class="form-group" ng-if="settings.database.type == 'pg' || settings.database.type == 'mysql' || settings.database.type == 'mssql'">
               <label for="database.username" class="col-xs-4 col-sm-3 control-label">Database Username</label>
               <div class="col-xs-8 col-sm-9">
-              <input type="text" class="form-control" name="database.username" ng-model="settings.database.username" >
+              <input type="text" class="form-control" name="database.username" ng-model="settings.database.username" required>
               <span id="helpBlock" class="help-block">Database Username</span>
               </div>
             </div>
-            <div class="form-group" ng-if="settings.database.type == 'pg' || settings.database.type == 'mysql' || settings.database.type == 'mssql' || settings.database.type == 'maria'">
+            <div class="form-group" ng-if="settings.database.type == 'pg' || settings.database.type == 'mysql' || settings.database.type == 'mssql'">
               <label for="database.password" class="col-xs-4 col-sm-3 control-label">Database Password</label>
               <div class="col-xs-8 col-sm-9">
                   <div class="input-group">
-                  <input type="password" ng-attr-type="{{ showPassword ? 'text' : 'password' }}" class="form-control" name="database.password" ng-model="settings.database.password" >
+                  <input type="password" ng-attr-type="{{ showPassword ? 'text' : 'password' }}" class="form-control" name="database.password" ng-model="settings.database.password" required>
                   <span class="input-group-addon" id="database.password.addon">
                       <div ng-click="toggleShowPassword()" ng-class="{'fa fa-eye': showPassword,'fa fa-eye-slash': !showPassword}" style="cursor: pointer; pointer-events: all;"></div>
                   </span>  
@@ -352,9 +351,9 @@
                 </div>
               </div>
             </div>
-
-            <button type="submit" class="btn btn-default pull-right">Save</button>
-
+            <div class="btn-group-vertical">
+              <button type="submit" class="btn btn-success ">Save</button>
+            </div>
           </form>
         </div>
 </div>

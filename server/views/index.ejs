@@ -385,27 +385,26 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
           }
         }
 
-        var qArray = [];
-        if (queryObj.q)
-          qArray.push('q='+encodeURIComponent(queryObj.q));
-        if (queryObj.address)
-          qArray.push('address='+encodeURIComponent(queryObj.address));
-        if (queryObj.agency)
-          qArray.push('agency='+encodeURIComponent(queryObj.agency));
-        if (queryObj.page > 1)
-          qArray.push('page='+encodeURIComponent(queryObj.page));
+        if (page) {
+          // if page then we have been passed a page var directly to the updateData func, which means we clicked on a page change button
+          // encoding everything prevents issues with some special chars
+          var qArray = [];
+          if (queryObj.q)
+            qArray.push('q='+encodeURIComponent(queryObj.q));
+          if (queryObj.address)
+            qArray.push('address='+encodeURIComponent(queryObj.address));
+          if (queryObj.agency)
+            qArray.push('agency='+encodeURIComponent(queryObj.agency));
+          if (queryObj.page > 1)
+            qArray.push('page='+encodeURIComponent(queryObj.page));
 
-        // default query string is "/" - this prevents the state from not passing on firefox
-        var qString = '/';
-        if (qArray.length > 0) {
-          qString = '?'+qArray.join('&');
-        }
-        // get the current query string - if it's blank or matches the one we're trying to set to, do nothing. This prevents duplicate history entries
-        var curQuery = window.location.search;
-        if (curQuery == '')
-          curQuery = '/';
-        if (curQuery != qString)
+          // default query string is "/" - this prevents the state from not passing on firefox
+          var qString = '/';
+          if (qArray.length > 0) {
+            qString = '?'+qArray.join('&');
+          }
           window.history.pushState('', '', qString);
+        }
         
         if (queryObj.q || queryObj.agency || queryObj.address) {
           Api.MessageSearch.get(queryObj).$promise.then(function(results) {

@@ -1,3 +1,21 @@
+# 0.3.2 - Unreleased
+
+**MySQL/MariaDB Upgrades from 0.3.0/0.3.1 aren't possible. Databases will need to be recreated and data re-imported.**
+
+**Fixes DoS Vulerability in search handling** #286, #288 @davidmckenzie
+
+* Multiple Bugfixes and cleanups for Knex. Mainly around MySQL/MariaDB #281 @DanrwAU
+    * Makes DB Settings required when MySQL/MariaDB Selected
+    * Removes MariaDB specific settings, Knex uses the MySQL library to drive MariaDB
+    * Removes old Debugging Code
+    * Removes custom Trigger for creating capcodes
+    * Sets capcodes.id column to correct autoincrementing type - ***BREAKING CHANGE***
+    * Set's Foreign Key correctly between messages.alias_id and capcodes.id 
+    * Sets correct Charset and Collation for MariaDB Compatibility 
+* Add sticky buttons to all pages, standardize size and layout. #275 @DanrwAU
+* Plugin: Shell Script Plugin #154 @all3kcis
+
+
 # 0.3.1 - 2019-05-07
 
 * **Fixes DoS vulnerability in search handling** #278 @davidmckenzie
