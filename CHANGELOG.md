@@ -1,4 +1,4 @@
-# 0.3.2 - Unreleased
+# 0.3.2 - 2019-05-15
 
 **MySQL/MariaDB Upgrades from 0.3.0/0.3.1 aren't possible. Databases will need to be recreated and data re-imported.**
 
