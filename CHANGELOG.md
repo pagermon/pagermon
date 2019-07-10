@@ -1,3 +1,7 @@
+# 0.3.3 - 2019-07-10
+
+* Fixed SQL statement
+
 # 0.3.2 - 2019-05-15
 
 **MySQL/MariaDB Upgrades from 0.3.0/0.3.1 aren't possible. Databases will need to be recreated and data re-imported.**
