@@ -1,6 +1,7 @@
 # 0.3.3 - 2019-07-11
 
 * Added Prowl-Plugin. Very similar to Pushover, but just for iOS and a little different.
+* Fix security vulnerability - capcode route security in v0.2.2 did not account for the case sensitivity of route URIs. @davidmckenzie (Thanks to TallTechDude for picking this up!)
 
 # 0.3.2 - 2019-05-15
 
