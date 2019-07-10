@@ -22,6 +22,7 @@ The UI is built around a Node/Express/Angular/Bootstrap stack, while the client 
 * Native browner notifications
 * Plugin Support - Current Plugins:
     * [Pushover](https://pushover.net/) near realtime muti-device notification service
+    * [Prowl](https://prowlapp.com) near realtime iOS notification service with Apple Watch support
     * [Telegram](https://telegram.org/) near realtime cloud based multi-device messaging
     * [Discord](https://discordapp.com/) near realtime cloud based messaging service
     * [Gotify](https://gotify.net/) Self-Hosted messaging service
