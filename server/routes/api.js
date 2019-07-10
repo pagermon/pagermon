@@ -169,7 +169,7 @@ router.get('/messages/:id', isLoggedIn, function(req, res, next) {
         .as('aliasMatch')
     })
     .leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id')
-    .where(['messages.id', id])
+    .where('messages.id', id)
     .then((row) => {
         if (HideCapcode) {
           if (!req.isAuthenticated()) {
