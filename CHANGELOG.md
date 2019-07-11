@@ -1,6 +1,6 @@
-# 0.3.3 - 2019-07-10
+# 0.3.3 - Unreleased
 
-* Fixed SQL statement
+* Fixed Messages/id route #295 @SloCompTech
 
 # 0.3.2 - 2019-05-15
 
