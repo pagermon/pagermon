@@ -77,18 +77,17 @@ These instructions will get you a copy of the project up and running on your loc
 * [nvm](https://github.com/creationix/nvm#installation)
 * nginx or some kind of reverse proxy for SSL offloading
 
-## Running the server
-
 ### Local setup
 
-1) Copy server/process-default.json to server/process.json and modify according to your environment
+## Running the server
+
+1) Copy process-default.json to process.json and modify according to your environment
 2) Launch the app from the Terminal:
 
 ```
     $ sudo apt-get install npm sqlite3
     $ npm install npm@latest -g
     $ npm install pm2 -g
-    $ cd server
     $ npm install
     $ export NODE_ENV=production
     $ pm2 start process.json
@@ -109,7 +108,6 @@ These instructions will get you a copy of the project up and running on your loc
 
 Alternatively a production ready setup guide is available here
 https://github.com/pagermon/pagermon/wiki/Setup-Guide---Ubuntu-Server-with-NGINX-Reverse-Proxy-and-Let's-Encrypt-SSL-Certificate
-
 
 ### Docker
 
