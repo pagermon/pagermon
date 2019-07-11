@@ -909,7 +909,7 @@ function inParam (sql, arr) {
 // route middleware to make sure a user is logged in
 function isLoggedIn(req, res, next) {
   if (req.method == 'GET') { 
-    if (apiSecurity || req.url.match(/capcodes/)) { //checkc if Secure mode is on, or if the route is a capcode route
+    if (apiSecurity || req.url.match(/capcodes/i)) { //check if Secure mode is on, or if the route is a capcode route
       if (req.isAuthenticated()) {
         // if user is authenticated in the session, carry on
         return next();
