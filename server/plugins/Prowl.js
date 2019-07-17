@@ -3,7 +3,6 @@ var logger = require('../log');
 
 function run(trigger, scope, data, config, callback) {
     var pConf = data.pluginconf.Prowl;
-    logger.main.debug(JSON.stringify(pConf));
     if (pConf && pConf.enable) {
         //ensure key has been entered before trying to push
         if (pConf.group == 0 || pConf.group == '0' || !pConf.group) {
@@ -34,15 +33,9 @@ function run(trigger, scope, data, config, callback) {
               logger.main.info("SENDING EMERGENCY MESSAGE: PROWL");
             }
 
-            logger.main.debug('Trying to send prowl.');
-            logger.main.debug('Event: '+event);
-            logger.main.debug('Application: '+config.application);
-            logger.main.debug('Payload: '+payload);
-            logger.main.debug(JSON.stringify(payload));
-
             prowl.push(event, config.application, payload, function (err, remaining) {
               if (err) { logger.main.error('Prowl:' + err); }
-              logger.main.debug('Prowl: Message sent. ' + remaining + ' messages remaining');
+              logger.main.debug('Prowl: Message sent. ' + remaining + ' messages remaining for this hour.');
               callback();
             });
           }
