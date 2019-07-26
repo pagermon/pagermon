@@ -1,4 +1,13 @@
 # [PagerMon](https://hrng.io/)
+![Discord](https://img.shields.io/discord/533900375066017812.svg?style=plastic)
+![GitHub issues](https://img.shields.io/github/issues-raw/pagermon/pagermon.svg?style=plastic)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/pagermon/pagermon.svg?style=plastic)
+![GitHub](https://img.shields.io/github/license/pagermon/pagermon.svg?style=plastic)
+![GitHub stars](https://img.shields.io/github/stars/pagermon/pagermon.svg?style=plastic)
+![GitHub forks](https://img.shields.io/github/forks/pagermon/pagermon.svg?style=plastic)
+![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/pagermon/pagermon.svg?label=release&style=plastic)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/pagermon/pagermon.svg?style=plastic)
+![GitHub contributors](https://img.shields.io/github/contributors/pagermon/pagermon.svg?style=plastic)
 
 PagerMon is an API driven client/server framework for parsing and displaying pager messages from multimon-ng.
 
