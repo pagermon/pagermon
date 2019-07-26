@@ -3,7 +3,7 @@
 * Fixed Messages/id route #295 @SloCompTech
 * Added Prowl-Plugin. Very similar to Pushover, but just for iOS and a little different. #293 #297 @eopo
 * Fix security vulnerability - capcode route security in v0.2.2 did not account for the case sensitivity of route URIs. #292 @davidmckenzie (Thanks to TallTechDude for picking this up!)
-
+* Add Admin show - Allow admins to see messages without alais's when loged in. @marshyonline
 
 # 0.3.2 - 2019-05-15
 
