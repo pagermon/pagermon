@@ -50,6 +50,7 @@ router.get('/messages', isLoggedIn, function(req, res, next) {
   nconf.load();
   console.time('init');
   var pdwMode = nconf.get('messages:pdwMode');
+  var adminShow = nconf.get('messages:adminShow');
   var maxLimit = nconf.get('messages:maxLimit');
   var defaultLimit = nconf.get('messages:defaultLimit');
   initData.replaceText = nconf.get('messages:replaceText');
@@ -67,13 +68,21 @@ router.get('/messages', isLoggedIn, function(req, res, next) {
     initData.limit = parseInt(defaultLimit, 10);
   }
   if (pdwMode) {
-    var subquery = db.from('capcodes').where('ignore', '=', 0).select('id')
+    if (adminShow && req.isAuthenticated()) {
+      var subquery = db.from('capcodes').where('ignore', '=', 1).select('id')
+    } else {
+      var subquery = db.from('capcodes').where('ignore', '=', 0).select('id')
+    }    
   } else {
     var subquery = db.from('capcodes').where('ignore', '=', 1).select('id')
   }
   db.from('messages').where(function () {
     if (pdwMode) {
-      this.from('messages').where('alias_id', 'in', subquery)
+      if (adminShow && req.isAuthenticated()) {
+        this.from('messages').where('alias_id', 'not in', subquery).orWhereNull('alias_id')
+      } else {
+        this.from('messages').where('alias_id', 'in', subquery)
+      } 
     } else {
       this.from('messages').where('alias_id', 'not in', subquery).orWhereNull('alias_id')
     }
@@ -106,7 +115,11 @@ router.get('/messages', isLoggedIn, function(req, res, next) {
         })
         .modify(function(queryBuilder) {
           if (pdwMode) {
-            queryBuilder.innerJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id').where('capcodes.ignore', 0)
+            if (adminShow && req.isAuthenticated()) {
+              queryBuilder.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id').where('capcodes.ignore', 0).orWhereNull('capcodes.ignore')
+            } else {
+              queryBuilder.innerJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id').where('capcodes.ignore', 0)              
+            } 
           } else {
             queryBuilder.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id').where('capcodes.ignore', 0).orWhereNull('capcodes.ignore')
           }
@@ -209,6 +222,7 @@ router.get('/messageSearch', isLoggedIn, function(req, res, next) {
   console.time('init');
   var dbtype = nconf.get('database:type')
   var pdwMode = nconf.get('messages:pdwMode');
+  var adminShow = nconf.get('messages:adminShow');
   var maxLimit = nconf.get('messages:maxLimit');
   var defaultLimit = nconf.get('messages:defaultLimit');
   initData.replaceText = nconf.get('messages:replaceText');
@@ -253,7 +267,11 @@ router.get('/messageSearch', isLoggedIn, function(req, res, next) {
       FROM messages `;
     }
     if (pdwMode) {
-      sql += " INNER JOIN capcodes ON capcodes.id = messages.alias_id";
+      if (adminShow && req.isAuthenticated()) {
+        sql += " LEFT JOIN capcodes ON capcodes.id = messages.alias_id ";
+      } else {
+        sql += " INNER JOIN capcodes ON capcodes.id = messages.alias_id";
+      }
     } else {
       sql += " LEFT JOIN capcodes ON capcodes.id = messages.alias_id ";
     }
@@ -277,7 +295,11 @@ router.get('/messageSearch', isLoggedIn, function(req, res, next) {
               FROM messages`;
     }
     if (pdwMode) {
-      sql += " INNER JOIN capcodes ON capcodes.id = messages.alias_id";
+      if (adminShow && req.isAuthenticated()) {
+        sql += " LEFT JOIN capcodes ON capcodes.id = messages.alias_id ";
+      } else {
+        sql += " INNER JOIN capcodes ON capcodes.id = messages.alias_id";
+      }
     } else {
       sql += " LEFT JOIN capcodes ON capcodes.id = messages.alias_id ";
     }
@@ -323,8 +345,12 @@ router.get('/messageSearch', isLoggedIn, function(req, res, next) {
               }
             }
             if (pdwMode) {
+              if (adminShow && req.isAuthenticated() && !row.ignore || row.ignore == 0){
+               data.push(row);
+              } else {
               if (row.ignore == 0)
-                data.push(row);
+                data.push(row); 
+              }
             } else {
               if (!row.ignore || row.ignore == 0)
                 data.push(row);
