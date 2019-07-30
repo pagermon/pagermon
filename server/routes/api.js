@@ -530,6 +530,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
     var dupeLimit = nconf.get('messages:duplicateLimit') || 0; // default 0
     var dupeTime = nconf.get('messages:duplicateTime') || 0; // default 0
     var pdwMode = nconf.get('messages:pdwMode');
+    var adminShow = nconf.get('messages:adminShow')
     var data = req.body;
         data.pluginData = {};
 
@@ -638,11 +639,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                                             .as('aliasMatch')
                                         })
                                         .modify(function(queryBuilder) {
-                                          if (pdwMode) {
-                                            queryBuilder.innerJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id')
-                                          } else {
                                             queryBuilder.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id')
-                                          }
                                         })
                                         .where('messages.id', '=', result[0])
                                         .then((row) => {
