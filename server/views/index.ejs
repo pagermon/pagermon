@@ -267,9 +267,20 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
         adminSocket.close()
         <% } %>
     <%} else { %>
-      var socketMode = socket
-      socket.open();
-      adminSocket.close()
+      <% if (pdwmode) { %>
+        <% if (login) { %>
+          var socketMode = adminSocket
+          adminSocket.open();
+        <% } else { %>
+          var socketMode = socket
+          socket.open();
+          adminSocket.close()
+        <% } %>
+      <% } else { %>
+        var socketMode = socket
+        socket.open();
+        adminSocket.close()
+      <% } %>
     <% } %>	
   <% } else { %>
     <% if (login) { %>

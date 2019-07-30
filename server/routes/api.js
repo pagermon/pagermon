@@ -670,7 +670,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                                               }
                                               //Only emit to normal socket if HideCapcode is on and ApiSecurity is off.
                                               if (HideCapcode && !apiSecurity) {
-                                                if (pdwMode && row.aliasMatch == null) {
+                                                if (pdwMode && row.aliasMatch != 1) {
                                                   //do nothing if pdwMode on and there isn't an aliasmatch
                                                 } else {
                                                   // Emit No capcode to normal socket
@@ -691,7 +691,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                                                 }
                                               }
                                             } else {
-                                              if (pdwMode && row.aliasMatch == null) {
+                                              if (pdwMode && row.aliasMatch != 1) {
                                                 if (adminShow) {
                                                   req.io.of('adminio').emit('messagePost', row);
                                                 } else {
@@ -699,6 +699,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                                                 }
                                               } else {
                                                 //Just emit - No Security enabled
+                                                req.io.of('adminio').emit('messagePost', row);
                                                 req.io.emit('messagePost', row);
                                               }
                                             }
