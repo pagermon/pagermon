@@ -178,11 +178,11 @@
               </div>
             </div>
             <div class="form-group">
-              <label for="messages.adminShow" class="col-xs-4 col-sm-3 control-label">Disable PDW Mode for Admin's</label>
+              <label for="messages.adminShow" class="col-xs-4 col-sm-3 control-label">PDW Mode - Admin Disable</label>
               <div class="col-xs-8 col-sm-9">
               <div class="checkbox">
                 <label>
-                <input type="checkbox" name="messages.adminShow" ng-model="settings.messages.adminShow">
+                <input type="checkbox" name="messages.adminShow" ng-model="settings.messages.adminShow" ng-disabled="!settings.messages.pdwMode">
                 When PDW Mode is enabled, use this option to show all messages to logged in user's only.
                 </label>
               </div>
