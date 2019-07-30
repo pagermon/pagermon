@@ -663,7 +663,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                                               //Emit full details to the admin socket
                                               if (pdwMode && adminShow) {
                                                 req.io.of('adminio').emit('messagePost', row);
-                                              } else if (!pdwMode) {
+                                              } else if (!pdwMode || row.aliasMatch == 1) {
                                                 req.io.of('adminio').emit('messagePost', row);
                                               } else {
                                                 // do nothing if PDWMode on and AdminShow is disabled
