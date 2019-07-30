@@ -665,11 +665,13 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                                                 req.io.of('adminio').emit('messagePost', row);
                                               } else if (!pdwMode) {
                                                 req.io.of('adminio').emit('messagePost', row);
+                                              } else {
+                                                // do nothing if PDWMode on and AdminShow is disabled
                                               }
                                               //Only emit to normal socket if HideCapcode is on and ApiSecurity is off.
                                               if (HideCapcode && !apiSecurity) {
-                                                if (pdwMode && !row.aliasMatch) {
-                                                  //do nothing
+                                                if (pdwMode && row.aliasMatch == null) {
+                                                  //do nothing if pdwMode on and there isn't an aliasmatch
                                                 } else {
                                                   // Emit No capcode to normal socket
                                                   row = {
@@ -689,8 +691,12 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                                                 }
                                               }
                                             } else {
-                                              if (pdwMode && !row.aliasMatch) {
-                                                //do nothing
+                                              if (pdwMode && row.aliasMatch == null) {
+                                                if (adminShow) {
+                                                  req.io.of('adminio').emit('messagePost', row);
+                                                } else {
+                                                  //do nothing
+                                                }
                                               } else {
                                                 //Just emit - No Security enabled
                                                 req.io.emit('messagePost', row);
