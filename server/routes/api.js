@@ -663,14 +663,14 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                                               //Emit full details to the admin socket
                                               if (pdwMode && adminShow) {
                                                 req.io.of('adminio').emit('messagePost', row);
-                                              } else if (!pdwMode || row.aliasMatch == 1) {
+                                              } else if (!pdwMode || row.aliasMatch != null) {
                                                 req.io.of('adminio').emit('messagePost', row);
                                               } else {
                                                 // do nothing if PDWMode on and AdminShow is disabled
                                               }
                                               //Only emit to normal socket if HideCapcode is on and ApiSecurity is off.
                                               if (HideCapcode && !apiSecurity) {
-                                                if (pdwMode && row.aliasMatch != 1) {
+                                                if (pdwMode && row.aliasMatch == null) {
                                                   //do nothing if pdwMode on and there isn't an aliasmatch
                                                 } else {
                                                   // Emit No capcode to normal socket
@@ -691,7 +691,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                                                 }
                                               }
                                             } else {
-                                              if (pdwMode && row.aliasMatch != 1) {
+                                              if (pdwMode && row.aliasMatch == null) {
                                                 if (adminShow) {
                                                   req.io.of('adminio').emit('messagePost', row);
                                                 } else {
