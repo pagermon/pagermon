@@ -169,7 +169,7 @@ router.get('/messages/:id', isLoggedIn, function(req, res, next) {
         .as('aliasMatch')
     })
     .leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id')
-    .where(['messages.id', id])
+    .where('messages.id', id)
     .then((row) => {
         if (HideCapcode) {
           if (!req.isAuthenticated()) {
@@ -922,7 +922,7 @@ function inParam (sql, arr) {
 // route middleware to make sure a user is logged in
 function isLoggedIn(req, res, next) {
   if (req.method == 'GET') { 
-    if (apiSecurity || req.url.match(/capcodes/) && !(req.url.match(/agency/))) { //checkc if Secure mode is on, or if the route is a capcode route
+    if (apiSecurity || req.url.match(/capcodes/i) && !(req.url.match(/agency/))) { //checkc if Secure mode is on, or if the route is a capcode route
       if (req.isAuthenticated()) {
         // if user is authenticated in the session, carry on
         return next();

@@ -1,6 +1,15 @@
-# 0.3.2 - Unreleased
+# 0.3.3 - Unreleased
+
+* Fixed Messages/id route #295 @SloCompTech
+* Added Prowl-Plugin. Very similar to Pushover, but just for iOS and a little different. #293 #297 @eopo
+* Fix security vulnerability - capcode route security in v0.2.2 did not account for the case sensitivity of route URIs. #292 @davidmckenzie (Thanks to TallTechDude for picking this up!)
+
+
+# 0.3.2 - 2019-05-15
 
 **MySQL/MariaDB Upgrades from 0.3.0/0.3.1 aren't possible. Databases will need to be recreated and data re-imported.**
+
+**Fixes DoS Vulerability in search handling** #286, #288 @davidmckenzie
 
 * Multiple Bugfixes and cleanups for Knex. Mainly around MySQL/MariaDB #281 @DanrwAU
     * Makes DB Settings required when MySQL/MariaDB Selected
@@ -12,6 +21,7 @@
     * Sets correct Charset and Collation for MariaDB Compatibility 
 * Add sticky buttons to all pages, standardize size and layout. #275 @DanrwAU
 * Plugin: Shell Script Plugin #154 @all3kcis
+
 
 # 0.3.1 - 2019-05-07
 
