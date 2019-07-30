@@ -661,28 +661,40 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                                             delete row.pluginconf;
                                             if (HideCapcode || apiSecurity) {
                                               //Emit full details to the admin socket
-                                              req.io.of('adminio').emit('messagePost', row);
+                                              if (pdwMode && adminShow) {
+                                                req.io.of('adminio').emit('messagePost', row);
+                                              } else if (!pdwMode) {
+                                                req.io.of('adminio').emit('messagePost', row);
+                                              }
                                               //Only emit to normal socket if HideCapcode is on and ApiSecurity is off.
                                               if (HideCapcode && !apiSecurity) {
-                                                // Emit No capcode to normal socket
-                                                row = {
-                                                  "id": row.id,
-                                                  "message": row.message,
-                                                  "source": row.source,
-                                                  "timestamp": row.timestamp,
-                                                  "alias_id": row.alias_id,
-                                                  "alias": row.alias,
-                                                  "agency": row.agency,
-                                                  "icon": row.icon,
-                                                  "color": row.color,
-                                                  "ignore": row.ignore,
-                                                  "aliasMatch": row.aliasMatch
-                                                };
-                                                req.io.emit('messagePost', row);
+                                                if (pdwMode && !row.aliasMatch) {
+                                                  //do nothing
+                                                } else {
+                                                  // Emit No capcode to normal socket
+                                                  row = {
+                                                    "id": row.id,
+                                                    "message": row.message,
+                                                    "source": row.source,
+                                                    "timestamp": row.timestamp,
+                                                    "alias_id": row.alias_id,
+                                                    "alias": row.alias,
+                                                    "agency": row.agency,
+                                                    "icon": row.icon,
+                                                    "color": row.color,
+                                                    "ignore": row.ignore,
+                                                    "aliasMatch": row.aliasMatch
+                                                  };
+                                                  req.io.emit('messagePost', row);
+                                                }
                                               }
                                             } else {
-                                              //Just emit - No Security enabled
-                                              req.io.emit('messagePost', row);
+                                              if (pdwMode && !row.aliasMatch) {
+                                                //do nothing
+                                              } else {
+                                                //Just emit - No Security enabled
+                                                req.io.emit('messagePost', row);
+                                              }
                                             }
                                           });
                                         }
