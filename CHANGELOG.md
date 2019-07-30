@@ -3,6 +3,7 @@
 * Fixed Messages/id route #295 @SloCompTech
 * Added Prowl-Plugin. Very similar to Pushover, but just for iOS and a little different. #293 #297 @eopo
 * Fix security vulnerability - capcode route security in v0.2.2 did not account for the case sensitivity of route URIs. #292 @davidmckenzie (Thanks to TallTechDude for picking this up!)
+* Add Agency route to the API to allow listing of distinct agencies. Not used in the application as yet. #300 @DanrwAU
 
 
 # 0.3.2 - 2019-05-15
