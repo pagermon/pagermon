@@ -28,6 +28,7 @@
       }
     ],
     "pdwMode": false,
+    "adminShow": false,
     "HideCapcode": false,
     "HideSource": false,
     "apiSecurity": false
