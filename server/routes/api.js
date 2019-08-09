@@ -618,7 +618,8 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
             } else {
               db.from('capcodes')
                   .select('id', 'ignore')
-                .whereRaw(`"${address}" LIKE address`)
+                //.whereRaw(`"${address}" LIKE address`)
+                  .where('address', 'like' , address)
                   .orderByRaw("REPLACE(address, '_', '%') DESC")
                   .then((row) => {
                     var insert;
