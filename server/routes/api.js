@@ -582,7 +582,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                       .as('temp_tab')
                     })  
               })
-              .andWhere('message', 'like', message)
+              .andWhere('message', 'like', `%${message}%`)
               .andWhere('address', '=', address)
             } else if ((dupeLimit !=0) && (dupeTime == 0)) {
               queryBuilder.where('id', 'in', function () {
@@ -595,7 +595,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                           .as('temp_tab')
                     })
               })
-              .andWhere('message', 'like', message)
+              .andWhere('message', 'like', `%${message}%`)
               .andWhere('address', '=', address)
             } else if ((dupeLimit == 0) && (dupeTime != 0)) {
               queryBuilder.where('id', 'in', function () {
@@ -603,10 +603,10 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                     .from('messages')
                     .where('timestamp', '>', timeDiff)
               })
-              .andWhere('message', 'like', message)
+              .andWhere('message', 'like', `%${message}%`)
               .andWhere('address', '=', address)
             } else {
-              queryBuilder.where('message', 'like', message)
+              queryBuilder.where('message', 'like', `%${message}%`)
                           .andWhere('address', '=', address)
             }
           })
