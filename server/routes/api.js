@@ -440,6 +440,19 @@ router.get('/capcodes', isLoggedIn, function(req, res, next) {
     })
 });
 
+router.get('/capcodes/agency', isLoggedIn, function(req, res, next) {
+  db.from('capcodes')
+    .distinct('agency')
+    .then((rows) => {    
+      res.status(200);
+      res.json(rows);
+    })
+    .catch((err) => {
+      res.status(500);
+      res.send(err);
+    })
+});
+
 router.get('/capcodes/:id', isLoggedIn, function(req, res, next) {
   var id = req.params.id;
     db.from('capcodes')
@@ -605,7 +618,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                       .as('temp_tab')
                     })  
               })
-              .andWhere('message', 'like', message)
+              .andWhere('message', '=', message)
               .andWhere('address', '=', address)
             } else if ((dupeLimit !=0) && (dupeTime == 0)) {
               queryBuilder.where('id', 'in', function () {
@@ -618,7 +631,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                           .as('temp_tab')
                     })
               })
-              .andWhere('message', 'like', message)
+              .andWhere('message', '=', message)
               .andWhere('address', '=', address)
             } else if ((dupeLimit == 0) && (dupeTime != 0)) {
               queryBuilder.where('id', 'in', function () {
@@ -626,10 +639,10 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                     .from('messages')
                     .where('timestamp', '>', timeDiff)
               })
-              .andWhere('message', 'like', message)
+              .andWhere('message', '=', message)
               .andWhere('address', '=', address)
             } else {
-              queryBuilder.where('message', 'like', message)
+              queryBuilder.where('message', '=', message)
                           .andWhere('address', '=', address)
             }
           })
@@ -641,7 +654,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
             } else {
               db.from('capcodes')
                   .select('id', 'ignore')
-                .whereRaw(`"${address}" LIKE address`)
+                  .whereRaw(`"${address}" LIKE address`)
                   .orderByRaw("REPLACE(address, '_', '%') DESC")
                   .then((row) => {
                     var insert;
@@ -987,7 +1000,7 @@ function inParam (sql, arr) {
 // route middleware to make sure a user is logged in
 function isLoggedIn(req, res, next) {
   if (req.method == 'GET') { 
-    if (apiSecurity || req.url.match(/capcodes/i)) { //check if Secure mode is on, or if the route is a capcode route
+    if (apiSecurity || req.url.match(/capcodes/i) && !(req.url.match(/agency$/))) { //check if Secure mode is on, or if the route is a capcode route
       if (req.isAuthenticated()) {
         // if user is authenticated in the session, carry on
         return next();
