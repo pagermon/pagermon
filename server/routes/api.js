@@ -557,7 +557,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
       var datetime = data.datetime || 1;
       var timeDiff = datetime - dupeTime;
       // if duplicate filtering is enabled, we want to populate the message buffer and check for duplicates within the limits
-      var matches = _.where(msgBuffer, {message: data.message});
+      var matches = _.where(msgBuffer, {message: data.message, address: data.address});
       if (matches.length > 0) {
         if (dupeTime != 0) {
           // search the matching messages and see if any match the time constrain
@@ -580,7 +580,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
       if (msgBuffer.length > dupeArrayLimit) {
         msgBuffer.shift();
       }
-      msgBuffer.push({message: data.message, datetime: data.datetime});
+      msgBuffer.push({message: data.message, datetime: data.datetime, address: data.address});
     }
 
     // send data to pluginHandler before proceeding
