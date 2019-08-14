@@ -49,7 +49,7 @@ function run (trigger, scope, data, config, callback) {
         } else if (!error && response.statusCode === 200) {
           logger.main.info('MessageRepeat: Message Sent')
         } else {
-          logger.main.error('MessageRepeat: ' + error + ' ' +  response.statusCode + ' ' +  response.statusText)
+          logger.main.error('MessageRepeat: Status Code:' +  response.statusCode)
         }
       })
   }
