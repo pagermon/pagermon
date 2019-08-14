@@ -563,11 +563,13 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
           // search the matching messages and see if any match the time constrain
           var timeFind = _.find(matches, function(msg){ return msg.datetime > timeDiff; });
           if (timeFind) {
+            logger.main.info(util.format('Ignoring duplicate: %o', data.message));
             res.status(200);
             return res.send('Ignoring duplicate');
           }
         } else {
           // if no dupeTime then just end the search now, we have matches
+          logger.main.info(util.format('Ignoring duplicate: %o', data.message));
           res.status(200);
           return res.send('Ignoring duplicate');
         }
