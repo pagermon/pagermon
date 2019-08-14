@@ -5,6 +5,7 @@ var basicAuth = require('express-basic-auth');
 var bcrypt = require('bcryptjs');
 var passport = require('passport');
 var util = require('util');
+var _ = require('underscore');
 var pluginHandler = require('../plugins/pluginHandler');
 var logger = require('../log');
 var db = require('../knex/knex.js');
@@ -37,7 +38,7 @@ var initData = {};
 // auth variables
 var HideCapcode = nconf.get('messages:HideCapcode');
 var apiSecurity = nconf.get('messages:apiSecurity');
-var dbtype = nconf.get('database:type')
+var dbtype = nconf.get('database:type');
 
 ///////////////////
 //               //
@@ -50,6 +51,7 @@ router.get('/messages', isLoggedIn, function(req, res, next) {
   nconf.load();
   console.time('init');
   var pdwMode = nconf.get('messages:pdwMode');
+  var adminShow = nconf.get('messages:adminShow');
   var maxLimit = nconf.get('messages:maxLimit');
   var defaultLimit = nconf.get('messages:defaultLimit');
   initData.replaceText = nconf.get('messages:replaceText');
@@ -67,13 +69,21 @@ router.get('/messages', isLoggedIn, function(req, res, next) {
     initData.limit = parseInt(defaultLimit, 10);
   }
   if (pdwMode) {
-    var subquery = db.from('capcodes').where('ignore', '=', 0).select('id')
+    if (adminShow && req.isAuthenticated()) {
+      var subquery = db.from('capcodes').where('ignore', '=', 1).select('id')
+    } else {
+      var subquery = db.from('capcodes').where('ignore', '=', 0).select('id')
+    }    
   } else {
     var subquery = db.from('capcodes').where('ignore', '=', 1).select('id')
   }
   db.from('messages').where(function () {
     if (pdwMode) {
-      this.from('messages').where('alias_id', 'in', subquery)
+      if (adminShow && req.isAuthenticated()) {
+        this.from('messages').where('alias_id', 'not in', subquery).orWhereNull('alias_id')
+      } else {
+        this.from('messages').where('alias_id', 'in', subquery)
+      } 
     } else {
       this.from('messages').where('alias_id', 'not in', subquery).orWhereNull('alias_id')
     }
@@ -106,7 +116,11 @@ router.get('/messages', isLoggedIn, function(req, res, next) {
         })
         .modify(function(queryBuilder) {
           if (pdwMode) {
-            queryBuilder.innerJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id').where('capcodes.ignore', 0)
+            if (adminShow && req.isAuthenticated()) {
+              queryBuilder.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id').where('capcodes.ignore', 0).orWhereNull('capcodes.ignore')
+            } else {
+              queryBuilder.innerJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id').where('capcodes.ignore', 0)              
+            } 
           } else {
             queryBuilder.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id').where('capcodes.ignore', 0).orWhereNull('capcodes.ignore')
           }
@@ -169,7 +183,7 @@ router.get('/messages/:id', isLoggedIn, function(req, res, next) {
         .as('aliasMatch')
     })
     .leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id')
-    .where(['messages.id', id])
+    .where('messages.id', id)
     .then((row) => {
         if (HideCapcode) {
           if (!req.isAuthenticated()) {
@@ -209,6 +223,7 @@ router.get('/messageSearch', isLoggedIn, function(req, res, next) {
   console.time('init');
   var dbtype = nconf.get('database:type')
   var pdwMode = nconf.get('messages:pdwMode');
+  var adminShow = nconf.get('messages:adminShow');
   var maxLimit = nconf.get('messages:maxLimit');
   var defaultLimit = nconf.get('messages:defaultLimit');
   initData.replaceText = nconf.get('messages:replaceText');
@@ -253,7 +268,11 @@ router.get('/messageSearch', isLoggedIn, function(req, res, next) {
       FROM messages `;
     }
     if (pdwMode) {
-      sql += " INNER JOIN capcodes ON capcodes.id = messages.alias_id";
+      if (adminShow && req.isAuthenticated()) {
+        sql += " LEFT JOIN capcodes ON capcodes.id = messages.alias_id ";
+      } else {
+        sql += " INNER JOIN capcodes ON capcodes.id = messages.alias_id";
+      }
     } else {
       sql += " LEFT JOIN capcodes ON capcodes.id = messages.alias_id ";
     }
@@ -277,7 +296,11 @@ router.get('/messageSearch', isLoggedIn, function(req, res, next) {
               FROM messages`;
     }
     if (pdwMode) {
-      sql += " INNER JOIN capcodes ON capcodes.id = messages.alias_id";
+      if (adminShow && req.isAuthenticated()) {
+        sql += " LEFT JOIN capcodes ON capcodes.id = messages.alias_id ";
+      } else {
+        sql += " INNER JOIN capcodes ON capcodes.id = messages.alias_id";
+      }
     } else {
       sql += " LEFT JOIN capcodes ON capcodes.id = messages.alias_id ";
     }
@@ -323,8 +346,12 @@ router.get('/messageSearch', isLoggedIn, function(req, res, next) {
               }
             }
             if (pdwMode) {
+              if (adminShow && req.isAuthenticated() && !row.ignore || row.ignore == 0){
+               data.push(row);
+              } else {
               if (row.ignore == 0)
-                data.push(row);
+                data.push(row); 
+              }
             } else {
               if (!row.ignore || row.ignore == 0)
                 data.push(row);
@@ -413,6 +440,19 @@ router.get('/capcodes', isLoggedIn, function(req, res, next) {
     })
 });
 
+router.get('/capcodes/agency', isLoggedIn, function(req, res, next) {
+  db.from('capcodes')
+    .distinct('agency')
+    .then((rows) => {    
+      res.status(200);
+      res.json(rows);
+    })
+    .catch((err) => {
+      res.status(500);
+      res.send(err);
+    })
+});
+
 router.get('/capcodes/:id', isLoggedIn, function(req, res, next) {
   var id = req.params.id;
     db.from('capcodes')
@@ -497,6 +537,10 @@ router.get('/capcodes/agency/:id', isLoggedIn, function(req, res, next) {
 // POST calls below
 //
 //////////////////////////////////
+
+// dupe init
+var msgBuffer = [];
+
 router.post('/messages', isLoggedIn, function(req, res, next) {
   nconf.load();
   if (req.body.address && req.body.message) {
@@ -504,8 +548,42 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
     var dupeLimit = nconf.get('messages:duplicateLimit') || 0; // default 0
     var dupeTime = nconf.get('messages:duplicateTime') || 0; // default 0
     var pdwMode = nconf.get('messages:pdwMode');
+    var adminShow = nconf.get('messages:adminShow');
     var data = req.body;
         data.pluginData = {};
+
+    if (filterDupes) {
+      // this is a bad solution and tech debt that will bite us in the ass if we ever go HA, but that's a problem for future me and that guy's a dick
+      var datetime = data.datetime || 1;
+      var timeDiff = datetime - dupeTime;
+      // if duplicate filtering is enabled, we want to populate the message buffer and check for duplicates within the limits
+      var matches = _.where(msgBuffer, {message: data.message, address: data.address});
+      if (matches.length > 0) {
+        if (dupeTime != 0) {
+          // search the matching messages and see if any match the time constrain
+          var timeFind = _.find(matches, function(msg){ return msg.datetime > timeDiff; });
+          if (timeFind) {
+            logger.main.info(util.format('Ignoring duplicate: %o', data.message));
+            res.status(200);
+            return res.send('Ignoring duplicate');
+          }
+        } else {
+          // if no dupeTime then just end the search now, we have matches
+          logger.main.info(util.format('Ignoring duplicate: %o', data.message));
+          res.status(200);
+          return res.send('Ignoring duplicate');
+        }
+      }
+      // no matches, maintain the array
+      var dupeArrayLimit = dupeLimit;
+      if (dupeArrayLimit == 0) {
+        dupeArrayLimit == 25; // should provide sufficient buffer, consider increasing if duplicates appear when users have no dupeLimit
+      }
+      if (msgBuffer.length > dupeArrayLimit) {
+        msgBuffer.shift();
+      }
+      msgBuffer.push({message: data.message, datetime: data.datetime, address: data.address});
+    }
 
     // send data to pluginHandler before proceeding
     logger.main.debug('beforeMessage start');
@@ -542,7 +620,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                       .as('temp_tab')
                     })  
               })
-              .andWhere('message', 'like', message)
+              .andWhere('message', '=', message)
               .andWhere('address', '=', address)
             } else if ((dupeLimit !=0) && (dupeTime == 0)) {
               queryBuilder.where('id', 'in', function () {
@@ -555,7 +633,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                           .as('temp_tab')
                     })
               })
-              .andWhere('message', 'like', message)
+              .andWhere('message', '=', message)
               .andWhere('address', '=', address)
             } else if ((dupeLimit == 0) && (dupeTime != 0)) {
               queryBuilder.where('id', 'in', function () {
@@ -563,10 +641,10 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                     .from('messages')
                     .where('timestamp', '>', timeDiff)
               })
-              .andWhere('message', 'like', message)
+              .andWhere('message', '=', message)
               .andWhere('address', '=', address)
             } else {
-              queryBuilder.where('message', 'like', message)
+              queryBuilder.where('message', '=', message)
                           .andWhere('address', '=', address)
             }
           })
@@ -578,7 +656,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
             } else {
               db.from('capcodes')
                   .select('id', 'ignore')
-                .whereRaw(`"${address}" LIKE address`)
+                  .whereRaw(`"${address}" LIKE address`)
                   .orderByRaw("REPLACE(address, '_', '%') DESC")
                   .then((row) => {
                     var insert;
@@ -612,11 +690,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                                             .as('aliasMatch')
                                         })
                                         .modify(function(queryBuilder) {
-                                          if (pdwMode) {
-                                            queryBuilder.innerJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id')
-                                          } else {
                                             queryBuilder.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id')
-                                          }
                                         })
                                         .where('messages.id', '=', result[0])
                                         .then((row) => {
@@ -638,28 +712,47 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                                             delete row.pluginconf;
                                             if (HideCapcode || apiSecurity) {
                                               //Emit full details to the admin socket
-                                              req.io.of('adminio').emit('messagePost', row);
+                                              if (pdwMode && adminShow) {
+                                                req.io.of('adminio').emit('messagePost', row);
+                                              } else if (!pdwMode || row.aliasMatch != null) {
+                                                req.io.of('adminio').emit('messagePost', row);
+                                              } else {
+                                                // do nothing if PDWMode on and AdminShow is disabled
+                                              }
                                               //Only emit to normal socket if HideCapcode is on and ApiSecurity is off.
                                               if (HideCapcode && !apiSecurity) {
-                                                // Emit No capcode to normal socket
-                                                row = {
-                                                  "id": row.id,
-                                                  "message": row.message,
-                                                  "source": row.source,
-                                                  "timestamp": row.timestamp,
-                                                  "alias_id": row.alias_id,
-                                                  "alias": row.alias,
-                                                  "agency": row.agency,
-                                                  "icon": row.icon,
-                                                  "color": row.color,
-                                                  "ignore": row.ignore,
-                                                  "aliasMatch": row.aliasMatch
-                                                };
-                                                req.io.emit('messagePost', row);
+                                                if (pdwMode && row.aliasMatch == null) {
+                                                  //do nothing if pdwMode on and there isn't an aliasmatch
+                                                } else {
+                                                  // Emit No capcode to normal socket
+                                                  row = {
+                                                    "id": row.id,
+                                                    "message": row.message,
+                                                    "source": row.source,
+                                                    "timestamp": row.timestamp,
+                                                    "alias_id": row.alias_id,
+                                                    "alias": row.alias,
+                                                    "agency": row.agency,
+                                                    "icon": row.icon,
+                                                    "color": row.color,
+                                                    "ignore": row.ignore,
+                                                    "aliasMatch": row.aliasMatch
+                                                  };
+                                                  req.io.emit('messagePost', row);
+                                                }
                                               }
                                             } else {
-                                              //Just emit - No Security enabled
-                                              req.io.emit('messagePost', row);
+                                              if (pdwMode && row.aliasMatch == null) {
+                                                if (adminShow) {
+                                                  req.io.of('adminio').emit('messagePost', row);
+                                                } else {
+                                                  //do nothing
+                                                }
+                                              } else {
+                                                //Just emit - No Security enabled
+                                                req.io.of('adminio').emit('messagePost', row);
+                                                req.io.emit('messagePost', row);
+                                              }
                                             }
                                           });
                                         }
@@ -909,7 +1002,7 @@ function inParam (sql, arr) {
 // route middleware to make sure a user is logged in
 function isLoggedIn(req, res, next) {
   if (req.method == 'GET') { 
-    if (apiSecurity || req.url.match(/capcodes/)) { //checkc if Secure mode is on, or if the route is a capcode route
+    if (apiSecurity || req.url.match(/capcodes/i) && !(req.url.match(/agency$/))) { //check if Secure mode is on, or if the route is a capcode route
       if (req.isAuthenticated()) {
         // if user is authenticated in the session, carry on
         return next();
