@@ -683,6 +683,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                     if (insert == true) {
                       var insertmsg = {address: address, message: message, timestamp: datetime, source: source, alias_id: alias_id}
                       db('messages').insert(insertmsg)
+                                    .returning('id') //added for postgres compatibility
                                     .then((result) => {
                                       // emit the full message
                                       db.from('messages')
