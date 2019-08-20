@@ -1,4 +1,4 @@
-var version = "0.3.3-beta";
+var version = "0.3.4-beta";
 var release = 20190106;
 
 var debug = require('debug')('pagermon:server');
@@ -45,6 +45,15 @@ var nconf = require('nconf');
 var dbinit = require('./db');
     dbinit.init(release);
 var db = require('./knex/knex.js');
+
+//Enable Azure Monitoring if enabled
+var azureEnable = nconf.get('monitoring:azureEnabled')
+var azureKey = nconf.get('monitoring:azureKey')
+if (azureEnable) {
+  logger.main.debug('Starting Azure Application Insights')
+  const appInsights = require('applicationinsights');
+  appInsights.setup(azureKey).start();
+}
 
 // routes
 var index = require('./routes/index');

@@ -49,5 +49,9 @@
       }
     ]
   },
+  "monitoring": {
+    "azureEnabled": "false",
+    "azureKey": ""
+  },
   "plugins": {}
 }
