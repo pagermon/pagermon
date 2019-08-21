@@ -42,10 +42,6 @@ var nconf = require('nconf');
     nconf.file({file: conf_file});
     nconf.load();
 
-var dbinit = require('./db');
-    dbinit.init(release);
-var db = require('./knex/knex.js');
-
 //Enable Azure Monitoring if enabled
 var azureEnable = nconf.get('monitoring:azureEnable')
 var azureKey = nconf.get('monitoring:azureKey')
@@ -62,6 +58,10 @@ if (azureEnable) {
              .setUseDiskRetryCaching(true)
              .start();
 }
+
+var dbinit = require('./db');
+    dbinit.init(release);
+var db = require('./knex/knex.js');
 
 // routes
 var index = require('./routes/index');
