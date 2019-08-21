@@ -52,7 +52,15 @@ var azureKey = nconf.get('monitoring:azureKey')
 if (azureEnable) {
   logger.main.debug('Starting Azure Application Insights')
   const appInsights = require('applicationinsights');
-  appInsights.setup(azureKey).start();
+  appInsights.setup(azureKey)
+             .setAutoDependencyCorrelation(true)
+             .setAutoCollectRequests(true)
+             .setAutoCollectPerformance(true)
+             .setAutoCollectExceptions(true)
+             .setAutoCollectDependencies(true)
+             .setAutoCollectConsole(true)
+             .setUseDiskRetryCaching(true)
+             .start();
 }
 
 // routes
