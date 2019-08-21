@@ -47,7 +47,7 @@ var dbinit = require('./db');
 var db = require('./knex/knex.js');
 
 //Enable Azure Monitoring if enabled
-var azureEnable = nconf.get('monitoring:azureEnabled')
+var azureEnable = nconf.get('monitoring:azureEnable')
 var azureKey = nconf.get('monitoring:azureKey')
 if (azureEnable) {
   logger.main.debug('Starting Azure Application Insights')
