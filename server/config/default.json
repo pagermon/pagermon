@@ -50,7 +50,7 @@
     ]
   },
   "monitoring": {
-    "azureEnabled": "false",
+    "azureEnable": "false",
     "azureKey": ""
   },
   "plugins": {}
