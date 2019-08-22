@@ -1,6 +1,7 @@
 # 0.3.4 - Unreleased
 
 * Fix error handling of messagerepeat plugin #304 @DanrwAU
+* Add support for Azure Application Insights #306 @DanrwAU
 
 # 0.3.3 - 2019-08-14
 
