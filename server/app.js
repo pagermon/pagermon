@@ -1,4 +1,4 @@
-var version = "0.3.3-beta";
+var version = "0.3.4-beta";
 var release = 20190106;
 
 var debug = require('debug')('pagermon:server');
@@ -41,6 +41,23 @@ if( ! fs.existsSync(conf_file) ) {
 var nconf = require('nconf');
     nconf.file({file: conf_file});
     nconf.load();
+
+//Enable Azure Monitoring if enabled
+var azureEnable = nconf.get('monitoring:azureEnable')
+var azureKey = nconf.get('monitoring:azureKey')
+if (azureEnable) {
+  logger.main.debug('Starting Azure Application Insights')
+  const appInsights = require('applicationinsights');
+  appInsights.setup(azureKey)
+             .setAutoDependencyCorrelation(true)
+             .setAutoCollectRequests(true)
+             .setAutoCollectPerformance(true)
+             .setAutoCollectExceptions(true)
+             .setAutoCollectDependencies(true)
+             .setAutoCollectConsole(true)
+             .setUseDiskRetryCaching(true)
+             .start();
+}
 
 var dbinit = require('./db');
     dbinit.init(release);

@@ -44,10 +44,12 @@ function run (trigger, scope, data, config, callback) {
         },
         form: messageData
       }, function (error, response, body) {
-        if (!error && response.statusCode === 200) {
+        if (error && response === undefined) {
+          logger.main.error('MessageRepeat: Status Code:' + error.errno)
+        } else if (!error && response.statusCode === 200) {
           logger.main.info('MessageRepeat: Message Sent')
         } else {
-          logger.main.error('MessageRepeat: ' + error + response.statusCode + response.statusText)
+          logger.main.error('MessageRepeat: Status Code:' +  response.statusCode)
         }
       })
   }
