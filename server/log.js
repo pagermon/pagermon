@@ -70,7 +70,7 @@ winston.loggers.add('db', {
     ),
     transports: [
         new winston.transports.File({
-            level: 'debug',
+            level: loglevel,
             filename: './logs/db.log',
             handleExceptions: true,
             maxsize: 10485760,
