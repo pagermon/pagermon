@@ -1,3 +1,7 @@
+# 0.3.5 - Unreleased
+
+* Add Knex logging to Winston #311 @DanrwAU
+
 # 0.3.4 - Unreleased
 
 * Fix error handling of messagerepeat plugin #304 @DanrwAU
