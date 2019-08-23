@@ -27,7 +27,7 @@ var dbconfig = {
     },
     log: {
       warn(message) {
-        logger.db.info(JSON.stringify(message))
+        logger.db.warn(JSON.stringify(message))
       },
       error(message) {
         logger.db.error(JSON.stringify(message))
