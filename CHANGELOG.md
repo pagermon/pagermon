@@ -1,7 +1,13 @@
-# 0.3.4 - Unreleased
+# 0.3.5 - Unreleased
+
+* Add Knex logging to Winston #311 @DanrwAU
+* Fix incorrect setting in default.json #310 @DanrwAU
+
+# 0.3.4 - 2019-08-22
 
 * Fix error handling of messagerepeat plugin #304 @DanrwAU
 * Add support for Azure Application Insights #306 @DanrwAU
+* Fix Vulnerability in capcodeCheck route leaking capcodes and plugin data #308 @DanrwAU @marshyonline
 
 # 0.3.3 - 2019-08-14
 
