@@ -1,6 +1,7 @@
 # 0.3.5 - Unreleased
 
 * Fix incorrect setting in default.json #310 @DanrwAU
+* Add Google Analytics Support @Marshyonline
 
 # 0.3.4 - 2019-08-22
 
