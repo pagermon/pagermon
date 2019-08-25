@@ -51,7 +51,9 @@
   },
   "monitoring": {
     "azureEnable": false,
-    "azureKey": ""
+    "azureKey": "",
+    "gaEnable": false,
+    "gaTrackingCode": ""
   },
   "plugins": {}
 }
