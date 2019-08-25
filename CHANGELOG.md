@@ -3,6 +3,7 @@
 * Add Knex logging to Winston #311 @DanrwAU
 * Fix incorrect setting in default.json #310 @DanrwAU
 * Add Google Analytics Support @Marshyonline
+* Add Login_Failed to failed login URL to allow Log Scanners to detect failed logins eaiser. @marshyonline
 
 # 0.3.4 - 2019-08-22
 
