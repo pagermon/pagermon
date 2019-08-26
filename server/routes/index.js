@@ -36,7 +36,7 @@ router.route('/login')
     // process the login form
     .post(passport.authenticate('local-login', {
         successRedirect : '/admin', // redirect to the secure profile section
-        failureRedirect : '/login', // redirect back to the signup page if there is an error
+        failureRedirect : '/login?=login_failed', // redirect back to the signup page if there is an error
         failureFlash : true // allow flash messages
     }));
     
