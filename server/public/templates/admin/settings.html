@@ -40,7 +40,7 @@
               <div class="col-xs-8 col-sm-9">
                 <div class="checkbox">
                   <label>
-                    <input type="checkbox" name="global.FrontPopupEnable" ng-model="settings.global.FrontPopupEnable"> Enable showing a modal to new visitors. This Can be used for showing a Disclamer or Site/Conact information. 
+                    <input type="checkbox" name="global.FrontPopupEnable" ng-model="settings.global.FrontPopupEnable"> Enable showing a modal to new visitors. This can be used for showing a disclamer or Site/Conact information. 
                   </label>
                   </div>
               </div>
@@ -55,7 +55,7 @@
             <div class="form-group" ng-hide="!settings.global.FrontPopupEnable">
               <label for="global.FrontPopupContent" class="col-xs-4 col-sm-3 control-label">Modal Content </label>
               <div class="col-xs-8 col-sm-9">
-                  <!-- <div summernote></div> -->
+                <div text-angular name="global.FrontPopupContent" ng-model="settings.global.FrontPopupContent" ng-required="settings.global.FrontPopupEnable" ta-toolbar="[['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'pre', 'quote'],['bold', 'italics', 'underline', 'strikeThrough', 'ul', 'ol', 'redo', 'undo', 'clear'],['justifyLeft', 'justifyCenter', 'justifyRight', 'indent', 'outdent'],['html', 'insertImage','insertLink']]"></div>
                   <!--<input class="form-control" type="text" name="global.FrontPopupContent" ng-model="settings.global.FrontPopupContent" ng-required="settings.global.FrontPopupEnable"> -->
                 <span id="helpBlock" class="help-block">Modal Content</span>
               </div>
