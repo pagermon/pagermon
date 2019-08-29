@@ -7,7 +7,6 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
-    "angular-summernote": "^0.8.1",
     "angular-ui-validate": "^1.2.3",
     "angular-utils-pagination": "^0.11.1",
     "angular-uuid": "0.0.4",
