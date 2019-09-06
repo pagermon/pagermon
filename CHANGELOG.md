@@ -1,4 +1,4 @@
-# 0.3.5 - Unreleased
+# 0.3.5 - 2019-09-06
 
 * Add Knex logging to Winston #311 @DanrwAU
 * Fix incorrect setting in default.json #310 @DanrwAU
