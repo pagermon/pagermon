@@ -341,6 +341,26 @@
               </div>
             </div>
 
+            <div class="form-group">
+              <label for="monitoring.gaEnable" class="col-xs-4 col-sm-3 control-label">Google Analytics</label>
+              <div class="col-xs-8 col-sm-9">
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" name="monitoring.gaEnable" ng-model="settings.monitoring.gaEnable"> Enable Google Analytics
+                  </label>
+                  </div>
+              </div>
+            </div>
+            <div class="form-group" ng-hide="!settings.monitoring.gaEnable">
+              <label for="monitoring.gaTrackingCode" class="col-xs-4 col-sm-3 control-label">Tracking ID. </label>
+              <div class="col-xs-8 col-sm-9">
+                  <input class="form-control" type="text" name="monitoring.gaTrackingCode" ng-model="settings.monitoring.gaTrackingCode" ng-required="settings.monitoring.gaEnable">
+                <span id="helpBlock" class="help-block">Tracking ID. See <a href=https://support.google.com/analytics/answer/1008080?hl=en>Documentation</a></span>
+              </div>
+            </div>
+
+
+
             <h4>Plugins</h4>
             <div class="plugin-group" ng-repeat="plugin in plugins">
               <hr />
