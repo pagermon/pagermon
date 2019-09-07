@@ -1,5 +1,4 @@
 var version = "0.3.5-beta";
-var release = 20190106;
 
 var debug = require('debug')('pagermon:server');
 var pmx = require('pmx').init({
@@ -60,7 +59,7 @@ if (azureEnable) {
 }
 
 var dbinit = require('./db');
-    dbinit.init(release);
+    dbinit.init();
 var db = require('./knex/knex.js');
 
 // routes
