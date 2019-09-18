@@ -3,7 +3,8 @@
     "loglevel": "debug",
     "sessionSecret": "1DVETLX8VE007RYQN9TN9Z00",
     "sitename": "PagerMon,
-    "metatags": "Meta"
+    "metatags": "",
+    "metadescription": ""
   },
   "database": {
     "file": "./messages.db",
