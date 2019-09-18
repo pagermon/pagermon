@@ -26,7 +26,7 @@ function init() {
                 logger.main.info("Current Legacy DB version: " + res[0].user_version);
                 logger.main.error("Unsupported Upgrade Version - Upgrade Pagermon Database to v0.2.3 BEFORE upgrading to v0.3.0");
                 process.exit(1)
-            } else if (res[0].user_version > 20181118) {
+            } else if (res[0].user_version >= 20181118) {
             // If the database has a legacy version number from 0.3.0 - remove it    
                 logger.main.info("Current Legacy DB version: " + res[0].user_version);
                 var vervar = 'pragma user_version = 0;'
