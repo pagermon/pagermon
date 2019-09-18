@@ -35,6 +35,20 @@
                 <span id="helpBlock" class="help-block">Secret key for cookie sessions, should be changed before deploying the application. Changing this will invalidate existing sessions.</span>
               </div>
             </div>
+		  <div class="form-group">
+              <label for="global.metatags" class="col-xs-4 col-sm-3 control-label">Metatag Keywords</label>
+              <div class="col-xs-8 col-sm-9">
+              <input type="text" class="form-control" name="global.metatags" ng-model="settings.global.metatags">
+              <span id="helpBlock" class="help-block">Enter Metatag Keywords with comma between eg, pagermon,pocsag,pagers (No Spaces)</span>
+              </div>
+            </div>
+		  <div class="form-group">
+              <label for="global.metadescription" class="col-xs-4 col-sm-3 control-label">Metatag Description</label>
+              <div class="col-xs-8 col-sm-9">
+              <input type="text" class="form-control" name="global.metadescription" ng-model="settings.global.metadescription">
+              <span id="helpBlock" class="help-block">Enter Metatag Description</span>
+              </div>
+            </div>
 
             <h5>Database</h5>
             <div class="form-group">
