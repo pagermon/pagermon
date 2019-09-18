@@ -18,6 +18,8 @@ router.use(function (req, res, next) {
   res.locals.iconsize = nconf.get('messages:iconsize');
   res.locals.gaEnable = nconf.get('monitoring:gaEnable');
   res.locals.gaTrackingCode = nconf.get('monitoring:gaTrackingCode');
+  res.locals.metatags = nconf.get('global:metatags');
+  res.locals.metatags = nconf.get('global:metadescription');
   next();
 });
 
