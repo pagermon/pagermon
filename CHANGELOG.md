@@ -1,3 +1,7 @@
+# 0.3.6 - 
+
+* Added sitename to menu & text field to set sitename in settings page #322 @s3m1s0n1c
+
 # 0.3.5 - 2019-09-06
 
 * Add Knex logging to Winston #311 @DanrwAU
