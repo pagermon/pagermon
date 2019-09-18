@@ -1,3 +1,6 @@
+# 0.3.6 -
+* Added Meta Keywords and Description for Google Ranking etc
+
 # 0.3.5 - 2019-09-06
 
 * Add Knex logging to Winston #311 @DanrwAU
