@@ -1,0 +1,23 @@
+{
+  "name": "Webhook",
+  "description": "Generic HTTP post webhook",
+  "disable": false,
+  "trigger": "message",
+  "scope": "after",
+  "config": [
+    {
+      "name": "URL",
+      "label": "Webhook URL",
+      "type": "text",
+      "required": true
+    }
+  ],
+  "aliasConfig": [
+    {
+      "name": "enable",
+      "label": "Enable",
+      "description": "Enable sending messages that match this alias via Generic Webhook",
+      "type": "checkbox"
+    }
+  ]
+}
