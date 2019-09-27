@@ -1,13 +1,20 @@
 # [PagerMon](https://hrng.io/)
 ![Discord](https://img.shields.io/discord/533900375066017812.svg?style=plastic)
-![GitHub issues](https://img.shields.io/github/issues-raw/pagermon/pagermon.svg?style=plastic)
-![GitHub pull requests](https://img.shields.io/github/issues-pr/pagermon/pagermon.svg?style=plastic)
-![GitHub](https://img.shields.io/github/license/pagermon/pagermon.svg?style=plastic)
-![GitHub stars](https://img.shields.io/github/stars/pagermon/pagermon.svg?style=plastic)
-![GitHub forks](https://img.shields.io/github/forks/pagermon/pagermon.svg?style=plastic)
-![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/pagermon/pagermon.svg?label=release&style=plastic)
-![GitHub commit activity](https://img.shields.io/github/commit-activity/m/pagermon/pagermon.svg?style=plastic)
-![GitHub contributors](https://img.shields.io/github/contributors/pagermon/pagermon.svg?style=plastic)
+![GitHub issues](https://img.shields.io/github/issues-raw/pagermon/pagermon-server.svg?style=plastic)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/pagermon/pagermon-server.svg?style=plastic)
+![GitHub](https://img.shields.io/github/license/pagermon/pagermon-server.svg?style=plastic)
+![GitHub stars](https://img.shields.io/github/stars/pagermon/pagermon-server.svg?style=plastic)
+![GitHub forks](https://img.shields.io/github/forks/pagermon/pagermon-server.svg?style=plastic)
+![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/pagermon/pagermon-server.svg?label=release&style=plastic)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/pagermon/pagermon-server.svg?style=plastic)
+![GitHub contributors](https://img.shields.io/github/contributors/pagermon/pagermon-server.svg?style=plastic)
+
+# This Project has changed. 
+## Pagermon has changed the layout of the repositories to make it easier for integrations with the project. 
+## The client and server now have seperate repositories 
+## The server can be found here https://github.com/pagermon/pagermon-server
+## The client can be found here https://github.com/pagermon/pagermon-client
+
 
 PagerMon is an API driven client/server framework for parsing and displaying pager messages from multimon-ng.
 
@@ -63,91 +70,6 @@ The UI is built around a Node/Express/Angular/Bootstrap stack, while the client 
 
 ![alias edit](http://i.imgur.com/gus8QTe.jpeg)
 
-## Getting Started
-
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
-
-### Prerequisites
-
-* [nodejs](https://nodejs.org/)
-* sqlite3
-* Probably some other stuff
-
-#### Recommended
-
-* [nvm](https://github.com/creationix/nvm#installation)
-* nginx or some kind of reverse proxy for SSL offloading
-
-## Running the server
-
-### Local setup
-
-1) Copy server/process-default.json to server/process.json and modify according to your environment
-2) Launch the app from the Terminal:
-
-```
-    $ sudo apt-get install npm sqlite3
-    $ npm install npm@latest -g
-    $ npm install pm2 -g
-    $ cd server
-    $ npm install
-    $ export NODE_ENV=production
-    $ pm2 start process.json
-```
-3) To start on boot, let pm2 handle it:
-```
-    $ sudo pm2 startup
-    $ pm2 save
-```
-4) You probably want to rotate logs, too:
-```
-    $ pm2 install pm2-logrotate
-    $ sudo pm2 logrotate -u user
-```
-5) Now login via the website, default port is 3000, default credentials are 'admin' / 'changeme'
-6) Head to /admin, change your password, and generate some API keys
-6) Grab your API keys and drop them in the PagerMon client, then you're good to go!
-
-Alternatively a production ready setup guide is available here
-https://github.com/pagermon/pagermon/wiki/Tutorial---Production-Ready-Ubuntu,-PM2,-Nginx-Reverse-Proxy,-Let's-Encrypt-SSL,-Pagermon-server
-
-
-### Docker
-
-1) Build the container:
-```
-    $ docker-compose build
-```
-
-2) Run the container
-
-​	In __foreground__:
-```
-    $ docker-compose up 
-```
-
-OR
-
-​	As __daemon__ (`-d`):
-```
-    $ docker-compose up -d
-```
-__NOTE:__
-   - The database will be located relativ to your current working directory under `./data/messages.db` (by `-v $(pwd)/data:/data`)
-   - The local port `3000` will be forwarded to the docker container to port `3000` (by `-p 3000:3000`)
-   - In case you would like to follow the logfile, run `docker logs -f pagermon` (by `--name pagermon `)
-   - To shutdown and remove the container, run `docker-compose down`
-   - If you make changes to the app for testing, you will need to re-build the image, run `docker-compose down && docker-compose up --build`
-
-3) Follow __Step 5__ from __Running the server____
-
-## Support 
-
-General PagerMon support can be requested in the #support channel of the PagerMon discord server.
-
-[Click Here](https://discord.gg/3VK7gSD) to join
-
-Bugs and Feature requests can be logged via the GitHub issues page. 
 
 ## Contributing
 
