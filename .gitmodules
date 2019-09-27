@@ -1,0 +1,6 @@
+[submodule "server"]
+	path = server
+	url = https://github.com/pagermon/pagermon-server.git
+[submodule "client"]
+	path = client
+	url = https://github.com/pagermon/pagermon-client.git
