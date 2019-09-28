@@ -11,9 +11,18 @@
 
 # This Project has changed. 
 ## Pagermon has changed the layout of the repositories to make it easier for integrations with the project. 
-## The client and server now have seperate repositories 
-## The server can be found here https://github.com/pagermon/pagermon-server
-## The client can be found here https://github.com/pagermon/pagermon-client
+## The client and server now have seperate repositories, which can be pulled through the submodules in this master repository, or individually:
+### The server can be found here https://github.com/pagermon/pagermon-server
+### The client can be found here https://github.com/pagermon/pagermon-client
+
+### To pull the submodules from the master repository:
+```
+git submodule update --init --recursive
+```
+### To update the submodules on subsequent pulls:
+```
+git pull --recurse-submodules
+```
 
 
 PagerMon is an API driven client/server framework for parsing and displaying pager messages from multimon-ng.
