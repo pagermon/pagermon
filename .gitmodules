@@ -1,6 +1,10 @@
 [submodule "server"]
 	path = server
 	url = https://github.com/pagermon/pagermon-server.git
+	branch = master
+	update = rebase
 [submodule "client"]
 	path = client
 	url = https://github.com/pagermon/pagermon-client.git
+	branch = master
+	update = rebase
