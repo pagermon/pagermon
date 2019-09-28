@@ -16,7 +16,7 @@
 ### The client can be found here https://github.com/pagermon/pagermon-client
 
 # Upgrade information
-If you perform a simple `git pull`, the contents of the server and client directory will be removed, except for those files covered by `.gitignore`, including database and configuration files. The presence of those files will submodules from being populated, so you'll need to move them temporarily to another location, e.g.
+If you perform a simple `git pull`, the contents of the server and client directory will be removed, except for those files covered by `.gitignore`, including database and configuration files. The presence of those files will prevent submodules from being populated, so you'll need to move them temporarily to another location, e.g.
 ```
 cd pagermon; mkdir ../pagermon-backup; mv client ../pagermon-backup/; mv server ../pagermon-backup/
 ```
