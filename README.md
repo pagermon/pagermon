@@ -9,17 +9,24 @@
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/pagermon/pagermon-server.svg?style=plastic)
 ![GitHub contributors](https://img.shields.io/github/contributors/pagermon/pagermon-server.svg?style=plastic)
 
-# This Project has changed. 
-## Pagermon has changed the layout of the repositories to make it easier for integrations with the project. 
+# This project has changed. 
+## PagerMon has changed the layout of the repositories to make it easier for integrations with the project. 
 ## The client and server now have seperate repositories, which can be pulled through the submodules in this master repository, or individually:
 ### The server can be found here https://github.com/pagermon/pagermon-server
 ### The client can be found here https://github.com/pagermon/pagermon-client
 
-### To pull the submodules from the master repository:
+# Upgrade information
+If you perform a simple `git pull`, the contents of the server and client directory will be removed, except for those files covered by `.gitignore`, including database and configuration files. The presence of those files will submodules from being populated, so you'll need to move them temporarily to another location, e.g.
+```
+cd pagermon; mkdir ../pagermon-backup; mv client ../pagermon-backup/; mv server ../pagermon-backup/
+```
+To pull the submodules from the master repository:
 ```
 git submodule update --init --recursive
 ```
-### To update the submodules on subsequent pulls:
+Once that's been initialised, repopulate the server and client directories with the files you relocated in the previous steps. You may want to run a `git status` to check that everything is in order.
+
+To update the submodules on any future releases:
 ```
 git pull --recurse-submodules
 ```
