@@ -1,3 +1,7 @@
+# 0.3.6 - Unreleased
+
+* Cleanup legacy DB code, add more logging to Knex #323 @DanrwAU
+
 # 0.3.5 - 2019-09-06
 
 * Add Knex logging to Winston #311 @DanrwAU
