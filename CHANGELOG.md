@@ -1,3 +1,8 @@
+# 0.3.6  - unreleased
+
+* Add Option to switch Search Bar Location @marshyonline
+
+
 # 0.3.5 - 2019-09-06
 
 * Add Knex logging to Winston #311 @DanrwAU

@@ -35,7 +35,16 @@
                 <span id="helpBlock" class="help-block">Secret key for cookie sessions, should be changed before deploying the application. Changing this will invalidate existing sessions.</span>
               </div>
             </div>
-
+            <div class="form-group">
+              <label for="global.searchlocation" class="col-xs-4 col-sm-3 control-label">Log level</label>
+              <div class="col-xs-8 col-sm-9">
+                <select name="global.searchlocation" ng-model="settings.global.searchlocation" class="form-control">
+                  <option value="Top">Top</option>
+                  <option value="Bottom">Bottom</option>
+                </select>
+                <span id="helpBlock" class="help-block">Sets the location of the Search Bar.</span>
+              </div>
+            </div>
             <h5>Database</h5>
             <div class="form-group">
               <label for="database.type" class="col-xs-4 col-sm-3 control-label">Type</label>
