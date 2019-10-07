@@ -48,14 +48,16 @@ var dbtype = nconf.get('database:type');
 //               //
 ///////////////////
 
-/* GET message listing. */
+/*
+ * GET message listing.
+ */
 router.get('/messages', isLoggedIn, async function(req, res, next) {
-    nconf.load();
     console.time('init');
 
     /*
      * Getting configuration
      */
+    nconf.load();
     const pdwMode = nconf.get('messages:pdwMode');
     const adminShow = nconf.get('messages:adminShow');
     const maxLimit = nconf.get('messages:maxLimit');
@@ -149,15 +151,15 @@ router.get('/messages/:id', isLoggedIn, async function(req, res, next) {
 router.get('/messageSearch', isLoggedIn, function(req, res, next) {
   nconf.load();
   console.time('init');
-  var dbtype = nconf.get('database:type');
-  var pdwMode = nconf.get('messages:pdwMode');
-  var adminShow = nconf.get('messages:adminShow');
-  var maxLimit = nconf.get('messages:maxLimit');
-  var defaultLimit = nconf.get('messages:defaultLimit');
+  const dbtype = nconf.get('database:type');
+  const pdwMode = nconf.get('messages:pdwMode');
+  const adminShow = nconf.get('messages:adminShow');
+  const maxLimit = nconf.get('messages:maxLimit');
+  const defaultLimit = nconf.get('messages:defaultLimit');
   initData.replaceText = nconf.get('messages:replaceText');
 
   if (typeof req.query.page !== 'undefined') {
-    var page = parseInt(req.query.page, 10);
+    let page = parseInt(req.query.page, 10);
     if (page > 0) {
       initData.currentPage = page - 1;
     } else {
@@ -170,10 +172,10 @@ router.get('/messageSearch', isLoggedIn, function(req, res, next) {
     initData.limit = parseInt(defaultLimit, 10);
   }
 
-  var rowCount;
-  var query;
-  var agency;
-  var address;
+  let rowCount;
+  let query;
+  let agency;
+  let address;
   // dodgy handling for unexpected results
   if (typeof req.query.q !== 'undefined') { query = req.query.q;
   } else { query = ''; }
