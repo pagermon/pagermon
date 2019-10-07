@@ -32,7 +32,7 @@ class Alias extends Model {
                     'color',
                     'ignore',
                     {aliasMatch: 'id'}
-                );
+                ).omit(Alias,['id']);
             }
         };
     }

@@ -60,7 +60,7 @@ router.get('/messages', isLoggedIn, async function(req, res, next) {
 
 
     if (typeof req.query.page !== 'undefined') {
-    var page = parseInt(req.query.page, 10);
+    const page = parseInt(req.query.page, 10);
     if (page > 0) {
       initData.currentPage = page - 1;
     } else {
@@ -74,39 +74,30 @@ router.get('/messages', isLoggedIn, async function(req, res, next) {
     }
 
     const query = Message.query()
-        .leftJoinRelation('[alias]')
+        .leftJoinRelation('[alias(messageView)]')
+        .columns(['messages.*','alias.alias','alias.aliasMatch', 'alias.icon', 'alias.agency', 'alias.color', 'alias.ignore'])
         .modify(builder => {
             if (pdwMode && (!adminShow && !req.isAuthenticated()))
-                builder.where({ignore: '0'});
+                builder.where({ignore: '0'}).whereNotNull('alias.id');
             else
-                builder.where({ignore: '1'}).orWhereNull('alias.ignore');
+                builder.where({ignore: '0'}).orWhereNull('alias.ignore');
+            if (HideCapcode && !req.isAuthenticated)
+                builder.omit(Message,['address'])
         })
         .orderBy('messages.timestamp','DESC');
 
-    logger.main.debug(query.toString());
     let queryResult = await query.page(initData.currentPage, initData.limit).catch(err => {logger.main.error(err);});
 
-    if (queryResult && queryResult.results && queryResult.results.length === 0) {
+    if (!queryResult || !queryResult.results || queryResult.results.length === 0) {
         queryResult = await query.page(0, initData.limit).catch(err => {logger.main.error(err);});
         if (queryResult && queryResult.results && queryResult.results.length === 0)
             res.status(200).json({'init': {}, 'messages': []});
     }
 
-    if (HideCapcode && !req.isAuthenticated)
-        queryResult.results.forEach(row => {
-            if(row) {
-                //delete row.address;
-                result.push(row)
-            }
-            else logger.main.info('empty results');
-        });
-
-    logger.main.debug(JSON.stringify(result));
-
     if (queryResult.results.length > 0) {
         console.timeEnd('sql');
         console.time('send');
-        res.status(200).json({'init': initData, 'messages': result});
+        res.status(200).json({'init': initData, 'messages': queryResult.results});
         console.timeEnd('send');
     }
   /**Message.query().where(builder => {
