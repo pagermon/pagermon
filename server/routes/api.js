@@ -52,30 +52,43 @@ var dbtype = nconf.get('database:type');
 router.get('/messages', isLoggedIn, async function(req, res, next) {
     nconf.load();
     console.time('init');
+
+    /*
+     * Getting configuration
+     */
     const pdwMode = nconf.get('messages:pdwMode');
     const adminShow = nconf.get('messages:adminShow');
     const maxLimit = nconf.get('messages:maxLimit');
     const defaultLimit = nconf.get('messages:defaultLimit');
     initData.replaceText = nconf.get('messages:replaceText');
 
-
+    /*
+     * Getting request parameters
+     */
     if (typeof req.query.page !== 'undefined') {
-    const page = parseInt(req.query.page, 10);
-    if (page > 0) {
-      initData.currentPage = page - 1;
-    } else {
-      initData.currentPage = 0;
+        const page = parseInt(req.query.page, 10);
+        if (page > 0)
+            // This accounts for the fact, that page is indexed starting 1 on the site and 0 in node
+            initData.currentPage = page - 1;
     }
-    }
-    if (req.query.limit && req.query.limit <= maxLimit) {
-    initData.limit = parseInt(req.query.limit, 10);
-    } else {
-    initData.limit = parseInt(defaultLimit, 10);
-    }
+    else
+    // If no valid page is set, use 0 instead.
+        initData.currentPage = 0;
+
+    if (req.query.limit && req.query.limit <= maxLimit)
+        initData.limit = parseInt(req.query.limit, 10);
+    else
+        initData.limit = parseInt(defaultLimit, 10);
 
     const query = Message.query()
         .leftJoinRelation('[alias(messageView)]')
-        .columns(['messages.*','alias.alias','alias.aliasMatch', 'alias.icon', 'alias.agency', 'alias.color', 'alias.ignore'])
+        .columns(['messages.*',
+            'alias.alias',
+            'alias.aliasMatch',
+            'alias.icon',
+            'alias.agency',
+            'alias.color',
+            'alias.ignore'])
         .modify(builder => {
             if (pdwMode && (!adminShow && !req.isAuthenticated()))
                 builder.where({ignore: '0'}).whereNotNull('alias.id');
@@ -88,51 +101,27 @@ router.get('/messages', isLoggedIn, async function(req, res, next) {
 
     let queryResult = await query.page(initData.currentPage, initData.limit).catch(err => {logger.main.error(err);});
 
+    //Check if the requested page contains messages. If not, try page 0. If this also has no messages, send empty result
     if (!queryResult || !queryResult.results || queryResult.results.length === 0) {
-        queryResult = await query.page(0, initData.limit).catch(err => {logger.main.error(err);});
+        initData.currentPage = 0;
+        queryResult = await query.page(initData.currentPage, initData.limit).catch(err => {logger.main.error(err);});
         if (queryResult && queryResult.results && queryResult.results.length === 0)
             res.status(200).json({'init': {}, 'messages': []});
     }
 
+    //Calculate initData for the result and correct presentation on clients.
+    initData.msgCount = queryResult.total;
+    initData.pageCount = Math.ceil(initData.msgCount / initData.limit);
+    initData.offset = initData.limit * initData.currentPage;
+    initData.offsetEnd = initData.offset + initData.limit;
+
+    //If everything is fine, send result.
     if (queryResult.results.length > 0) {
         console.timeEnd('sql');
         console.time('send');
         res.status(200).json({'init': initData, 'messages': queryResult.results});
         console.timeEnd('send');
     }
-  /**Message.query().where(builder => {
-              if (pdwMode) {
-                  if (adminShow && req.isAuthenticated())
-                  // If PDW-Mode and Admin, show everything not ignored, including unmatched
-                  builder.where('alias_id', 'not in', Alias.query().where(db.raw('capcodes.ignore = 1')).select('id')).orWhereNull('alias_id');
-              else
-                  // If PDW-Mode and not Admin, show everything not ignored or not unmatched
-                  builder.where('alias_id', 'in', Alias.query().where(db.raw('capcodesignore = 0')).select('id'));
-              }
-              else
-                  // If no PDW-Mode, show everything not ignored, including unmatched
-                  builder.where('alias_id', 'not in', Alias.query().where(db.raw('capcodes.ignore = 1')).select('id')).orWhereNull('alias_id')
-          }).count('* as msgcount')
-      .then(function(initcount){
-          const count = initcount[0];
-          if (count) {
-              initData.msgCount = count.msgcount;
-              initData.pageCount = Math.ceil(initData.msgCount/initData.limit);
-          }
-          if (initData.currentPage > initData.pageCount)
-              initData.currentPage = 0;
-          initData.offset = initData.limit * initData.currentPage;
-          if (initData.offset < 0)
-              initData.offset = 0;
-          initData.offsetEnd = initData.offset + initData.limit;
-          console.timeEnd('init');
-          console.time('sql');
-          let result = [];
-          let rowCount;
-          logger.main.debug(JSON.stringify(initData));
-
-
-          });**/
   });
 
 router.get('/messages/:id', isLoggedIn, function(req, res, next) {
