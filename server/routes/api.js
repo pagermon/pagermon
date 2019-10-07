@@ -124,56 +124,32 @@ router.get('/messages', isLoggedIn, async function(req, res, next) {
     }
   });
 
-router.get('/messages/:id', isLoggedIn, function(req, res, next) {
-  nconf.load();
-  var pdwMode = nconf.get('messages:pdwMode');
-  var id = req.params.id;
+router.get('/messages/:id', isLoggedIn, async function(req, res, next) {
+      nconf.load();
+      const pdwMode = nconf.get('messages:pdwMode');
 
-  db.from('messages')
-    .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', function () {
-      this.select('capcodes.id')
-        .as('aliasMatch')
-    })
-    .leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id')
-    .where('messages.id', id)
-    .then((row) => {
-        if (HideCapcode) {
-          if (!req.isAuthenticated()) {
-            row = {
-              "id": row.id,
-              "message": row.message,
-              "source": row.source,
-              "timestamp": row.timestamp,
-              "alias_id": row.alias_id,
-              "alias": row.alias,
-              "agency": row.agency,
-              "icon": row.icon,
-              "color": row.color,
-              "ignore": row.ignore,
-              "aliasMatch": row.aliasMatch
-            };
-          }
-        }
-        if(row.ignore == 1) {
-          res.status(200).json({});
-        } else {
-          if(pdwMode && !row.alias) {
-            res.status(200).json({});
-          } else {
-            res.status(200).json(row);
-          }
-        }
-    })
-    .catch((err) => {
-      res.status(500).send(err);
-    })
+      const queryResult = await Message.query()
+          .findById(req.params.id)
+          .column(['messages.*','alias.alias','alias.agency','alias.icon', 'alias.color', 'alias.ignore', 'alias.aliasMatch'])
+          .leftJoinRelation('[alias(messageView)]')
+          .modify(builder => {
+              if (HideCapcode && !req.isAuthenticated())
+                  builder.omit(Message, ['address']);
+          });
+
+      if (!queryResult || (queryResult.ignore || (pdwMode && !queryResult.alias)))
+        res.status(200).json({});
+      else
+          res.status(200).json({queryResult});
+
+      queryResult.catch(err => {res.status(500).send(err)});
 });
 
 /* GET message search */
 router.get('/messageSearch', isLoggedIn, function(req, res, next) {
   nconf.load();
   console.time('init');
-  var dbtype = nconf.get('database:type')
+  var dbtype = nconf.get('database:type');
   var pdwMode = nconf.get('messages:pdwMode');
   var adminShow = nconf.get('messages:adminShow');
   var maxLimit = nconf.get('messages:maxLimit');
