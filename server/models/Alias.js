@@ -26,15 +26,13 @@ class Alias extends Model {
     static get modifiers() {
         return {
             messageView(builder) {
-                builder.select('capcodes.alias',
-                    'capcodes.agency',
-                    'capcodes.icon',
-                    'capcodes.color',
-                    'capcodes.ignore',
-                    builder => {
-                        builder.select('capcodes.id').as('aliasMatch')
-                    }
-                )
+                builder.column('alias',
+                    'agency',
+                    'icon',
+                    'color',
+                    'ignore',
+                    {aliasMatch: 'id'}
+                );
             }
         };
     }

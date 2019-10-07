@@ -49,30 +49,67 @@ var dbtype = nconf.get('database:type');
 ///////////////////
 
 /* GET message listing. */
-router.get('/messages', isLoggedIn, function(req, res, next) {
-  nconf.load();
-  console.time('init');
-  var pdwMode = nconf.get('messages:pdwMode');
-  var adminShow = nconf.get('messages:adminShow');
-  var maxLimit = nconf.get('messages:maxLimit');
-  var defaultLimit = nconf.get('messages:defaultLimit');
-  initData.replaceText = nconf.get('messages:replaceText');
-  if (typeof req.query.page !== 'undefined') {
+router.get('/messages', isLoggedIn, async function(req, res, next) {
+    nconf.load();
+    console.time('init');
+    const pdwMode = nconf.get('messages:pdwMode');
+    const adminShow = nconf.get('messages:adminShow');
+    const maxLimit = nconf.get('messages:maxLimit');
+    const defaultLimit = nconf.get('messages:defaultLimit');
+    initData.replaceText = nconf.get('messages:replaceText');
+
+
+    if (typeof req.query.page !== 'undefined') {
     var page = parseInt(req.query.page, 10);
     if (page > 0) {
       initData.currentPage = page - 1;
     } else {
       initData.currentPage = 0;
     }
-  }
-  if (req.query.limit && req.query.limit <= maxLimit) {
+    }
+    if (req.query.limit && req.query.limit <= maxLimit) {
     initData.limit = parseInt(req.query.limit, 10);
-  } else {
+    } else {
     initData.limit = parseInt(defaultLimit, 10);
-  }
+    }
 
+    const query = Message.query()
+        .leftJoinRelation('[alias]')
+        .modify(builder => {
+            if (pdwMode && (!adminShow && !req.isAuthenticated()))
+                builder.where({ignore: '0'});
+            else
+                builder.where({ignore: '1'}).orWhereNull('alias.ignore');
+        })
+        .orderBy('messages.timestamp','DESC');
 
-  Message.query().where(builder => {
+    logger.main.debug(query.toString());
+    let queryResult = await query.page(initData.currentPage, initData.limit).catch(err => {logger.main.error(err);});
+
+    if (queryResult && queryResult.results && queryResult.results.length === 0) {
+        queryResult = await query.page(0, initData.limit).catch(err => {logger.main.error(err);});
+        if (queryResult && queryResult.results && queryResult.results.length === 0)
+            res.status(200).json({'init': {}, 'messages': []});
+    }
+
+    if (HideCapcode && !req.isAuthenticated)
+        queryResult.results.forEach(row => {
+            if(row) {
+                //delete row.address;
+                result.push(row)
+            }
+            else logger.main.info('empty results');
+        });
+
+    logger.main.debug(JSON.stringify(result));
+
+    if (queryResult.results.length > 0) {
+        console.timeEnd('sql');
+        console.time('send');
+        res.status(200).json({'init': initData, 'messages': result});
+        console.timeEnd('send');
+    }
+  /**Message.query().where(builder => {
               if (pdwMode) {
                   if (adminShow && req.isAuthenticated())
                   // If PDW-Mode and Admin, show everything not ignored, including unmatched
@@ -99,46 +136,12 @@ router.get('/messages', isLoggedIn, function(req, res, next) {
           initData.offsetEnd = initData.offset + initData.limit;
           console.timeEnd('init');
           console.time('sql');
-
           let result = [];
           let rowCount;
           logger.main.debug(JSON.stringify(initData));
 
-          Message.query()
-              .joinEager('alias(messageView)')
-              //.modifyEager('alias', builder => {
-              //    if (pdwMode && (!adminShow && !req.isAuthenticated()))
-              //        builder.where({ignore: '0'});
-              //    else
-              //        builder.where({ignore: '1'}).orWhereNull('capcodes.ignore');
-              //})
-              .orderBy('messages.timestamp','DESC').limit(initData.limit).offset(initData.offset)
-              .then(rows => {
-                  logger.main.debug('Retreived results from database:');
-                  logger.main.debug(JSON.stringify(rows));
-                  let rowCount = rows.length;
 
-                  // Hide Address if not logged in and HideCapcode enabled.
-                  if (HideCapcode && !req.isAuthenticated)
-                      rows.forEach(row => {
-                          if (row) {
-                              delete row.address;
-                              result.push(row);
-                          }
-                          else logger.main.info('empty results');
-                      })
-                  })
-              .catch(err => { logger.main.error(err); })
-              .finally(() => {
-                  if (rowCount > 0) {
-                      console.timeEnd('sql');
-                      console.time('send');
-                      res.status(200).json({'init': initData, 'messages': result});
-                      console.timeEnd('send');
-                  }
-                  else res.status(200).json({'init': {}, 'messages': []});
-              })
-          });
+          });**/
   });
 
 router.get('/messages/:id', isLoggedIn, function(req, res, next) {
