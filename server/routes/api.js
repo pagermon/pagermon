@@ -19,6 +19,9 @@ var conf_file = './config/config.json';
 nconf.file({file: conf_file});
 nconf.load();
 
+const v2 = require('./api.v2');
+router.use('/v2',v2);
+
 router.use(bodyParser.json());       // to support JSON-encoded bodies
 router.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: true
