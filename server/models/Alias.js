@@ -9,6 +9,10 @@ class Alias extends Model {
         return 'capcodes';
     }
 
+    static get jsonAttributes () {
+        return ['pluginconf']
+    }
+
     static get relationMappings () {
         const { Message } = require('./Message');
         return {
