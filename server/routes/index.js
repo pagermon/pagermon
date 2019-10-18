@@ -11,9 +11,14 @@ require('../config/passport')(passport); // pass passport for configuration
 router.use(function (req, res, next) {
   res.locals.login = req.isAuthenticated();
   res.locals.user = req.user || '';
-  res.locals.hidecapcode = nconf.get('messages:HideCapcode');
-  res.locals.pdwmode = nconf.get('messages:pdwMode');
+  res.locals.hidedate = nconf.get('messages:HideDate');
+  res.locals.hidetime = nconf.get('messages:HideTime');
   res.locals.hidesource = nconf.get('messages:HideSource');
+  res.locals.hidecapcode = nconf.get('messages:HideCapcode');
+  res.locals.hideicon = nconf.get('messages:HideIcon');
+  res.locals.hidealias = nconf.get('messages:HideAlias');
+  res.locals.hidemessage = nconf.get('messages:HideMessage');
+  res.locals.pdwmode = nconf.get('messages:pdwMode');
   res.locals.apisecurity = nconf.get('messages:apiSecurity');
   res.locals.iconsize = nconf.get('messages:iconsize');
   res.locals.gaEnable = nconf.get('monitoring:gaEnable');

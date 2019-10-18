@@ -29,9 +29,14 @@
     ],
     "pdwMode": false,
     "adminShow": false,
-    "HideCapcode": false,
+    "apiSecurity": false,
+    "HideDate": false,
+    "HideTime": false,
     "HideSource": false,
-    "apiSecurity": false
+    "HideCapcode": false,
+    "HideIcon": false,
+    "HideAlias": false,
+    "HideMessage": false
   },
   "auth": {
     "type": "local",

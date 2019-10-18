@@ -39,34 +39,46 @@
                 </span>
                 </div>
             </th>
-            <% if (!hidesource || login) { %>
+            <% if (!hidesource && login) { %>
               <th class="noMobile noSmall" style="text-align: center;">Src</th>
             <% } %>
-            <% if (!hidecapcode || login) { %>
+            <% if (!hidecapcode && login) { %>
               <th class="noMobile" style="text-align: center;">Capcode</th>
             <% } %>
+            <% if (!hideicon || !login) { %>
             <th class="noMobile noSmall"></th>
+            <% } %>
+            <% if (!hidealias || !login) { %>
             <th class="noMobile noSmall"></th>
+            <% } %>
+            <% if (!hidemessage || !login) { %>
             <th style="text-align: center;">Message
               <span ng-if="filter || hasQuery" class="pull-left" style="vertical-align: middle; padding-right: 10px;">
                   <strong>Filter:</strong> <a ng-href="/" style="margin-bottom: 3px;" class="btn btn-primary btn-xs">{{filter || origQuery}} <i class="fa fa-fw fa-times"></i></a>
               </span></th>
+            <% } %>
           </tr>
         </thead>
         <tbody>
           <tr ng-repeat="message in messages | filter: search">
+            <% if (!hidedate || !login) { %>
             <td class="shrink noMobile noSmall">{{message.date}}</td>
+            <% } %>
+            <% if (!hidetime || !login) { %>
             <td class="shrink">{{message.timestamp}}</td>
-            <% if (!hidesource || login) { %>
+            <% } %>
+            <% if (!hidesource && login) { %>
               <td class="shrink noMobile noSmall clickable-td" uib-popover-template="'templates/popover.html'" popover-append-to-body=true ng-click="popoverEl = 'source'" popover-trigger="'outsideClick'" style="background-color: {{message.color || 'grey'}}; text-align: center;">
                 <span class="small" style="color: white; font-family: monospace;"><strong>{{message.source}}</strong></span>
               </td>
             <% } %>
-            <% if (!hidecapcode || login) { %>
+            <% if (!hidecapcode && login) { %>
               <td class="shrink noMobile noSmall clickable-td" uib-popover-template="'templates/popover.html'" popover-append-to-body=true ng-click="popoverEl = 'address'" popover-trigger="'outsideClick'" style="background-color: {{message.color || 'grey'}}; text-align: center;">
                 <span class="small" style="color: white; font-family: monospace;"><strong>{{message.address}}</strong></span>
               </td>
             <% } %>
+            
+            <% if (!hideicon || !login) { %>
             <td class="shrink clickable-td" ng-if="message.agency" uib-popover-template="'templates/popover.html'" popover-append-to-body=true ng-click="popoverEl = 'agency'" popover-trigger="'outsideClick'">
               <% if (iconsize == 'small') { %>
               <span class="fa-stack fa-fw" style="color: {{message.color || 'grey'}};">
@@ -79,6 +91,7 @@
               </span>
               <strong style="vertical-align: middle;">{{message.agency || ''}}</strong>
             </td>
+            
             <td class="shrink" ng-if="!message.agency">
               <% if (iconsize == 'small') { %>
               <span class="fa-stack fa-fw" style="color: {{message.color || 'grey'}};">
@@ -91,14 +104,21 @@
               </span>
               <strong style="vertical-align: middle;"></strong>
             </td>
+            <% } %>
+
+            <% if (!hidealias || !login) { %>
             <td class="shrink noMobile noSmall clickable-td" ng-if="user" uib-popover-template="'templates/popover.html'" popover-append-to-body=true ng-click="popoverEl = 'alias'" popover-trigger="'outsideClick'">
               <span style="color: Maroon;">{{message.alias || 'Unknown'}}</span>
             </td>
             <td class="shrink noMobile noSmall" ng-if="!user">
               <span>{{message.alias || ''}}</span>
             </td>
+            <% } %>
+
+            <% if (!hidemessage || !login) { %>
             <td class="expand"><div highlight="message.message" replacement="init.replaceText" class="pagerMessage"></td>
-        </tbody>
+            <% } %>
+          </tbody>
       </table>
       </div>
     <div class="row" ng-if="messages.length == 0">
