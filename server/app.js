@@ -154,7 +154,6 @@ app.use('/admin', admin);
 app.use('/post', api);
 app.use('/api', api);
 
-
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   var err = new Error('Not Found');
@@ -196,8 +195,8 @@ if (dbtype == 'mysql') {
           logger.main.info('CRON: Alias Refresh Successful')
       })
       .catch((err) => {
-        logger.main.error('CRON: Error refreshing aliases' + err); 
-        console.timeEnd('updateMap'); 
+        logger.main.error('CRON: Error refreshing aliases' + err);
+        console.timeEnd('updateMap');
       })
     } else {
       logger.main.debug('CRON: Alias Refresh not Required, Skipping.')
