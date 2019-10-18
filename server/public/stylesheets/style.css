@@ -134,11 +134,11 @@ a:hover, a:focus {
 
 .nav-tabs.nav-justified>li>a, .nav-tabs.nav-justified>li>a:hover, .nav-tabs.nav-justified>li>a:focus, .nav-tabs.nav-justified>.active>a, .nav-tabs.nav-justified>.active>a:hover, .nav-tabs.nav-justified>.active>a:focus {
     border-top: 1px solid #dddddd;
-    border-right: 1px solid #dddddd;   
-    border-left: 1px solid #dddddd; 
+    border-right: 1px solid #dddddd;
+    border-left: 1px solid #dddddd;
 }
 
-.navbar-nav>li>a:hover, .navbar-nav>li>a:focus:hover, .navbar-nav>li.active>a:hover, .navbar-nav>li.active>a:focus:hover, .navbar-nav>li.active>a, .navbar-nav>li.active>a:focus {  
+.navbar-nav>li>a:hover, .navbar-nav>li>a:focus:hover, .navbar-nav>li.active>a:hover, .navbar-nav>li.active>a:focus:hover, .navbar-nav>li.active>a, .navbar-nav>li.active>a:focus {
     background-color: #eeeeee;
 }
 
@@ -156,7 +156,7 @@ a:hover, a:focus {
 .btn-group-vertical {
     text-align: center;
     position: fixed;
-    bottom:80px; 
+    bottom:80px;
     right:50px;
     width: 225px;
 }
@@ -164,7 +164,7 @@ a:hover, a:focus {
 #buttons-capcodes {
     text-align: center;
     position: fixed;
-    bottom:280px; 
+    bottom:280px;
     right:50px;
     width: 225px;
 }
@@ -209,24 +209,24 @@ a:hover, a:focus {
     .btn-group-vertical {
         text-align: center;
         position: fixed;
-        bottom:80px; 
+        bottom:80px;
         right:50px;
         width: 140px;
     }
-    
+
     #buttons-capcodes {
         text-align: center;
         position: fixed;
-        bottom:280px; 
+        bottom:280px;
         right:50px;
         width: 140px;
     }
 }
 
 /*
-textarea:focus, textarea.form-control:focus, input.form-control:focus, input[type=text]:focus, 
-input[type=password]:focus, input[type=email]:focus, input[type=number]:focus, 
-[type=text].form-control:focus, [type=password].form-control:focus, 
+textarea:focus, textarea.form-control:focus, input.form-control:focus, input[type=text]:focus,
+input[type=password]:focus, input[type=email]:focus, input[type=number]:focus,
+[type=text].form-control:focus, [type=password].form-control:focus,
 [type=email].form-control:focus, [type=tel].form-control:focus,
 [contenteditable].form-control:focus {
     -webkit-box-shadow: inset 0 -2px 0 maroon;
@@ -264,7 +264,7 @@ table .expand {
     padding-left: 2px;
     padding-right: 2px;
     }
-    
+
     .pagination {
     margin: 15px 0;
     margin-top: 15px;
@@ -350,8 +350,8 @@ table .expand {
 
   position:fixed;
   margin-top:0px;
-  width: 0; 
-    height: 0; 
+  width: 0;
+    height: 0;
     border-left: 30px solid transparent;
     border-right: 30px solid transparent;
     border-top: 30px solid Maroon;
@@ -361,7 +361,7 @@ table .expand {
     border-top: 30px solid FireBrick;
 }
 
-.triangle-down p{  
+.triangle-down p{
   text-align:center;
   color:MistyRose;
   margin-top:-33px;
@@ -370,11 +370,11 @@ table .expand {
 }
 
 .alert-fixed {
-    position:fixed; 
-    top: 30px; 
+    position:fixed;
+    top: 30px;
     left: 10%;
     width: 80%;
-    z-index:9999; 
+    z-index:9999;
     border-radius:5px;
 }
 
