@@ -270,80 +270,93 @@
 
             <h5>Table</h5>
             <div class="form-group">
-              <label for="messages.HideDate" class="col-xs-4 col-sm-3 control-label">Hide Date</label>
+              <label for="hide.date" class="col-xs-4 col-sm-3 control-label">Date</label>
               <div class="col-xs-8 col-sm-9">
                 <div class="checkbox">
+                  <input type="text" class="form-control" placeholder="Date" ng-model="settings.columnName.date" disabled>
+                  <span id="helpBlock" class="help-block">Set the column heading for the date.</span>
                   <label>
-                    <input type="checkbox" name="messages.HideDate" ng-model="settings.messages.HideDate">
-                    Hides the date column.
+                    <input type="checkbox" name="hide.date" ng-model="settings.hide.date">
+                    Hide the date column.
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="form-group" disabled>
+              <label for="hide.time" class="col-xs-4 col-sm-3 control-label">Time</label>
+              <div class="col-xs-8 col-sm-9">
+                <div class="checkbox">
+                  <input type="text" class="form-control" placeholder="Time" ng-model="settings.columnName.time" disabled>
+                  <span id="helpBlock" class="help-block">Set the column heading for the time.</span>
+                  <label>
+                    <input type="checkbox" name="hide.time" ng-model="settings.hide.time">
+                    Hide the time column.
                   </label>
                 </div>
               </div>
             </div>
             <div class="form-group">
-              <label for="messages.HideTime" class="col-xs-4 col-sm-3 control-label">Hide Time</label>
-              <div class="col-xs-8 col-sm-9">
-                <div class="checkbox">
-                  <label>
-                    <input type="checkbox" name="messages.HideTime" ng-model="settings.messages.HideTime">
-                    Hides the time column.
-                  </label>
-                </div>
-              </div>
-            </div>
-            <div class="form-group">
-                <label for="messages.HideSource" class="col-xs-4 col-sm-3 control-label">Hide Source</label>
+                <label for="hide.source" class="col-xs-4 col-sm-3 control-label">Source</label>
                 <div class="col-xs-8 col-sm-9">
                 <div class="checkbox">
+                  <input type="text" class="form-control" placeholder="Source" ng-model="settings.columnName.source">
+                  <span id="helpBlock" class="help-block">Set the column heading for the source.</span>
                   <label>
-                    <input type="checkbox" name="messages.HideSource" ng-model="settings.messages.HideSource">
-                    Hides the source column.
+                    <input type="checkbox" name="hide.source" ng-model="settings.hide.source">
+                    Hide the source column.
                   </label>
                 </div>
               </div>
             </div>
             <div class="form-group">
-                <label for="messages.HideCapcode" class="col-xs-4 col-sm-3 control-label">Hide Capcode</label>
+                <label for="hide.capcode" class="col-xs-4 col-sm-3 control-label">Capcode</label>
                 <div class="col-xs-8 col-sm-9">
                   <div class="checkbox">
+                    <input type="text" class="form-control" placeholder="Capcode" ng-model="settings.columnName.capcode">
+                    <span id="helpBlock" class="help-block">Set the column heading for the capcode.</span>
                     <label>
-                      <input type="checkbox" name="messages.HideCapcode" ng-model="settings.messages.HideCapcode">
-                      Hides the capcode column.
+                      <input type="checkbox" name="hide.capcode" ng-model="settings.hide.capcode">
+                      Hide the capcode column.
                     </label>
                   </div>
                 </div>
             </div>
             <div class="form-group">
-              <label for="messages.HideIcon" class="col-xs-4 col-sm-3 control-label">Hide Icon</label>
+              <label for="hide.icon" class="col-xs-4 col-sm-3 control-label">Icon</label>
               <div class="col-xs-8 col-sm-9">
                 <div class="checkbox">
+                  <input type="text" class="form-control" placeholder="Icon" ng-model="settings.columnName.icon">
+                  <span id="helpBlock" class="help-block">Set the column heading for the icon.</span>
                   <label>
-                    <input type="checkbox" name="messages.HideIcon" ng-model="settings.messages.HideIcon">
-                    Hides the icon column.
+                    <input type="checkbox" name="hide.icon" ng-model="settings.hide.icon">
+                    Hide the icon column.
                   </label>
                 </div>
               </div>
             </div>
             <div class="form-group">
-              <label for="messages.HideAlias" class="col-xs-4 col-sm-3 control-label">Hide Alias</label>
+              <label for="hide.alias" class="col-xs-4 col-sm-3 control-label">Alias</label>
               <div class="col-xs-8 col-sm-9">
                 <div class="checkbox">
+                  <input type="text" class="form-control" placeholder="Alias" ng-model="settings.columnName.alias">
+                  <span id="helpBlock" class="help-block">Set the column heading for the alias.</span>
                   <label>
-                    <input type="checkbox" name="messages.HideAlias" ng-model="settings.messages.HideAlias">
-                    Hides the alias column.
+                    <input type="checkbox" name="hide.alias" ng-model="settings.hide.alias">
+                    Hide the alias column.
                   </label>
                 </div>
               </div>
             </div>
             <div class="form-group">
-              <label for="messages.HideMessage" class="col-xs-4 col-sm-3 control-label">Hide Message</label>
+              <label for="hide.message" class="col-xs-4 col-sm-3 control-label">Message</label>
               <div class="col-xs-8 col-sm-9">
                 <div class="checkbox">
+                  <input type="text" class="form-control" placeholder="Message" ng-model="settings.columnName.message">
+                  <span id="helpBlock" class="help-block">Set the column heading for the message.</span>
                   <label>
-                    <input type="checkbox" name="messages.HideMessage" ng-model="settings.messages.HideMessage">
-                    Hides the message column
+                    <input type="checkbox" name="hide.message" ng-model="settings.hide.message">
+                    Hide the message column.
                   </label>
-                </div>
               </div>
             </div>
 

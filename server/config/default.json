@@ -30,13 +30,26 @@
     "pdwMode": false,
     "adminShow": false,
     "apiSecurity": false,
-    "HideDate": false,
-    "HideTime": false,
-    "HideSource": false,
-    "HideCapcode": false,
-    "HideIcon": false,
-    "HideAlias": false,
-    "HideMessage": false
+    "hideCapcode": false,
+    "hideSource": false
+  },
+  "hide": {
+    "date": false,
+    "time": false,
+    "source": false,
+    "capcode": false,
+    "icon": false,
+    "alias": false,
+    "message": false
+  },
+  "columnname": {
+    "date": "Date",
+    "time": "Time",
+    "source": "Src",
+    "capcode": "Capcode",
+    "icon": "Icon",
+    "alias": "Alias",
+    "message": "Message"
   },
   "auth": {
     "type": "local",
