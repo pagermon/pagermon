@@ -30,8 +30,8 @@
     "pdwMode": false,
     "adminShow": false,
     "apiSecurity": false,
-    "hideCapcode": false,
-    "hideSource": false
+    "HideCapcode": false,
+    "HideSource": false
   },
   "hide": {
     "date": false,
