@@ -4,16 +4,16 @@
 <!-- Inlined and minified below <script src="/javascripts/angular-textreplace.js"></script>-->
 <script>angular.module("angular-highlight",[]).directive("highlight",function(){return{link:function(e,t,h){function i(e,t){for(var h=0;h<t.length;h++){var i=new RegExp(t[h].match,"gi");if(e.search(i)>-1)return t[h]}}h.highlightClass||(h.highlightClass="angular-highlight");var l=function(t,l){var r=i(t,e.replacement);if(r.highlight)a='<a href="/?q='+t+'" data-toggle="popover" class="'+h.highlightClass+'" title="'+r.replace+'" onmouseenter="$(this).tooltip(\'show\')">'+t+"</a>";else var a='<a href="/?q='+t+'" data-toggle="popover" title="'+r.replace+'" onmouseenter="$(this).tooltip(\'show\')">'+t+"</a>";return a},r=function(e){var t,h=e.length,i=[];for(t=0;t<h;t++)i.push(e[t].match.replace(new RegExp("^ | $","g"),""));return i};e.$watch("replacement",function(){if(!e.replacement||""==e.replacement)return t.html(e.highlight),!1;var h=r(e.replacement),i=new RegExp(h.join("|"),"gmi"),a=e.highlight.replace(i,l);t.html(a)})},replace:!1,scope:{highlight:"=",replacement:"="}}});</script>
 <base href="/">
-<% if (FrontPopupEnable) { %>
+<% if (frontPopupEnable) { %>
   <div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="discModal" id="onload">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal">x</button>
-          <h4 class="modal-title"><i class="fa fa-exclamation-circle"></i><%= FrontPopupTitle %></h4>
+          <h4 class="modal-title"><i class="fa fa-exclamation-circle"></i><%= frontPopupTitle %></h4>
         </div>
         <div class="modal-body">
-        <%- FrontPopupContent %>
+        <%- frontPopupContent %>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default ok" data-dismiss="modal">Close</button>
