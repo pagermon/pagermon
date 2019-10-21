@@ -2,9 +2,9 @@
   "global": {
     "loglevel": "debug",
     "sessionSecret": "1DVETLX8VE007RYQN9TN9Z00",
-    "FrontPopupEnable": false,
-    "FrontPopupTitle": "",
-    "FrontPopupContent": ""
+    "frontPopupEnable": false,
+    "frontPopupTitle": "",
+    "frontPopupContent": ""
   },
   "database": {
     "file": "./messages.db",
