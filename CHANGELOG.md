@@ -1,7 +1,7 @@
 # 0.3.6  - unreleased
 
+* GA De-Dupe - Resolved Dupe GA Hits. @marshyonline
 * Add front page popout. @marshyonline
-
 
 # 0.3.5 - 2019-09-06
 
