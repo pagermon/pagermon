@@ -1,3 +1,8 @@
+# 0.3.6  - unreleased
+
+* GA De-Dupe - Resolved Dupe GA Hits. @marshyonline
+
+
 # 0.3.5 - 2019-09-06
 
 * Add Knex logging to Winston #311 @DanrwAU
