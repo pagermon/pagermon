@@ -366,26 +366,28 @@ router.get('/capcodes/init', isLoggedIn, function(req, res, next) {
 // all capcode get methods are only used in admin area, so lock down to logged in users as they may contain sensitive data
 
 router.get('/capcodes', isLoggedIn, async function(req, res, next) {
-    const result = await Alias.query().orderByRaw("REPLACE(address, '_', '%')").catch(next);
-    res.json(result);
+    try {
+        const result = await Alias.query().orderByRaw("REPLACE(address, '_', '%')");
+        res.status(200);
+        res.json(result);
+    }
+    catch (err) {
+        res.status(500);
+        res.send(err)
+    }
 });
 
 router.get('/capcodes/agency', isLoggedIn, async function(req, res, next) {
-    const result = await Alias.query().distinct('agency').catch((err) => {
+    try {
+        const result = await Alias.query().distinct('agency');
+        res.status(200);
+        res.json(result);
+    }
+    catch (err) {
         res.status(500);
         res.send(err);
-    });
-
-    res.status(200);
-    res.json(result);
-
+    }
 });
-
-router.get('/capcodes/alias', isLoggedIn, async function(req, res, next) {
-    const result = await Alias.query().distinct('alias').catch((err) => {
-        res.status(500);
-        res.send(err);
-    });
 
 router.get('/capcodes/alias', isLoggedIn, async function(req, res, next) {
     try {
