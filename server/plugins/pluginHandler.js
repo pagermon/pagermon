@@ -8,8 +8,8 @@ nconf.file({file: conf_file});
 nconf.load();
 var logger = require('../log');
 
-function handle(trigger, scope, data, callback) {
-    var plugins = nconf.get("plugins");
+async function handle(trigger, scope, data) {
+    const plugins = nconf.get("plugins");
     logger.main.debug('======================');
     logger.main.debug(`trigger: ${trigger} scope: ${scope}`);
     logger.main.debug('======================');
@@ -48,11 +48,10 @@ function handle(trigger, scope, data, callback) {
         }
     }, function(err) {
         if (err) logger.main.error(err);
-        callback(data);
+        return data;
     });
-
-};
+}
 
 module.exports = {
     handle: handle
-}
+};
