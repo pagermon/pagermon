@@ -386,78 +386,67 @@ router.get('/capcodes/alias', isLoggedIn, async function(req, res, next) {
         res.send(err);
     });
 
-    res.status(200);
-    res.json(result);
-
+router.get('/capcodes/alias', isLoggedIn, async function(req, res, next) {
+    try {
+        const result = await Alias.query().distinct('alias');
+        res.status(200);
+        res.json(result);
+    }
+    catch(err) {
+        res.status(500);
+        res.send(err);
+    }
 });
 
 
 router.get('/capcodes/:id', isLoggedIn, async function(req, res, next) {
-    var id = req.params.id;
+    const id = req.params.id;
 
-    let result = await Alias.query().findById(id).catch((err) => {
+    try {
+        let result = await Alias.query().findById(id);
+        if (result === undefined)
+        {
+            result = {"id": "",
+                "address": "",
+                "alias": "",
+                "agency": "",
+                "icon": "question",
+                "color": "black",
+                "ignore": 0,
+                "pluginconf": {}}
+        }
+
+        res.status(200);
+        res.json(result);
+    }
+   catch(err) {
         res.status(500);
         res.send(err);
-    });
-
-
-    res.json(result);
-    /*
-      .then(function (row) {
-        if (row.length > 0) {
-          row = row[0]
-          row.pluginconf = parseJSON(row.pluginconf);
-          res.status(200);
-          res.json(row);
-        } else {
-          row = {
-            "id": "",
-            "address": "",
-            "alias": "",
-            "agency": "",
-            "icon": "question",
-            "color": "black",
-            "ignore": 0,
-            "pluginconf": {}
-          };
-          res.status(200);
-          res.json(row);
-        }
-      })
-
-     */
+    }
 });
 
-router.get('/capcodeCheck/:id', isLoggedIn, function(req, res, next) {
-  var id = req.params.id;
-    db.from('capcodes')
-      .select('*')
-      .where('address', id)
-      .then((row) => {
-        if (row.length > 0) {
-          row = row[0]
-          row.pluginconf = parseJSON(row.pluginconf);
-          res.status(200);
-          res.json(row);
-        } else {
-          row = {
-            "id": "",
-            "address": "",
-            "alias": "",
-            "agency": "",
-            "icon": "question",
-            "color": "black",
-            "ignore": 0,
-            "pluginconf": {}
-          };
-          res.status(200);
-          res.json(row);
-        }
-    })
-    .catch((err) => {
-      res.status(500);
-      res.send(err);
-    })
+router.get('/capcodeCheck/:id', isLoggedIn, async function(req, res, next) {
+    const id = req.params.id;
+     try {
+         let result = await Alias.query().findOne('address',id);
+         if (result == undefined)
+         {
+             result = {"id": "",
+                 "address": "",
+                 "alias": "",
+                 "agency": "",
+                 "icon": "question",
+                 "color": "black",
+                 "ignore": 0,
+                 "pluginconf": {}}
+         }
+         res.status(200);
+         res.send(result);
+     }
+    catch(err) {
+        res.status(500);
+        res.send(err);
+    }
 });
 
 router.get('/capcodes/agency/:id', isLoggedIn, async function(req, res, next) {
