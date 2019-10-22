@@ -185,18 +185,23 @@ router.get('/messageSearch', isLoggedIn, async function(req, res, next) {
     console.time('sql');
 
     const queryResult = await Message.query()
+        .skipUndefined()
+        .where('alias.agency', 'LIKE' ,req.query.agency).andWhere('alias.ignore','0')
+        .where('address', 'LIKE' ,req.query.address).orWhere('source','LIKE',req.query.address)
+        .modify(
+            builder => {
+                if (req.query.q) builder.whereRaw('MATCH(message, address, source) AGAINST (? IN BOOLEAN MODE)',[req.query.q])
+            }
+        )
         .modify(builder => {
-            if (typeof req.query.agency !== 'undefined')  builder.where('alias.agency', 'LIKE' ,req.query.agency).andWhere('alias.ignore','0');
-            if (typeof req.query.address !== 'undefined')  builder.where('address', 'LIKE' ,req.query.address).orWhere('source','LIKE',req.query.address);
-            if (typeof req.query.q !== 'undefined')  builder.where(raw('MATCH(message, address, source) AGAINST (\'??\' IN BOOLEAN MODE)',[req.query.q]));
-            if (pdwMode && !adminShow && !req.isAuthenticated) builder.applyFilter(['messageViewInner']);
-            else builder.applyFilter(['messageViewLeft']);
-        })
-        .page(initData.currentPage, initData.limit)
-        .modify(builder => {
+            if (pdwMode && !adminShow && !req.isAuthenticated)
+                builder.applyFilter(['messageViewInner']);
+            else
+                builder.applyFilter(['messageViewLeft']);
             if (hideCapcode && !req.isAuthenticated())
                 builder.omit(Message, ['address']);
-        });
+        })
+        .page(initData.currentPage, initData.limit);
 
     console.timeEnd('sql');
     console.time('send');
@@ -216,10 +221,6 @@ router.get('/messageSearch', isLoggedIn, async function(req, res, next) {
 
     console.timeEnd('send');
 
-
-
-  // set select commands based on query type
-  // address can be address or source field
     /**
   if (dbtype == 'sqlite3') {
     var sql
