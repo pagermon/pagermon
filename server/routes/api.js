@@ -460,19 +460,20 @@ router.get('/capcodeCheck/:id', isLoggedIn, function(req, res, next) {
     })
 });
 
-router.get('/capcodes/agency/:id', isLoggedIn, function(req, res, next) {
-  var id = req.params.id;
-    db.from('capcodes')
-      .select('*')
-      .where('agency', 'like', id)
-      .then((rows) => {
+router.get('/capcodes/agency/:id', isLoggedIn, async function(req, res, next) {
+    const id = req.params.id;
+
+    try {
+        const result = await Alias.query()
+            .where('agency','like',id);
         res.status(200);
-        res.json(rows);
-      })
-      .catch((err) => {
+        res.json(result);
+    }
+    catch(err)
+    {
         res.status(500);
         res.send(err);
-      })
+    }
 });
 
 //////////////////////////////////
