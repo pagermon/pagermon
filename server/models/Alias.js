@@ -10,7 +10,7 @@ class Alias extends Model {
     }
 
     static get jsonAttributes () {
-        return ['pluginconf']
+        return ['pluginconf'];
     }
 
     static get relationMappings () {
@@ -35,6 +35,7 @@ class Alias extends Model {
                     'icon',
                     'color',
                     'ignore',
+                    'pluginconf',
                     {aliasMatch: 'id'}
                 ).omit(Alias,['id']);
             }
