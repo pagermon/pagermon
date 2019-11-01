@@ -53,7 +53,8 @@ const apiSecurity = nconf.get('messages:apiSecurity');
 /*
  * GET message listing.
  */
-router.get('/messages', isLoggedIn, async function(req, res, next) {
+router.route('/messages')
+    .get(isLoggedIn, async function (req, res, next) {
     console.time('init');
 
     /*
@@ -125,7 +126,194 @@ router.get('/messages', isLoggedIn, async function(req, res, next) {
         res.status(200).json({'init': initData, 'messages': queryResult.results});
         console.timeEnd('send');
     }
-  });
+    })
+    .post(isLoggedIn, async function (req, res, next) {
+        nconf.load();
+        if (req.body.address && req.body.message) {
+            const filterDupes = nconf.get('messages:duplicateFiltering');
+            const dupeLimit = nconf.get('messages:duplicateLimit') || 0; // default 0
+            const dupeTime = nconf.get('messages:duplicateTime') || 0; // default 0
+            const pdwMode = nconf.get('messages:pdwMode');
+            const adminShow = nconf.get('messages:adminShow');
+            let data = req.body;
+            data.pluginData = {};
+
+            if (filterDupes) {
+                // this is a bad solution and tech debt that will bite us in the ass if we ever go HA, but that's a problem for future me and that guy's a dick
+                const datetime = data.datetime || 1;
+                const timeDiff = datetime - dupeTime;
+                // if duplicate filtering is enabled, we want to populate the message buffer and check for duplicates within the limits
+                const matches = _.where(msgBuffer, {message: data.message, address: data.address});
+                if (matches.length > 0) {
+                    if (dupeTime !== 0) {
+                        // search the matching messages and see if any match the time constrain
+                        if (_.find(matches, function (msg) {
+                            return msg.datetime > timeDiff;
+                        })) {
+                            logger.main.info(util.format('Ignoring duplicate: %o', data.message));
+                            res.status(200);
+                            return res.send('Ignoring duplicate');
+                        }
+                    } else {
+                        // if no dupeTime then just end the search now, we have matches
+                        logger.main.info(util.format('Ignoring duplicate: %o', data.message));
+                        res.status(200);
+                        return res.send('Ignoring duplicate');
+                    }
+                }
+                // no matches, maintain the array
+                let dupeArrayLimit = dupeLimit;
+                if (dupeArrayLimit === 0)
+                    dupeArrayLimit = 25; // should provide sufficient buffer, consider increasing if duplicates appear when users have no dupeLimit
+
+                if (msgBuffer.length > dupeArrayLimit)
+                    msgBuffer.shift();
+
+                msgBuffer.push({message: data.message, datetime: data.datetime, address: data.address});
+            }
+
+            // send data to pluginHandler before proceeding
+            logger.main.debug('beforeMessage start');
+            const beforePlugin = await pluginHandler.handle('message', 'before', data);
+            logger.main.debug(util.format('Before Plugin return: %o', beforePlugin));
+            logger.main.debug('beforeMessage done');
+
+            // only set data to the response if it's non-empty and still contains the pluginData object
+            if (beforePlugin && beforePlugin.pluginData)
+                data = beforePlugin;
+
+            if (data.pluginData.ignore) {
+                // stop processing
+                res.status(200);
+                return res.send('Ignoring filtered');
+            }
+
+            const address = data.address || '0000000';
+            const message = data.message || 'null';
+            const datetime = data.datetime || 1;
+            const timeDiff = datetime - dupeTime;
+            const source = data.source || 'UNK';
+
+            try {
+                const dupeMessages = await Message.query()
+                    .modify(builder => {
+                        if ((dupeLimit !== 0) && (dupeTime !== 0)) {
+                            builder.where('timestamp', '>', timeDiff)
+                                .where('message', message)
+                                .where('address', address)
+                                .orderBy('id', 'DESC')
+                                .limit(dupeLimit);
+                        } else if ((dupeLimit === 0) && (dupeTime !== 0)) {
+                            builder.where('timestamp', '>', timeDiff)
+                                .where('message', message)
+                                .where('address', address)
+                        } else {
+                            builder.where('message', message)
+                                .where('address', address)
+                        }
+                    });
+                if (dupeMessages && filterDupes && dupeMessages.length > 0) {
+                    logger.main.info(util.format('Ignoring duplicate: %o', message));
+                    res.status(200);
+                    res.send('Ignoring duplicate');
+                } else {
+                    const matchAlias = await Alias.query()
+                        .findOne(raw('? LIKE address', address))
+                        .orderByRaw("REPLACE(address, '_', '%') DESC");
+
+                    let insert;
+                    let alias_id;
+                    if (matchAlias) {
+                        if (matchAlias.ignore === 1) {
+                            insert = false;
+                            logger.main.info('Ignoring filtered address: ' + address + ' alias: ' + matchAlias.id);
+                        } else {
+                            insert = true;
+                            alias_id = matchAlias.id;
+                        }
+                    } else insert = true;
+                    if (data.pluginData.aliasId)
+                        alias_id = data.pluginData.aliasId;
+
+                    if (insert) {
+                        const insert = await Message.query()
+                            .insertAndFetch({
+                                address: address,
+                                message: message,
+                                timestamp: datetime,
+                                source: source,
+                                alias_id: alias_id
+                            });
+
+                        const result = await Message.query()
+                            .findById(insert.id)
+                            .columns(['messages.*', 'alias.*'])
+                            .joinRelation('alias')
+                            .modify(builder => {
+                                if (HideCapcode && !req.isAuthenticated())
+                                    builder.omit(Message, ['address']);
+                            });
+
+                        /*
+                         * TODO: This is needed due to a bug in Objection.js
+                         * In future, the former call shall be made with .joinEager instead of .joinRelation,
+                         * if joinRelation would parse JSON as joinEager does.
+                         */
+                        result.pluginconf = JSON.parse(result.pluginconf);
+
+                        result.pluginData = data.pluginData;
+                        logger.main.debug('afterMessage start');
+                        const response = await pluginHandler.handle('message', 'after', result);
+                        logger.main.debug(util.format('Plugin handler after: %o', response));
+                        logger.main.debug('afterMessage done');
+
+                        //removing Plugin Configuration before firing socket message;
+                        delete result.pluginconf;
+                        if (HideCapcode || apiSecurity) {
+                            //Emit full details to the admin socket
+                            if (pdwMode && adminShow) {
+                                req.io.of('adminio').emit('messagePost', result);
+                            } else if (!pdwMode || result.aliasMatch != null) {
+                                req.io.of('adminio').emit('messagePost', result);
+                            } else {
+                                // do nothing if PDWMode on and AdminShow is disabled
+                            }
+                            //Only emit to normal socket if HideCapcode is on and ApiSecurity is off.
+                            if (HideCapcode && !apiSecurity) {
+                                if (pdwMode && result.aliasMatch == null) {
+                                    //do nothing if pdwMode on and there isn't an aliasmatch
+                                } else {
+                                    // Emit No capcode to normal socket
+                                    delete result.address;
+                                    req.io.emit('messagePost', result);
+                                }
+                            }
+                        } else {
+                            if (pdwMode && insert.aliasMatch == null) {
+                                if (adminShow) {
+                                    req.io.of('adminio').emit('messagePost', insert);
+                                } else {
+                                    //do nothing
+                                }
+                            } else {
+                                //Just emit - No Security enabled
+                                req.io.of('adminio').emit('messagePost', insert);
+                                req.io.emit('messagePost', insert);
+                            }
+                        }
+
+                        res.status(200).send('' + insert);
+                    }
+                }
+            } catch (err) {
+                res.status(500).send(err);
+                logger.main.error(err)
+            }
+
+        } else {
+            res.status(500).json({message: 'Error - address or message missing'});
+        }
+    });
 
 router.get('/messages/:id', isLoggedIn, async function(req, res, next) {
       nconf.load();
