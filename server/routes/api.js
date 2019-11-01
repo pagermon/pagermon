@@ -430,7 +430,7 @@ router.get('/capcodeCheck/:id', isLoggedIn, async function(req, res, next) {
     const id = req.params.id;
      try {
          let result = await Alias.query().findOne('address',id);
-         if (result == undefined)
+         if (result === undefined)
          {
              result = {"id": "",
                  "address": "",
@@ -441,12 +441,9 @@ router.get('/capcodeCheck/:id', isLoggedIn, async function(req, res, next) {
                  "ignore": 0,
                  "pluginconf": {}}
          }
-         res.status(200);
-         res.send(result);
-     }
-    catch(err) {
-        res.status(500);
-        res.send(err);
+         res.status(200).send(result);
+     } catch (err) {
+         res.status(500).send(err);
     }
 });
 
@@ -456,13 +453,11 @@ router.get('/capcodes/agency/:id', isLoggedIn, async function(req, res, next) {
     try {
         const result = await Alias.query()
             .where('agency','like',id);
-        res.status(200);
-        res.json(result);
+        res.status(200).send(result);
     }
     catch(err)
     {
-        res.status(500);
-        res.send(err);
+        res.status(500).send(err);
     }
 });
 
