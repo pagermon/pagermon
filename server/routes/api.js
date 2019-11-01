@@ -1,24 +1,23 @@
-var express = require('express');
-var bodyParser = require('body-parser');
-var router = express.Router();
-var basicAuth = require('express-basic-auth');
-var bcrypt = require('bcryptjs');
-var passport = require('passport');
-var util = require('util');
-var _ = require('underscore');
-var pluginHandler = require('../plugins/pluginHandler');
-var logger = require('../log');
-var db = require('../knex/knex.js');
+const express = require('express');
+const bodyParser = require('body-parser');
+const router = express.Router();
+const passport = require('passport');
+const util = require('util');
+const _ = require('underscore');
+const pluginHandler = require('../plugins/pluginHandler');
+const logger = require('../log');
+const db = require('../knex/knex.js');
 require('../config/passport')(passport); // pass passport for configuration
 const { raw } = require('objection');
-const {Alias} = require('../models/Alias');
-const {Message} = require('../models/Message');
+const { Alias } = require('../models/Alias');
+const { Message } = require('../models/Message');
 
-var nconf = require('nconf');
-var conf_file = './config/config.json';
+const nconf = require('nconf');
+const conf_file = './config/config.json';
 nconf.file({file: conf_file});
 nconf.load();
 
+// TODO: Personal experiment!!!
 const v2 = require('./api.v2');
 router.use('/v2',v2);
 
