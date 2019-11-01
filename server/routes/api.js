@@ -171,72 +171,71 @@ router.route('/messages')
     })
     .post(async (req, res, next) => {
         nconf.load();
-        if (req.body.address && req.body.message) {
-            const filterDupes = nconf.get('messages:duplicateFiltering');
-            const dupeLimit = nconf.get('messages:duplicateLimit') || 0; // default 0
-            const dupeTime = nconf.get('messages:duplicateTime') || 0; // default 0
-            const pdwMode = nconf.get('messages:pdwMode');
-            const adminShow = nconf.get('messages:adminShow');
-            let data = req.body;
-            data.pluginData = {};
+        try {
+            if (req.body.address && req.body.message) {
+                const filterDupes = nconf.get('messages:duplicateFiltering');
+                const dupeLimit = nconf.get('messages:duplicateLimit') || 0; // default 0
+                const dupeTime = nconf.get('messages:duplicateTime') || 0; // default 0
+                const pdwMode = nconf.get('messages:pdwMode');
+                const adminShow = nconf.get('messages:adminShow');
+                let data = req.body;
+                data.pluginData = {};
 
-            if (filterDupes) {
-                // this is a bad solution and tech debt that will bite us in the ass if we ever go HA, but that's a problem for future me and that guy's a dick
+                if (filterDupes) {
+                    // this is a bad solution and tech debt that will bite us in the ass if we ever go HA, but that's a problem for future me and that guy's a dick
+                    const datetime = data.datetime || 1;
+                    const timeDiff = datetime - dupeTime;
+                    // if duplicate filtering is enabled, we want to populate the message buffer and check for duplicates within the limits
+                    const matches = _.where(msgBuffer, {message: data.message, address: data.address});
+                    if (matches.length > 0) {
+                        if (dupeTime !== 0) {
+                            // search the matching messages and see if any match the time constrain
+                            if (_.find(matches, function (msg) {
+                                return msg.datetime > timeDiff;
+                            })) {
+                                logger.main.info(util.format('Ignoring duplicate: %o', data.message));
+                                res.status(200).send('Ignoring duplicate');
+                                return;
+                            }
+                        } else {
+                            // if no dupeTime then just end the search now, we have matches
+                            logger.main.info(util.format('Ignoring duplicate: %o', data.message));
+                            res.status(200).send('Ignoring duplicate');
+                            return;
+                        }
+                    }
+                    // no matches, maintain the array
+                    let dupeArrayLimit = dupeLimit;
+                    if (dupeArrayLimit === 0)
+                        dupeArrayLimit = 25; // should provide sufficient buffer, consider increasing if duplicates appear when users have no dupeLimit
+
+                    if (msgBuffer.length > dupeArrayLimit)
+                        msgBuffer.shift();
+
+                    msgBuffer.push({message: data.message, datetime: data.datetime, address: data.address});
+                }
+
+                // send data to pluginHandler before proceeding
+                logger.main.debug('beforeMessage start');
+                const beforePlugin = await pluginHandler.handle('message', 'before', data);
+                logger.main.debug(util.format('Before Plugin return: %o', beforePlugin));
+                logger.main.debug('beforeMessage done');
+
+                // only set data to the response if it's non-empty and still contains the pluginData object
+                if (beforePlugin && beforePlugin.pluginData)
+                    data = beforePlugin;
+
+                if (data.pluginData.ignore) {
+                    // stop processing
+                    res.status(200).send('Ignoring filtered');
+                    return;
+                }
+
+                const address = data.address || '0000000';
+                const message = data.message || 'null';
                 const datetime = data.datetime || 1;
                 const timeDiff = datetime - dupeTime;
-                // if duplicate filtering is enabled, we want to populate the message buffer and check for duplicates within the limits
-                const matches = _.where(msgBuffer, {message: data.message, address: data.address});
-                if (matches.length > 0) {
-                    if (dupeTime !== 0) {
-                        // search the matching messages and see if any match the time constrain
-                        if (_.find(matches, function (msg) {
-                            return msg.datetime > timeDiff;
-                        })) {
-                            logger.main.info(util.format('Ignoring duplicate: %o', data.message));
-                            res.status(200);
-                            return res.send('Ignoring duplicate');
-                        }
-                    } else {
-                        // if no dupeTime then just end the search now, we have matches
-                        logger.main.info(util.format('Ignoring duplicate: %o', data.message));
-                        res.status(200);
-                        return res.send('Ignoring duplicate');
-                    }
-                }
-                // no matches, maintain the array
-                let dupeArrayLimit = dupeLimit;
-                if (dupeArrayLimit === 0)
-                    dupeArrayLimit = 25; // should provide sufficient buffer, consider increasing if duplicates appear when users have no dupeLimit
-
-                if (msgBuffer.length > dupeArrayLimit)
-                    msgBuffer.shift();
-
-                msgBuffer.push({message: data.message, datetime: data.datetime, address: data.address});
-            }
-
-            // send data to pluginHandler before proceeding
-            logger.main.debug('beforeMessage start');
-            const beforePlugin = await pluginHandler.handle('message', 'before', data);
-            logger.main.debug(util.format('Before Plugin return: %o', beforePlugin));
-            logger.main.debug('beforeMessage done');
-
-            // only set data to the response if it's non-empty and still contains the pluginData object
-            if (beforePlugin && beforePlugin.pluginData)
-                data = beforePlugin;
-
-            if (data.pluginData.ignore) {
-                // stop processing
-                res.status(200);
-                return res.send('Ignoring filtered');
-            }
-
-            const address = data.address || '0000000';
-            const message = data.message || 'null';
-            const datetime = data.datetime || 1;
-            const timeDiff = datetime - dupeTime;
-            const source = data.source || 'UNK';
-
-            try {
+                const source = data.source || 'UNK';
                 const dupeMessages = await Message.query()
                     .modify(builder => {
                         if ((dupeLimit !== 0) && (dupeTime !== 0)) {
@@ -256,8 +255,7 @@ router.route('/messages')
                     });
                 if (dupeMessages && filterDupes && dupeMessages.length > 0) {
                     logger.main.info(util.format('Ignoring duplicate: %o', message));
-                    res.status(200);
-                    res.send('Ignoring duplicate');
+                    res.status(200).send('Ignoring duplicate');
                 } else {
                     const matchAlias = await Alias.query()
                         .findOne(raw('? LIKE address', address))
@@ -344,16 +342,17 @@ router.route('/messages')
                             }
                         }
 
-                        res.status(200).send('' + insert);
+                        res.status(200).send(insert);
+                    } else {
+                        res.status(200).send('Ignoring filtered alias');
                     }
                 }
-            } catch (err) {
-                res.status(500).send(err);
-                logger.main.error(err)
-            }
 
-        } else {
-            res.status(500).json({message: 'Error - address or message missing'});
+            } else {
+                res.status(500).json({message: 'Error - address or message missing'});
+            }
+        } catch (err) {
+            res.status(500).send(err);
         }
     });
 
