@@ -32,7 +32,7 @@ router.use(function (req, res, next) {
 });
 
 // defaults
-var initData = {};
+const initData = {};
     initData.limit = nconf.get('messages:defaultLimit');
     initData.replaceText = nconf.get('messages:replaceText');
     initData.currentPage = 0;
@@ -41,9 +41,8 @@ var initData = {};
     initData.offset = 0;
 
 // auth variables
-var HideCapcode = nconf.get('messages:HideCapcode');
-var apiSecurity = nconf.get('messages:apiSecurity');
-var dbtype = nconf.get('database:type');
+const HideCapcode = nconf.get('messages:HideCapcode');
+const apiSecurity = nconf.get('messages:apiSecurity');
 
 ///////////////////
 //               //
