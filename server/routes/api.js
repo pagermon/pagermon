@@ -31,6 +31,8 @@ router.use(function (req, res, next) {
   next();
 });
 
+router.use(isLoggedIn);
+
 // defaults
 const initData = {};
     initData.limit = nconf.get('messages:defaultLimit');
@@ -40,21 +42,65 @@ const initData = {};
     initData.msgCount = 0;
     initData.offset = 0;
 
+let msgBuffer = [];
+
 // auth variables
 const HideCapcode = nconf.get('messages:HideCapcode');
 const apiSecurity = nconf.get('messages:apiSecurity');
 
+function isLoggedIn(req, res, next) {
+    if (req.method === 'GET') {
+        if (apiSecurity || ((req.url.match(/capcodes/i) || req.url.match(/capcodeCheck/i)) && !(req.url.match(/agency$/)))) { //check if Secure mode is on, or if the route is a capcode route
+            if (req.isAuthenticated()) {
+                // if user is authenticated in the session, carry on
+                logger.main.debug('Calling next 54');
+                return next();
+            } else {
+                //logger.main.debug('Basic auth failed, attempting API auth');
+                passport.authenticate('localapikey', {session: false, failWithError: true})(req, res, next),
+                    function (next) {
+                        logger.main.debug('Calling next 60');
+                        next();
+                    },
+                    function (res) {
+                        logger.main.debug('Auth failed 64');
+                        return res.status(401).json({error: 'Authentication failed.'});
+                    }
+            }
+        } else {
+            logger.main.debug('calling next 69');
+            return next();
+        }
+    } else if (req.method === 'POST') { //Check if user is authenticated for POST methods
+        if (req.isAuthenticated()) {
+            logger.main.debug('calling next 74');
+            return next();
+        } else {
+            passport.authenticate('localapikey', {session: false, failWithError: true})(req, res, next),
+                function (next) {
+                    logger.main.debug('calling next 79');
+                    next();
+                },
+                function (res) {
+                    logger.main.debug('Auth failed 83');
+                    return res.status(401).json({error: 'Authentication failed.'});
+                }
+        }
+    }
+}
+
 ///////////////////
 //               //
-// GET messages  //
+// Messages      //
 //               //
 ///////////////////
 
-/*
- * GET message listing.
+/**
+ * GET message
+ * POST message
  */
 router.route('/messages')
-    .get(isLoggedIn, async function (req, res, next) {
+    .get(async (req, res, next) => {
     console.time('init');
 
     /*
@@ -127,7 +173,7 @@ router.route('/messages')
         console.timeEnd('send');
     }
     })
-    .post(isLoggedIn, async function (req, res, next) {
+    .post(async (req, res, next) => {
         nconf.load();
         if (req.body.address && req.body.message) {
             const filterDupes = nconf.get('messages:duplicateFiltering');
@@ -315,7 +361,10 @@ router.route('/messages')
         }
     });
 
-router.get('/messages/:id', isLoggedIn, async function(req, res, next) {
+/**
+ * GET message by id
+ */
+router.get('/messages/:id', isLoggedIn, async (req, res, next) => {
       nconf.load();
 
       const pdwMode = nconf.get('messages:pdwMode');
@@ -341,8 +390,10 @@ router.get('/messages/:id', isLoggedIn, async function(req, res, next) {
       console.timeEnd('send');
 });
 
-/* GET message search */
-router.get('/messageSearch', isLoggedIn, async function(req, res, next) {
+/**
+ * GET message search
+ * */
+router.get('/messageSearch', isLoggedIn, async (req, res, next) => {
     nconf.load();
     console.time('init');
     const dbtype = nconf.get('database:type');
@@ -408,15 +459,16 @@ router.get('/messageSearch', isLoggedIn, async function(req, res, next) {
     console.timeEnd('send');
 });
 
+
 ///////////////////
 //               //
-// GET capcodes  //
+// Capcodes      //
 //               //
 ///////////////////
 
 
 // capcodes aren't pagified at the moment, this should probably be removed
-router.get('/capcodes/init', isLoggedIn, function(req, res, next) {
+router.get('/capcodes/init', isLoggedIn, (req, res, next) => {
   //set current page if specifed as get variable (eg: /?page=2)
   if (typeof req.query.page !== 'undefined') {
       const page = parseInt(req.query.page, 10);
@@ -444,17 +496,20 @@ router.get('/capcodes/init', isLoggedIn, function(req, res, next) {
 
 // all capcode get methods are only used in admin area, so lock down to logged in users as they may contain sensitive data
 
+/**
+ * GET Capcodes listing
+ * POST Capcode
+ */
 router.route('/capcodes')
-    .get(isLoggedIn, async function (req, res, next) {
-    try {
-        const result = await Alias.query().orderByRaw("REPLACE(address, '_', '%')");
-        res.status(200).send(result);
-    }
-    catch (err) {
-        res.status(500).send(err)
-    }
+    .get(async (req, res, next) => {
+        try {
+            const result = await Alias.query().orderByRaw("REPLACE(address, '_', '%')");
+            res.status(200).send(result);
+        } catch (err) {
+            res.status(500).send(err)
+        }
     })
-    .post(isLoggedIn, async function (req, res, next) {
+    .post(async (req, res, next) => {
         nconf.load();
         const updateRequired = nconf.get('database:aliasRefreshRequired');
 
@@ -504,7 +559,10 @@ router.route('/capcodes')
         }
     });
 
-router.get('/capcodes/agency', isLoggedIn, async function(req, res, next) {
+/**
+ * GET Agency listing
+ */
+router.get('/capcodes/agency', isLoggedIn, async (req, res, next) => {
     try {
         const result = await Alias.query().distinct('agency');
         res.status(200).send(result);
@@ -514,7 +572,10 @@ router.get('/capcodes/agency', isLoggedIn, async function(req, res, next) {
     }
 });
 
-router.get('/capcodes/alias', isLoggedIn, async function(req, res, next) {
+/**
+ * GET Alias listing
+ */
+router.get('/capcodes/alias', isLoggedIn, async (req, res, next) => {
     try {
         const result = await Alias.query().distinct('alias');
         res.status(200).send(result);
@@ -524,33 +585,36 @@ router.get('/capcodes/alias', isLoggedIn, async function(req, res, next) {
     }
 });
 
+/**
+ * GET Capcode by ID
+ * POST Capcode by ID
+ * DELETE Capcode by ID
+ */
 router.route('/capcodes/:id')
-    .get(isLoggedIn, async function (req, res, next) {
-    const id = req.params.id;
+    .get(async (req, res, next) => {
+        const id = req.params.id;
 
-    try {
-        let result = await Alias.query().findById(id);
-        if (result === undefined)
-        {
-            result = {
-                id: "",
-                address: "",
-                alias: "",
-                agency: "",
-                icon: "question",
-                color: "black",
-                ignore: 0,
-                pluginconf: {}
+        try {
+            let result = await Alias.query().findById(id);
+            if (result === undefined) {
+                result = {
+                    id: "",
+                    address: "",
+                    alias: "",
+                    agency: "",
+                    icon: "question",
+                    color: "black",
+                    ignore: 0,
+                    pluginconf: {}
+                }
             }
-        }
 
-        res.status(200).send(result);
-    }
-   catch(err) {
-       res.status(500).send(err);
-    }
+            res.status(200).send(result);
+        } catch(err) {
+            res.status(500).send(err);
+        }
     })
-    .post(isLoggedIn, async function (req, res, next) {
+    .post(async (req, res, next) => {
         let id = req.params.id || req.body.id || null;
         nconf.load();
         const updateRequired = nconf.get('database:aliasRefreshRequired');
@@ -625,7 +689,7 @@ router.route('/capcodes/:id')
             res.status(500).json({message: err}).send();
         }
     })
-    .delete(isLoggedIn, async function (req, res, next) {
+    .delete(async (req, res, next) => {
         // delete single alias
         const id = parseInt(req.params.id, 10);
         nconf.load();
@@ -652,7 +716,10 @@ router.route('/capcodes/:id')
         logger.main.debug(util.format('%o', req.body || 'request body empty'));
     });
 
-router.get('/capcodeCheck/:id', isLoggedIn, async function(req, res, next) {
+/**
+ * GET CapcodeCheck
+ */
+router.get('/capcodeCheck/:id', isLoggedIn, async (req, res, next) => {
     const id = req.params.id;
      try {
          let result = await Alias.query().findOne('address',id);
@@ -673,13 +740,13 @@ router.get('/capcodeCheck/:id', isLoggedIn, async function(req, res, next) {
     }
 });
 
-router.get('/capcodes/agency/:id', isLoggedIn, async function(req, res, next) {
-    const id = req.params.id;
-
+/**
+ * GET Agency by Name
+ */
+router.get('/capcodes/agency/:agency', isLoggedIn, async (req, res, next) => {
     try {
         const result = await Alias.query()
-            .where('agency','like',id);
-        res.status(200).send(result);
+            .where('agency', 'like', req.params.agency)
     }
     catch(err)
     {
@@ -687,8 +754,10 @@ router.get('/capcodes/agency/:id', isLoggedIn, async function(req, res, next) {
     }
 });
 
-
-router.post('/capcodeRefresh', isLoggedIn, async function (req, res, next) {
+/**
+ * POST CapcodeRefresh
+ */
+router.post('/capcodeRefresh', isLoggedIn, async (req, res, next) => {
     nconf.load();
     try {
         console.time('db');
@@ -719,40 +788,6 @@ router.use([handleError]);
 module.exports = router;
 
 // route middleware to make sure a user is logged in
-function isLoggedIn(req, res, next) {
-    if (req.method === 'GET') {
-        if (apiSecurity || ((req.url.match(/capcodes/i) || req.url.match(/capcodeCheck/i)) && !(req.url.match(/agency$/)))) { //check if Secure mode is on, or if the route is a capcode route
-            if (req.isAuthenticated()) {
-                // if user is authenticated in the session, carry on
-                return next();
-            } else {
-                //logger.main.debug('Basic auth failed, attempting API auth');
-                passport.authenticate('localapikey', {session: false, failWithError: true})(req, res, next),
-                    function (next) {
-                        next();
-                    },
-                    function (res) {
-                        return res.status(401).json({error: 'Authentication failed.'});
-                    }
-            }
-        } else {
-            return next();
-        }
-    } else if (req.method === 'POST') { //Check if user is authenticated for POST methods
-        if (req.isAuthenticated()) {
-            return next();
-        } else {
-            passport.authenticate('localapikey', {session: false, failWithError: true})(req, res, next),
-                function (next) {
-                    next();
-                },
-                function (res) {
-                    return res.status(401).json({error: 'Authentication failed.'});
-                }
-        }
-    }
-}
-
 function handleError(err, req, res, next) {
     const output = {
         error: {
