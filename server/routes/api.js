@@ -909,13 +909,3 @@ function handleError(err,req,res,next){
   var statusCode = err.status || 500;
   res.status(statusCode).json(output);
 }
-
-function parseJSON(json) {
-  var parsed;
-  try {
-    parsed = JSON.parse(json)
-  } catch (e) {
-    // ignore errors
-  }
-  return parsed;
-}
