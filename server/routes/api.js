@@ -503,37 +503,37 @@ function inParam (sql, arr) {
 
 // route middleware to make sure a user is logged in
 function isLoggedIn(req, res, next) {
-  if (req.method == 'GET') {
-    if (apiSecurity || ((req.url.match(/capcodes/i) || req.url.match(/capcodeCheck/i)) && !(req.url.match(/agency$/))) ) { //check if Secure mode is on, or if the route is a capcode route
-      if (req.isAuthenticated()) {
-        // if user is authenticated in the session, carry on
-        return next();
-      } else {
-        //logger.main.debug('Basic auth failed, attempting API auth');
-        passport.authenticate('localapikey', { session: false, failWithError: true })(req, res, next),
-          function (next) {
-            next();
-          },
-          function (res) {
-            return res.status(401).json({ error: 'Authentication failed.' });
-          }
+    if (req.method === 'GET') {
+        if (apiSecurity || ((req.url.match(/capcodes/i) || req.url.match(/capcodeCheck/i)) && !(req.url.match(/agency$/)))) { //check if Secure mode is on, or if the route is a capcode route
+            if (req.isAuthenticated()) {
+                // if user is authenticated in the session, carry on
+                return next();
+            } else {
+                //logger.main.debug('Basic auth failed, attempting API auth');
+                passport.authenticate('localapikey', {session: false, failWithError: true})(req, res, next),
+                    function (next) {
+                        next();
+                    },
+                    function (res) {
+                        return res.status(401).json({error: 'Authentication failed.'});
+                    }
+            }
+        } else {
+            return next();
         }
-    } else {
-      return next();
-    }
-  } else if (req.method == 'POST') { //Check if user is authenticated for POST methods
-    if (req.isAuthenticated()) {
-      return next();
-    } else {
-      passport.authenticate('localapikey', { session: false, failWithError: true }) (req,res,next),
-        function (next) {
-          next();
-        },
-        function (res) {
-          return res.status(401).json({ error: 'Authentication failed.' });
+    } else if (req.method === 'POST') { //Check if user is authenticated for POST methods
+        if (req.isAuthenticated()) {
+            return next();
+        } else {
+            passport.authenticate('localapikey', {session: false, failWithError: true})(req, res, next),
+                function (next) {
+                    next();
+                },
+                function (res) {
+                    return res.status(401).json({error: 'Authentication failed.'});
+                }
         }
     }
-  }
 }
 
 function handleError(err, req, res, next) {
