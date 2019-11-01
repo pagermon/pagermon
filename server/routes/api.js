@@ -526,7 +526,7 @@ router.get('/messageSearch', isLoggedIn, async function(req, res, next) {
 router.get('/capcodes/init', isLoggedIn, function(req, res, next) {
   //set current page if specifed as get variable (eg: /?page=2)
   if (typeof req.query.page !== 'undefined') {
-    var page = parseInt(req.query.page, 10);
+      const page = parseInt(req.query.page, 10);
     if (page > 0)
       initData.currentPage = page - 1;
   }
@@ -542,7 +542,7 @@ router.get('/capcodes/init', isLoggedIn, function(req, res, next) {
       if (initData.offset < 0) {
         initData.offset = 0;
       }
-      res.json(initData);
+        res.send(initData);
     })
     .catch((err) => {
       logger.main.error(err);
@@ -551,68 +551,213 @@ router.get('/capcodes/init', isLoggedIn, function(req, res, next) {
 
 // all capcode get methods are only used in admin area, so lock down to logged in users as they may contain sensitive data
 
-router.get('/capcodes', isLoggedIn, async function(req, res, next) {
+router.route('/capcodes')
+    .get(isLoggedIn, async function (req, res, next) {
     try {
         const result = await Alias.query().orderByRaw("REPLACE(address, '_', '%')");
-        res.status(200);
-        res.json(result);
+        res.status(200).send(result);
     }
     catch (err) {
-        res.status(500);
-        res.send(err)
+        res.status(500).send(err)
     }
-});
+    })
+    .post(isLoggedIn, async function (req, res, next) {
+        nconf.load();
+        const updateRequired = nconf.get('database:aliasRefreshRequired');
+
+        if (req.body.address && req.body.alias) {
+            const id = req.body.id || null;
+            const address = req.body.address || 0;
+            const alias = req.body.alias || 'null';
+            const agency = req.body.agency || 'null';
+            const color = req.body.color || 'black';
+            const icon = req.body.icon || 'question';
+            const ignore = req.body.ignore || 0;
+            const pluginconf = JSON.stringify(req.body.pluginconf) || "{}";
+
+            const data = {
+                id: id,
+                address: address,
+                alias: alias,
+                agency: agency,
+                color: color,
+                icon: icon,
+                ignore: ignore,
+                pluginconf: pluginconf
+            };
+
+            try {
+                const result = await Alias.query()
+                    .findById(data.id)
+                    .modify(builder => {
+                        if (data.id == null)
+                            builder.insert(data);
+                        else
+                            builder.update(data);
+                    });
+
+                res.status(200).send(result);
+                if (!updateRequired || updateRequired === 0) {
+                    nconf.set('database:aliasRefreshRequired', 1);
+                    nconf.save();
+                }
+            } catch (err) {
+                logger.main.error(err);
+                res.status(500).send(err);
+            }
+            logger.main.debug(util.format('%o', req.body || 'no request body'));
+        } else {
+            res.status(500).json({message: 'Error - address or alias missing'});
+        }
+    });
 
 router.get('/capcodes/agency', isLoggedIn, async function(req, res, next) {
     try {
         const result = await Alias.query().distinct('agency');
-        res.status(200);
-        res.json(result);
+        res.status(200).send(result);
     }
     catch (err) {
-        res.status(500);
-        res.send(err);
+        res.status(500).send(err);
     }
 });
 
 router.get('/capcodes/alias', isLoggedIn, async function(req, res, next) {
     try {
         const result = await Alias.query().distinct('alias');
-        res.status(200);
-        res.json(result);
+        res.status(200).send(result);
     }
     catch(err) {
-        res.status(500);
-        res.send(err);
+        res.status(500).send(err);
     }
 });
 
-
-router.get('/capcodes/:id', isLoggedIn, async function(req, res, next) {
+router.route('/capcodes/:id')
+    .get(isLoggedIn, async function (req, res, next) {
     const id = req.params.id;
 
     try {
         let result = await Alias.query().findById(id);
         if (result === undefined)
         {
-            result = {"id": "",
-                "address": "",
-                "alias": "",
-                "agency": "",
-                "icon": "question",
-                "color": "black",
-                "ignore": 0,
-                "pluginconf": {}}
+            result = {
+                id: "",
+                address: "",
+                alias: "",
+                agency: "",
+                icon: "question",
+                color: "black",
+                ignore: 0,
+                pluginconf: {}
+            }
         }
 
-        res.status(200);
-        res.json(result);
+        res.status(200).send(result);
     }
    catch(err) {
-        res.status(500);
-        res.send(err);
+       res.status(500).send(err);
     }
-});
+    })
+    .post(isLoggedIn, async function (req, res, next) {
+        let id = req.params.id || req.body.id || null;
+        nconf.load();
+        const updateRequired = nconf.get('database:aliasRefreshRequired');
+        let result;
+        try {
+            if (id === 'deleteMultiple') {
+                // do delete multiple
+                const idList = req.body.deleteList || [0, 0];
+                if (!idList.some(isNaN)) {
+                    logger.main.info('Deleting: ' + idList);
+
+                    result = await Alias.query()
+                        .delete()
+                        .where('id', 'in', idList);
+                } else
+                    res.status(500).json({message: 'ID list contained non-numbers'}).send();
+            } else {
+                if (req.body.address && req.body.alias) {
+                    if (id === 'new') {
+                        id = null;
+                    }
+
+                    let insert;
+                    insert.address = req.body.address || 0;
+                    insert.alias = req.body.alias || 'null';
+                    insert.agency = req.body.agency || 'null';
+                    insert.color = req.body.color || 'black';
+                    insert.icon = req.body.icon || 'question';
+                    insert.ignore = req.body.ignore || 0;
+                    insert.pluginconf = req.body.pluginconf || {};
+                    const updateAlias = req.body.updateAlias || 0;
+
+                    console.time('db');
+
+                    result = Alias.query()
+                        .findById(id)
+                        .modify(builder => {
+                            if (id == null)
+                                builder.insert(insert);
+                            else
+                                builder.patch(insert);
+                        });
+                    console.timeEnd('db');
+
+                    if (updateAlias) {
+                        console.time('updateMap');
+                        await Message.query()
+                            .patch('alias_id', function () {
+                                Alias.query()
+                                    .select('id')
+                                    .where('messages.address', 'like', 'address')
+                                    .orderByRaw("REPLACE(address, '_', '%') DESC LIMIT 1")
+                            });
+                        console.timeEnd('updateMap');
+                    } else if (!updateRequired || updateRequired === 0) {
+                        nconf.set('database:aliasRefreshRequired', 1);
+                        nconf.save();
+                    }
+                    logger.main.debug(util.format('%o', req.body || 'request body empty'));
+                } else
+                    res.status(500).json({message: 'Address or Alias missing'}).send();
+            }
+
+            console.time('send');
+            res.status(200).send({'status': 'ok'});
+            console.timeEnd('send');
+            if (!updateRequired || updateRequired === 0) {
+                nconf.set('database:aliasRefreshRequired', 1);
+                nconf.save();
+            }
+        } catch (err) {
+            res.status(500).json({message: err}).send();
+        }
+    })
+    .delete(isLoggedIn, async function (req, res, next) {
+        // delete single alias
+        const id = parseInt(req.params.id, 10);
+        nconf.load();
+        const updateRequired = nconf.get('database:aliasRefreshRequired');
+        logger.main.info('Deleting ' + id);
+
+        try {
+            console.time('delete');
+            await Alias.query()
+                .delete()
+                .findById(id);
+            console.timeEnd('delete');
+
+            console.time('send');
+            res.status(200).send({'status': 'ok'});
+            if (!updateRequired || updateRequired === 0) {
+                nconf.set('database:aliasRefreshRequired', 1);
+                nconf.save();
+            }
+            console.timeEnd('send');
+        } catch (err) {
+            res.status(500).send(err);
+        }
+        logger.main.debug(util.format('%o', req.body || 'request body empty'));
+    });
 
 router.get('/capcodeCheck/:id', isLoggedIn, async function(req, res, next) {
     const id = req.params.id;
@@ -679,10 +824,6 @@ router.post('/capcodeRefresh', isLoggedIn, async function (req, res, next) {
 router.use([handleError]);
 
 module.exports = router;
-
-function inParam (sql, arr) {
-  return sql.replace('?#', arr.map(()=> '?' ).join(','));
-}
 
 // route middleware to make sure a user is logged in
 function isLoggedIn(req, res, next) {
