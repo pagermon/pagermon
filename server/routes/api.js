@@ -359,7 +359,7 @@ router.route('/messages')
 /**
  * GET message by id
  */
-router.get('/messages/:id', isLoggedIn, async (req, res, next) => {
+router.get('/messages/:id', async (req, res, next) => {
       nconf.load();
 
       const pdwMode = nconf.get('messages:pdwMode');
@@ -388,7 +388,7 @@ router.get('/messages/:id', isLoggedIn, async (req, res, next) => {
 /**
  * GET message search
  * */
-router.get('/messageSearch', isLoggedIn, async (req, res, next) => {
+router.get('/messageSearch', async (req, res, next) => {
     nconf.load();
     console.time('init');
     const dbtype = nconf.get('database:type');
@@ -463,7 +463,7 @@ router.get('/messageSearch', isLoggedIn, async (req, res, next) => {
 
 
 // capcodes aren't pagified at the moment, this should probably be removed
-router.get('/capcodes/init', isLoggedIn, (req, res, next) => {
+router.get('/capcodes/init', (req, res, next) => {
   //set current page if specifed as get variable (eg: /?page=2)
   if (typeof req.query.page !== 'undefined') {
       const page = parseInt(req.query.page, 10);
@@ -557,7 +557,7 @@ router.route('/capcodes')
 /**
  * GET Agency listing
  */
-router.get('/capcodes/agency', isLoggedIn, async (req, res, next) => {
+router.get('/capcodes/agency', async (req, res, next) => {
     try {
         const result = await Alias.query().distinct('agency');
         res.status(200).send(result);
@@ -570,7 +570,7 @@ router.get('/capcodes/agency', isLoggedIn, async (req, res, next) => {
 /**
  * GET Alias listing
  */
-router.get('/capcodes/alias', isLoggedIn, async (req, res, next) => {
+router.get('/capcodes/alias', async (req, res, next) => {
     try {
         const result = await Alias.query().distinct('alias');
         res.status(200).send(result);
@@ -714,7 +714,7 @@ router.route('/capcodes/:id')
 /**
  * GET CapcodeCheck
  */
-router.get('/capcodeCheck/:id', isLoggedIn, async (req, res, next) => {
+router.get('/capcodeCheck/:id', async (req, res, next) => {
     const id = req.params.id;
      try {
          let result = await Alias.query().findOne('address',id);
@@ -738,7 +738,7 @@ router.get('/capcodeCheck/:id', isLoggedIn, async (req, res, next) => {
 /**
  * GET Agency by Name
  */
-router.get('/capcodes/agency/:agency', isLoggedIn, async (req, res, next) => {
+router.get('/capcodes/agency/:agency', async (req, res, next) => {
     try {
         const result = await Alias.query()
             .where('agency', 'like', req.params.agency)
@@ -752,7 +752,7 @@ router.get('/capcodes/agency/:agency', isLoggedIn, async (req, res, next) => {
 /**
  * POST CapcodeRefresh
  */
-router.post('/capcodeRefresh', isLoggedIn, async (req, res, next) => {
+router.post('/capcodeRefresh', async (req, res, next) => {
     nconf.load();
     try {
         console.time('db');
