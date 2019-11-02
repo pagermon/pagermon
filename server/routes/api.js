@@ -17,16 +17,17 @@ const conf_file = './config/config.json';
 nconf.file({file: conf_file});
 nconf.load();
 
+/*
+ * MIDDLEWARE IMPORT
+ */
 router.use(bodyParser.json());       // to support JSON-encoded bodies
 router.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: true
 }));
-
 router.use(function (req, res, next) {
   res.locals.login = req.isAuthenticated();
   next();
 });
-
 router.use(isLoggedIn);
 
 // defaults
