@@ -30,14 +30,15 @@ class Alias extends Model {
     static get modifiers() {
         return {
             messageView(builder) {
-                builder.column('alias',
+                builder
+                    .where({ignore: 0})
+                    .column(['alias',
                     'agency',
                     'icon',
                     'color',
                     'ignore',
-                    'pluginconf',
-                    {aliasMatch: 'id'}
-                ).omit(Alias,['id']);
+                        {aliasMatch: 'id'}])
+                    .omit(Alias, ['id']);
             }
         };
     }
