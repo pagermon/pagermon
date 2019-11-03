@@ -423,7 +423,12 @@ router.get('/messageSearch', async (req, res, next) => {
         .where('address', 'LIKE' ,req.query.address).orWhere('source','LIKE',req.query.address)
         .modify(
             builder => {
-                if (req.query.q) builder.whereRaw('MATCH(message, address, source) AGAINST (? IN BOOLEAN MODE)',[req.query.q])
+                if (req.query.q) {
+                    if (dbtype === 'mysql') builder.whereRaw('MATCH(message, address, source) AGAINST (? IN BOOLEAN MODE)', [req.query.q]);
+                    else if (dbtype === 'sqlite') {
+                        builder.rightJoin('message_search_index', 'message_search_index.rowid', 'messages.id').whereRaw('message_search_index MATCH ?', [req.query.q]);
+                    }
+                }
             }
         )
         .modify(builder => {
