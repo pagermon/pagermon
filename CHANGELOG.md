@@ -1,6 +1,9 @@
 ﻿# 0.3.6 - Unreleased
 
-* Add Generic Webhook plugin @stubbers
+* Add Generic Webhook plugin #325 @stubbers
+* Cleanup legacy DB code, add more logging to Knex #335 @DanrwAU
+* GA De-Dupe - Resolved Dupe GA Hits. @marshyonline
+
 
 # 0.3.5 - 2019-09-06
 
