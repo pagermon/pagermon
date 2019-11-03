@@ -1,5 +1,6 @@
-# 0.3.6  - unreleased
+# 0.3.6 - Unreleased
 
+* Cleanup legacy DB code, add more logging to Knex #335 @DanrwAU
 * GA De-Dupe - Resolved Dupe GA Hits. @marshyonline
 
 
