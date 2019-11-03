@@ -5,14 +5,14 @@ var logger = require('../log');
 
 function run(trigger, scope, data, config, callback) {
 
-  if(data.pluginconf.Shell && data.pluginconf.Shell.enable){
-    
+    if (data.alias.pluginconf.Shell && data.alias.pluginconf.Shell.enable) {
+
     var file_name = data.alias_id;
 
     // Override ID if needed
-    if(data.pluginconf.Shell.overrideAlias > 0){
+        if (data.alias.pluginconf.Shell.overrideAlias > 0) {
       logger.main.debug('Override filename');
-      var file_name = data.pluginconf.Shell.overrideAlias;
+            var file_name = data.alias.pluginconf.Shell.overrideAlias;
     }
 
     if(process.platform === "win32"){
@@ -27,7 +27,7 @@ function run(trigger, scope, data, config, callback) {
 
     // Check file exist
     if(fs.existsSync(file_path+full_file_name)){
-        logger.main.info('Exec shell command for selected alias')
+        logger.main.info('Exec shell command for selected alias');
 
         if(process.platform === "win32"){
           var child = spawn("powershell.exe", [file_path+full_file_name, '"'+data.address+'"', "@'\r\n"+data.message+"\r\n'@", "@'\r\n"+JSON.stringify(data)+"\r\n'@"]); //
@@ -54,4 +54,4 @@ function run(trigger, scope, data, config, callback) {
 
 module.exports = {
     run: run
-}
+};

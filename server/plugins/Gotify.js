@@ -3,7 +3,7 @@ var https = require('https');
 var logger = require('../log');
 
 function run(trigger, scope, data, config, callback) {
-    let pConf = data.pluginconf.Gotify;
+    let pConf = data.alias.pluginconf.Gotify;
     if (pConf && pConf.enable) {
 
         let port = 80; // default
@@ -18,7 +18,7 @@ function run(trigger, scope, data, config, callback) {
 
         // POST data
         const dat = JSON.stringify({
-            title: data.agency+' - '+data.alias,
+            title: data.alias.agency + ' - ' + data.alias.alias,
             message: data.message,
             priority: priority
         });
@@ -76,4 +76,4 @@ function run(trigger, scope, data, config, callback) {
 
 module.exports = {
     run: run
-}
+};

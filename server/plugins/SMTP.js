@@ -2,7 +2,7 @@ const nodemailer = require('nodemailer');
 var logger = require('../log');
 
 function run(trigger, scope, data, config, callback) {
-    var sConf = data.pluginconf.SMTP;
+    var sConf = data.alias.pluginconf.SMTP;
     if (sConf && sConf.enable) {
         let smtpConfig = {
             host: config.server,
@@ -17,12 +17,12 @@ function run(trigger, scope, data, config, callback) {
               rejectUnauthorized: false
             }
         };
-        let transporter = nodemailer.createTransport(smtpConfig,[])
+        let transporter = nodemailer.createTransport(smtpConfig, []);
 
         let mailOptions = {
           from: `"${config.mailFromName}" <${config.mailFrom}>`, // sender address
           to: sConf.mailto, // list of receivers
-          subject: data.agency+' - '+data.alias, // Subject line
+            subject: data.alias.agency + ' - ' + data.alias.alias, // Subject line
           text: data.message, // plain text body
           html: '<b>'+data.message+'</b>' // html body
         };
@@ -44,4 +44,4 @@ function run(trigger, scope, data, config, callback) {
 
 module.exports = {
     run: run
-}
+};

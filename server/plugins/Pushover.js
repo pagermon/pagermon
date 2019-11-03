@@ -2,7 +2,7 @@ var push = require('pushover-notifications');
 var logger = require('../log');
 
 function run(trigger, scope, data, config, callback) {
-    var pConf = data.pluginconf.Pushover;
+  var pConf = data.alias.pluginconf.Pushover;
     if (pConf && pConf.enable) {
         //ensure key has been entered before trying to push
         if (pConf.group == 0 || pConf.group == '0' || !pConf.group) {
@@ -23,10 +23,10 @@ function run(trigger, scope, data, config, callback) {
             if (pConf.priority) {
               pushPri = pConf.priority.value;
             }
-            
+
             var msg = {
               message: data.message,
-              title: data.agency+' - '+data.alias,
+              title: data.alias.agency + ' - ' + data.alias.alias,
               sound: pushSound,
               priority: pushPri,
               onerror: function(err) {
@@ -55,4 +55,4 @@ function run(trigger, scope, data, config, callback) {
 
 module.exports = {
     run: run
-}
+};

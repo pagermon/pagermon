@@ -2,7 +2,7 @@ var twit = require('twit');
 var logger = require('../log');
 
 function run(trigger, scope, data, config, callback) {
-    var tConf = data.pluginconf.Twitter;
+    var tConf = data.alias.pluginconf.Twitter;
     if (tConf && tConf.enable) {
         if ((config.consKey == 0 || !config.consKey) || (config.consSecret == 0 || !config.consSecret) || (config.accToken == 0 || !config.accToken) || (config.accSecret == 0 || !config.accSecret)) {
             logger.main.error('Twitter: ' + data.address + ' No API keys set. Please check API keys.');
@@ -14,8 +14,8 @@ function run(trigger, scope, data, config, callback) {
                 access_token: config.accToken,
                 access_token_secret: config.accSecret,
               });
-              
-              var twittertext = `${data.agency} - ${data.alias} \n` +
+
+            var twittertext = `${data.alias.agency} - ${data.alias.alias} \n` +
                 `${data.message} \n` +
                 `${tConf.hashtag} ${config.globalHashtags}`;
               // TODO: this should limit chars of twittertext
@@ -33,4 +33,4 @@ function run(trigger, scope, data, config, callback) {
 
 module.exports = {
     run: run
-}
+};

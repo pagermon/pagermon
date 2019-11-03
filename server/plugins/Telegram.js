@@ -3,7 +3,7 @@ var util = require('util');
 var logger = require('../log');
 
 function run(trigger, scope, data, config, callback) {
-    var tConf = data.pluginconf.Telegram;
+    var tConf = data.alias.pluginconf.Telegram;
     if (tConf && tConf.enable) {
         var telekey = config.teleAPIKEY;
         var t = new telegram({
@@ -14,9 +14,9 @@ function run(trigger, scope, data, config, callback) {
             callback();
         } else {
             //Notification formatted in Markdown for pretty notifications
-            var notificationText = `*${data.agency} - ${data.alias}*\n` + 
+            var notificationText = `*${data.alias.agency} - ${data.alias.alias}*\n` +
                                     `Message: ${data.message}`;
-            
+
             t.sendMessage({
                 chat_id: tConf.chat,
                 text: notificationText,
@@ -36,4 +36,4 @@ function run(trigger, scope, data, config, callback) {
 
 module.exports = {
     run: run
-}
+};

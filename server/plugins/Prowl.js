@@ -2,7 +2,7 @@ var Prowl = require('node-prowl');
 var logger = require('../log');
 
 function run(trigger, scope, data, config, callback) {
-    var pConf = data.pluginconf.Prowl;
+    var pConf = data.alias.pluginconf.Prowl;
     if (pConf && pConf.enable) {
         //ensure key has been entered before trying to push
         if (pConf.group == 0 || pConf.group == '0' || !pConf.group) {
@@ -12,7 +12,7 @@ function run(trigger, scope, data, config, callback) {
             var prowl =  new Prowl(pConf.group);
 
             var payload = {};
-            
+
             if (pConf.url) {
               payload.url = pConf.url;
             }
@@ -25,7 +25,7 @@ function run(trigger, scope, data, config, callback) {
               payload.providerkey = pConf.providerkey;
             }
 
-            var event = data.agency+' - '+data.alias;
+            var event = data.alias.agency + ' - ' + data.alias.alias;
             payload.description = data.message + ' \nTime: '+ new Date().toLocaleString();
 
             if (pConf.priority == 2 || pConf.priority == '2') {
