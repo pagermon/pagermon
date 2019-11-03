@@ -134,18 +134,27 @@ router.route('/messages')
 
     const query = Message.query()
         .page(initData.currentPage, initData.limit)
+        .modify('defaultSort')
+        .joinEager('alias(messageView)')
         .modify(builder => {
             //Select join method and filtering according to pdwMode setting
-            if (pdwMode && (!adminShow && !req.isAuthenticated()))
-                builder.applyFilter(['messageViewInner']).where({ignore: '0'}).whereNotNull('alias.id');
+            if (!pdwMode || (adminShow && req.isAuthenticated()))
+                builder
+                    .eagerOptions({joinOperation: 'leftJoin'})
+                    .modifyEager('alias', builder => {
+                        builder.orWhereNull('ignore')
+                    });
             else
-                builder.applyFilter(['messageViewLeft']).where({ignore: '0'}).orWhereNull('alias.ignore');
+                builder
+                    .eagerOptions({joinOperation: 'innerJoin'});
 
             //Hide capcode if hideCapcode enabled and not logged in.
-            if (HideCapcode && !req.isAuthenticated)
+            if (HideCapcode && !req.isAuthenticated()) {
+                logger.main.debug('HideCap && !isAuth');
                 builder.omit(Message,['address'])
-        });
+            }
 
+        });
     let queryResult = await query.catch(err => {logger.main.error(err);});
 
     //Check if the requested page contains messages. If not, try page 0. If this also has no messages, send empty result
@@ -156,6 +165,7 @@ router.route('/messages')
             res.status(200).json({'init': {}, 'messages': []});
     }
 
+        initData.msgCount = queryResult.total;
     //Calculate initData for the result and correct presentation on clients.
     //initData.msgCount = queryResult.total;
     initData.pageCount = Math.ceil(initData.msgCount / initData.limit);
@@ -172,6 +182,7 @@ router.route('/messages')
     })
     .post(async (req, res, next) => {
         nconf.load();
+        logger.main.debug(util.format(req.body));
         try {
             if (req.body.address && req.body.message) {
                 const filterDupes = nconf.get('messages:duplicateFiltering');
@@ -288,19 +299,11 @@ router.route('/messages')
 
                         const result = await Message.query()
                             .findById(insert.id)
-                            .columns(['messages.*', 'alias.*'])
-                            .joinRelation('alias')
+                            .eager('alias')
                             .modify(builder => {
                                 if (HideCapcode && !req.isAuthenticated())
                                     builder.omit(Message, ['address']);
                             });
-
-                        /*
-                         * TODO: This is needed due to a bug in Objection.js
-                         * In future, the former call shall be made with .joinEager instead of .joinRelation,
-                         * if joinRelation would parse JSON as joinEager does.
-                         */
-                        result.pluginconf = JSON.parse(result.pluginconf);
 
                         result.pluginData = data.pluginData;
                         logger.main.debug('afterMessage start');
@@ -332,18 +335,18 @@ router.route('/messages')
                         } else {
                             if (pdwMode && insert.aliasMatch == null) {
                                 if (adminShow) {
-                                    req.io.of('adminio').emit('messagePost', insert);
+                                    req.io.of('adminio').emit('messagePost', result);
                                 } else {
                                     //do nothing
                                 }
                             } else {
                                 //Just emit - No Security enabled
-                                req.io.of('adminio').emit('messagePost', insert);
-                                req.io.emit('messagePost', insert);
+                                req.io.of('adminio').emit('messagePost', result);
+                                req.io.emit('messagePost', result);
                             }
                         }
 
-                        res.status(200).send(insert);
+                        res.status(200).send(result);
                     } else {
                         res.status(200).send('Ignoring filtered alias');
                     }
@@ -353,6 +356,7 @@ router.route('/messages')
                 res.status(500).json({message: 'Error - address or message missing'});
             }
         } catch (err) {
+            logger.main.error(util.format('%o', err));
             res.status(500).send(err);
         }
     });
@@ -368,7 +372,8 @@ router.get('/messages/:id', async (req, res, next) => {
       console.time('sql');
       const queryResult = await Message.query()
           .findById(req.params.id)
-          .modify('messageViewLeft')
+          .eager('alias(messageView)')
+          .modify('defaultSort')
           .modify(builder => {
               if (HideCapcode && !req.isAuthenticated())
                   builder.omit(Message, ['address']);
@@ -419,25 +424,27 @@ router.get('/messageSearch', async (req, res, next) => {
 
     const queryResult = await Message.query()
         .skipUndefined()
-        .where('alias.agency', 'LIKE' ,req.query.agency).andWhere('alias.ignore','0')
-        .where('address', 'LIKE' ,req.query.address).orWhere('source','LIKE',req.query.address)
-        .modify(
-            builder => {
-                if (req.query.q) {
-                    if (dbtype === 'mysql') builder.whereRaw('MATCH(message, address, source) AGAINST (? IN BOOLEAN MODE)', [req.query.q]);
-                    else if (dbtype === 'sqlite') {
-                        builder.rightJoin('message_search_index', 'message_search_index.rowid', 'messages.id').whereRaw('message_search_index MATCH ?', [req.query.q]);
-                    }
+        .modify('defaultSort')
+        .joinEager('alias(messageView)')
+        .modify(builder => {
+            builder
+                .where('alias.agency', 'LIKE', req.query.agency)
+                .where('alias.address', 'LIKE', req.query.address)
+                .where('alias.source', 'LIKE', req.query.address);
+
+            if (req.query.q) {
+                if (dbtype === 'mysql') builder.whereRaw('MATCH(message, address, source) AGAINST (? IN BOOLEAN MODE)', [req.query.q]);
+                else if (dbtype === 'sqlite3') {
+                    builder.join('messages_search_index', 'messages_search_index.rowid', 'messages.id').whereRaw('messages_search_index MATCH ?', [req.query.q]);
                 }
             }
-        )
-        .modify(builder => {
-            if (pdwMode && !adminShow && !req.isAuthenticated)
-                builder.applyFilter(['messageViewInner']);
+
+            if (!pdwMode || (adminShow && req.isAuthenticated()))
+                builder.eagerOptions({joinOperator: 'left'});
             else
-                builder.applyFilter(['messageViewLeft']);
+                builder.eagerOptions({joinOperator: 'inner'});
             if (hideCapcode && !req.isAuthenticated())
-                builder.omit(Message, ['address']);
+                builder.omit(['address']);
         })
         .page(initData.currentPage, initData.limit);
 
@@ -504,7 +511,8 @@ router.get('/capcodes/init', (req, res, next) => {
 router.route('/capcodes')
     .get(async (req, res, next) => {
         try {
-            const result = await Alias.query().orderByRaw("REPLACE(address, '_', '%')");
+            const result = await Alias.query()
+                .orderByRaw("REPLACE(address, '_', '%')");
             res.status(200).send(result);
         } catch (err) {
             res.status(500).send(err)
@@ -515,24 +523,15 @@ router.route('/capcodes')
         const updateRequired = nconf.get('database:aliasRefreshRequired');
 
         if (req.body.address && req.body.alias) {
-            const id = req.body.id || null;
-            const address = req.body.address || 0;
-            const alias = req.body.alias || 'null';
-            const agency = req.body.agency || 'null';
-            const color = req.body.color || 'black';
-            const icon = req.body.icon || 'question';
-            const ignore = req.body.ignore || 0;
-            const pluginconf = JSON.stringify(req.body.pluginconf) || "{}";
-
             const data = {
-                id: id,
-                address: address,
-                alias: alias,
-                agency: agency,
-                color: color,
-                icon: icon,
-                ignore: ignore,
-                pluginconf: pluginconf
+                id: req.body.id || null,
+                address: req.body.address || 0,
+                alias: req.body.alias || 'null',
+                agency: req.body.agency || 'null',
+                color: req.body.color || 'black',
+                icon: req.body.icon || 'question',
+                ignore: req.body.ignore || 0,
+                pluginconf: req.body.pluginconf || {}
             };
 
             try {
@@ -556,7 +555,7 @@ router.route('/capcodes')
             }
             logger.main.debug(util.format('%o', req.body || 'no request body'));
         } else {
-            res.status(500).json({message: 'Error - address or alias missing'});
+            res.status(500).send('Error - address or alias missing');
         }
     });
 
@@ -565,7 +564,8 @@ router.route('/capcodes')
  */
 router.get('/capcodes/agency', async (req, res, next) => {
     try {
-        const result = await Alias.query().distinct('agency');
+        const result = await Alias.query()
+            .distinct('agency');
         res.status(200).send(result);
     }
     catch (err) {
@@ -578,7 +578,8 @@ router.get('/capcodes/agency', async (req, res, next) => {
  */
 router.get('/capcodes/alias', async (req, res, next) => {
     try {
-        const result = await Alias.query().distinct('alias');
+        const result = await Alias.query()
+            .distinct('alias');
         res.status(200).send(result);
     }
     catch(err) {
@@ -591,12 +592,11 @@ router.get('/capcodes/alias', async (req, res, next) => {
  * POST Capcode by ID
  * DELETE Capcode by ID
  */
-router.route('/capcodes/:id')
+router.route('/capcodes/:capcode')
     .get(async (req, res, next) => {
-        const id = req.params.id;
-
         try {
-            let result = await Alias.query().findById(id);
+            let result = await Alias.query()
+                .findById(req.params.capcode);
             if (result === undefined) {
                 result = {
                     id: "",
@@ -616,7 +616,8 @@ router.route('/capcodes/:id')
         }
     })
     .post(async (req, res, next) => {
-        let id = req.params.id || req.body.id || null;
+        let id = req.params.capcode || req.body.id || null;
+
         nconf.load();
         const updateRequired = nconf.get('database:aliasRefreshRequired');
         let result;
@@ -634,11 +635,11 @@ router.route('/capcodes/:id')
                     res.status(500).json({message: 'ID list contained non-numbers'}).send();
             } else {
                 if (req.body.address && req.body.alias) {
-                    if (id === 'new') {
+                    if (id === 'new' || !id) {
                         id = null;
                     }
 
-                    let insert;
+                    let insert = {};
                     insert.address = req.body.address || 0;
                     insert.alias = req.body.alias || 'null';
                     insert.agency = req.body.agency || 'null';
@@ -650,13 +651,12 @@ router.route('/capcodes/:id')
 
                     console.time('db');
 
-                    result = Alias.query()
-                        .findById(id)
+                    const result = await Alias.query()
                         .modify(builder => {
                             if (id == null)
                                 builder.insert(insert);
                             else
-                                builder.patch(insert);
+                                builder.findById(id).patch(insert);
                         });
                     console.timeEnd('db');
 
@@ -720,10 +720,9 @@ router.route('/capcodes/:id')
 /**
  * GET CapcodeCheck
  */
-router.get('/capcodeCheck/:id', async (req, res, next) => {
-    const id = req.params.id;
+router.get('/capcodeCheck/:address', async (req, res, next) => {
      try {
-         let result = await Alias.query().findOne('address',id);
+         let result = await Alias.query().findOne('address', req.params.address);
          if (result === undefined)
          {
              result = {"id": "",
