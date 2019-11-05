@@ -98,87 +98,91 @@ function isLoggedIn(req, res, next) {
  */
 router.route('/messages')
     .get(async (req, res, next) => {
-    console.time('init');
+        try {
+            console.time('init');
 
-    /*
-     * Getting configuration
-     */
-    nconf.load();
-    const pdwMode = nconf.get('messages:pdwMode');
-    const adminShow = nconf.get('messages:adminShow');
-    const maxLimit = nconf.get('messages:maxLimit');
-    const defaultLimit = nconf.get('messages:defaultLimit');
-    initData.replaceText = nconf.get('messages:replaceText');
+            /*
+             * Getting configuration
+             */
+            nconf.load();
+            const pdwMode = nconf.get('messages:pdwMode');
+            const adminShow = nconf.get('messages:adminShow');
+            const maxLimit = nconf.get('messages:maxLimit');
+            const defaultLimit = nconf.get('messages:defaultLimit');
+            initData.replaceText = nconf.get('messages:replaceText');
 
-    /*
-     * Getting request parameters
-     */
-    if (typeof req.query.page !== 'undefined') {
-        const page = parseInt(req.query.page, 10);
-        if (page > 0)
-            // This accounts for the fact, that page is indexed starting 1 on the site and 0 in node
-            initData.currentPage = page - 1;
-    }
-    else
-    // If no valid page is set, use 0 instead.
-        initData.currentPage = 0;
+            /*
+             * Getting request parameters
+             */
+            if (typeof req.query.page !== 'undefined') {
+                const page = parseInt(req.query.page, 10);
+                if (page > 0)
+                // This accounts for the fact, that page is indexed starting 1 on the site and 0 in node
+                    initData.currentPage = page - 1;
+            } else
+            // If no valid page is set, use 0 instead.
+                initData.currentPage = 0;
 
-    if (req.query.limit && req.query.limit <= maxLimit)
-        initData.limit = parseInt(req.query.limit, 10);
-    else
-        initData.limit = parseInt(defaultLimit, 10);
-
-    //Time tracking
-    console.timeEnd('init');
-    console.time('sql');
-
-    const query = Message.query()
-        .page(initData.currentPage, initData.limit)
-        .modify('defaultSort')
-        .joinEager('alias(messageView)')
-        .modify(builder => {
-            //Select join method and filtering according to pdwMode setting
-            if (!pdwMode || (adminShow && req.isAuthenticated()))
-                builder
-                    .eagerOptions({joinOperation: 'leftJoin'})
-                    .modifyEager('alias', builder => {
-                        builder.orWhereNull('ignore')
-                    });
+            if (req.query.limit && req.query.limit <= maxLimit)
+                initData.limit = parseInt(req.query.limit, 10);
             else
-                builder
-                    .eagerOptions({joinOperation: 'innerJoin'});
+                initData.limit = parseInt(defaultLimit, 10);
 
-            //Hide capcode if hideCapcode enabled and not logged in.
-            if (HideCapcode && !req.isAuthenticated()) {
-                logger.main.debug('HideCap && !isAuth');
-                builder.omit(Message,['address'])
+            //Time tracking
+            console.timeEnd('init');
+            console.time('sql');
+
+            let queryResult = await Message.query()
+                .page(initData.currentPage, initData.limit)
+                .modify('defaultSort')
+                .joinEager('alias(messageView)')
+                .modify(builder => {
+                    //Select join method and filtering according to pdwMode setting
+                    if (!pdwMode || (adminShow && req.isAuthenticated()))
+                        builder
+                            .eagerOptions({joinOperation: 'leftJoin'})
+                            .modifyEager('alias', builder => {
+                                builder.orWhereNull('ignore')
+                            });
+                    else
+                        builder
+                            .eagerOptions({joinOperation: 'innerJoin'});
+
+                    //Hide capcode if hideCapcode enabled and not logged in.
+                    if (HideCapcode && !req.isAuthenticated()) {
+                        logger.main.debug('HideCap && !isAuth');
+                        builder.omit(Message, ['address'])
+                    }
+
+                });
+
+            //Check if the requested page contains messages. If not, try page 0. If this also has no messages, send empty result
+            if (!queryResult || !queryResult.results || queryResult.results.length === 0) {
+                initData.currentPage = 0;
+                queryResult = await query.page(initData.currentPage, initData.limit);
+                if (queryResult && queryResult.results && queryResult.results.length === 0)
+                    res.status(200).json({'init': {}, 'messages': []});
             }
+            console.timeEnd('sql');
 
-        });
-    let queryResult = await query.catch(err => {logger.main.error(err);});
+            initData.msgCount = queryResult.total;
+            //Calculate initData for the result and correct presentation on clients.
+            //initData.msgCount = queryResult.total;
+            initData.pageCount = Math.ceil(initData.msgCount / initData.limit);
+            initData.offset = initData.limit * initData.currentPage;
+            initData.offsetEnd = initData.offset + initData.limit;
 
-    //Check if the requested page contains messages. If not, try page 0. If this also has no messages, send empty result
-    if (!queryResult || !queryResult.results || queryResult.results.length === 0) {
-        initData.currentPage = 0;
-        queryResult = await query.page(initData.currentPage, initData.limit).catch(err => {logger.main.error(err);});
-        if (queryResult && queryResult.results && queryResult.results.length === 0)
-            res.status(200).json({'init': {}, 'messages': []});
-    }
+            console.time('send');
+            //If everything is fine, send result.
+            if (queryResult.results.length > 0)
+                res.status(200).json({'init': initData, 'messages': queryResult.results}); else
+                res.status(200).json({});
+            console.timeEnd('send');
 
-        initData.msgCount = queryResult.total;
-    //Calculate initData for the result and correct presentation on clients.
-    //initData.msgCount = queryResult.total;
-    initData.pageCount = Math.ceil(initData.msgCount / initData.limit);
-    initData.offset = initData.limit * initData.currentPage;
-    initData.offsetEnd = initData.offset + initData.limit;
-
-    //If everything is fine, send result.
-    if (queryResult.results.length > 0) {
-        console.timeEnd('sql');
-        console.time('send');
-        res.status(200).json({'init': initData, 'messages': queryResult.results});
-        console.timeEnd('send');
-    }
+        } catch (e) {
+            res.status(500).send(e);
+            logger.main.debug(e);
+        }
     })
     .post(async (req, res, next) => {
         nconf.load();
@@ -410,66 +414,70 @@ router.get('/messageSearch', async (req, res, next) => {
     const defaultLimit = nconf.get('messages:defaultLimit');
     initData.replaceText = nconf.get('messages:replaceText');
 
-    if (typeof req.query.page !== 'undefined') {
-    let page = parseInt(req.query.page, 10);
-    if (page > 0) {
-      initData.currentPage = page - 1;
-    } else {
-      initData.currentPage = 0;
-    }
-    }
-    if (req.query.limit && req.query.limit <= maxLimit) {
-    initData.limit = parseInt(req.query.limit, 10);
-    } else {
-    initData.limit = parseInt(defaultLimit, 10);
-    }
-
-    console.timeEnd('init');
-    console.time('sql');
-
-    const queryResult = await Message.query()
-        .skipUndefined()
-        .modify('defaultSort')
-        .joinEager('alias(messageView)')
-        .modify(builder => {
-            builder
-                .where('alias.agency', 'LIKE', req.query.agency)
-                .where('alias.address', 'LIKE', req.query.address)
-                .where('alias.source', 'LIKE', req.query.address);
-
-            if (req.query.q) {
-                if (dbtype === 'mysql') builder.whereRaw('MATCH(message, address, source) AGAINST (? IN BOOLEAN MODE)', [req.query.q]);
-                else if (dbtype === 'sqlite3') {
-                    builder.join('messages_search_index', 'messages_search_index.rowid', 'messages.id').whereRaw('messages_search_index MATCH ?', [req.query.q]);
-                }
+    try {
+        if (typeof req.query.page !== 'undefined') {
+            let page = parseInt(req.query.page, 10);
+            if (page > 0) {
+                initData.currentPage = page - 1;
+            } else {
+                initData.currentPage = 0;
             }
+        }
+        if (req.query.limit && req.query.limit <= maxLimit) {
+            initData.limit = parseInt(req.query.limit, 10);
+        } else {
+            initData.limit = parseInt(defaultLimit, 10);
+        }
 
-            if (!pdwMode || (adminShow && req.isAuthenticated()))
-                builder.eagerOptions({joinOperator: 'left'});
-            else
-                builder.eagerOptions({joinOperator: 'inner'});
-            if (hideCapcode && !req.isAuthenticated())
-                builder.omit(['address']);
-        })
-        .page(initData.currentPage, initData.limit);
+        console.timeEnd('init');
+        console.time('sql');
 
-    console.timeEnd('sql');
-    console.time('send');
+        const queryResult = await Message.query()
+            .skipUndefined()
+            .modify('defaultSort')
+            .joinEager('alias(messageView)')
+            .modify(builder => {
+                builder
+                    .where('alias.agency', 'LIKE', req.query.agency)
+                    .where('alias.address', 'LIKE', req.query.address)
+                    .where('alias.source', 'LIKE', req.query.address);
 
-    //Calculate initData for the result and correct presentation on clients.
-    initData.msgCount = queryResult.total;
-    initData.pageCount = Math.ceil(initData.msgCount / initData.limit);
-    initData.offset = initData.limit * initData.currentPage;
-    initData.offsetEnd = initData.offset + initData.limit;
+                if (req.query.q) {
+                    if (dbtype === 'mysql') builder.whereRaw('MATCH(message, address, source) AGAINST (? IN BOOLEAN MODE)', [req.query.q]);
+                    else if (dbtype === 'sqlite3') {
+                        builder.join('messages_search_index', 'messages_search_index.rowid', 'messages.id').whereRaw('messages_search_index MATCH ?', [req.query.q]);
+                    }
+                }
 
-    //if (!queryResult || (queryResult.ignore || (pdwMode && !queryResult.alias)))
-    //    res.status(200).json({});
-    //else
-        res.status(200).json({init: initData, messages: queryResult.results});
+                if (!pdwMode || (adminShow && req.isAuthenticated()))
+                    builder.eagerOptions({joinOperator: 'left'});
+                else
+                    builder.eagerOptions({joinOperator: 'inner'});
+                if (hideCapcode && !req.isAuthenticated())
+                    builder.omit(['address']);
+            })
+            .page(initData.currentPage, initData.limit);
 
-    //queryResult.catch(err => {res.status(500).send(err)});
+        console.timeEnd('sql');
+        console.time('send');
 
-    console.timeEnd('send');
+        //Calculate initData for the result and correct presentation on clients.
+        initData.msgCount = queryResult.total;
+        initData.pageCount = Math.ceil(initData.msgCount / initData.limit);
+        initData.offset = initData.limit * initData.currentPage;
+        initData.offsetEnd = initData.offset + initData.limit;
+
+        if (!queryResult || (queryResult.ignore || (pdwMode && !queryResult.alias)))
+            res.status(200).json({});
+        else
+            res.status(200).json({init: initData, messages: queryResult.results});
+
+        console.timeEnd('send');
+    } catch (e) {
+        console.time('send');
+        res.status(500).send(e);
+        console.timeEnd('send');
+    }
 });
 
 
