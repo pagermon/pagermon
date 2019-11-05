@@ -369,26 +369,31 @@ router.get('/messages/:id', async (req, res, next) => {
 
       const pdwMode = nconf.get('messages:pdwMode');
 
-      console.time('sql');
-      const queryResult = await Message.query()
-          .findById(req.params.id)
-          .eager('alias(messageView)')
-          .modify('defaultSort')
-          .modify(builder => {
-              if (HideCapcode && !req.isAuthenticated())
-                  builder.omit(Message, ['address']);
-          });
+    try {
+        console.time('sql');
+        const queryResult = await Message.query()
+            .findById(req.params.id)
+            .eager('alias(messageView)')
+            .modify('defaultSort')
+            .modify(builder => {
+                if (HideCapcode && !req.isAuthenticated())
+                    builder.omit(Message, ['address']);
+            });
 
-      console.timeEnd('sql');
-      console.time('send');
+        console.timeEnd('sql');
+        console.time('send');
 
-      if (!queryResult || (queryResult.ignore || (pdwMode && !queryResult.alias)))
-          res.status(200).json({});
-      else
-          res.status(200).json({queryResult});
+        if (!queryResult || (queryResult.ignore || (pdwMode && !queryResult.alias)))
+            res.status(200).json({});
+        else
+            res.status(200).json({queryResult});
+        console.timeEnd('send');
+    } catch (e) {
+        console.time('send');
+        res.status(500).send(err);
+        console.timeEnd('send');
+    }
 
-      queryResult.catch(err => {res.status(500).send(err)});
-      console.timeEnd('send');
 });
 
 /**
