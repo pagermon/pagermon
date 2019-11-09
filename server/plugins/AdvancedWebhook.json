@@ -1,0 +1,50 @@
+{
+  "name": "AdvancedWebhook",
+  "description": "Advanced HTTP post webhook",
+  "disable": false,
+  "trigger": "message",
+  "scope": "after",
+  "config": [
+    {
+      "name": "URL",
+      "label": "Webhook URL",
+      "description": "Destination webhook URL",
+      "type": "text",
+      "required": true
+    },
+    {
+      "name": "contentType",
+      "label": "Content Type",
+      "description": "Content type header to use (eg - application/json)",
+      "type": "text",
+      "required": true
+    },
+    {
+      "name": "filterMode",
+      "label": "Filter Mode",
+      "description": "Filter mode to use (all messages, all defined aliases, per alias only)",
+      "type": "select",
+      "options": [
+        {"value": "0", "text": "Per alias only"},
+        {"value": "1", "text": "Defined aliases"},
+        {"value": "2", "text": "All messages"}
+      ],
+      "required": true
+    },
+    {
+      "name": "contentTemplate",
+      "label": "Content Template",
+      "description": "Template of content to send. /<field>/ will be replaced with the contents for the message (eg - /message/ will get replaced with the message text)",
+      "type": "text",
+      "required": true
+    }
+  ],
+  "aliasConfig": [
+    {
+      "name": "enable",
+      "label": "Enable",
+      "description": "Enable sending messages that match this alias via Advanced Webhook",
+      "type": "checkbox"
+    }
+  ]
+}

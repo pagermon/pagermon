@@ -1,0 +1,90 @@
+{
+  "name": "SimpleWebhook",
+  "description": "Generic HTTP post webhook",
+  "disable": false,
+  "trigger": "message",
+  "scope": "after",
+  "config": [
+    {
+      "name": "URL",
+      "label": "Destination URL",
+      "description": "Destination webhook URL",
+      "type": "text",
+      "required": true
+    },
+    {
+      "name": "filterMode",
+      "label": "Filter Mode",
+      "description": "Filter mode to use (all messages, all defined aliases, per alias only)",
+      "type": "select",
+      "options": [
+        {"value": "0", "text": "Per alias only"},
+        {"value": "1", "text": "Defined aliases"},
+        {"value": "2", "text": "All messages"}
+      ],
+      "required": true
+    },
+    {
+      "name": "sendAddress",
+      "label": "Send Address",
+      "description": "Include 'address' field in the JSON payload",
+      "type": "checkbox"
+    },
+    {
+      "name": "sendMessage",
+      "label": "Send Message",
+      "description": "Include 'message' field in the JSON payload",
+      "type": "checkbox"
+    },
+    {
+      "name": "sendSource",
+      "label": "Send Source",
+      "description": "Include 'source' field in the JSON payload",
+      "type": "checkbox"
+    },
+    {
+      "name": "sendTimestamp",
+      "label": "Send Timestamp",
+      "description": "Include 'timestamp' field in the JSON payload",
+      "type": "checkbox"
+    },
+    {
+      "name": "sendAliasId",
+      "label": "Send Alias ID",
+      "description": "Include 'alias ID' field in the JSON payload",
+      "type": "checkbox"
+    },
+    {
+      "name": "sendAlias",
+      "label": "Send Alias",
+      "description": "Include 'alias' field in the JSON payload",
+      "type": "checkbox"
+    },
+    {
+      "name": "sendAgency",
+      "label": "Send Agency",
+      "description": "Include 'agency' field in the JSON payload",
+      "type": "checkbox"
+    },
+    {
+      "name": "sendIcon",
+      "label": "Send Icon",
+      "description": "Include 'icon' field in the JSON payload",
+      "type": "checkbox"
+    },
+    {
+      "name": "sendColor",
+      "label": "Send Color",
+      "description": "Include 'color' field in the JSON payload",
+      "type": "checkbox"
+    }
+  ],
+  "aliasConfig": [
+    {
+      "name": "enable",
+      "label": "Enable",
+      "description": "Enable sending messages that match this alias via Simple Webhook",
+      "type": "checkbox"
+    }
+  ]
+}
