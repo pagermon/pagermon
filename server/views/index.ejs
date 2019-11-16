@@ -15,7 +15,6 @@
   <ng-view></ng-view>
 
   <!-- Template -->
-  
   <script type="text/ng-template" id="/messages.html">
   <div ng-show="loading" class="loading"><i class="fa fa-spinner fa-spin"></i></div>
     <p></p>
@@ -97,8 +96,12 @@
             <td class="shrink noMobile noSmall" ng-if="!user">
               <span>{{message.alias || ''}}</span>
             </td>
-            <td class="expand"><div highlight="message.message" replacement="init.replaceText" class="pagerMessage"></td>
-        </tbody>
+            <% } %>
+
+            <% if (!hidemessage || !login) { %>
+            <td class="expand" ng-controller="ModalCtrl as $ctrl" ng-click="$ctrl.openComponentModal(message)"><div highlight="message.message" replacement="init.replaceText" class="pagerMessage"></td>
+            <% } %>
+          </tbody>
       </table>
       </div>
     <div class="row" ng-if="messages.length == 0">
@@ -148,7 +151,7 @@
   </script>
   
   <script>
-var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-highlight', 'ui.bootstrap'])
+var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-highlight', 'ngAnimate', 'ngSanitize', 'ui.bootstrap'])
     
     .factory('socket', function ($rootScope) {
       
@@ -240,6 +243,65 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
       wrap('replaceState');
     })
     
+.controller('ModalCtrl', function ($uibModal, $log, $document) {
+  var $ctrl = this;
+  $ctrl.message = null;
+
+  $ctrl.open = function (message, parentSelector) {
+    var modalInstance = $uibModal.open({
+      ariaDescribedBy: 'modal-body',
+      templateUrl: 'templates/myModalContent.html',
+      controller: 'ModalInstanceCtrl',
+      controllerAs: '$ctrl',
+      resolve: {
+        message: function () {
+          return $ctrl.message;
+        }
+      }
+    });
+  };
+
+  $ctrl.openComponentModal = function (message) {
+    var modalInstance = $uibModal.open({
+      component: 'modalComponent',
+      resolve: {
+        message: function () {
+          $ctrl.message = message;
+          return $ctrl.message;
+        }
+      }
+    });
+  };
+})
+
+.controller('ModalInstanceCtrl', function ($uibModalInstance, message) {
+  var $ctrl = this;
+  $ctrl.message = message;
+
+  $ctrl.cancel = function () {
+    $uibModalInstance.dismiss('cancel');
+  };
+})
+
+.component('modalComponent', {
+  templateUrl: 'templates/myModalContent.html',
+  bindings: {
+    resolve: '<',
+    close: '&',
+    dismiss: '&'
+  },
+  controller: function () {
+    var $ctrl = this;
+
+    $ctrl.$onInit = function () {
+      $ctrl.message = $ctrl.resolve.message;
+    };
+
+    $ctrl.cancel = function () {
+      $ctrl.dismiss({$value: 'cancel'});
+    };
+  }
+})
     // Controller
     // TODO: optimise this whole section, consider popping this entire controller out to a separate file
     .controller('MessageController', ['$scope', '$routeParams', 'Api', 'socket', 'adminSocket', '$cookies', '$location', '$window', function ($scope, $routeParams, Api, socket, adminSocket, $cookies, $location, $window) {
@@ -567,7 +629,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
           controller: 'MessageController'
        });
       $locationProvider.html5Mode({ enabled: true, requireBase: false, rewriteLinks: false});
-    }]);
+    }]);   
 
 function notify(notifyTitle,notifyMessage) {
     if (!("Notification" in window)) {
@@ -595,6 +657,10 @@ function notify(notifyTitle,notifyMessage) {
             }
         });
     }
+}
+
+function test(){
+  console.log("This browser does not support desktop notification");
 }
   </script>
 

@@ -1,0 +1,15 @@
+
+<div class="modal-dialog">
+    <div class="modal-body" id="modal-body" >
+        <div>Date: {{ $ctrl.message.date }}</div>
+        <div>Time: {{ $ctrl.message.timestamp }}</div>
+        <div>Source: {{ $ctrl.message.source }}</div>
+        <div>Address: {{ $ctrl.message.address }}</div>
+        <div>Agency: {{ $ctrl.message.agency }}</div>
+        <div>Alias: {{ $ctrl.message.alias }}</div>
+        <div>Message: {{ $ctrl.message.message }}</div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-warning" type="button" ng-click="$ctrl.cancel()">Close</button>
+    </div>
+</div>
