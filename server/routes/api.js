@@ -606,7 +606,6 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
         var datetime = data.datetime || 1;
         var timeDiff = datetime - dupeTime;
         var source = data.source || 'UNK';
-        var dupeorderby = 'id DESC LIMIT ' + dupeLimit
         db.from('messages')
           .select('*')
           .modify(function (queryBuilder) {
@@ -618,7 +617,8 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                       this.select('id')
                       .from('messages')
                       .where('timestamp', '>', timeDiff)
-                      .orderByRaw(dupeorderby)
+                      .orderBy('id', 'desc')
+                      .limit(dupeLimit)
                       .as('temp_tab')
                     })  
               })
@@ -631,7 +631,8 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                     .from(function () {
                       this.select('id')
                           .from('messages')
-                          .orderByRaw(dupeorderby)
+                          .orderBy('id', 'desc')
+                          .limit(dupeLimit)
                           .as('temp_tab')
                     })
               })
