@@ -14,7 +14,7 @@ var dbtype = nconf.get('database:type');
 //in order to create migration files, client must be hardcoded to 'sqlite3' otherwise it won't work. 
 var dbconfig = {
     client: dbtype,
-        connection: {},
+    connection: {},
     useNullAsDefault: true,
     debug: debugon,
     migrations: {
@@ -38,16 +38,16 @@ var dbconfig = {
 }
 
 if (dbtype == 'sqlite3') {
-  dbconfig.client.connection.filename = nconf.get('database:file');
+  dbconfig.connection.filename = nconf.get('database:file');
 } else if (dbtype == 'sqlite3') {
-  dbconfig.client.connection.host = nconf.get('database:server');
-  dbconfig.client.connection.user = nconf.get('database:username');
-  dbconfig.client.connection.password = nconf.get('database:password');
-  dbconfig.client.connection.database = nconf.get('database:database');
+  dbconfig.connection.host = nconf.get('database:server');
+  dbconfig.connection.user = nconf.get('database:username');
+  dbconfig.connection.password = nconf.get('database:password');
+  dbconfig.connection.database = nconf.get('database:database');
 } else if (dbtype == 'oracledb') {
-  dbconfig.client.connection.connectString = nconf.get('database:connectString');
-  dbconfig.client.connection.user = nconf.get('database:username');
-  dbconfig.client.connection.password = nconf.get('database:password');
+  dbconfig.connection.connectString = nconf.get('database:connectString');
+  dbconfig.connection.user = nconf.get('database:username');
+  dbconfig.connection.password = nconf.get('database:password');
 }
 
 //this is required because of the silly way knex migrations handle environments 
