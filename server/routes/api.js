@@ -108,10 +108,11 @@ router.get('/messages', isLoggedIn, function(req, res, next) {
       var rowCount
 
       db.from('messages')
-        .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', function () {
-          this.select('capcodes.id')
-          .as('aliasMatch')
-        })
+        // .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', function () {
+        //   this.select('capcodes.id')
+        //   .as('aliasMatch')
+        // })
+        .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', 'capcodes.id')
         .modify(function(queryBuilder) {
           if (pdwMode) {
             if (adminShow && req.isAuthenticated()) {
