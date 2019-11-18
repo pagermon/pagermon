@@ -423,6 +423,7 @@ router.get('/capcodes/init', isLoggedIn, function(req, res, next) {
     })
     .catch((err) => {
       logger.main.error(err);
+      return next(err);
     })
 });
 
@@ -436,7 +437,7 @@ router.get('/capcodes', isLoggedIn, function(req, res, next) {
       res.json(rows);
     })
     .catch((err) => {
-      logger.main.debug(err);
+      logger.main.error(err);
       return next(err);
     })
 });
@@ -481,8 +482,8 @@ router.get('/capcodes/:id', isLoggedIn, function(req, res, next) {
         }
       })
       .catch((err) => {
-        res.status(500);
-        res.send(err);
+        logger.main.error(err);
+        return next(err);
       })
 });
 
@@ -513,8 +514,8 @@ router.get('/capcodeCheck/:id', isLoggedIn, function(req, res, next) {
         }
     })
     .catch((err) => {
-      res.status(500);
-      res.send(err);
+      logger.main.error(err);
+      return next(err);
     })
 });
 
@@ -528,8 +529,8 @@ router.get('/capcodes/agency/:id', isLoggedIn, function(req, res, next) {
         res.json(rows);
       })
       .catch((err) => {
-        res.status(500);
-        res.send(err);
+        logger.main.error(err);
+        return next(err);
       })
 });
 
