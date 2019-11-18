@@ -431,7 +431,7 @@ router.get('/capcodes/init', isLoggedIn, function(req, res, next) {
 router.get('/capcodes', isLoggedIn, function(req, res, next) {
   db.from('capcodes')
     .select('*')
-    .orderByRaw("REPLACE(address, '_', '%')")
+    //.orderByRaw("REPLACE(address, '_', '%')")
     .then((rows) => {
       res.json(rows);
     })
