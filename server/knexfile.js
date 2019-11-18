@@ -44,11 +44,11 @@ if (dbtype == 'sqlite3') {
   dbconfig.connection.user = nconf.get('database:username');
   dbconfig.connection.password = nconf.get('database:password');
   dbconfig.connection.database = nconf.get('database:database');
-  dbconfig.fetchAsString = ['clob'];
 } else if (dbtype == 'oracledb') {
   dbconfig.connection.connectString = nconf.get('database:connectString');
   dbconfig.connection.user = nconf.get('database:username');
   dbconfig.connection.password = nconf.get('database:password');
+  dbconfig.fetchAsString = ['clob'];
 }
 
 //this is required because of the silly way knex migrations handle environments 
