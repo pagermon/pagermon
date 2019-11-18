@@ -73,7 +73,7 @@ router.get('/messages', isLoggedIn, function(req, res, next) {
       var subquery = db.from('capcodes').where('ignore', '=', 1).select('id')
     } else {
       var subquery = db.from('capcodes').where('ignore', '=', 0).select('id')
-    }    
+    }
   } else {
     var subquery = db.from('capcodes').where('ignore', '=', 1).select('id')
   }
@@ -83,7 +83,7 @@ router.get('/messages', isLoggedIn, function(req, res, next) {
         this.from('messages').where('alias_id', 'not in', subquery).orWhereNull('alias_id')
       } else {
         this.from('messages').where('alias_id', 'in', subquery)
-      } 
+      }
     } else {
       this.from('messages').where('alias_id', 'not in', subquery).orWhereNull('alias_id')
     }
@@ -104,8 +104,6 @@ router.get('/messages', isLoggedIn, function(req, res, next) {
       console.timeEnd('init');
       console.time('sql');
 
-      var orderby;
-      orderby = "messages.timestamp DESC LIMIT "+initData.limit+" OFFSET "+initData.offset;
       var result = [];
       var rowCount
 
@@ -119,13 +117,15 @@ router.get('/messages', isLoggedIn, function(req, res, next) {
             if (adminShow && req.isAuthenticated()) {
               queryBuilder.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id').where('capcodes.ignore', 0).orWhereNull('capcodes.ignore')
             } else {
-              queryBuilder.innerJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id').where('capcodes.ignore', 0)              
-            } 
+              queryBuilder.innerJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id').where('capcodes.ignore', 0)
+            }
           } else {
             queryBuilder.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id').where('capcodes.ignore', 0).orWhereNull('capcodes.ignore')
           }
         })
-        .orderByRaw(orderby)
+        .orderBy('messages.timestamp', 'desc')
+        .limit(initData.limit)
+        .offset(initData.offset)
         .then(rows => {
           rowCount = rows.length
           for (row of rows) {
