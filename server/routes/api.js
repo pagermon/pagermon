@@ -433,12 +433,10 @@ router.get('/capcodes', isLoggedIn, function(req, res, next) {
     .select('*')
     //.orderByRaw("REPLACE(address, '_', '%')")
     .then((rows) => {
-      res.status(200);
       res.json(rows);
     })
     .catch((err) => {
-      res.status(500);
-      res.send(err);
+      return next(err);
     })
 });
 
