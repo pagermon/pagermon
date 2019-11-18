@@ -436,7 +436,7 @@ router.get('/capcodes', isLoggedIn, function(req, res, next) {
       res.json(rows);
     })
     .catch((err) => {
-      logger.debug(err);
+      logger.main.debug(err);
       return next(err);
     })
 });
