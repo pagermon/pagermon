@@ -287,7 +287,7 @@ router.get('/messageSearch', isLoggedIn, function(req, res, next) {
       sql += ' messages.id IS ?';
     }
     sql += " ORDER BY messages.timestamp DESC;";
-  } else if (dbtype == 'mysql') {
+  } else if (dbtype == 'mysql' || dbtype == 'oracle') {
     if (query != '') {
       sql = `SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch
               FROM messages`;
