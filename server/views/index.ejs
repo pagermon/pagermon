@@ -250,7 +250,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
   $ctrl.open = function (message, parentSelector) {
     var modalInstance = $uibModal.open({
       ariaDescribedBy: 'modal-body',
-      templateUrl: 'templates/myModalContent.html',
+      templateUrl: 'templates/messageModal.html',
       controller: 'ModalInstanceCtrl',
       controllerAs: '$ctrl',
       resolve: {
@@ -284,7 +284,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
 })
 
 .component('modalComponent', {
-  templateUrl: 'templates/myModalContent.html',
+  templateUrl: 'templates/messageModal.html',
   bindings: {
     resolve: '<',
     close: '&',
