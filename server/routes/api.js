@@ -400,7 +400,8 @@ router.get('/capcodes/init', isLoggedIn, function(req, res, next) {
   }
   db.from('capcodes')
     .select('id')
-    .orderByRaw('id DESC LIMIT 1')
+    .orderBy('i', 'desc')
+    .limit(1)
     .then((row) => {
       initData.msgCount = parseInt(row['id'], 10);
       //console.log(initData.msgCount);
@@ -925,7 +926,8 @@ router.post('/capcodes/:id', isLoggedIn, function(req, res, next) {
                   this.select('id')
                     .from('capcodes')
                     .where('messages.address', 'like', 'address')
-                    .orderByRaw(`REPLACE("address", '_', '%') DESC LIMIT 1`)
+                    .orderByRaw(`REPLACE("address", '_', '%') DESC`)
+                    .limit(1)
                 })
                 .catch((err) => {
                   logger.main.error(err);
@@ -982,7 +984,8 @@ router.post('/capcodeRefresh', isLoggedIn, function(req, res, next) {
     this.select('id')
         .from('capcodes')
         .where(db.ref('messages.address'), 'like', db.ref('capcodes.address') )
-        .orderByRaw(`REPLACE("address", '_', '%') DESC LIMIT 1`)
+        .orderByRaw(`REPLACE("address", '_', '%') DESC`)
+        .limit(1)
   })
   .then((result) => {
       console.timeEnd('updateMap');
