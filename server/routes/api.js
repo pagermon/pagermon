@@ -652,7 +652,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                   .select('id', 'ignore')
                   // TODO: test this doesn't break other DBs
                   .whereRaw(`"${address}" LIKE "address"`)
-                  .orderByRaw("REPLACE(address, '_', '%') DESC")
+                  .orderByRaw(`REPLACE("address", '_', '%') DESC`)
                   .then((row) => {
                     var insert;
                     var alias_id = null;
