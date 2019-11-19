@@ -436,7 +436,7 @@ router.get('/capcodes', isLoggedIn, function(req, res, next) {
 router.get('/capcodes/agency', isLoggedIn, function(req, res, next) {
   db.from('capcodes')
     .distinct('agency')
-    .then((rows) => {    
+    .then((rows) => {
       res.status(200);
       res.json(rows);
     })
@@ -886,9 +886,10 @@ router.post('/capcodes/:id', isLoggedIn, function(req, res, next) {
       var ignore = req.body.ignore || 0;
       var pluginconf = JSON.stringify(req.body.pluginconf) || "{}";
       var updateAlias = req.body.updateAlias || 0;
-      var result
+
       console.time('insert');
       db.from('capcodes')
+        .returning('id')
         .where('id', '=', id)
         .modify(function(queryBuilder) {
           if (id == null) {
