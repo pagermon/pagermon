@@ -25,10 +25,10 @@ exports.up = function(db, Promise) {
           table.dropColumn('agency');
           table.dropColumn('icon');
           table.dropColumn('color');
-          table.string('alias', [1000]).alter();
-          table.string('agency', [255]).alter();
-          table.string('icon', [255]).alter();
-          table.string('color', [255]).alter();
+          table.string('alias', [1000]);
+          table.string('agency', [255]);
+          table.string('icon', [255]);
+          table.string('color', [255]);
         });
       }
     })
