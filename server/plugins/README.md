@@ -102,7 +102,6 @@ The `data` object is structured thusly on `after` events:
   icon: 'question',
   color: 'black',
   ignore: 0,
-  aliasMatch: 148,
   pluginData: {},
   pluginconf: {
     Discord: { enable: false, webhook: '' },
@@ -138,7 +137,6 @@ On a message without a matching alias, the `data` object will have null for most
   icon: null,
   color: null,
   ignore: null,
-  aliasMatch: null,
   pluginData: {},
   pluginconf: {} }
 ```

@@ -108,11 +108,7 @@ router.get('/messages', isLoggedIn, function(req, res, next) {
       var rowCount
 
       db.from('messages')
-        .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', function () {
-          this.select('capcodes.id')
-          .as('aliasMatch')
-        })
-        // .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', 'capcodes.id')
+        .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore')
         .modify(function(queryBuilder) {
           if (pdwMode) {
             if (adminShow && req.isAuthenticated()) {
@@ -143,8 +139,7 @@ router.get('/messages', isLoggedIn, function(req, res, next) {
                     "agency": row.agency,
                     "icon": row.icon,
                     "color": row.color,
-                    "ignore": row.ignore,
-                    "aliasMatch": row.aliasMatch
+                    "ignore": row.ignore
                   };
                 }
               }
@@ -179,10 +174,7 @@ router.get('/messages/:id', isLoggedIn, function(req, res, next) {
   var id = req.params.id;
 
   db.from('messages')
-    .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', function () {
-      this.select('capcodes.id')
-        .as('aliasMatch')
-    })
+    .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore')
     .leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id')
     .where('messages.id', id)
     .then((row) => {
@@ -198,8 +190,7 @@ router.get('/messages/:id', isLoggedIn, function(req, res, next) {
               "agency": row.agency,
               "icon": row.icon,
               "color": row.color,
-              "ignore": row.ignore,
-              "aliasMatch": row.aliasMatch
+              "ignore": row.ignore
             };
           }
         }
@@ -261,11 +252,11 @@ router.get('/messageSearch', isLoggedIn, function(req, res, next) {
   if (dbtype == 'sqlite3') {
     var sql
     if (query != '') {
-      sql = `SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch
+      sql = `SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore
       FROM messages_search_index
       LEFT JOIN messages ON messages.id = messages_search_index.rowid `;
     } else {
-      sql = `SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch 
+      sql = `SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore 
       FROM messages `;
     }
     if (pdwMode) {
@@ -290,10 +281,10 @@ router.get('/messageSearch', isLoggedIn, function(req, res, next) {
     sql += " ORDER BY messages.timestamp DESC;";
   } else if (dbtype == 'mysql' || dbtype == 'oracledb') {
     if (query != '') {
-      sql = `SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch
+      sql = `SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore
               FROM messages`;
     } else {
-      sql = `SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch 
+      sql = `SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore 
               FROM messages`;
     }
     if (pdwMode) {
@@ -341,8 +332,7 @@ router.get('/messageSearch', isLoggedIn, function(req, res, next) {
                   "agency": row.agency,
                   "icon": row.icon,
                   "color": row.color,
-                  "ignore": row.ignore,
-                  "aliasMatch": row.aliasMatch
+                  "ignore": row.ignore
                 };
               }
             }
@@ -689,10 +679,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                                     .then((result) => {
                                       // emit the full message
                                       db.from('messages')
-                                        .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', 'capcodes.pluginconf', function () {
-                                          this.select('capcodes.id')
-                                            .as('aliasMatch')
-                                        })
+                                        .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', 'capcodes.pluginconf')
                                         .modify(function(queryBuilder) {
                                             queryBuilder.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id')
                                         })
@@ -702,7 +689,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                                           row = row[0]
                                           // send data to pluginHandler after processing
                                           row.pluginData = data.pluginData;
-                                          
+
                                           if (row.pluginconf) {
                                             row.pluginconf = parseJSON(row.pluginconf);
                                           } else {
@@ -718,15 +705,15 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                                               //Emit full details to the admin socket
                                               if (pdwMode && adminShow) {
                                                 req.io.of('adminio').emit('messagePost', row);
-                                              } else if (!pdwMode || row.aliasMatch != null) {
+                                              } else if (!pdwMode || row.alias_id != null) {
                                                 req.io.of('adminio').emit('messagePost', row);
                                               } else {
                                                 // do nothing if PDWMode on and AdminShow is disabled
                                               }
                                               //Only emit to normal socket if HideCapcode is on and ApiSecurity is off.
                                               if (HideCapcode && !apiSecurity) {
-                                                if (pdwMode && row.aliasMatch == null) {
-                                                  //do nothing if pdwMode on and there isn't an aliasmatch
+                                                if (pdwMode && row.alias_id == null) {
+                                                  //do nothing if pdwMode on and there isn't an alias_id
                                                 } else {
                                                   // Emit No capcode to normal socket
                                                   row = {
@@ -739,14 +726,13 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                                                     "agency": row.agency,
                                                     "icon": row.icon,
                                                     "color": row.color,
-                                                    "ignore": row.ignore,
-                                                    "aliasMatch": row.aliasMatch
+                                                    "ignore": row.ignore
                                                   };
                                                   req.io.emit('messagePost', row);
                                                 }
                                               }
                                             } else {
-                                              if (pdwMode && row.aliasMatch == null) {
+                                              if (pdwMode && row.alias_id == null) {
                                                 if (adminShow) {
                                                   req.io.of('adminio').emit('messagePost', row);
                                                 } else {
