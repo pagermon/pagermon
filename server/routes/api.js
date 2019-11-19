@@ -679,13 +679,19 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                       db('messages').insert(insertmsg)
                       .then((result) => {
                         // emit the full message
+                        var msgId;
+                        if (result.isArray()) {
+                          msgId = result[0];
+                        } else {
+                          msgId = result;
+                        }
                         logger.main.debug(result);
                         db.from('messages')
                           .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', 'capcodes.pluginconf')
                           .modify(function(queryBuilder) {
                               queryBuilder.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id')
                           })
-                          .where('messages.id', '=', result[0])
+                          .where('messages.id', '=', msgId)
                           .then((row) => {
                           if(row.length > 0) {
                             row = row[0]
