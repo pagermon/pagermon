@@ -21,8 +21,10 @@ exports.up = function(db, Promise) {
         });
       } else {
         return db.schema.table('messages', table => {
-          table.string('message', [1000]).alter();
-          table.string('source', [255]).alter();
+          table.dropColumn('message');
+          table.dropColumn('source');
+          table.string('message', [1000]);
+          table.string('source', [255]);
         });
       }
     })
