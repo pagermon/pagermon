@@ -751,7 +751,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                                       .catch((err) => {
                                         res.status(500).send(err);
                                         logger.main.error(err)
-                                      })          
+                                      })
                             })
                             .catch ((err) => {
                               res.status(500).send(err);
@@ -768,8 +768,8 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
               }
             })
             .catch((err) => {
-             res.status(500).send(err);
-             logger.main.error(err)
+              res.status(500).send(err);
+              logger.main.error(err)
             })
       })
   } else {
@@ -790,7 +790,7 @@ router.post('/capcodes', isLoggedIn, function(req, res, next) {
     var ignore = req.body.ignore || 0;
     var pluginconf = JSON.stringify(req.body.pluginconf) || "{}";
       db.from('capcodes')
-        .where('id', '=', id)  
+        .where('id', '=', id)
         .modify(function (queryBuilder) {
           if (id == null) {
             queryBuilder.insert({
@@ -817,7 +817,7 @@ router.post('/capcodes', isLoggedIn, function(req, res, next) {
           }
         })
         .returning('id')
-        .then((result) => { 
+        .then((result) => {
           res.status(200);
           res.send(''+result);
           if (!updateRequired || updateRequired == 0) {
@@ -899,9 +899,9 @@ router.post('/capcodes/:id', isLoggedIn, function(req, res, next) {
               ignore: ignore,
               pluginconf: pluginconf
             })
-          } 
+          }
         })
-        .then((result) => { 
+        .then((result) => {
             console.timeEnd('insert');
             if (updateAlias == 1) {
               console.time('updateMap');
@@ -956,7 +956,7 @@ router.delete('/capcodes/:id', isLoggedIn, function(req, res, next) {
       })
       .catch((err) => {
         res.status(500).send(err);
-      }) 
+      })
     logger.main.debug(util.format('%o',req.body || 'request body empty'));
 });
 
