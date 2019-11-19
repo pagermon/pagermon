@@ -642,7 +642,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                           .andWhere('address', '=', address)
             }
           })
-          .then((row) => { 
+          .then((row) => {
             if (row.length > 0 && filterDupes) {
               logger.main.info(util.format('Ignoring duplicate: %o', message));
               res.status(200);
@@ -650,7 +650,8 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
             } else {
               db.from('capcodes')
                   .select('id', 'ignore')
-                  .whereRaw(`"${address}" LIKE address`)
+                  // TODO: test this doesn't break other DBs
+                  .whereRaw(`"${address}" LIKE "address"`)
                   .orderByRaw("REPLACE(address, '_', '%') DESC")
                   .then((row) => {
                     var insert;
@@ -676,93 +677,94 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                     if (insert == true) {
                       var insertmsg = {address: address, message: message, timestamp: datetime, source: source, alias_id: alias_id}
                       db('messages').insert(insertmsg)
-                                    .then((result) => {
-                                      // emit the full message
-                                      db.from('messages')
-                                        .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', 'capcodes.pluginconf')
-                                        .modify(function(queryBuilder) {
-                                            queryBuilder.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id')
-                                        })
-                                        .where('messages.id', '=', result[0])
-                                        .then((row) => {
-                                        if(row.length > 0) {
-                                          row = row[0]
-                                          // send data to pluginHandler after processing
-                                          row.pluginData = data.pluginData;
+                      .then((result) => {
+                        // emit the full message
+                        db.from('messages')
+                          .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', 'capcodes.pluginconf')
+                          .modify(function(queryBuilder) {
+                              queryBuilder.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id')
+                          })
+                          .where('messages.id', '=', result[0])
+                          .then((row) => {
+                          if(row.length > 0) {
+                            row = row[0]
+                            // send data to pluginHandler after processing
+                            row.pluginData = data.pluginData;
 
-                                          if (row.pluginconf) {
-                                            row.pluginconf = parseJSON(row.pluginconf);
-                                          } else {
-                                            row.pluginconf = {};
-                                          }
-                                          logger.main.debug('afterMessage start');
-                                          pluginHandler.handle('message', 'after', row, function(response) {
-                                            logger.main.debug(util.format('%o',response));
-                                            logger.main.debug('afterMessage done');
-                                            // remove the pluginconf object before firing socket message
-                                            delete row.pluginconf;
-                                            if (HideCapcode || apiSecurity) {
-                                              //Emit full details to the admin socket
-                                              if (pdwMode && adminShow) {
-                                                req.io.of('adminio').emit('messagePost', row);
-                                              } else if (!pdwMode || row.alias_id != null) {
-                                                req.io.of('adminio').emit('messagePost', row);
-                                              } else {
-                                                // do nothing if PDWMode on and AdminShow is disabled
-                                              }
-                                              //Only emit to normal socket if HideCapcode is on and ApiSecurity is off.
-                                              if (HideCapcode && !apiSecurity) {
-                                                if (pdwMode && row.alias_id == null) {
-                                                  //do nothing if pdwMode on and there isn't an alias_id
-                                                } else {
-                                                  // Emit No capcode to normal socket
-                                                  row = {
-                                                    "id": row.id,
-                                                    "message": row.message,
-                                                    "source": row.source,
-                                                    "timestamp": row.timestamp,
-                                                    "alias_id": row.alias_id,
-                                                    "alias": row.alias,
-                                                    "agency": row.agency,
-                                                    "icon": row.icon,
-                                                    "color": row.color,
-                                                    "ignore": row.ignore
-                                                  };
-                                                  req.io.emit('messagePost', row);
-                                                }
-                                              }
-                                            } else {
-                                              if (pdwMode && row.alias_id == null) {
-                                                if (adminShow) {
-                                                  req.io.of('adminio').emit('messagePost', row);
-                                                } else {
-                                                  //do nothing
-                                                }
-                                              } else {
-                                                //Just emit - No Security enabled
-                                                req.io.of('adminio').emit('messagePost', row);
-                                                req.io.emit('messagePost', row);
-                                              }
-                                            }
-                                          });
-                                        }
-                                        res.status(200).send(''+result);
-                                      })
-                                      .catch((err) => {
-                                        res.status(500).send(err);
-                                        logger.main.error(err)
-                                      })
-                            })
-                            .catch ((err) => {
-                              res.status(500).send(err);
-                              logger.main.error(err)
-                            })
+                            if (row.pluginconf) {
+                              row.pluginconf = parseJSON(row.pluginconf);
+                            } else {
+                              row.pluginconf = {};
+                            }
+                            logger.main.debug('afterMessage start');
+                            pluginHandler.handle('message', 'after', row, function(response) {
+                              logger.main.debug(util.format('%o',response));
+                              logger.main.debug('afterMessage done');
+                              // remove the pluginconf object before firing socket message
+                              delete row.pluginconf;
+                              if (HideCapcode || apiSecurity) {
+                                //Emit full details to the admin socket
+                                if (pdwMode && adminShow) {
+                                  req.io.of('adminio').emit('messagePost', row);
+                                } else if (!pdwMode || row.alias_id != null) {
+                                  req.io.of('adminio').emit('messagePost', row);
+                                } else {
+                                  // do nothing if PDWMode on and AdminShow is disabled
+                                }
+                                //Only emit to normal socket if HideCapcode is on and ApiSecurity is off.
+                                if (HideCapcode && !apiSecurity) {
+                                  if (pdwMode && row.alias_id == null) {
+                                    //do nothing if pdwMode on and there isn't an alias_id
+                                  } else {
+                                    // Emit No capcode to normal socket
+                                    row = {
+                                      "id": row.id,
+                                      "message": row.message,
+                                      "source": row.source,
+                                      "timestamp": row.timestamp,
+                                      "alias_id": row.alias_id,
+                                      "alias": row.alias,
+                                      "agency": row.agency,
+                                      "icon": row.icon,
+                                      "color": row.color,
+                                      "ignore": row.ignore
+                                    };
+                                    req.io.emit('messagePost', row);
+                                  }
+                                }
+                              } else {
+                                if (pdwMode && row.alias_id == null) {
+                                  if (adminShow) {
+                                    req.io.of('adminio').emit('messagePost', row);
+                                  } else {
+                                    //do nothing
+                                  }
+                                } else {
+                                  //Just emit - No Security enabled
+                                  req.io.of('adminio').emit('messagePost', row);
+                                  req.io.emit('messagePost', row);
+                                }
+                              }
+                            });
+                          }
+                          res.status(200).send(''+result);
+                        })
+                        .catch((err) => {
+                          res.status(500).send(err);
+                          logger.main.error(err)
+                        })
+                      })
+                      .catch ((err) => {
+                        res.status(500).send(err);
+                        logger.main.error(err)
+                      })
                     } else {
                         res.status(200);
                         res.send('Ignoring filtered');
                     }
               })
               .catch((err) => {
+                res.status(500).send(err);
                 logger.main.error(err)
               })
               }
