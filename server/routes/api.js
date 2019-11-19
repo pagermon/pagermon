@@ -448,34 +448,39 @@ router.get('/capcodes/agency', isLoggedIn, function(req, res, next) {
 
 router.get('/capcodes/:id', isLoggedIn, function(req, res, next) {
   var id = req.params.id;
+  var defaults = {
+    "id": "",
+    "address": "",
+    "alias": "",
+    "agency": "",
+    "icon": "question",
+    "color": "black",
+    "ignore": 0,
+    "pluginconf": {}
+  };
+  if (id == 'new') {
+    res.status(200);
+    res.json(defaults);
+  } else {
     db.from('capcodes')
-      .select('*')
-      .where('id', id)
-      .then(function (row) {
-        if (row.length > 0) {
-          row = row[0]
-          row.pluginconf = parseJSON(row.pluginconf);
-          res.status(200);
-          res.json(row);
-        } else {
-          row = {
-            "id": "",
-            "address": "",
-            "alias": "",
-            "agency": "",
-            "icon": "question",
-            "color": "black",
-            "ignore": 0,
-            "pluginconf": {}
-          };
-          res.status(200);
-          res.json(row);
-        }
-      })
-      .catch((err) => {
-        logger.main.error(err);
-        return next(err);
-      })
+    .select('*')
+    .where('id', id)
+    .then(function (row) {
+      if (row.length > 0) {
+        row = row[0]
+        row.pluginconf = parseJSON(row.pluginconf);
+        res.status(200);
+        res.json(row);
+      } else {
+        res.status(200);
+        res.json(defaults);
+      }
+    })
+    .catch((err) => {
+      logger.main.error(err);
+      return next(err);
+    })
+  }
 });
 
 router.get('/capcodeCheck/:id', isLoggedIn, function(req, res, next) {
