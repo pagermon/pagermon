@@ -680,7 +680,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                       .then((result) => {
                         // emit the full message
                         var msgId;
-                        if (result.isArray()) {
+                        if (Array.isArray(result)) {
                           msgId = result[0];
                         } else {
                           msgId = result;
