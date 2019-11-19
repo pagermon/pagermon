@@ -679,6 +679,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                       db('messages').insert(insertmsg)
                       .then((result) => {
                         // emit the full message
+                        logger.main.debug(result);
                         db.from('messages')
                           .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', 'capcodes.pluginconf')
                           .modify(function(queryBuilder) {
