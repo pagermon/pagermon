@@ -20,21 +20,14 @@ exports.up = function(db, Promise) {
           table.index(['timestamp', 'alias_id'], 'msg_timestamp');
         });
       } else {
-        return db.schema.dropTable('message').then(function () {
-          return db.schema.createTable('messages', table => {
-            table.charset('utf8');
-            table.collate('utf8_general_ci');
-            table.increments('id').primary().unique().notNullable();
-            table.string('address', [255]).notNullable();
-            table.string('message', [1000]).notNullable();
-            table.string('source', [255]).notNullable();
-            table.integer('timestamp');
-            table.integer('alias_id').unsigned().references('id').inTable('capcodes');
-            table.index(['address', 'id'], 'msg_index');
-            table.index(['id', 'alias_id'], 'msg_alias');
-            table.index(['timestamp', 'alias_id'], 'msg_timestamp');
+        return db.schema.table('messages', table => {
+          table.dropColumn('message').then(function () {
+            table.dropColumn('source')
+          }).then(function () {
+            table.string('message', [1000]);
+            table.string('source', [255]);
           });
-        })
+        });
       }
     })
   } else {

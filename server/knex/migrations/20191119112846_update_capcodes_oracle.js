@@ -20,19 +20,18 @@ exports.up = function(db, Promise) {
           table.unique(['id', 'address'], 'cc_pk_idx');
         });
       } else {
-        return db.schema.dropTable('capcodes').then(function () {
-          return db.schema.createTable('capcodes', table => {
-            table.charset('utf8');
-            table.collate('utf8_general_ci');
-            table.increments('id').primary().unique().notNullable();
-            table.string('address', [255]).notNullable();
-            table.string('alias', [1000]).notNullable();
+        return db.schema.table('capcodes', table => {
+          table.dropColumn('alias').then(function () {
+            table.dropColumn('agency')
+          }).then(function () {
+            table.dropColumn('icon');
+          }).then(function () {
+            table.dropColumn('color');
+          }).then(function () {
+            table.string('alias', [1000]);
             table.string('agency', [255]);
             table.string('icon', [255]);
             table.string('color', [255]);
-            table.text('pluginconf');
-            table.integer('ignore').defaultTo(0);
-            table.unique(['id', 'address'], 'cc_pk_idx');
           });
         });
       }
