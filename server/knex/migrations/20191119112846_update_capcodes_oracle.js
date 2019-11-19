@@ -21,10 +21,10 @@ exports.up = function(db, Promise) {
         });
       } else {
         return db.schema.table('capcodes', table => {
-          table.string('alias', [1000]).notNullable();
-          table.string('agency', [255]);
-          table.string('icon', [255]);
-          table.string('color', [255]);
+          table.string('alias', [1000]).notNullable().alter();
+          table.string('agency', [255]).alter();
+          table.string('icon', [255]).alter();
+          table.string('color', [255]).alter();
         });
       }
     })
