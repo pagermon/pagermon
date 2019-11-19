@@ -650,8 +650,8 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
             } else {
               db.from('capcodes')
                   .select('id', 'ignore')
-                  // TODO: test this doesn't break other DBs
-                  .whereRaw(`"${address}" LIKE "address"`)
+                  // TODO: test this doesn't break other DBs - there's a lot of quote changes here
+                  .whereRaw(`'${address}' LIKE "address"`)
                   .orderByRaw(`REPLACE("address", '_', '%') DESC`)
                   .then((row) => {
                     var insert;
