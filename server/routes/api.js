@@ -333,9 +333,10 @@ router.get('/messageSearch', isLoggedIn, function(req, res, next) {
     if (dbtype == 'sqlite3' && query != '') {
       qb.where('messages_search_index', 'MATCH', query)
     } else if (dbtype == 'mysql' && query != '') {
+      // FIX THESE TWO - THIS IS BEGGING FOR SQL INJECTION
       qb.joinRaw(`MATCH(messages.message, messages.address, messages.source) AGAINST ('${query}' IN BOOLEAN MODE)`)
     } else if (dbtype == 'oracledb' && query != '') {
-      qb.whereRaw(`CONTAINS("messages.message", '${query}', 1) > 0`)
+      qb.whereRaw(`CONTAINS("messages"."message", '${query}', 1) > 0`)
     } else {
       if (address != '')
         qb.where('messages.address', 'LIKE', address).orWhere('messages.source', address);
