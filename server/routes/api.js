@@ -248,36 +248,6 @@ router.get('/messageSearch', isLoggedIn, function(req, res, next) {
 
   // set select commands based on query type
   // address can be address or source field
-  db.select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore')
-    .modify(function(qb) {
-    if (dbtype == 'sqlite3' && query != '') {
-      qb.from('messages_search_index')
-        .leftJoin('messages', 'messages.id', '=', 'messages_search_index.rowid')
-    } else {
-      qb.from('messages');
-    }
-    if (pdwMode) {
-      if (adminShow && req.isAuthenticated()) {
-        qb.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id');
-      } else {
-        qb.innerJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id');
-      }
-    } else {
-      qb.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id');
-    }
-    if (dbtype == 'sqlite3' && query != '') {
-      qb.where('messages_search_index', 'MATCH', query)
-    } else if (dbtype == 'mysql' && query != '') {
-      qb.joinRaw(`MATCH(messages.message, messages.address, messages.source) AGAINST (${query} IN BOOLEAN MODE)`)
-    } else if (dbtype == 'oracledb' && query != '') {
-      qb.whereRaw(`CONTAINS("messages.message", ${query}, 1) > 0`)
-    } else {
-      if (address != '')
-        qb.where('messages.address', 'LIKE', address).orWhere('messages.source', address);
-      if (agency != '')
-        qb.whereIn('messages.alias_id', qb.select('id').from('capcodes').where('agency',agency).where('ignore',0))
-    }
-  }).orderBy('messages.timestamp', 'desc');
   
   // if (dbtype == 'sqlite3') {
   //   var sql
@@ -339,10 +309,40 @@ router.get('/messageSearch', isLoggedIn, function(req, res, next) {
   //   sql += " ORDER BY messages.timestamp DESC;";
   // }
 
-  if (sql) {
+  // if (sql) {
     var data = []
     console.time('sql')
-    db.raw(sql, query)
+    // db.raw(sql, query)
+    db.select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore')
+    .modify(function(qb) {
+    if (dbtype == 'sqlite3' && query != '') {
+      qb.from('messages_search_index')
+        .leftJoin('messages', 'messages.id', '=', 'messages_search_index.rowid')
+    } else {
+      qb.from('messages');
+    }
+    if (pdwMode) {
+      if (adminShow && req.isAuthenticated()) {
+        qb.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id');
+      } else {
+        qb.innerJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id');
+      }
+    } else {
+      qb.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id');
+    }
+    if (dbtype == 'sqlite3' && query != '') {
+      qb.where('messages_search_index', 'MATCH', query)
+    } else if (dbtype == 'mysql' && query != '') {
+      qb.joinRaw(`MATCH(messages.message, messages.address, messages.source) AGAINST (${query} IN BOOLEAN MODE)`)
+    } else if (dbtype == 'oracledb' && query != '') {
+      qb.whereRaw(`CONTAINS("messages.message", ${query}, 1) > 0`)
+    } else {
+      if (address != '')
+        qb.where('messages.address', 'LIKE', address).orWhere('messages.source', address);
+      if (agency != '')
+        qb.whereIn('messages.alias_id', qb.select('id').from('capcodes').where('agency',agency).where('ignore',0))
+    }
+  }).orderBy('messages.timestamp', 'desc')
       .then((rows) => {
         if (rows) {
           if (dbtype == 'mysql') {
@@ -410,7 +410,7 @@ router.get('/messageSearch', isLoggedIn, function(req, res, next) {
         logger.main.error(err);
         res.status(500).send(err);
       })
-  }
+  // }
 });
 
 ///////////////////
