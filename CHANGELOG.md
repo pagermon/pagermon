@@ -5,6 +5,7 @@
 * Add Google Analytics Support @Marshyonline
 * Change Footer link to Pagermon Repo to prevent tracking @marshyonline
 * Add Login_Failed to failed login URL to allow Log Scanners to detect failed logins easier. @marshyonline
+* Add messageModal for when message is clicked. @ThomasLuu00
 
 # 0.3.4 - 2019-08-22
 
