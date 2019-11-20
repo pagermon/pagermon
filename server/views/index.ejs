@@ -97,7 +97,7 @@
             <td class="shrink noMobile noSmall" ng-if="!user">
               <span>{{message.alias || ''}}</span>
             </td>
-            <td class="expand" ng-controller="ModalCtrl as $ctrl" ng-click="$ctrl.openComponentModal(message)"><div highlight="message.message" replacement="init.replaceText" class="pagerMessage"></td>
+            <td class="expand" ng-controller="ModalCtrl as $ctrl" ng-click="$ctrl.openComponentModal(message, <%= hidesource && !login %>, <%= hidecapcode && !login %>)"><div highlight="message.message" replacement="init.replaceText" class="pagerMessage"></td>
         </tbody>
       </table>
       </div>
@@ -258,16 +258,17 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
     });
   };
 
-  $ctrl.openComponentModal = function (message) {
+  $ctrl.openComponentModal = function (message, hideSource, hideCapcode) {
     var modalInstance = $uibModal.open({
       component: 'modalComponent',
       resolve: {
-        message: function () {
-          $ctrl.message = message;
-          return $ctrl.message;
-        }
+        message: function () { return message; },
+        hideSource: function () { return hideSource; },
+        hideCapcode: function () { return hideCapcode; }
       }
     });
+    
+    modalInstance.result.then(angular.noop, angular.noop); 
   };
 })
 
@@ -292,6 +293,12 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
 
     $ctrl.$onInit = function () {
       $ctrl.message = $ctrl.resolve.message;
+      if ($ctrl.resolve.hideSource) {
+        $ctrl.message.source = '';
+      }
+      if ($ctrl.resolve.hideCapcode) {
+        $ctrl.message.address = '';
+      }
     };
 
     $ctrl.cancel = function () {
