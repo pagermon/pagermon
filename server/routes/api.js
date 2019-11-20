@@ -213,7 +213,7 @@ router.get('/messages/:id', isLoggedIn, function(req, res, next) {
 router.get('/messageSearch', isLoggedIn, function(req, res, next) {
   nconf.load();
   console.time('init');
-  var dbtype = nconf.get('database:type')
+  var dbtype = nconf.get('database:type');
   var pdwMode = nconf.get('messages:pdwMode');
   var adminShow = nconf.get('messages:adminShow');
   var maxLimit = nconf.get('messages:maxLimit');
@@ -422,9 +422,16 @@ router.get('/capcodes/init', isLoggedIn, function(req, res, next) {
 // all capcode get methods are only used in admin area, so lock down to logged in users as they may contain sensitive data
 
 router.get('/capcodes', isLoggedIn, function(req, res, next) {
+  nconf.load();
+  var dbtype = nconf.get('database:type');
   db.from('capcodes')
     .select('*')
-    .orderByRaw(`REPLACE("address", '_', '%')`)
+    .modify(function(queryBuilder) {
+      if (dbtype == 'oracledb')
+        queryBuilder.orderByRaw(`REPLACE("address", '_', '%')`);
+      else
+        queryBuilder.orderByRaw(`REPLACE(address, '_', '%')`)
+    })
     .then((rows) => {
       res.json(rows);
     })
@@ -521,7 +528,7 @@ router.get('/capcodes/agency/:id', isLoggedIn, function(req, res, next) {
     db.from('capcodes')
       .select('*')
       .where('agency', 'like', id)
-      .then((rows) => {    
+      .then((rows) => {
         res.status(200);
         res.json(rows);
       })
@@ -543,6 +550,7 @@ var msgBuffer = [];
 router.post('/messages', isLoggedIn, function(req, res, next) {
   nconf.load();
   if (req.body.address && req.body.message) {
+    var dbtype = nconf.get('database:type');
     var filterDupes = nconf.get('messages:duplicateFiltering');
     var dupeLimit = nconf.get('messages:duplicateLimit') || 0; // default 0
     var dupeTime = nconf.get('messages:duplicateTime') || 0; // default 0
@@ -657,8 +665,15 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
               db.from('capcodes')
                   .select('id', 'ignore')
                   // TODO: test this doesn't break other DBs - there's a lot of quote changes here
-                  .whereRaw(`'${address}' LIKE "address"`)
-                  .orderByRaw(`REPLACE("address", '_', '%') DESC`)
+                  .modify(function(queryBuilder) {
+                    if (dbtype == 'oracledb') {
+                      queryBuilder.whereRaw(`'${address}' LIKE "address"`)
+                      queryBuilder.orderByRaw(`REPLACE("address", '_', '%') DESC`);
+                    } else {
+                      queryBuilder.whereRaw(`"${address}" LIKE address`)
+                      queryBuilder.orderByRaw(`REPLACE(address, '_', '%') DESC`)
+                    }
+                  })
                   .then((row) => {
                     var insert;
                     var alias_id = null;
@@ -851,6 +866,7 @@ router.post('/capcodes', isLoggedIn, function(req, res, next) {
 });
 
 router.post('/capcodes/:id', isLoggedIn, function(req, res, next) {
+  var dbtype = nconf.get('database:type');
   var id = req.params.id || req.body.id || null;
   nconf.load();
   var updateRequired = nconf.get('database:aliasRefreshRequired');
@@ -926,7 +942,12 @@ router.post('/capcodes/:id', isLoggedIn, function(req, res, next) {
                   this.select('id')
                     .from('capcodes')
                     .where('messages.address', 'like', 'address')
-                    .orderByRaw(`REPLACE("address", '_', '%') DESC`)
+                    .modify(function(queryBuilder) {
+                      if (dbtype == 'oracledb')
+                        queryBuilder.orderByRaw(`REPLACE("address", '_', '%') DESC`);
+                      else
+                        queryBuilder.orderByRaw(`REPLACE(address, '_', '%') DESC`)
+                    })
                     .limit(1)
                 })
                 .catch((err) => {
@@ -979,12 +1000,18 @@ router.delete('/capcodes/:id', isLoggedIn, function(req, res, next) {
 
 router.post('/capcodeRefresh', isLoggedIn, function(req, res, next) {
   nconf.load();
+  var dbtype = nconf.get('database:type');
   console.time('updateMap');
   db('messages').update('alias_id', function() {
     this.select('id')
         .from('capcodes')
         .where(db.ref('messages.address'), 'like', db.ref('capcodes.address') )
-        .orderByRaw(`REPLACE("address", '_', '%') DESC`)
+        .modify(function(queryBuilder) {
+          if (dbtype == 'oracledb')
+            queryBuilder.orderByRaw(`REPLACE("address", '_', '%') DESC`);
+          else
+            queryBuilder.orderByRaw(`REPLACE(address, '_', '%') DESC`)
+        })
         .limit(1)
   })
   .then((result) => {
