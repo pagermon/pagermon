@@ -43,7 +43,7 @@
               <th class="noMobile noSmall" style="text-align: center;">Src</th>
             <% } %>
             <% if (!hidecapcode || login) { %>
-              <th class="noMobile" style="text-align: center;">Capcode</th>
+              <th class="noMobile noSmall" style="text-align: center;">Capcode</th>
             <% } %>
             <th class="noMobile noSmall"></th>
             <th class="noMobile noSmall"></th>
@@ -97,7 +97,12 @@
             <td class="shrink noMobile noSmall" ng-if="!user">
               <span>{{message.alias || ''}}</span>
             </td>
-            <td class="expand" ng-controller="ModalCtrl as $ctrl" ng-click="$ctrl.openComponentModal(message, <%= hidesource && !login %>, <%= hidecapcode && !login %>)"><div highlight="message.message" replacement="init.replaceText" class="pagerMessage"></td>
+            <td class="expand noDesktop" ng-controller="ModalCtrl as $ctrl" ng-click="$ctrl.openComponentModal(message, <%= hidesource && !login %>, <%= hidecapcode && !login %>)">
+              <div highlight="message.message" replacement="init.replaceText" class="pagerMessage"> </div>
+            </td>
+            <td class="expand noMobile">
+              <div highlight="message.message" replacement="init.replaceText" class="pagerMessage"> </div>
+            </td>
         </tbody>
       </table>
       </div>

@@ -276,9 +276,20 @@ table .expand {
         display: none;
     }
 }
+@media screen and (min-device-width: 769px) {
+    table .noDesktop {
+        display: none;
+    }
+}
 
 @media screen and (max-width: 768px) {
     table .noSmall {
+        display: none;
+    }
+}
+
+@media screen and (min-width: 769px) {
+    table .noLarge {
         display: none;
     }
 }
