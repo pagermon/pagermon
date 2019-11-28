@@ -85,8 +85,8 @@
               </span></th>
           </tr>
         </thead>
-        <tbody>
-          <tr ng-repeat="message in messages | filter: search">
+        <tbody ng-controller="AccordionCtrl">
+          <tr ng-repeat-start="message in messages | filter: search">
             <td class="shrink noMobile noSmall">{{message.date}}</td>
             <td class="shrink">{{message.timestamp}}</td>
             <% if (!hidesource || login) { %>
@@ -129,7 +129,23 @@
             <td class="shrink noMobile noSmall" ng-if="!user">
               <span>{{message.alias || ''}}</span>
             </td>
-            <td class="expand"><div highlight="message.message" replacement="init.replaceText" class="pagerMessage"></td>
+            <td class="expand"><div highlight="message.message" replacement="init.replaceText" class="pagerMessage" ng-click="toggleHiddenRow($index, message)"></td>
+          </tr>
+          <tr ng-repeat-end ng-show="activeRow==$index">
+              <td colspan="7">
+                  <div>Date: {{ targetMsg.date }}</div>
+                  <div>Time: {{ targetMsg.timestamp }}</div>
+                  <% if (!hidesource || login) { %>
+                  <div>Source: {{ targetMsg.source }}</div>
+                  <% } %>
+                  <% if (!hidecapcode || login) { %>
+                  <div>Address: {{ targetMsg.address }}</div>
+                  <% } %>
+                  <div>Agency: {{ targetMsg.agency }}</div>
+                  <div>Alias: {{ targetMsg.alias }}</div>
+                  <div>Message: {{ targetMsg.message }}</div>
+              </td>
+          </tr>
         </tbody>
       </table>
       </div>
@@ -271,7 +287,19 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
       wrap('pushState');
       wrap('replaceState');
     })
-    
+    .controller('AccordionCtrl', function ($scope) {
+
+      $scope.toggleHiddenRow = function(id, message){
+        if (id != $scope.activeRow){
+          $scope.activeRow = id;
+          $scope.targetMsg = message;
+        } 
+        else {
+          $scope.activeRow = null;
+        }
+      };
+    })
+
     // Controller
     // TODO: optimise this whole section, consider popping this entire controller out to a separate file
     .controller('MessageController', ['$scope', '$routeParams', 'Api', 'socket', 'adminSocket', '$cookies', '$location', '$window', function ($scope, $routeParams, Api, socket, adminSocket, $cookies, $location, $window) {
