@@ -676,7 +676,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
 
                         if (dbtype == 'oracledb') {
                           // oracle requires update of search index after insert, can't be trigger for some reason
-                          db.raw(`CTX_DDL.SYNC_INDEX()`);
+                          db.raw(`EXEC CTX_DDL.SYNC_INDEX('search_idx')`);
                         }
 
                         db.from('messages')
