@@ -272,7 +272,7 @@ router.get('/messageSearch', isLoggedIn, function(req, res, next) {
     } else if (dbtype == 'mysql' && query != '') {
       qb.joinRaw(`MATCH(messages.message, messages.address, messages.source) AGAINST ('?' IN BOOLEAN MODE)`, query)
     } else if (dbtype == 'oracledb' && query != '') {
-      qb.whereRaw(`CONTAINS("messages"."message", '?', 1) > 0`, query)
+      qb.whereRaw(`CONTAINS("messages"."message", ?, 1) > 0`, query)
     } else {
       if (address != '')
         qb.where('messages.address', 'LIKE', address).orWhere('messages.source', address);
