@@ -270,10 +270,9 @@ router.get('/messageSearch', isLoggedIn, function(req, res, next) {
     if (dbtype == 'sqlite3' && query != '') {
       qb.where('messages_search_index', 'MATCH', query)
     } else if (dbtype == 'mysql' && query != '') {
-      // FIX THESE TWO - THIS IS BEGGING FOR SQL INJECTION
-      qb.joinRaw(`MATCH(messages.message, messages.address, messages.source) AGAINST ('${query}' IN BOOLEAN MODE)`)
+      qb.joinRaw(`MATCH(messages.message, messages.address, messages.source) AGAINST ('?' IN BOOLEAN MODE)`, query)
     } else if (dbtype == 'oracledb' && query != '') {
-      qb.whereRaw(`CONTAINS("messages"."message", '${query}', 1) > 0`)
+      qb.whereRaw(`CONTAINS("messages"."message", '?', 1) > 0`, query)
     } else {
       if (address != '')
         qb.where('messages.address', 'LIKE', address).orWhere('messages.source', address);
@@ -584,7 +583,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
             if ((dupeLimit != 0) && (dupeTime != 0)) {
               queryBuilder.where('id', 'in', function () {
                 this.select('*')
-                    //this wierd subquery is to keep mysql happy 
+                    //this wierd subquery is to keep mysql happy
                     .from(function () {
                       this.select('id')
                       .from('messages')
@@ -592,7 +591,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                       .orderBy('id', 'desc')
                       .limit(dupeLimit)
                       .as('temp_tab')
-                    })  
+                    })
               })
               .andWhere('message', '=', message)
               .andWhere('address', '=', address)
@@ -674,6 +673,12 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                           msgId = result;
                         }
                         logger.main.debug(result);
+
+                        if (dbtype == 'oracledb') {
+                          // oracle requires update of search index after insert, can't be trigger for some reason
+                          db.raw(`CTX_DDL.SYNC_INDEX()`);
+                        }
+
                         db.from('messages')
                           .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', 'capcodes.pluginconf')
                           .modify(function(queryBuilder) {
