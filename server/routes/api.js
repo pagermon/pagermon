@@ -366,7 +366,7 @@ router.get('/capcodes/init', isLoggedIn, function(req, res, next) {
   }
   db.from('capcodes')
     .select('id')
-    .orderBy('i', 'desc')
+    .orderBy('id', 'desc')
     .limit(1)
     .then((row) => {
       initData.msgCount = parseInt(row['id'], 10);
