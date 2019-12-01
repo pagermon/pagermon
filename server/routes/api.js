@@ -676,11 +676,6 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
 
                         if (dbtype == 'oracledb') {
                           // oracle requires update of search index after insert, can't be trigger for some reason
-                          // db.transaction((trx) => {
-                          //   db.raw(`CTX_DDL.SYNC_INDEX('search_idx')`)
-                          //     .transacting(trx)
-                          //     .then(trx.commit)
-                          //     .catch(trx.rollback);
                           db.raw(`BEGIN CTX_DDL.SYNC_INDEX('search_idx'); END;`)
                           .then((resp) => {
                             logger.main.debug('search_idx sync complete');
@@ -1005,8 +1000,8 @@ router.post('/capcodeRefresh', isLoggedIn, function(req, res, next) {
       res.status(200).send({'status': 'ok'});
   })
   .catch((err) => {
-    logger.main.error(err); 
-    console.timeEnd('updateMap'); 
+    logger.main.error(err);
+    console.timeEnd('updateMap');
   })
 });
 
@@ -1020,7 +1015,7 @@ function inParam (sql, arr) {
 
 // route middleware to make sure a user is logged in
 function isLoggedIn(req, res, next) {
-  if (req.method == 'GET') { 
+  if (req.method == 'GET') {
     if (apiSecurity || ((req.url.match(/capcodes/i) || req.url.match(/capcodeCheck/i)) && !(req.url.match(/agency$/))) ) { //check if Secure mode is on, or if the route is a capcode route
       if (req.isAuthenticated()) {
         // if user is authenticated in the session, carry on
