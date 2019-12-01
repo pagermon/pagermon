@@ -268,7 +268,7 @@ router.get('/messageSearch', isLoggedIn, function(req, res, next) {
       qb.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id');
     }
     if (dbtype == 'sqlite3' && query != '') {
-      qb.where('messages_search_index', 'MATCH', query)
+      qb.whereRaw('messages_search_index MATCH ?', query)
     } else if (dbtype == 'mysql' && query != '') {
       qb.joinRaw(`MATCH(messages.message, messages.address, messages.source) AGAINST ('?' IN BOOLEAN MODE)`, query)
     } else if (dbtype == 'oracledb' && query != '') {
