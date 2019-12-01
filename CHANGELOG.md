@@ -6,6 +6,7 @@
 * Add front page popout. @marshyonline
 * Fix mixed content errors on admin panel @davidmckenzie
 * Fix Knex serialisation #343 @davidmckenzie
+* Enable Help Button @marshyonline
 * Add Oracle support because why the heck not #345 @davidmckenzie
 
 # 0.3.5 - 2019-09-06
