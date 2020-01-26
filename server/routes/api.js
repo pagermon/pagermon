@@ -270,7 +270,7 @@ router.get('/messageSearch', isLoggedIn, function(req, res, next) {
     if (dbtype == 'sqlite3' && query != '') {
       qb.whereRaw('messages_search_index MATCH ?', query)
     } else if (dbtype == 'mysql' && query != '') {
-      qb.joinRaw(`MATCH(messages.message, messages.address, messages.source) AGAINST ('?' IN BOOLEAN MODE)`, query)
+      qb.whereRaw(`MATCH(messages.message, messages.address, messages.source) AGAINST (? IN BOOLEAN MODE)`, query)
     } else if (dbtype == 'oracledb' && query != '') {
       qb.whereRaw(`CONTAINS("messages"."message", ?, 1) > 0`, query)
     } else {
@@ -282,10 +282,6 @@ router.get('/messageSearch', isLoggedIn, function(req, res, next) {
   }).orderBy('messages.timestamp', 'desc')
     .then((rows) => {
       if (rows) {
-        if (dbtype == 'mysql') {
-          // This is required for MySQL Compatibility - SQLite doesn't need this.
-          rows = rows[0]
-        }
         for (row of rows) {
           if (HideCapcode) {
             if (!req.isAuthenticated()) {
