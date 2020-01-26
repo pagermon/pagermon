@@ -39,7 +39,7 @@ var dbconfig = {
 
 if (dbtype == 'sqlite3') {
   dbconfig.connection.filename = nconf.get('database:file');
-} else if (dbtype == 'sqlite3') {
+} else if (dbtype == 'mysql') {
   dbconfig.connection.host = nconf.get('database:server');
   dbconfig.connection.user = nconf.get('database:username');
   dbconfig.connection.password = nconf.get('database:password');
