@@ -270,6 +270,8 @@ router.get('/messageSearch', isLoggedIn, function(req, res, next) {
     if (dbtype == 'sqlite3' && query != '') {
       qb.whereRaw('messages_search_index MATCH ?', query)
     } else if (dbtype == 'mysql' && query != '') {
+      //This wraps the search query in quotes so MySQL searches for the complete term rather than individual words.
+      query = '"' + query + '"'
       qb.whereRaw(`MATCH(messages.message, messages.address, messages.source) AGAINST (? IN BOOLEAN MODE)`, query)
     } else if (dbtype == 'oracledb' && query != '') {
       qb.whereRaw(`CONTAINS("messages"."message", ?, 1) > 0`, query)
