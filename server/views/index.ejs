@@ -129,7 +129,7 @@
             <td class="shrink noMobile noSmall" ng-if="!user">
               <span>{{message.alias || ''}}</span>
             </td>
-            <td class="expand"><div highlight="message.message" replacement="init.replaceText" class="pagerMessage" ng-click="toggleHiddenRow($index, message)"></td>
+            <td class="expand"><div highlight="message.message" replacement="init.replaceText" class="pagerMessage" <% if (accordionEnable) { %> ng-click="toggleHiddenRow($index, message)"<% } %>></td>
           </tr>
           <tr ng-repeat-end ng-show="activeRow==$index">
               <td colspan="7">

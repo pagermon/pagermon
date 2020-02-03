@@ -34,7 +34,8 @@
     "adminShow": false,
     "HideCapcode": false,
     "HideSource": false,
-    "apiSecurity": false
+    "apiSecurity": false,
+    "accordionEnable": true
   },
   "auth": {
     "type": "local",
