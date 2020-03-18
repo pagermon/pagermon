@@ -1,3 +1,13 @@
+﻿# 0.3.6 - 2020-03-19
+
+* Add Generic Webhook plugin #325 @stubbers
+* Cleanup legacy DB code, add more logging to Knex #335 @DanrwAU
+* GA De-Dupe - Resolved Dupe GA Hits. @marshyonline
+* Add front page popout. @marshyonline
+* Fix mixed content errors on admin panel @davidmckenzie
+* Fix Knex serialisation #343 @davidmckenzie
+* Enable Help Button @marshyonline
+
 # 0.3.5 - 2019-09-06
 
 * Add Knex logging to Winston #311 @DanrwAU
