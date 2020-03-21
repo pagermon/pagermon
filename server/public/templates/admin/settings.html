@@ -67,6 +67,7 @@
                 <select name="database.type" ng-model="settings.database.type" class="form-control" required>
                   <option value="sqlite3">SQLite</option>
                   <option value="mysql">MySQL / MariaDB</option>
+                  <option value="oracledb">Oracle DB</option>
                   <!--<option value="mssql">MSSQL</option>
                   <option value="pg">Postgres</option> -->
                 </select>
@@ -77,6 +78,13 @@
               <div class="col-xs-8 col-sm-9">
               <input type="text" class="form-control" name="database.file" ng-model="settings.database.file" required>
               <span id="helpBlock" class="help-block">Configure the path to the SQLite Database</span>
+              </div>
+            </div>
+            <div class="form-group" ng-if="settings.database.type == 'oracledb'">
+              <label for="database.connectString" class="col-xs-4 col-sm-3 control-label">Database Connection String</label>
+              <div class="col-xs-8 col-sm-9">
+              <input type="text" class="form-control" name="database.connectString" ng-model="settings.database.connectString" required>
+              <span id="helpBlock" class="help-block">Oracle connection string</span>
               </div>
             </div>
             <div class="form-group" ng-if="settings.database.type == 'pg' || settings.database.type == 'mysql' || settings.database.type == 'mssql'">
@@ -93,14 +101,14 @@
               <span id="helpBlock" class="help-block">Name of the database.</span>
               </div>
             </div>
-            <div class="form-group" ng-if="settings.database.type == 'pg' || settings.database.type == 'mysql' || settings.database.type == 'mssql'">
+            <div class="form-group" ng-if="settings.database.type == 'pg' || settings.database.type == 'mysql' || settings.database.type == 'mssql' || settings.database.type == 'oracledb'">
               <label for="database.username" class="col-xs-4 col-sm-3 control-label">Database Username</label>
               <div class="col-xs-8 col-sm-9">
               <input type="text" class="form-control" name="database.username" ng-model="settings.database.username" required>
               <span id="helpBlock" class="help-block">Database Username</span>
               </div>
             </div>
-            <div class="form-group" ng-if="settings.database.type == 'pg' || settings.database.type == 'mysql' || settings.database.type == 'mssql'">
+            <div class="form-group" ng-if="settings.database.type == 'pg' || settings.database.type == 'mysql' || settings.database.type == 'mssql' || settings.database.type == 'oracledb'">
               <label for="database.password" class="col-xs-4 col-sm-3 control-label">Database Password</label>
               <div class="col-xs-8 col-sm-9">
                   <div class="input-group">

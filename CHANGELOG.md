@@ -1,4 +1,8 @@
-﻿# 0.3.6 - 2020-03-19
+# 0.3.7 - Unreleased
+
+* Add Oracle support because why the heck not #345 @davidmckenzie
+
+# 0.3.6 - 2020-03-19
 
 * Add Generic Webhook plugin #325 @stubbers
 * Cleanup legacy DB code, add more logging to Knex #335 @DanrwAU

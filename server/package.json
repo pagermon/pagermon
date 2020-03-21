@@ -36,6 +36,7 @@
     "node-prowl": "latest",
     "node-uuid": "^1.4.8",
     "nodemailer": "latest",
+    "oracledb": "3.1.2",
     "passport": "^0.3.2",
     "passport-local": "^1.0.0",
     "passport-localapikey-update": "^0.5.0",
