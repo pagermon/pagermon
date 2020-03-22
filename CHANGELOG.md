@@ -1,6 +1,7 @@
-# 0.3.7 - Unreleased
+﻿# 0.3.7 - Unreleased
 
 * Add Oracle support because why the heck not #345 @davidmckenzie
+* Fix new FLEX multimon format #357 @davidmckenzie
 
 # 0.3.6 - 2020-03-19
 
