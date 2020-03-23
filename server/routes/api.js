@@ -428,6 +428,7 @@ router.get('/capcodes/:id', isLoggedIn, function(req, res, next) {
     "icon": "question",
     "color": "black",
     "ignore": 0,
+    "storeToneOnly": 0,
     "pluginconf": {}
   };
   if (id == 'new') {
@@ -525,6 +526,14 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
     var data = req.body;
         data.pluginData = {};
 
+
+    // Define if message is Tone Only
+    data.isToneOnly = false;
+    if ( data.message == "TONE ONLY" ){
+      // Marked as "Tone only" in client reader
+      data.isToneOnly = true;
+    }
+
     if (filterDupes) {
       // this is a bad solution and tech debt that will bite us in the ass if we ever go HA, but that's a problem for future me and that guy's a dick
       var datetime = data.datetime || 1;
@@ -556,13 +565,6 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
         msgBuffer.shift();
       }
       msgBuffer.push({message: data.message, datetime: data.datetime, address: data.address});
-    }
-
-    // Define if message is Tone Only
-    data.isToneOnly = false;
-    if ( data.message.length == 9 && data.message.match(new RegExp('^(TONE ONLY)$')) ){
-      // Marked as "Tone only" in client reader
-      data.isToneOnly = true;
     }
 
     // send data to pluginHandler before proceeding
@@ -636,7 +638,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
               res.send('Ignoring duplicate');
             } else {
               db.from('capcodes')
-                  .select('id', 'ignore')
+                  .select('id', 'ignore', 'alias', 'agency', 'icon', 'color', 'storeToneOnly', 'pluginconf')
                   // TODO: test this doesn't break other DBs - there's a lot of quote changes here
                   .modify(function(queryBuilder) {
                     if (dbtype == 'oracledb') {
@@ -668,14 +670,15 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                       alias_id = data.pluginData.aliasId;
                     }
 
-                    if( data.isToneOnly ){
+                    // Process ToneOnly, only if not ignored
+                    if( insert && data.isToneOnly ){
                       if( storeToneOnly == "never" ){
                         insert = false;
                         logger.main.info('Ignoring tone only, Store:never, address: '+address);
                       }else if( storeToneOnly == "aliases" ){
                         if( !(typeof row !== 'undefined' && row.storeToneOnly == 1 ) ){
                           insert = false;
-                          logger.main.info('Ignoring tone only, Store:aliases, address: '+address+' alias: '+row.id);
+                          logger.main.info('Ignoring tone only, Store:aliases, address: '+address+' alias: '+row.alias);
                         }
                       }
                     }
@@ -716,6 +719,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                             row = row[0]
                             // send data to pluginHandler after processing
                             row.pluginData = data.pluginData;
+                            row.isToneOnly = data.isToneOnly; // If tone Only stored
 
                             if (row.pluginconf) {
                               row.pluginconf = parseJSON(row.pluginconf);
@@ -785,8 +789,31 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                         logger.main.error(err)
                       })
                     } else {
+                      if(data.isToneOnly){
+                        if(!insert){
+                          if (row.pluginconf) {
+                            row.pluginconf = parseJSON(row.pluginconf);
+                          } else {
+                            row.pluginconf = {};
+                          }
+                          data = Object.assign(data, row);
+
+                          // send data to pluginHandler
+                          // Plugin can use data.isToneOnly
+                          logger.main.info('Tone only not stored but processed by plugins, address: '+address);
+                          logger.main.debug('toneonlyMessage start');
+                          pluginHandler.handle('message', 'after', data, function(response) {
+                            logger.main.debug(util.format('%o',response));
+                            logger.main.debug('toneonlyMessage done');
+
+                            res.status(200);
+                            res.send('Tone only not stored but processed by plugins');
+                          })
+                        }
+                      }else{
                         res.status(200);
                         res.send('Ignoring filtered');
+                      }
                     }
               })
               .catch((err) => {

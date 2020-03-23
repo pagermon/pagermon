@@ -31,6 +31,7 @@ var apikey = nconf.get('apikey');
 var identifier = nconf.get('identifier');
 var sendFunctionCode = nconf.get('sendFunctionCode') || false;
 var useTimestamp = nconf.get('useTimestamp') || true;
+var enableToneOnly = nconf.get('enableToneOnly') || true;
 
 //Check if hostname is in a valid format - currently only removes trailing slash - possibly expand to validate the whole URI? 
 if(hostname.substr(-1) === '/') {
@@ -97,8 +98,13 @@ rl.on('line', (line) => {
       message = line.match(/Numeric:(.*?)$/)[1].trim();
       trimMessage = message.replace(/<[A-Za-z]{3}>/g,'').replace(/Ä/g,'[').replace(/Ü/g,']');
     } else {
-      message = "TONE ONLY";
-      trimMessage = message;
+      if(enableToneOnly){
+        message = "TONE ONLY";
+        trimMessage = message;
+      }else{
+        message = false;
+        trimMessage = '';
+      }
     }
   } else if (line.match(/FLEX[:|]/)) {
     address = line.match(/FLEX[:|] ?.*?[\[|](\d*?)[\]| ]/)[1].trim();

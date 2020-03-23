@@ -4,12 +4,25 @@
     "disable": false,
     "trigger": "message",
     "scope": "after",
+    "acceptToneOnly": true,
     "config": [ 
         {
             "name": "pushAPIKEY",
             "label": "API Key",
             "description": "Application key supplied by Pushover.",
             "type": "text",
+            "required": true
+        },
+        {
+            "name": "processToneOnly",
+            "label": "Process \"Tone only\" messages ",
+            "description": "",
+            "type": "select",
+            "options": [
+                {"value": "never", "text": "Never"},
+                {"value": "aliases", "text": "For selected aliases"},
+                {"value": "always", "text": "Always"}
+            ],
             "required": true
         }
     ],
@@ -40,6 +53,12 @@
             "description": "Pushover destination for messages",
             "type": "text",
             "required": true
+        },
+        {
+            "name": "toneOnlyProcessAlias",
+            "label": "Process \"Tone Only\" for this alias",
+            "description": "Depends on the \"Plugins Settings\" -> Pushover - > \"Process Tone only messages\". This parameter is only used if set to \"For selected aliases\".",
+            "type": "checkbox"
         },
         {
             "name": "sound",

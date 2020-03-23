@@ -3,5 +3,6 @@
   "hostname": "http://127.0.0.1:3000",
   "identifier": "TEST",
   "sendFunctionCode": false,
-  "useTimestamp": true
+  "useTimestamp": true,
+  "enableToneOnly": true
 }

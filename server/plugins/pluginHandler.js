@@ -28,13 +28,19 @@ function handle(trigger, scope, data, callback) {
                 let pConfig = require(`./${plugin}.json`);
                 // check scope
                 if (pConfig.trigger == trigger && pConfig.scope == scope && !pConfig.disable) {
-                    logger.main.debug('RUNNING PLUGIN!');
-                    let pRun = require(`./${plugin}`);
-                        pRun.run(trigger, scope, data, conf, function(response, error) {
-                            if (error) logger.main.error(error);
-                            if (response) data = response;
-                            cb();
-                        });
+//||  scope == "toneonly"
+                    if ( !data.isToneOnly || ( data.isToneOnly && typeof pConfig.acceptToneOnly != 'undefined' && pConfig.acceptToneOnly ) ) {
+                        logger.main.debug('RUNNING PLUGIN!');
+                        let pRun = require(`./${plugin}`);
+                            pRun.run(trigger, scope, data, conf, function(response, error) {
+                                if (error) logger.main.error(error);
+                                if (response) data = response;
+                                cb();
+                            });
+                    }else{
+                        logger.main.debug('Plugin does not accept "ToneOnly" messages');
+                        cb();
+                    }
                 } else {
                     logger.main.debug('Plugin does not run in this scope');
                     cb();
