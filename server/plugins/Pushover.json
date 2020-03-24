@@ -22,6 +22,12 @@
             "type": "checkbox"
         },
         {
+            "name": "processToneOnly",
+            "label": "Process Tone Only messages",
+            "description": "Depends on the \"General Settings\" -> \"Process tone only\". Only used if set to \"Aliases\".",
+            "type": "checkbox"
+        },
+        {
             "name": "priority",
             "label": "Priority",
             "description": "Priority of the message",

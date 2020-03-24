@@ -9,6 +9,7 @@ function run(trigger, scope, data, config, callback) {
           logger.main.error('Pushover: ' + data.address + ' No User/Group key set. Please enter User/Group Key.');
             callback();
           } else {
+            // data.isToneOnly to determine if it is a Tone only message
             var p = new push({
               user: pConf.group,
               token: config.pushAPIKEY,

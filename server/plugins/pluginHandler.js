@@ -28,15 +28,22 @@ function handle(trigger, scope, data, callback) {
                 let pConfig = require(`./${plugin}.json`);
                 // check scope
                 if (pConfig.trigger == trigger && pConfig.scope == scope && !pConfig.disable) {
-//||  scope == "toneonly"
                     if ( !data.isToneOnly || ( data.isToneOnly && typeof pConfig.acceptToneOnly != 'undefined' && pConfig.acceptToneOnly ) ) {
                         logger.main.debug('RUNNING PLUGIN!');
                         let pRun = require(`./${plugin}`);
+                        pAliasConf = data.pluginconf[plugin];
+
+
+                        if( nconf.get('messages:processToneOnly') == 'aliases' && ( typeof pAliasConf.processToneOnly == "undefined" || !pAliasConf.processToneOnly ) ){
+                            logger.main.debug("processToneOnly=aliases and toneOnlyProcessAlias=false -> Skipped")
+                            cb();
+                        }else{
                             pRun.run(trigger, scope, data, conf, function(response, error) {
                                 if (error) logger.main.error(error);
                                 if (response) data = response;
                                 cb();
                             });
+                        }
                     }else{
                         logger.main.debug('Plugin does not accept "ToneOnly" messages');
                         cb();
