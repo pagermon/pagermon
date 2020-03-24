@@ -4,24 +4,11 @@ var logger = require('../log');
 function run(trigger, scope, data, config, callback) {
     var pConf = data.pluginconf.Pushover;
     if (pConf && pConf.enable) {
-        if (data.isToneOnly  && ( typeof config.processToneOnly == 'unknown' || config.processToneOnly.value == "never" ) ){
-          logger.main.debug("processToneOnly=NEVER")
-          callback();
-          return;
-        }
-
         //ensure key has been entered before trying to push
         if (pConf.group == 0 || pConf.group == '0' || !pConf.group) {
           logger.main.error('Pushover: ' + data.address + ' No User/Group key set. Please enter User/Group Key.');
             callback();
           } else {
-          
-            if ( data.isToneOnly && ( config.processToneOnly.value == "aliases" && ( typeof pConf.toneOnlyProcessAlias == "undefined" || !pConf.toneOnlyProcessAlias ) ) ){
-              logger.main.debug("processToneOnly=aliases and toneOnlyProcessAlias=false -> Skipped")
-              callback();
-              return;
-            }
-
             var p = new push({
               user: pConf.group,
               token: config.pushAPIKEY,

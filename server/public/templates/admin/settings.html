@@ -174,14 +174,25 @@
               </div>
             </div>
             <div class="form-group">
-              <label for="messages.storeToneOnly" class="col-xs-4 col-sm-3 control-label">Store tone only messages</label>
+              <label for="messages.storeToneOnly" class="col-xs-4 col-sm-3 control-label">Process tone only messages</label>
               <div class="col-xs-8 col-sm-9">
-                <select name="messages.storeToneOnly" ng-model="settings.messages.storeToneOnly" class="form-control">
+                <select name="messages.processToneOnly" ng-model="settings.messages.processToneOnly" class="form-control">
                   <option value="never">Never</option>
                   <option value="aliases">Only for selected aliases</option>
                   <option value="always">Always</option>
                 </select>
-                <span id="helpBlock" class="help-block">Choose if you want to store "Tone only" messages. <a href="https://github.com/pagermon/pagermon/wiki/Messages">See more info about "Tone only" filtering</a></span>
+                <span id="helpBlock" class="help-block">Choose if you want to store "Tone only" messages. (Default:never) <a href="https://github.com/pagermon/pagermon/wiki/Messages">See more info about "Tone only" filtering</a></span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="messages.storeToneOnly" class="col-xs-4 col-sm-3 control-label">Store tone only messages</label>
+              <div class="col-xs-8 col-sm-9">
+                <select name="messages.storeToneOnly" ng-model="settings.messages.storeToneOnly" ng-disabled="settings.messages.processToneOnly != 'aliases' && settings.messages.processToneOnly != 'always'" class="form-control">
+                  <option value="never">Never</option>
+                  <option value="aliases">Only for selected aliases</option>
+                  <option value="always">Always</option>
+                </select>
+                <span id="helpBlock" class="help-block">Choose if you want to store "Tone only" messages.<br />Need "Process tone only messages" = "Always" or "For selected aliases" (Default:never)<br /><a href="https://github.com/pagermon/pagermon/wiki/Messages">See more info about "Tone only" filtering</a></span>
               </div>
             </div>
             <div class="form-group">

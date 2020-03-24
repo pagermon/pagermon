@@ -429,6 +429,7 @@ router.get('/capcodes/:id', isLoggedIn, function(req, res, next) {
     "color": "black",
     "ignore": 0,
     "storeToneOnly": 0,
+    "processToneOnly": 0,
     "pluginconf": {}
   };
   if (id == 'new') {
@@ -477,6 +478,7 @@ router.get('/capcodeCheck/:id', isLoggedIn, function(req, res, next) {
             "color": "black",
             "ignore": 0,
             "storeToneOnly": 0,
+            "processToneOnly": 0,
             "pluginconf": {}
           };
           res.status(200);
@@ -518,6 +520,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
   if (req.body.address && req.body.message) {
     var dbtype = nconf.get('database:type');
     var storeToneOnly = nconf.get('messages:storeToneOnly') || "never";
+    var processToneOnly = nconf.get('messages:processToneOnly') || "never";
     var filterDupes = nconf.get('messages:duplicateFiltering');
     var dupeLimit = nconf.get('messages:duplicateLimit') || 0; // default 0
     var dupeTime = nconf.get('messages:duplicateTime') || 0; // default 0
@@ -532,6 +535,12 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
     if ( data.message == "TONE ONLY" ){
       // Marked as "Tone only" in client reader
       data.isToneOnly = true;
+
+      if(processToneOnly == "never"){
+        logger.main.info('Ignoring tone only, process:never');
+        res.status(200);
+        return res.send('Ignoring tone only, process:never');
+      }
     }
 
     if (filterDupes) {
@@ -638,7 +647,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
               res.send('Ignoring duplicate');
             } else {
               db.from('capcodes')
-                  .select('id', 'ignore', 'alias', 'agency', 'icon', 'color', 'storeToneOnly', 'pluginconf')
+                  .select('id', 'ignore', 'alias', 'agency', 'icon', 'color', 'storeToneOnly', 'processToneOnly', 'pluginconf')
                   // TODO: test this doesn't break other DBs - there's a lot of quote changes here
                   .modify(function(queryBuilder) {
                     if (dbtype == 'oracledb') {
@@ -670,17 +679,30 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                       alias_id = data.pluginData.aliasId;
                     }
 
-                    // Process ToneOnly, only if not ignored
-                    if( insert && data.isToneOnly ){
-                      if( storeToneOnly == "never" ){
-                        insert = false;
-                        logger.main.info('Ignoring tone only, Store:never, address: '+address);
-                      }else if( storeToneOnly == "aliases" ){
-                        if( !(typeof row !== 'undefined' && row.storeToneOnly == 1 ) ){
+                    // Tone Only section
+                    if( data.isToneOnly ){
+                      // Process ToneOnly, only if not ignored
+                      if( insert ){
+                        if( storeToneOnly == "never" ){
                           insert = false;
-                          logger.main.info('Ignoring tone only, Store:aliases, address: '+address+' alias: '+row.alias);
+                          logger.main.info('Tone only will not stored, Store:never, address: '+address);
+                        }else if( storeToneOnly == "aliases" ){
+                          if( !(typeof row !== 'undefined' && row.storeToneOnly == 1 ) ){
+                            insert = false;
+                            logger.main.info('Tone only will not stored, Store:aliases, address: '+address+' alias: '+row.alias);
+                          }
+                        }
+                        data.storeToneOnly = insert;
+                      }
+                      var processing = true;
+                      if( processToneOnly == "aliases" ){
+                        if( !(typeof row !== 'undefined' && row.processToneOnly == 1 ) ){
+                          processing = false;
+                          logger.main.info('Tone only will not processed, process:aliases, address: '+address+' alias: '+row.alias);
                         }
                       }
+                      data.processToneOnly = processing; // Plugin can differentiate processing and store message
+                      // End Tone Only section
                     }
 
                     if (insert == true) {
@@ -726,10 +748,9 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                             } else {
                               row.pluginconf = {};
                             }
-                            logger.main.debug('afterMessage start');
-                            pluginHandler.handle('message', 'after', row, function(response) {
-                              logger.main.debug(util.format('%o',response));
-                              logger.main.debug('afterMessage done');
+
+                            callbackPluginHandler = function() {
+                              logger.main.debug('callbackPluginHandler start');
                               // remove the pluginconf object before firing socket message
                               delete row.pluginconf;
                               if (HideCapcode || apiSecurity) {
@@ -775,7 +796,19 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                                   req.io.emit('messagePost', row);
                                 }
                               }
-                            });
+                            }
+
+                            if( !data.isToneOnly || ( data.isToneOnly && data.processToneOnly == true) ){
+                              logger.main.debug('afterMessage start');
+                              pluginHandler.handle('message', 'after', row, function(response) {
+                                logger.main.debug(util.format('%o',response));
+                                logger.main.debug('afterMessage done');
+                                callbackPluginHandler();
+                              });
+                            }else{
+                              // Tone Only and not processed
+                              callbackPluginHandler();
+                            }
                           }
                           res.status(200).send(''+result);
                         })
@@ -790,7 +823,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                       })
                     } else {
                       if(data.isToneOnly){
-                        if(!insert){
+                        if(data.processToneOnly == true){
                           if (row.pluginconf) {
                             row.pluginconf = parseJSON(row.pluginconf);
                           } else {
@@ -843,6 +876,7 @@ router.post('/capcodes', isLoggedIn, function(req, res, next) {
     var color = req.body.color || 'black';
     var icon = req.body.icon || 'question';
     var storeToneOnly = req.body.storeToneOnly || 0;
+    var processToneOnly = req.body.processToneOnly || 0;
     var ignore = req.body.ignore || 0;
     var pluginconf = JSON.stringify(req.body.pluginconf) || "{}";
       db.from('capcodes')
@@ -857,6 +891,7 @@ router.post('/capcodes', isLoggedIn, function(req, res, next) {
               color: color,
               icon: icon,
               storeToneOnly: storeToneOnly,
+              processToneOnly: processToneOnly,
               ignore: ignore,
               pluginconf: pluginconf
             })
@@ -869,6 +904,7 @@ router.post('/capcodes', isLoggedIn, function(req, res, next) {
               color: color,
               icon: icon,
               storeToneOnly: storeToneOnly,
+              processToneOnly: processToneOnly,
               ignore: ignore,
               pluginconf: pluginconf
             })
@@ -929,6 +965,7 @@ router.post('/capcodes/:id', isLoggedIn, function(req, res, next) {
       var color = req.body.color || 'black';
       var icon = req.body.icon || 'question';
       var storeToneOnly = req.body.storeToneOnly || 0;
+      var processToneOnly = req.body.processToneOnly || 0;
       var ignore = req.body.ignore || 0;
       var pluginconf = JSON.stringify(req.body.pluginconf) || "{}";
       var updateAlias = req.body.updateAlias || 0;
@@ -947,6 +984,7 @@ router.post('/capcodes/:id', isLoggedIn, function(req, res, next) {
               color: color,
               icon: icon,
               storeToneOnly: storeToneOnly,
+              processToneOnly: processToneOnly,
               ignore: ignore,
               pluginconf: pluginconf
             })
@@ -959,6 +997,7 @@ router.post('/capcodes/:id', isLoggedIn, function(req, res, next) {
               color: color,
               icon: icon,
               storeToneOnly: storeToneOnly,
+              processToneOnly: processToneOnly,
               ignore: ignore,
               pluginconf: pluginconf
             })
