@@ -692,16 +692,6 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                         }
                         data.storeToneOnly = insert;
                       }
-                      /*var processing = true;
-                      if( processToneOnly == "aliases" ){
-                        if( !(typeof row !== 'undefined' && row.processToneOnly == 1 ) ){
-                          processing = false;
-                          logger.main.info('Tone only will not processed, process:aliases, address: '+address+' alias: '+row.alias);
-                        }
-                      }
-                      data.processToneOnly = processing; // Plugin can differentiate processing and store message
-                      // End Tone Only section
-                      */
                     }
 
                     if (insert == true) {
