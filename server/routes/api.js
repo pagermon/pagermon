@@ -838,11 +838,12 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                           pluginHandler.handle('message', 'after', data, function(response) {
                             logger.main.debug(util.format('%o',response));
                             logger.main.debug('toneonlyMessage done');
-
-                            res.status(200);
-                            res.send('Tone only not stored but processed by plugins');
                           })
+                          res.status(200);
+                          res.send('Tone only not stored but processed by plugins');
                         }
+                        res.status(200);
+                        res.send('Tone only not stored and not processed by plugins');
                       }else{
                         res.status(200);
                         res.send('Ignoring filtered');
