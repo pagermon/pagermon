@@ -2,6 +2,7 @@
 
 * Add Oracle support because why the heck not #345 @davidmckenzie
 * Fix new FLEX multimon format #357 @davidmckenzie
+* Changed FontAwesome to v5.13.0 + Switched to cdnjs.cloudflare.com to serve
 
 # 0.3.6 - 2020-03-19
 
