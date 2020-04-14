@@ -150,8 +150,8 @@ services:
     container_name: pagermon
     environment:
       - APP_NAME=pagermon
-      - PUID=1000
-      - PGID=1000
+      - PUID=1000 # Not required since node user inside docker has UID 1000
+      - PGID=1000 # Not required since node user inside docker has GID 1000
       - TZ=Europe/London
     ports:
       - "3000:3000"
