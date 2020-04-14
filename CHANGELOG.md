@@ -2,7 +2,9 @@
 
 * Add Oracle support because why the heck not #345 @davidmckenzie
 * Fix new FLEX multimon format #357 @davidmckenzie
-* Changed FontAwesome to v5.13.0 + Switched to cdnjs.cloudflare.com to serve
+* Changed FontAwesome to v5.13.0 + Switched to cdnjs.cloudflare.com to serve #365 @MaxwellDPS
+* Docker Improvements and Auto-build with dockerhub #367 @SloCompTech
+* Add FontAwesome Shims to make 0.3.7 non-breaking #369 @DanrwAU
 
 # 0.3.6 - 2020-03-19
 
