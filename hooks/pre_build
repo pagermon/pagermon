@@ -1,0 +1,21 @@
+#!/bin/bash
+
+BUILD_ARCH=$(echo "${DOCKERFILE_PATH}" | cut -d '.' -f 2)
+
+if [ -z "$BUILD_ARCH" ] || [ "$BUILD_ARCH" == "amd64" ]; then
+    echo 'qemu-user-static: Registration not required for current arch';
+    exit 0
+fi
+
+#
+#   DockerHub multiarch hack
+#   @see https://stackoverflow.com/questions/54578066/how-to-build-a-docker-image-on-a-specific-architecture-with-docker-hub
+#   @see https://stackoverflow.com/questions/55818831/dockerhub-automated-build-for-arm-arm64-permission-denied
+#   @see https://stackoverflow.com/questions/44925788/dockerfile-compile-in-local-machine-but-fails-in-docker-hub-for-automated-build
+#   @see https://github.com/cmosh/alpine-arm
+#   @see https://github.com/balena-io-library/armv7hf-debian-qemu/tree/master/bin
+#   @see https://wiki.debian.org/RaspberryPi/qemu-user-static
+#   @see https://github.com/multiarch/qemu-user-static
+#   @see https://aquarat.co.za/tag/dockerhub/
+#
+docker run --rm --privileged multiarch/qemu-user-static:register --reset

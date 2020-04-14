@@ -1,7 +1,7 @@
 #
 #	PagerMon image
 #
-FROM slocomptech/bi-node:12
+FROM slocomptech/bi-node:12-armhf
 
 #
 #	Arguments
