@@ -31,7 +31,7 @@ LABEL org.opencontainers.image.authors="PagerMon Team" \
 			org.opencontainers.image.version=${VERSION}
 
 #
-#	Environment variables
+#	Environment variables.
 #	Don't forget to set NODE_ENV
 #
 ENV APP_NAME=PagerMon \
