@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BUILD_ARCH=$(echo "${DOCKERFILE_PATH}" | cut -d '.' -f 2)
+BUILD_ARCH=$(echo "${DOCKERFILE_PATH}" | cut -s -d '.' -f 2)
 
 if [ -z "$BUILD_ARCH" ] || [ "$BUILD_ARCH" == "amd64" ]; then
     echo 'qemu-user-static: Registration not required for current arch';
