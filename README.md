@@ -196,7 +196,7 @@ docker-compose up -d
 - In case you would like to follow the logfile, run `docker logs -f pagermon` (by `--name pagermon`)
 - To shutdown and remove the container (if using compose), run `docker-compose down`
 - If you make changes to the app for testing, you will need to re-build the image, run `docker-compose down && docker-compose up --build`
-- To run on *Raspberry Pi* use **armhf** variant (add `-armhf` at the end of version).
+- To run on *Raspberry Pi* use **armhf** variant (add `-armhf` at the end of version), but **be aware** that OracleDB does not work there.
 
 See [additional parameters](https://github.com/SloCompTech/docker-baseimage).
 

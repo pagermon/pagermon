@@ -70,6 +70,8 @@ RUN apk add --no-cache sqlite && \
 			python3 && \
 		ln -s /usr/bin/python3 /usr/bin/python && \
 		cd /app && \
+		# Remove OracleDB packages, since it can't be built for armhf
+		sed -i 's/"oracledb"\s*:\s*".*"\s*,//' /app/package.json && \
 		sudo -u ${CONTAINER_USER} -g ${CONTAINER_USER} npm install ${NPM_ARGS} && \
 		rm /usr/bin/python && \
     apk del .build-dependencies && \
