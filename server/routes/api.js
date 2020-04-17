@@ -279,7 +279,9 @@ router.get('/messageSearch', isLoggedIn, function(req, res, next) {
       if (address != '')
         qb.where('messages.address', 'LIKE', address).orWhere('messages.source', address);
       if (agency != '')
-        qb.whereIn('messages.alias_id', qb.select('id').from('capcodes').where('agency',agency).where('ignore',0))
+        qb.whereIn('messages.alias_id', function(qb2) {
+                qb2.select('id').from('capcodes').where('agency',agency).where('ignore',0);
+        })
     }
   }).orderBy('messages.timestamp', 'desc')
     .then((rows) => {
