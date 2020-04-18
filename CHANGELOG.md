@@ -6,6 +6,7 @@
 * Docker Improvements and Auto-build with dockerhub #367 @SloCompTech
 * Add FontAwesome Shims to make 0.3.7 non-breaking #369 @DanrwAU
 * Fix Agency Searching crashing applicaiton #370 @DanrwAU
+* Docker: Fix for saving config in docker if changed UID,GID #376 @SloCompTech
 
 # 0.3.6 - 2020-03-19
 

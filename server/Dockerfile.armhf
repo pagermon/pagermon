@@ -77,5 +77,6 @@ RUN apk add --no-cache sqlite && \
     apk del .build-dependencies && \
     # Link config file to config dir
     sudo -u ${CONTAINER_USER} -g ${CONTAINER_USER} ln -s /config/config.json /app/config/config.json && \
+    sudo -u ${CONTAINER_USER} -g ${CONTAINER_USER} ln -s /config/backup.json /app/config/backup.json && \
     sudo -u ${CONTAINER_USER} -g ${CONTAINER_USER} cp /app/config/default.json /defaults/config.json && \
     sed -i 's/"\.\/messages\.db.*"/"\/config\/messages\.db"/' /defaults/config.json
