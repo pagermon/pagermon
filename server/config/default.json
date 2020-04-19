@@ -4,7 +4,8 @@
     "sessionSecret": "1DVETLX8VE007RYQN9TN9Z00",
     "frontPopupEnable": false,
     "frontPopupTitle": "",
-    "frontPopupContent": ""
+    "frontPopupContent": "",
+    "searchLocation": "bottom"
   },
   "database": {
     "file": "./messages.db",

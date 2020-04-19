@@ -36,6 +36,16 @@
               </div>
             </div>
             <div class="form-group">
+              <label for="global.searchLocation" class="col-xs-4 col-sm-3 control-label">Log level</label>
+              <div class="col-xs-8 col-sm-9">
+                <select name="global.searchLocation" ng-model="settings.global.searchLocation" class="form-control">
+                  <option value="top">Top</option>
+                  <option value="bottom">Bottom</option>
+                </select>
+                <span id="helpBlock" class="help-block">Sets the location of the Search Bar.</span>
+              </div>
+            </div>
+            <div class="form-group">
               <label for="global.frontPopupEnable" class="col-xs-4 col-sm-3 control-label">Enable One Time Modal</label>
               <div class="col-xs-8 col-sm-9">
                 <div class="checkbox">
