@@ -8,6 +8,7 @@
 * Fix Agency Searching crashing applicaiton #370 @DanrwAU
 * Docker: Fix for saving config in docker if changed UID,GID #376 @SloCompTech
 * Docker: Multistage build #377 @SloCompTech
+* Add option to relocate searchbar #378 @marshyonline, @DanrWAU
 
 # 0.3.6 - 2020-03-19
 
