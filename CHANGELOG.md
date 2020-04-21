@@ -1,4 +1,18 @@
-﻿# 0.3.6 - 2020-03-19
+﻿# 0.3.7 - Unreleased
+
+* Add Oracle support because why the heck not #345 @davidmckenzie
+* Fix new FLEX multimon format #357 @davidmckenzie
+* ~~Changed FontAwesome to v5.13.0 + Switched to cdnjs.cloudflare.com to serve #365 @MaxwellDPS~~
+* Docker Improvements and Auto-build with dockerhub #367 @SloCompTech
+* ~~Add FontAwesome Shims to make 0.3.7 non-breaking #369 @DanrwAU~~
+* Fix Agency Searching crashing applicaiton #370 @DanrwAU
+* Docker: Fix for saving config in docker if changed UID,GID #376 @SloCompTech
+* Docker: Multistage build #377 @SloCompTech
+* Add option to relocate searchbar #378 @marshyonline, @DanrWAU
+
+Note: FontAwesome V5 removed due to compatibility issues
+
+# 0.3.6 - 2020-03-19
 
 * Add Generic Webhook plugin #325 @stubbers
 * Cleanup legacy DB code, add more logging to Knex #335 @DanrwAU
