@@ -1,4 +1,8 @@
 /* Index - Dark Theme */
+.dropdown-toggle {
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 0px;
+}
 
 .d-location {
     text-align: center;
