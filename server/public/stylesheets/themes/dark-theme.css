@@ -28,10 +28,31 @@
     padding-right:3px;
 }
 
+pagination>.active>a, .pagination>.active>span, .pagination>.active>a:hover, .pagination>.active>span:hover, .pagination>.active>a:focus, .pagination>.active>span:focus {
+    background-color: #203f52!important;
+    border-color: #203f52!important;
+    cursor: default;
+}
 
 /* Naughty Bootstrap overrides until we get it up to date with recent */
 
+@media (min-width: 992px) {
+.col-lg-6 {
+    -webkit-box-flex: 0;
+    -ms-flex: 0 0 50%;
+    flex: 0 0 50%;
+    max-width: 50%;
+    }   
+}
 
+@media (min-width: 420px) {
+.col-xs-10 {
+    -webkit-box-flex: 0;
+    -ms-flex: 0 0 83.33333%;
+    flex: 0 0 83.33333%;
+    max-width: 83.33333%;
+    }
+}
 
 main .container-fluid {
     padding-left: 0;
@@ -53,15 +74,6 @@ main .container-fluid {
     margin-left: auto;
     }
     
-    .row {
-    display: -webkit-box!important;
-    display: -ms-flexbox!important;
-    display: flex!important;
-    -ms-flex-wrap: wrap!important;
-    flex-wrap: wrap!important;
-    margin-right: -15px;
-    margin-left: -15px;
-}
 
 .col-12 {
     -webkit-box-flex: 0!important;
