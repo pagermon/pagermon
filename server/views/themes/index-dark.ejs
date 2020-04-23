@@ -25,6 +25,7 @@
         </div>
       <% } %>
       
+      <% if (login) { %>
       <div class="container-fluid disable-text-selection" style="margin-top:15px">
                 <div class="btn-group" data-toggle="buttons">
                   <button type="button" class="btn btn-default btn-sm" ng-click="updateData();" aria-label="Refresh" title="Refresh Messages"><i class="fa fa-refresh {{spinner}}" aria-hidden="true"></i></button>
@@ -46,6 +47,7 @@
                   <strong>Filter:</strong> <a ng-href="/" style="margin-bottom: 3px;" class="btn btn-primary btn-xs">{{filter || origQuery}} <i class="fa fa-fw fa-times"></i></a>
               </span>
       </div>
+      <% } %>
 
   <div class="container-fluid disable-text-selection" style="background: #1e323f;padding-top:15px;">
     <!-- Dark Theme Card Template -->
