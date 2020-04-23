@@ -1,4 +1,7 @@
 /* Index - Dark Theme */
+.footer-nav {
+    box-shadow: 0 1px 15px rgba(0,0,0,.1), 0 1px 8px rgba(0,0,0,.1)!important;
+}
 .dropdown-toggle {
     border-top-left-radius: 0px;
     border-bottom-left-radius: 0px;
@@ -32,6 +35,20 @@ pagination>.active>a, .pagination>.active>span, .pagination>.active>a:hover, .pa
     background-color: #203f52!important;
     border-color: #203f52!important;
     cursor: default;
+}
+.pagination>.active>a, .pagination>.active>span, .pagination>.active>a:hover, .pagination>.active>span:hover, .pagination>.active>a:focus, .pagination>.active>span:focus {
+    background-color: #203f52!important;
+    border-color: #203f52!important;
+    cursor: default;
+}
+.pagination>li>a, .pagination>li>span {
+    padding: 6px 10px;
+    width: 100%;
+    text-align: center;
+    color: #203f52!important
+    border: 0;
+    border-top: 1px solid #dddddd;
+    border-bottom: 1px solid #dddddd;
 }
 
 /* Naughty Bootstrap overrides until we get it up to date with recent */
