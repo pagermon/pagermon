@@ -2,6 +2,10 @@
   "global": {
     "loglevel": "debug",
     "sessionSecret": "1DVETLX8VE007RYQN9TN9Z00",
+    "frontPopupEnable": false,
+    "frontPopupTitle": "",
+    "frontPopupContent": "",
+    "searchLocation": "bottom",
     "sitename": "PagerMon"
   },
   "database": {
