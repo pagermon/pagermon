@@ -20,6 +20,10 @@ router.use(function (req, res, next) {
   res.locals.gaTrackingCode = nconf.get('monitoring:gaTrackingCode');
   res.locals.metatags = nconf.get('global:metatags');
   res.locals.metadescription = nconf.get('global:metadescription');
+  res.locals.frontPopupEnable = nconf.get('global:frontPopupEnable');
+  res.locals.frontPopupTitle = nconf.get('global:frontPopupTitle');
+  res.locals.frontPopupContent = nconf.get('global:frontPopupContent');
+  res.locals.searchLocation = nconf.get('global:searchLocation');
   next();
 });
 

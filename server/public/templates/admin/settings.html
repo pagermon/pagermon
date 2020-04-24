@@ -35,6 +35,7 @@
                 <span id="helpBlock" class="help-block">Secret key for cookie sessions, should be changed before deploying the application. Changing this will invalidate existing sessions.</span>
               </div>
             </div>
+
 		  <div class="form-group">
               <label for="global.metatags" class="col-xs-4 col-sm-3 control-label">Metatag Keywords</label>
               <div class="col-xs-8 col-sm-9">
@@ -47,6 +48,41 @@
               <div class="col-xs-8 col-sm-9">
               <input type="text" class="form-control" name="global.metadescription" ng-model="settings.global.metadescription">
               <span id="helpBlock" class="help-block">Enter Metatag Description</span>
+               </div>
+            </div>
+
+            <div class="form-group">
+              <label for="global.searchLocation" class="col-xs-4 col-sm-3 control-label">Homepage Search Bar Location</label>
+              <div class="col-xs-8 col-sm-9">
+                <select name="global.searchLocation" ng-model="settings.global.searchLocation" class="form-control">
+                  <option value="top">Top</option>
+                  <option value="bottom">Bottom</option>
+                </select>
+                <span id="helpBlock" class="help-block">Sets the location of the Search Bar.</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="global.frontPopupEnable" class="col-xs-4 col-sm-3 control-label">Enable One Time Modal</label>
+              <div class="col-xs-8 col-sm-9">
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" name="global.frontPopupEnable" ng-model="settings.global.frontPopupEnable"> Enable showing a modal to new visitors. This can be used for showing a disclamer or Site/Contact information. 
+                  </label>
+                  </div>
+              </div>
+            </div>
+            <div class="form-group" ng-hide="!settings.global.frontPopupEnable">
+              <label for="global.frontPopupTitle" class="col-xs-4 col-sm-3 control-label">Modal Title </label>
+              <div class="col-xs-8 col-sm-9">
+                  <input class="form-control" type="text" name="global.frontPopupTitle" ng-model="settings.global.frontPopupTitle" ng-required="settings.global.frontPopupEnable">
+                <span id="helpBlock" class="help-block">Modal Title</span>
+              </div>
+            </div>
+            <div class="form-group" ng-hide="!settings.global.frontPopupEnable">
+              <label for="global.frontPopupContent" class="col-xs-4 col-sm-3 control-label">Modal Content </label>
+              <div class="col-xs-8 col-sm-9">
+                <div text-angular name="global.frontPopupContent" ng-model="settings.global.frontPopupContent" ng-required="settings.global.frontPopupEnable" ta-toolbar="[['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'pre', 'quote'],['bold', 'italics', 'underline', 'strikeThrough', 'ul', 'ol', 'redo', 'undo', 'clear'],['justifyLeft', 'justifyCenter', 'justifyRight', 'indent', 'outdent'],['html', 'insertImage','insertLink']]" ta-text-editor-class="clearfix border-around" ta-html-editor-class="border-around"></div>
+		            <span id="helpBlock" class="help-block">Modal Content</span>
               </div>
             </div>
 
@@ -57,6 +93,7 @@
                 <select name="database.type" ng-model="settings.database.type" class="form-control" required>
                   <option value="sqlite3">SQLite</option>
                   <option value="mysql">MySQL / MariaDB</option>
+                  <option value="oracledb">Oracle DB</option>
                   <!--<option value="mssql">MSSQL</option>
                   <option value="pg">Postgres</option> -->
                 </select>
@@ -67,6 +104,13 @@
               <div class="col-xs-8 col-sm-9">
               <input type="text" class="form-control" name="database.file" ng-model="settings.database.file" required>
               <span id="helpBlock" class="help-block">Configure the path to the SQLite Database</span>
+              </div>
+            </div>
+            <div class="form-group" ng-if="settings.database.type == 'oracledb'">
+              <label for="database.connectString" class="col-xs-4 col-sm-3 control-label">Database Connection String</label>
+              <div class="col-xs-8 col-sm-9">
+              <input type="text" class="form-control" name="database.connectString" ng-model="settings.database.connectString" required>
+              <span id="helpBlock" class="help-block">Oracle connection string</span>
               </div>
             </div>
             <div class="form-group" ng-if="settings.database.type == 'pg' || settings.database.type == 'mysql' || settings.database.type == 'mssql'">
@@ -83,14 +127,14 @@
               <span id="helpBlock" class="help-block">Name of the database.</span>
               </div>
             </div>
-            <div class="form-group" ng-if="settings.database.type == 'pg' || settings.database.type == 'mysql' || settings.database.type == 'mssql'">
+            <div class="form-group" ng-if="settings.database.type == 'pg' || settings.database.type == 'mysql' || settings.database.type == 'mssql' || settings.database.type == 'oracledb'">
               <label for="database.username" class="col-xs-4 col-sm-3 control-label">Database Username</label>
               <div class="col-xs-8 col-sm-9">
               <input type="text" class="form-control" name="database.username" ng-model="settings.database.username" required>
               <span id="helpBlock" class="help-block">Database Username</span>
               </div>
             </div>
-            <div class="form-group" ng-if="settings.database.type == 'pg' || settings.database.type == 'mysql' || settings.database.type == 'mssql'">
+            <div class="form-group" ng-if="settings.database.type == 'pg' || settings.database.type == 'mysql' || settings.database.type == 'mssql' || settings.database.type == 'oracledb'">
               <label for="database.password" class="col-xs-4 col-sm-3 control-label">Database Password</label>
               <div class="col-xs-8 col-sm-9">
                   <div class="input-group">

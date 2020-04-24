@@ -1,6 +1,6 @@
 {
   "name": "pagermon",
-  "version": "0.3.5-beta",
+  "version": "0.3.7-beta",
   "private": true,
   "license": "Unlicense",
   "scripts": {
@@ -36,6 +36,7 @@
     "node-prowl": "latest",
     "node-uuid": "^1.4.8",
     "nodemailer": "latest",
+    "oracledb": "^4.2.0",
     "passport": "^0.3.2",
     "passport-local": "^1.0.0",
     "passport-localapikey-update": "^0.5.0",

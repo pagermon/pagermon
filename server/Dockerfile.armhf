@@ -2,7 +2,7 @@
 #	Build & install packages
 # multistage to save time when building (don't install packages every time)
 #
-FROM slocomptech/bi-node:12 as builder
+FROM slocomptech/bi-node:12-armhf as builder
 
 COPY package.json /app/
 
@@ -18,12 +18,14 @@ RUN apk add --no-cache --virtual .build-dependencies \
       python3 && \
     ln -s /usr/bin/python3 /usr/bin/python && \
     cd /app && \
+    # Remove OracleDB packages, since it can't be built for armhf
+    sed -i 's/"oracledb"\s*:\s*".*"\s*,//' /app/package.json && \
     sudo -u ${CONTAINER_USER} -g ${CONTAINER_USER} npm install ${NPM_ARGS}
-
+  
 #
 #	PagerMon image
 #
-FROM slocomptech/bi-node:12
+FROM slocomptech/bi-node:12-armhf
 
 #
 #	Copy packages from builder
@@ -83,6 +85,8 @@ COPY . /app/
 # Install pagermon
 RUN chown -R $CONTAINER_USER:$CONTAINER_USER /app && \
     chown -R $CONTAINER_USER:$CONTAINER_USER /defaults && \
+    # Remove OracleDB packages, since it can't be built for armhf
+    sed -i 's/"oracledb"\s*:\s*".*"\s*,//' /app/package.json && \
     # Link config file to config dir
     sudo -u ${CONTAINER_USER} -g ${CONTAINER_USER} ln -s /config/config.json /app/config/config.json && \
     sudo -u ${CONTAINER_USER} -g ${CONTAINER_USER} ln -s /config/backup.json /app/config/backup.json && \

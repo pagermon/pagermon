@@ -1,0 +1,16 @@
+#!/bin/bash
+
+#
+#   DockerHub build hook (overrides default build command)
+#   @see https://docs.docker.com/docker-hub/builds/advanced/
+#   @see https://microbadger.com/labels
+#
+
+echo "Building image"
+
+docker build \
+  --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
+  --build-arg VCS_REF=`git rev-parse --short HEAD` \
+  --build-arg VCS_SRC="https://github.com/pagermon/pagermon/commit/$SOURCE_COMMIT" \
+  --build-arg VERSION="$SOURCE_BRANCH" \
+  -t $IMAGE_NAME -f $DOCKERFILE_PATH .

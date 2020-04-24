@@ -73,7 +73,7 @@ router.get('/messages', isLoggedIn, function(req, res, next) {
       var subquery = db.from('capcodes').where('ignore', '=', 1).select('id')
     } else {
       var subquery = db.from('capcodes').where('ignore', '=', 0).select('id')
-    }    
+    }
   } else {
     var subquery = db.from('capcodes').where('ignore', '=', 1).select('id')
   }
@@ -83,7 +83,7 @@ router.get('/messages', isLoggedIn, function(req, res, next) {
         this.from('messages').where('alias_id', 'not in', subquery).orWhereNull('alias_id')
       } else {
         this.from('messages').where('alias_id', 'in', subquery)
-      } 
+      }
     } else {
       this.from('messages').where('alias_id', 'not in', subquery).orWhereNull('alias_id')
     }
@@ -104,28 +104,25 @@ router.get('/messages', isLoggedIn, function(req, res, next) {
       console.timeEnd('init');
       console.time('sql');
 
-      var orderby;
-      orderby = "messages.timestamp DESC LIMIT "+initData.limit+" OFFSET "+initData.offset;
       var result = [];
       var rowCount
 
       db.from('messages')
-        .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', function () {
-          this.select('capcodes.id')
-          .as('aliasMatch')
-        })
+        .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore')
         .modify(function(queryBuilder) {
           if (pdwMode) {
             if (adminShow && req.isAuthenticated()) {
               queryBuilder.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id').where('capcodes.ignore', 0).orWhereNull('capcodes.ignore')
             } else {
-              queryBuilder.innerJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id').where('capcodes.ignore', 0)              
-            } 
+              queryBuilder.innerJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id').where('capcodes.ignore', 0)
+            }
           } else {
             queryBuilder.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id').where('capcodes.ignore', 0).orWhereNull('capcodes.ignore')
           }
         })
-        .orderByRaw(orderby)
+        .orderBy('messages.timestamp', 'desc')
+        .limit(initData.limit)
+        .offset(initData.offset)
         .then(rows => {
           rowCount = rows.length
           for (row of rows) {
@@ -142,8 +139,7 @@ router.get('/messages', isLoggedIn, function(req, res, next) {
                     "agency": row.agency,
                     "icon": row.icon,
                     "color": row.color,
-                    "ignore": row.ignore,
-                    "aliasMatch": row.aliasMatch
+                    "ignore": row.ignore
                   };
                 }
               }
@@ -178,10 +174,7 @@ router.get('/messages/:id', isLoggedIn, function(req, res, next) {
   var id = req.params.id;
 
   db.from('messages')
-    .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', function () {
-      this.select('capcodes.id')
-        .as('aliasMatch')
-    })
+    .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore')
     .leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id')
     .where('messages.id', id)
     .then((row) => {
@@ -197,8 +190,7 @@ router.get('/messages/:id', isLoggedIn, function(req, res, next) {
               "agency": row.agency,
               "icon": row.icon,
               "color": row.color,
-              "ignore": row.ignore,
-              "aliasMatch": row.aliasMatch
+              "ignore": row.ignore
             };
           }
         }
@@ -221,7 +213,7 @@ router.get('/messages/:id', isLoggedIn, function(req, res, next) {
 router.get('/messageSearch', isLoggedIn, function(req, res, next) {
   nconf.load();
   console.time('init');
-  var dbtype = nconf.get('database:type')
+  var dbtype = nconf.get('database:type');
   var pdwMode = nconf.get('messages:pdwMode');
   var adminShow = nconf.get('messages:adminShow');
   var maxLimit = nconf.get('messages:maxLimit');
@@ -255,141 +247,106 @@ router.get('/messageSearch', isLoggedIn, function(req, res, next) {
   } else { address = ''; }
 
   // set select commands based on query type
-  // address can be address or source field
-  
-  if (dbtype == 'sqlite3') {
-    var sql
-    if (query != '') {
-      sql = `SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch
-      FROM messages_search_index
-      LEFT JOIN messages ON messages.id = messages_search_index.rowid `;
-    } else {
-      sql = `SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch 
-      FROM messages `;
-    }
-    if (pdwMode) {
-      if (adminShow && req.isAuthenticated()) {
-        sql += " LEFT JOIN capcodes ON capcodes.id = messages.alias_id ";
-      } else {
-        sql += " INNER JOIN capcodes ON capcodes.id = messages.alias_id";
-      }
-    } else {
-      sql += " LEFT JOIN capcodes ON capcodes.id = messages.alias_id ";
-    }
-    sql += ' WHERE';
-    if (query != '') {
-      sql += ` messages_search_index MATCH ?`;
-    } else {
-      if (address != '')
-        sql += ` messages.address LIKE "${address}" OR messages.source = "${address}" OR `;
-      if (agency != '')
-        sql += ` messages.alias_id IN (SELECT id FROM capcodes WHERE agency = "${agency}" AND ignore = 0) OR `;
-      sql += ' messages.id IS ?';
-    }
-    sql += " ORDER BY messages.timestamp DESC;";
-  } else if (dbtype == 'mysql') {
-    if (query != '') {
-      sql = `SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch
-              FROM messages`;
-    } else {
-      sql = `SELECT messages.*, capcodes.alias, capcodes.agency, capcodes.icon, capcodes.color, capcodes.ignore, capcodes.id AS aliasMatch 
-              FROM messages`;
-    }
-    if (pdwMode) {
-      if (adminShow && req.isAuthenticated()) {
-        sql += " LEFT JOIN capcodes ON capcodes.id = messages.alias_id ";
-      } else {
-        sql += " INNER JOIN capcodes ON capcodes.id = messages.alias_id";
-      }
-    } else {
-      sql += " LEFT JOIN capcodes ON capcodes.id = messages.alias_id ";
-    }
-    sql += ' WHERE';
-    if (query != '') {
-      sql += ` MATCH(messages.message, messages.address, messages.source) AGAINST (? IN BOOLEAN MODE)`;
-    } else {
-      if (address != '')
-        sql += ` messages.address LIKE "${address}" OR messages.source = "${address}" OR`;
-      if (agency != '')
-        sql += ` messages.alias_id IN (SELECT id FROM capcodes WHERE agency = "${agency}" AND capcodes.ignore = 0) OR`;
-      sql += ' messages.id = ?';
-    }
-    sql += " ORDER BY messages.timestamp DESC;";
-  }
 
-  if (sql) {
-    var data = []
-    console.time('sql')
-    db.raw(sql, query)
-      .then((rows) => {
-        if (rows) {
-          if (dbtype == 'mysql') {
-            // This is required for MySQL Compatibility - SQLite doesn't need this. 
-            rows = rows[0]
-          }
-          for (row of rows) {
-            if (HideCapcode) {
-              if (!req.isAuthenticated()) {
-                row = {
-                  "id": row.id,
-                  "message": row.message,
-                  "source": row.source,
-                  "timestamp": row.timestamp,
-                  "alias_id": row.alias_id,
-                  "alias": row.alias,
-                  "agency": row.agency,
-                  "icon": row.icon,
-                  "color": row.color,
-                  "ignore": row.ignore,
-                  "aliasMatch": row.aliasMatch
-                };
-              }
+  var data = []
+  console.time('sql')
+  db.select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore')
+    .modify(function(qb) {
+    if (dbtype == 'sqlite3' && query != '') {
+      qb.from('messages_search_index')
+        .leftJoin('messages', 'messages.id', '=', 'messages_search_index.rowid')
+    } else {
+      qb.from('messages');
+    }
+    if (pdwMode) {
+      if (adminShow && req.isAuthenticated()) {
+        qb.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id');
+      } else {
+        qb.innerJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id');
+      }
+    } else {
+      qb.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id');
+    }
+    if (dbtype == 'sqlite3' && query != '') {
+      qb.whereRaw('messages_search_index MATCH ?', query)
+    } else if (dbtype == 'mysql' && query != '') {
+      //This wraps the search query in quotes so MySQL searches for the complete term rather than individual words.
+      query = '"' + query + '"'
+      qb.whereRaw(`MATCH(messages.message, messages.address, messages.source) AGAINST (? IN BOOLEAN MODE)`, query)
+    } else if (dbtype == 'oracledb' && query != '') {
+      qb.whereRaw(`CONTAINS("messages"."message", ?, 1) > 0`, query)
+    } else {
+      if (address != '')
+        qb.where('messages.address', 'LIKE', address).orWhere('messages.source', address);
+      if (agency != '')
+        qb.whereIn('messages.alias_id', function(qb2) {
+                qb2.select('id').from('capcodes').where('agency',agency).where('ignore',0);
+        })
+    }
+  }).orderBy('messages.timestamp', 'desc')
+    .then((rows) => {
+      if (rows) {
+        for (row of rows) {
+          if (HideCapcode) {
+            if (!req.isAuthenticated()) {
+              row = {
+                "id": row.id,
+                "message": row.message,
+                "source": row.source,
+                "timestamp": row.timestamp,
+                "alias_id": row.alias_id,
+                "alias": row.alias,
+                "agency": row.agency,
+                "icon": row.icon,
+                "color": row.color,
+                "ignore": row.ignore
+              };
             }
-            if (pdwMode) {
-              if (adminShow && req.isAuthenticated() && !row.ignore || row.ignore == 0){
-               data.push(row);
-              } else {
-              if (row.ignore == 0)
-                data.push(row); 
-              }
+          }
+          if (pdwMode) {
+            if (adminShow && req.isAuthenticated() && !row.ignore || row.ignore == 0){
+              data.push(row);
             } else {
-              if (!row.ignore || row.ignore == 0)
-                data.push(row);
+            if (row.ignore == 0)
+              data.push(row); 
             }
+          } else {
+            if (!row.ignore || row.ignore == 0)
+              data.push(row);
           }
-        } else {
-          logger.main.info('empty results');
         }
-        rowCount = data.length
-        if (rowCount > 0) {
-          console.timeEnd('sql');
-          var result = data;
-          console.time('initEnd');
-          initData.msgCount = result.length;
-          initData.pageCount = Math.ceil(initData.msgCount / initData.limit);
-          if (initData.currentPage > initData.pageCount) {
-            initData.currentPage = 0;
-          }
-          initData.offset = initData.limit * initData.currentPage;
-          if (initData.offset < 0) {
-            initData.offset = 0;
-          }
-          initData.offsetEnd = initData.offset + initData.limit;
-          var limitResults = result.slice(initData.offset, initData.offsetEnd);
-  
-          console.timeEnd('initEnd');
-          res.json({ 'init': initData, 'messages': limitResults });
-        } else {
-          console.timeEnd('sql');
-          res.status(200).json({ 'init': {}, 'messages': [] });
-        }
-      })
-      .catch((err) => {
+      } else {
+        logger.main.info('empty results');
+      }
+      rowCount = data.length
+      if (rowCount > 0) {
         console.timeEnd('sql');
-        logger.main.error(err);
-        res.status(500).send(err);
-      })
-  }
+        var result = data;
+        console.time('initEnd');
+        initData.msgCount = result.length;
+        initData.pageCount = Math.ceil(initData.msgCount / initData.limit);
+        if (initData.currentPage > initData.pageCount) {
+          initData.currentPage = 0;
+        }
+        initData.offset = initData.limit * initData.currentPage;
+        if (initData.offset < 0) {
+          initData.offset = 0;
+        }
+        initData.offsetEnd = initData.offset + initData.limit;
+        var limitResults = result.slice(initData.offset, initData.offsetEnd);
+
+        console.timeEnd('initEnd');
+        res.json({ 'init': initData, 'messages': limitResults });
+      } else {
+        console.timeEnd('sql');
+        res.status(200).json({ 'init': {}, 'messages': [] });
+      }
+    })
+    .catch((err) => {
+      console.timeEnd('sql');
+      logger.main.error(err);
+      res.status(500).send(err);
+    })
 });
 
 ///////////////////
@@ -409,7 +366,8 @@ router.get('/capcodes/init', isLoggedIn, function(req, res, next) {
   }
   db.from('capcodes')
     .select('id')
-    .orderByRaw('id DESC LIMIT 1')
+    .orderBy('id', 'desc')
+    .limit(1)
     .then((row) => {
       initData.msgCount = parseInt(row['id'], 10);
       //console.log(initData.msgCount);
@@ -423,27 +381,36 @@ router.get('/capcodes/init', isLoggedIn, function(req, res, next) {
     })
     .catch((err) => {
       logger.main.error(err);
+      return next(err);
     })
 });
 
 // all capcode get methods are only used in admin area, so lock down to logged in users as they may contain sensitive data
 
 router.get('/capcodes', isLoggedIn, function(req, res, next) {
+  nconf.load();
+  var dbtype = nconf.get('database:type');
   db.from('capcodes')
     .select('*')
-    .orderByRaw("REPLACE(address, '_', '%')")
+    .modify(function(queryBuilder) {
+      if (dbtype == 'oracledb')
+        queryBuilder.orderByRaw(`REPLACE("address", '_', '%')`);
+      else
+        queryBuilder.orderByRaw(`REPLACE(address, '_', '%')`)
+    })
     .then((rows) => {
       res.json(rows);
     })
     .catch((err) => {
-      return next(err)
+      logger.main.error(err);
+      return next(err);
     })
 });
 
 router.get('/capcodes/agency', isLoggedIn, function(req, res, next) {
   db.from('capcodes')
     .distinct('agency')
-    .then((rows) => {    
+    .then((rows) => {
       res.status(200);
       res.json(rows);
     })
@@ -455,34 +422,39 @@ router.get('/capcodes/agency', isLoggedIn, function(req, res, next) {
 
 router.get('/capcodes/:id', isLoggedIn, function(req, res, next) {
   var id = req.params.id;
+  var defaults = {
+    "id": "",
+    "address": "",
+    "alias": "",
+    "agency": "",
+    "icon": "question",
+    "color": "black",
+    "ignore": 0,
+    "pluginconf": {}
+  };
+  if (id == 'new') {
+    res.status(200);
+    res.json(defaults);
+  } else {
     db.from('capcodes')
-      .select('*')
-      .where('id', id)
-      .then(function (row) {
-        if (row.length > 0) {
-          row = row[0]
-          row.pluginconf = parseJSON(row.pluginconf);
-          res.status(200);
-          res.json(row);
-        } else {
-          row = {
-            "id": "",
-            "address": "",
-            "alias": "",
-            "agency": "",
-            "icon": "question",
-            "color": "black",
-            "ignore": 0,
-            "pluginconf": {}
-          };
-          res.status(200);
-          res.json(row);
-        }
-      })
-      .catch((err) => {
-        res.status(500);
-        res.send(err);
-      })
+    .select('*')
+    .where('id', id)
+    .then(function (row) {
+      if (row.length > 0) {
+        row = row[0]
+        row.pluginconf = parseJSON(row.pluginconf);
+        res.status(200);
+        res.json(row);
+      } else {
+        res.status(200);
+        res.json(defaults);
+      }
+    })
+    .catch((err) => {
+      logger.main.error(err);
+      return next(err);
+    })
+  }
 });
 
 router.get('/capcodeCheck/:id', isLoggedIn, function(req, res, next) {
@@ -512,8 +484,8 @@ router.get('/capcodeCheck/:id', isLoggedIn, function(req, res, next) {
         }
     })
     .catch((err) => {
-      res.status(500);
-      res.send(err);
+      logger.main.error(err);
+      return next(err);
     })
 });
 
@@ -522,13 +494,13 @@ router.get('/capcodes/agency/:id', isLoggedIn, function(req, res, next) {
     db.from('capcodes')
       .select('*')
       .where('agency', 'like', id)
-      .then((rows) => {    
+      .then((rows) => {
         res.status(200);
         res.json(rows);
       })
       .catch((err) => {
-        res.status(500);
-        res.send(err);
+        logger.main.error(err);
+        return next(err);
       })
 });
 
@@ -544,6 +516,7 @@ var msgBuffer = [];
 router.post('/messages', isLoggedIn, function(req, res, next) {
   nconf.load();
   if (req.body.address && req.body.message) {
+    var dbtype = nconf.get('database:type');
     var filterDupes = nconf.get('messages:duplicateFiltering');
     var dupeLimit = nconf.get('messages:duplicateLimit') || 0; // default 0
     var dupeTime = nconf.get('messages:duplicateTime') || 0; // default 0
@@ -604,21 +577,21 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
         var datetime = data.datetime || 1;
         var timeDiff = datetime - dupeTime;
         var source = data.source || 'UNK';
-        var dupeorderby = 'id DESC LIMIT ' + dupeLimit
         db.from('messages')
           .select('*')
           .modify(function (queryBuilder) {
             if ((dupeLimit != 0) && (dupeTime != 0)) {
               queryBuilder.where('id', 'in', function () {
                 this.select('*')
-                    //this wierd subquery is to keep mysql happy 
+                    //this wierd subquery is to keep mysql happy
                     .from(function () {
                       this.select('id')
                       .from('messages')
                       .where('timestamp', '>', timeDiff)
-                      .orderByRaw(dupeorderby)
+                      .orderBy('id', 'desc')
+                      .limit(dupeLimit)
                       .as('temp_tab')
-                    })  
+                    })
               })
               .andWhere('message', '=', message)
               .andWhere('address', '=', address)
@@ -629,7 +602,8 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                     .from(function () {
                       this.select('id')
                           .from('messages')
-                          .orderByRaw(dupeorderby)
+                          .orderBy('id', 'desc')
+                          .limit(dupeLimit)
                           .as('temp_tab')
                     })
               })
@@ -648,7 +622,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                           .andWhere('address', '=', address)
             }
           })
-          .then((row) => { 
+          .then((row) => {
             if (row.length > 0 && filterDupes) {
               logger.main.info(util.format('Ignoring duplicate: %o', message));
               res.status(200);
@@ -656,8 +630,16 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
             } else {
               db.from('capcodes')
                   .select('id', 'ignore')
-                  .whereRaw(`"${address}" LIKE address`)
-                  .orderByRaw("REPLACE(address, '_', '%') DESC")
+                  // TODO: test this doesn't break other DBs - there's a lot of quote changes here
+                  .modify(function(queryBuilder) {
+                    if (dbtype == 'oracledb') {
+                      queryBuilder.whereRaw(`'${address}' LIKE "address"`)
+                      queryBuilder.orderByRaw(`REPLACE("address", '_', '%') DESC`);
+                    } else {
+                      queryBuilder.whereRaw(`"${address}" LIKE address`)
+                      queryBuilder.orderByRaw(`REPLACE(address, '_', '%') DESC`)
+                    }
+                  })
                   .then((row) => {
                     var insert;
                     var alias_id = null;
@@ -681,105 +663,122 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
 
                     if (insert == true) {
                       var insertmsg = {address: address, message: message, timestamp: datetime, source: source, alias_id: alias_id}
-                      db('messages').insert(insertmsg)
-                                    .then((result) => {
-                                      // emit the full message
-                                      db.from('messages')
-                                        .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', 'capcodes.pluginconf', function () {
-                                          this.select('capcodes.id')
-                                            .as('aliasMatch')
-                                        })
-                                        .modify(function(queryBuilder) {
-                                            queryBuilder.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id')
-                                        })
-                                        .where('messages.id', '=', result[0])
-                                        .then((row) => {
-                                        if(row.length > 0) {
-                                          row = row[0]
-                                          // send data to pluginHandler after processing
-                                          row.pluginData = data.pluginData;
-                                          
-                                          if (row.pluginconf) {
-                                            row.pluginconf = parseJSON(row.pluginconf);
-                                          } else {
-                                            row.pluginconf = {};
-                                          }
-                                          logger.main.debug('afterMessage start');
-                                          pluginHandler.handle('message', 'after', row, function(response) {
-                                            logger.main.debug(util.format('%o',response));
-                                            logger.main.debug('afterMessage done');
-                                            // remove the pluginconf object before firing socket message
-                                            delete row.pluginconf;
-                                            if (HideCapcode || apiSecurity) {
-                                              //Emit full details to the admin socket
-                                              if (pdwMode && adminShow) {
-                                                req.io.of('adminio').emit('messagePost', row);
-                                              } else if (!pdwMode || row.aliasMatch != null) {
-                                                req.io.of('adminio').emit('messagePost', row);
-                                              } else {
-                                                // do nothing if PDWMode on and AdminShow is disabled
-                                              }
-                                              //Only emit to normal socket if HideCapcode is on and ApiSecurity is off.
-                                              if (HideCapcode && !apiSecurity) {
-                                                if (pdwMode && row.aliasMatch == null) {
-                                                  //do nothing if pdwMode on and there isn't an aliasmatch
-                                                } else {
-                                                  // Emit No capcode to normal socket
-                                                  row = {
-                                                    "id": row.id,
-                                                    "message": row.message,
-                                                    "source": row.source,
-                                                    "timestamp": row.timestamp,
-                                                    "alias_id": row.alias_id,
-                                                    "alias": row.alias,
-                                                    "agency": row.agency,
-                                                    "icon": row.icon,
-                                                    "color": row.color,
-                                                    "ignore": row.ignore,
-                                                    "aliasMatch": row.aliasMatch
-                                                  };
-                                                  req.io.emit('messagePost', row);
-                                                }
-                                              }
-                                            } else {
-                                              if (pdwMode && row.aliasMatch == null) {
-                                                if (adminShow) {
-                                                  req.io.of('adminio').emit('messagePost', row);
-                                                } else {
-                                                  //do nothing
-                                                }
-                                              } else {
-                                                //Just emit - No Security enabled
-                                                req.io.of('adminio').emit('messagePost', row);
-                                                req.io.emit('messagePost', row);
-                                              }
-                                            }
-                                          });
-                                        }
-                                        res.status(200).send(''+result);
-                                      })
-                                      .catch((err) => {
-                                        res.status(500).send(err);
-                                        logger.main.error(err)
-                                      })          
-                            })
-                            .catch ((err) => {
-                              res.status(500).send(err);
-                              logger.main.error(err)
-                            })
+                      db('messages').insert(insertmsg).returning('id')
+                      .then((result) => {
+                        // emit the full message
+                        var msgId;
+                        if (Array.isArray(result)) {
+                          msgId = result[0];
+                        } else {
+                          msgId = result;
+                        }
+                        logger.main.debug(result);
+
+                        if (dbtype == 'oracledb') {
+                          // oracle requires update of search index after insert, can't be trigger for some reason
+                          db.raw(`BEGIN CTX_DDL.SYNC_INDEX('search_idx'); END;`)
+                          .then((resp) => {
+                            logger.main.debug('search_idx sync complete');
+                            logger.main.debug(resp);
+                          }).catch ((err) => {
+                            logger.main.error('search_idx sync failed');
+                            logger.main.error(err)
+                          });
+                        }
+
+                        db.from('messages')
+                          .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', 'capcodes.pluginconf')
+                          .modify(function(queryBuilder) {
+                              queryBuilder.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id')
+                          })
+                          .where('messages.id', '=', msgId)
+                          .then((row) => {
+                          if(row.length > 0) {
+                            row = row[0]
+                            // send data to pluginHandler after processing
+                            row.pluginData = data.pluginData;
+
+                            if (row.pluginconf) {
+                              row.pluginconf = parseJSON(row.pluginconf);
+                            } else {
+                              row.pluginconf = {};
+                            }
+                            logger.main.debug('afterMessage start');
+                            pluginHandler.handle('message', 'after', row, function(response) {
+                              logger.main.debug(util.format('%o',response));
+                              logger.main.debug('afterMessage done');
+                              // remove the pluginconf object before firing socket message
+                              delete row.pluginconf;
+                              if (HideCapcode || apiSecurity) {
+                                //Emit full details to the admin socket
+                                if (pdwMode && adminShow) {
+                                  req.io.of('adminio').emit('messagePost', row);
+                                } else if (!pdwMode || row.alias_id != null) {
+                                  req.io.of('adminio').emit('messagePost', row);
+                                } else {
+                                  // do nothing if PDWMode on and AdminShow is disabled
+                                }
+                                //Only emit to normal socket if HideCapcode is on and ApiSecurity is off.
+                                if (HideCapcode && !apiSecurity) {
+                                  if (pdwMode && row.alias_id == null) {
+                                    //do nothing if pdwMode on and there isn't an alias_id
+                                  } else {
+                                    // Emit No capcode to normal socket
+                                    row = {
+                                      "id": row.id,
+                                      "message": row.message,
+                                      "source": row.source,
+                                      "timestamp": row.timestamp,
+                                      "alias_id": row.alias_id,
+                                      "alias": row.alias,
+                                      "agency": row.agency,
+                                      "icon": row.icon,
+                                      "color": row.color,
+                                      "ignore": row.ignore
+                                    };
+                                    req.io.emit('messagePost', row);
+                                  }
+                                }
+                              } else {
+                                if (pdwMode && row.alias_id == null) {
+                                  if (adminShow) {
+                                    req.io.of('adminio').emit('messagePost', row);
+                                  } else {
+                                    //do nothing
+                                  }
+                                } else {
+                                  //Just emit - No Security enabled
+                                  req.io.of('adminio').emit('messagePost', row);
+                                  req.io.emit('messagePost', row);
+                                }
+                              }
+                            });
+                          }
+                          res.status(200).send(''+result);
+                        })
+                        .catch((err) => {
+                          res.status(500).send(err);
+                          logger.main.error(err)
+                        })
+                      })
+                      .catch ((err) => {
+                        res.status(500).send(err);
+                        logger.main.error(err)
+                      })
                     } else {
                         res.status(200);
                         res.send('Ignoring filtered');
                     }
               })
               .catch((err) => {
+                res.status(500).send(err);
                 logger.main.error(err)
               })
               }
             })
             .catch((err) => {
-             res.status(500).send(err);
-             logger.main.error(err)
+              res.status(500).send(err);
+              logger.main.error(err)
             })
       })
   } else {
@@ -800,7 +799,7 @@ router.post('/capcodes', isLoggedIn, function(req, res, next) {
     var ignore = req.body.ignore || 0;
     var pluginconf = JSON.stringify(req.body.pluginconf) || "{}";
       db.from('capcodes')
-        .where('id', '=', id)  
+        .where('id', '=', id)
         .modify(function (queryBuilder) {
           if (id == null) {
             queryBuilder.insert({
@@ -827,7 +826,7 @@ router.post('/capcodes', isLoggedIn, function(req, res, next) {
           }
         })
         .returning('id')
-        .then((result) => { 
+        .then((result) => {
           res.status(200);
           res.send(''+result);
           if (!updateRequired || updateRequired == 0) {
@@ -846,6 +845,7 @@ router.post('/capcodes', isLoggedIn, function(req, res, next) {
 });
 
 router.post('/capcodes/:id', isLoggedIn, function(req, res, next) {
+  var dbtype = nconf.get('database:type');
   var id = req.params.id || req.body.id || null;
   nconf.load();
   var updateRequired = nconf.get('database:aliasRefreshRequired');
@@ -882,9 +882,10 @@ router.post('/capcodes/:id', isLoggedIn, function(req, res, next) {
       var ignore = req.body.ignore || 0;
       var pluginconf = JSON.stringify(req.body.pluginconf) || "{}";
       var updateAlias = req.body.updateAlias || 0;
-      var result
+
       console.time('insert');
       db.from('capcodes')
+        .returning('id')
         .where('id', '=', id)
         .modify(function(queryBuilder) {
           if (id == null) {
@@ -909,9 +910,9 @@ router.post('/capcodes/:id', isLoggedIn, function(req, res, next) {
               ignore: ignore,
               pluginconf: pluginconf
             })
-          } 
+          }
         })
-        .then((result) => { 
+        .then((result) => {
             console.timeEnd('insert');
             if (updateAlias == 1) {
               console.time('updateMap');
@@ -920,7 +921,13 @@ router.post('/capcodes/:id', isLoggedIn, function(req, res, next) {
                   this.select('id')
                     .from('capcodes')
                     .where('messages.address', 'like', 'address')
-                    .orderByRaw("REPLACE(address, '_', '%') DESC LIMIT 1")
+                    .modify(function(queryBuilder) {
+                      if (dbtype == 'oracledb')
+                        queryBuilder.orderByRaw(`REPLACE("address", '_', '%') DESC`);
+                      else
+                        queryBuilder.orderByRaw(`REPLACE(address, '_', '%') DESC`)
+                    })
+                    .limit(1)
                 })
                 .catch((err) => {
                   logger.main.error(err);
@@ -966,18 +973,25 @@ router.delete('/capcodes/:id', isLoggedIn, function(req, res, next) {
       })
       .catch((err) => {
         res.status(500).send(err);
-      }) 
+      })
     logger.main.debug(util.format('%o',req.body || 'request body empty'));
 });
 
 router.post('/capcodeRefresh', isLoggedIn, function(req, res, next) {
   nconf.load();
+  var dbtype = nconf.get('database:type');
   console.time('updateMap');
   db('messages').update('alias_id', function() {
     this.select('id')
         .from('capcodes')
         .where(db.ref('messages.address'), 'like', db.ref('capcodes.address') )
-        .orderByRaw("REPLACE(address, '_', '%') DESC LIMIT 1")
+        .modify(function(queryBuilder) {
+          if (dbtype == 'oracledb')
+            queryBuilder.orderByRaw(`REPLACE("address", '_', '%') DESC`);
+          else
+            queryBuilder.orderByRaw(`REPLACE(address, '_', '%') DESC`)
+        })
+        .limit(1)
   })
   .then((result) => {
       console.timeEnd('updateMap');
@@ -986,8 +1000,8 @@ router.post('/capcodeRefresh', isLoggedIn, function(req, res, next) {
       res.status(200).send({'status': 'ok'});
   })
   .catch((err) => {
-    logger.main.error(err); 
-    console.timeEnd('updateMap'); 
+    logger.main.error(err);
+    console.timeEnd('updateMap');
   })
 });
 
@@ -1001,7 +1015,7 @@ function inParam (sql, arr) {
 
 // route middleware to make sure a user is logged in
 function isLoggedIn(req, res, next) {
-  if (req.method == 'GET') { 
+  if (req.method == 'GET') {
     if (apiSecurity || ((req.url.match(/capcodes/i) || req.url.match(/capcodeCheck/i)) && !(req.url.match(/agency$/))) ) { //check if Secure mode is on, or if the route is a capcode route
       if (req.isAuthenticated()) {
         // if user is authenticated in the session, carry on

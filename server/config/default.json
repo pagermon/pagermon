@@ -5,6 +5,10 @@
     "sitename": "PagerMon",
     "metatags": "",
     "metadescription": ""
+    "frontPopupEnable": false,
+    "frontPopupTitle": "",
+    "frontPopupContent": "",
+    "searchLocation": "bottom"
   },
   "database": {
     "file": "./messages.db",

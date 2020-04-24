@@ -111,37 +111,96 @@ These instructions will get you a copy of the project up and running on your loc
 Alternatively a production ready setup guide is available here
 https://github.com/pagermon/pagermon/wiki/Tutorial---Production-Ready-Ubuntu,-PM2,-Nginx-Reverse-Proxy,-Let's-Encrypt-SSL,-Pagermon-server
 
-
 ### Docker
 
-1) Build the container:
-```
-    $ docker-compose build
+#### Manual build
+
+You can use image already built for you or you can build it yourself:
+
+``` bash
+# For PC
+docker build -t pagermon/pagermon .
+
+# For Raspberry Pi
+docker build -t pagermon/pagermon:latest-armhf -f Dockerfile.armhf .
 ```
 
-2) Run the container
+#### Running
 
-​	In __foreground__:
+``` bash
+docker create \
+  --name=pagermon \
+  -e APP_NAME=pagermon \
+  -p 3000:3000 \
+  -e TZ=Europe/London \
+  -v </path/to/config-mount>:/config \
+  --restart unless-stopped \
+  pagermon/pagermon:<VERSION>
+docker start pagermon
 ```
-    $ docker-compose up 
+
+### docker-compose
+
+``` yaml
+version: "2"
+services:
+  pagernet-station:
+    #build: ./server # To build localy
+    image: pagermon/pagermon:<VERSION>
+    container_name: pagermon
+    environment:
+      - APP_NAME=pagermon
+      - PUID=1000 # Not required since node user inside docker has UID 1000
+      - PGID=1000 # Not required since node user inside docker has GID 1000
+      - TZ=Europe/London
+    ports:
+      - "3000:3000"
+    volumes:
+      - </path/to/config-mount>:/config
+    restart: unless-stopped
 ```
 
-OR
+Then run:
 
-​	As __daemon__ (`-d`):
+``` bash
+# Building with compose file
+docker-compose build
+
+# Running from compose file in foreground
+docker-compose up
+
+# Running from compose file in background
+docker-compose up -d
 ```
-    $ docker-compose up -d
-```
-__NOTE:__
-   - The database will be located relativ to your current working directory under `./data/messages.db` (by `-v $(pwd)/data:/data`)
-   - The local port `3000` will be forwarded to the docker container to port `3000` (by `-p 3000:3000`)
-   - In case you would like to follow the logfile, run `docker logs -f pagermon` (by `--name pagermon `)
-   - To shutdown and remove the container, run `docker-compose down`
-   - If you make changes to the app for testing, you will need to re-build the image, run `docker-compose down && docker-compose up --build`
 
-3) Follow __Step 5__ from __Running the server____
+#### Parameters
 
-## Support 
+|Parameter|Function|
+|:-------:|:-------|
+| `-e APP_NAME=<name>` | Application name |
+| `-e HOSTNAME=<hostname>` | Hostname |
+| `-e USE_COOKIE_HOST=true` | Use cookie host. |
+| `-e NO_CHOWN=true`| Disable fixing permissions. |
+| `-e PUID=1000` | for UserID |
+| `-e PGID=1000` | for GroupID |
+| `-e SKIP_APP=true` | Don't start app, useful for development. |
+| `-e TZ=Europe/London` | Specify a timezone to use eg. Europe/London. |
+| `-v <path>:/config` | Mount config diretory, so config persist during container restarts |
+| `-v <volumename>:/config` | Create named volume for config diretory, so config persist during container restarts |
+| `-v /config` | Create unnamed volume for config diretory, so config persist during container restarts |
+
+**Note:**
+
+- Configuration is stored in `/config` in container and it is owned by *node* user with UID/GID 1000. To fix config directory ownership use `-e PUID=<UID>` and `-e PGID=<GID>`. (Here are database and config file stored)
+- The local port `3000` will be forwarded to the docker container to port `3000` (by `-p 3000:3000`)
+- In case you would like to follow the logfile, run `docker logs -f pagermon` (by `--name pagermon`)
+- To shutdown and remove the container (if using compose), run `docker-compose down`
+- If you make changes to the app for testing, you will need to re-build the image, run `docker-compose down && docker-compose up --build`
+- To run on *Raspberry Pi* use **armhf** variant (add `-armhf` at the end of version), but **be aware** that OracleDB does not work there.
+
+See [additional parameters](https://github.com/SloCompTech/docker-baseimage).
+
+## Support
 
 General PagerMon support can be requested in the #support channel of the PagerMon discord server.
 
