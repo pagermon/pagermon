@@ -21,6 +21,7 @@
     "cookie-parser": "~1.4.3",
     "core-js": "^2.4.1",
     "cron": "^1.7.0",
+    "csv-express": "^1.2.2",
     "debug": "~2.6.3",
     "discord.js": "latest",
     "ejs": "~2.5.6",

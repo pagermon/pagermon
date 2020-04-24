@@ -20,7 +20,10 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         }),
         AliasRefresh: $resource('/api/capcodeRefresh', null, {
           'post': { method:'POST', isArray: false }
-        })
+        }),
+        AliasExport: $resource('/api/capcodeExport', null, {
+          'post': { method:'POST', isArray: false }
+        }),
       };
     }])
     
@@ -72,7 +75,35 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
           $scope.loading = false;          
         });
       };
-      
+
+      $scope.aliasExport = function () {
+        $scope.loading = true;
+        $scope.alertMessage = {};
+        Api.AliasExport.post(null, null).$promise.then(function (response) {
+          console.log(response);
+          $scope.loading = false;
+          if (response.status == 'ok') {
+            $scope.alertMessage.text = 'Alias export complete!';
+            $scope.alertMessage.type = 'alert-success';
+            $scope.alertMessage.show = true;
+            $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+          } else {
+            $scope.alertMessage.text = 'Error exporting aliases: '+response.data.error;
+            $scope.alertMessage.type = 'alert-danger';
+            $scope.alertMessage.show = true;
+            $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+          }
+        }, function(response) {
+          console.log(response);
+          $scope.alertMessage.text = 'Error exporting aliases: '+response.data.error;
+          $scope.alertMessage.type = 'alert-danger';
+          $scope.alertMessage.show = true;
+          $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+          $scope.loading = false;          
+        });
+      };
+
+
       $scope.messageDetail = function(address) {
           $location.url('/aliases/'+address);
       };
