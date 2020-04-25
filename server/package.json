@@ -30,6 +30,7 @@
     "express-basic-auth": "^1.1.1",
     "express-messages": "^1.0.1",
     "express-session": "^1.15.3",
+    "json-2-csv": "^3.6.2",
     "knex": "^0.16.3",
     "moment": "^2.18.1",
     "morgan": "~1.9.1",

@@ -28,7 +28,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
     }])
     
     // Controller
-    .controller('AliasController', ['$scope', '$routeParams', 'Api', '$uibModal', '$filter', '$location', '$timeout', function ($scope, $routeParams, Api, $uibModal, $filter, $location, $timeout) {
+    .controller('AliasController', ['$scope', '$routeParams', 'Api', '$uibModal', '$filter', '$location', '$timeout', 'FileSaver', function ($scope, $routeParams, Api, $uibModal, $filter, $location, $timeout, FileSaver) {
       $scope.loading = true;
       $scope.alertMessage = {};
       Api.Aliases.query(null, function(results) {
@@ -82,9 +82,8 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         Api.AliasExport.post(null, null).$promise.then(function (response) {
           console.log(response.data);
           $scope.loading = false;
-          if (response.data) {
-            
-            var blob = new Blob([content], { type: "text/plain;charset=utf-8" }); 
+          if (response.data) {          
+            var blob = new Blob([response.data], { type: "text/csv;charset=utf-8" }); 
             FileSaver.saveAs(blob, "export.csv"); 
             $scope.alertMessage.text = 'Alias export complete!';
             $scope.alertMessage.type = 'alert-success';

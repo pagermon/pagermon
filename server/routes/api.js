@@ -1,5 +1,4 @@
 var express = require('express');
-var csv = require('csv-express');
 var bodyParser = require('body-parser');
 var router = express.Router();
 var basicAuth = require('express-basic-auth');
@@ -10,6 +9,7 @@ var _ = require('underscore');
 var pluginHandler = require('../plugins/pluginHandler');
 var logger = require('../log');
 var db = require('../knex/knex.js');
+var converter = require('json-2-csv');
 
 require('../config/passport')(passport); // pass passport for configuration
 
@@ -1020,7 +1020,13 @@ router.post('/capcodeExport', isLoggedIn, function(req, res, next) {
         queryBuilder.orderByRaw(`REPLACE(address, '_', '%')`)
     })
     .then((rows) => {
-      res.status(200).send({ 'status': 'ok', 'data': rows })
+      converter.json2csv(rows, function(err, data) {
+        if (err) {
+          res.status(500).send(err);
+        } else {
+          res.status(200).send({ 'status': 'ok', 'data': data })
+        }
+      }) 
     })
     .catch((err) => {
       logger.main.error(err);
