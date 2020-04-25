@@ -1,4 +1,8 @@
-﻿# 0.3.7 - 2020-04-21
+﻿# 0.3.8 - Unreleased
+
+* Add CSV Export for Aliases #383 @DanrwAU
+
+# 0.3.7 - 2020-04-21
 
 * Add Oracle support because why the heck not #345 @davidmckenzie
 * Fix new FLEX multimon format #357 @davidmckenzie
