@@ -42,12 +42,13 @@
 
 <% include global/menu.ejs %>
 
+    <!-- Theme switch here -->
 
-    <!-- Original Table layout -->
-    <!-- Don't want this on for now include themes/index-original.ejs  -->
-
-    <!-- Or use Dark Theme -->
-    <% include themes/index-dark.ejs %>
+    <% if (enabledarktheme) { %>
+      <% include themes/index-dark.ejs %>
+    <% } else { %>
+      <% include themes/index-original.ejs %>
+    <% } %>
 
   </div>
 
@@ -89,9 +90,14 @@
       </div>
     <% } %>
 
-    <!-- Original Footer Pagination -->
-    <!-- Don't want this on for now include global/pagination.ejs  -->
-    <% include global/pagination-dark.ejs %>
+
+    <!-- Theme switch for pagination here -->
+
+    <% if (enabledarktheme) { %>
+      <% include global/pagination-dark.ejs %>
+    <% } else { %>
+      <% include include global/pagination.ejs %>
+    <% } %>
 
     </div>
   </script>

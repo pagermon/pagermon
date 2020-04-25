@@ -3,6 +3,7 @@
     "loglevel": "debug",
     "sessionSecret": "1DVETLX8VE007RYQN9TN9Z00",
     "frontPopupEnable": false,
+    "enabledarktheme": false,
     "frontPopupTitle": "",
     "frontPopupContent": "",
     "searchLocation": "bottom"
