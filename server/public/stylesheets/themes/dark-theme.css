@@ -1,4 +1,13 @@
 /* Index - Dark Theme */
+.pagerMessage {
+    font-weight: bold;
+    color: #bdbdbd!important;
+}
+
+.time-decoded {
+    color: #bdbdbd;
+}
+
 .footer-nav {
     box-shadow: 0 1px 15px rgba(0,0,0,.1), 0 1px 8px rgba(0,0,0,.1)!important;
 }

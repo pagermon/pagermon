@@ -24,7 +24,7 @@
           </div>
         </div>
       <% } %>
-      
+
       <% if (login) { %>
       <div class="container-fluid disable-text-selection" style="margin-top:15px">
                 <div class="btn-group" data-toggle="buttons">
@@ -71,7 +71,7 @@
                           <div class="card-body pl-0 align-self-center d-flex flex-column flex-lg-row justify-content-between min-width-zero">
                             <div class="min-width-zero">
                               <!-- Time Decoded -->
-                              <span class="mb-0 text-muted text-small w-15 w-xs-100"><i class="pr-3px fa fa-clock-o" aria-hidden="true"></i>{{message.timestamp}}</span>
+                              <span class="mb-0 time-decoded text-small w-15 w-xs-100"><i class="pr-3px fa fa-clock-o" aria-hidden="true"></i>{{message.timestamp}}</span>
                               <!-- Message Contents --> 
                               <span>
                                 <p highlight="message.message" replacement="init.replaceText" class="pagerMessage list-item-heading mb-0 w-xs-100"></p>

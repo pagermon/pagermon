@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html ng-app=app lang="en">
-<% include global/header.ejs %>
+<!-- Header Theme switch here -->
+<% if (enabledarktheme) { %>
+  <% include include global/header-dark.ejs %>
+<% } else { %>
+  <% include include global/header.ejs%>
+<% } %>
 <!-- Inlined and minified below <script src="/javascripts/angular-textreplace.js"></script>-->
 <script>angular.module("angular-highlight",[]).directive("highlight",function(){return{link:function(e,t,h){function i(e,t){for(var h=0;h<t.length;h++){var i=new RegExp(t[h].match,"gi");if(e.search(i)>-1)return t[h]}}h.highlightClass||(h.highlightClass="angular-highlight");var l=function(t,l){var r=i(t,e.replacement);if(r.highlight)a='<a href="/?q='+t+'" class="'+h.highlightClass+'">'+r.replace+"</a>";else var a='<a href="/?q='+t+'">'+r.replace+"</a>";return a},r=function(e){var t,h=e.length,i=[];for(t=0;t<h;t++)i.push(e[t].match.replace(new RegExp("^ | $","g"),""));return i};e.$watch("replacement",function(){if(!e.replacement||""==e.replacement)return t.html(e.highlight),!1;var h=r(e.replacement),i=new RegExp(h.join("|"),"gmi"),a=e.highlight.replace(i,l);t.html(a)})},replace:!1,scope:{highlight:"=",replacement:"="}}});</script>
 <base href="/">
@@ -42,8 +47,7 @@
 
 <% include global/menu.ejs %>
 
-    <!-- Theme switch here -->
-
+    <!-- Index Theme switch here -->
     <% if (enabledarktheme) { %>
       <% include themes/index-dark.ejs %>
     <% } else { %>
@@ -92,11 +96,10 @@
 
 
     <!-- Theme switch for pagination here -->
-
     <% if (enabledarktheme) { %>
       <% include global/pagination-dark.ejs %>
     <% } else { %>
-      <% include include global/pagination.ejs %>
+      <% include global/pagination.ejs %>
     <% } %>
 
     </div>
@@ -560,6 +563,10 @@ function notify(notifyTitle,notifyMessage) {
 
 </div>
 
-<!-- Original Footer Pagination -->
-<!-- Don't want this on for now include global/footer.ejs  -->
-<% include global/footer-dark.ejs %>
+    <!-- Theme switch for footer here -->
+    <% if (enabledarktheme) { %>
+      <% include global/footer-dark.ejs %>
+    <% } else { %>
+      <% include global/footer.ejs %>
+    <% } %>
+
