@@ -1,4 +1,4 @@
-angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'ui.bootstrap', 'color.picker', 'ui.validate', 'textAngular'])
+angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'ui.bootstrap', 'color.picker', 'ui.validate', 'textAngular', 'ngFileSaver'])
     // Service
     .factory('Api', ['$resource',
      function($resource) {
@@ -80,9 +80,12 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         $scope.loading = true;
         $scope.alertMessage = {};
         Api.AliasExport.post(null, null).$promise.then(function (response) {
-          console.log(response);
+          console.log(response.data);
           $scope.loading = false;
-          if (response.status == 'ok') {
+          if (response.data) {
+            
+            var blob = new Blob([content], { type: "text/plain;charset=utf-8" }); 
+            FileSaver.saveAs(blob, "export.csv"); 
             $scope.alertMessage.text = 'Alias export complete!';
             $scope.alertMessage.type = 'alert-success';
             $scope.alertMessage.show = true;

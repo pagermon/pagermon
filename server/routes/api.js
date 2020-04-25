@@ -1010,6 +1010,7 @@ router.post('/capcodeRefresh', isLoggedIn, function(req, res, next) {
 router.post('/capcodeExport', isLoggedIn, function(req, res, next) {
   nconf.load();
   var dbtype = nconf.get('database:type');
+  var filename = 'export.csv'
   db.from('capcodes')
     .select('*')
     .modify(function(queryBuilder) {
@@ -1019,13 +1020,7 @@ router.post('/capcodeExport', isLoggedIn, function(req, res, next) {
         queryBuilder.orderByRaw(`REPLACE(address, '_', '%')`)
     })
     .then((rows) => {
-        try{
-          res.setHeader('Content-Type', 'text/csv');
-          res.csv(rows, true, null, 200)
-        } catch (err) {
-          res.status(500).send(err);
-          logger.main.error(err);
-        }
+      res.status(200).send({ 'status': 'ok', 'data': rows })
     })
     .catch((err) => {
       logger.main.error(err);
