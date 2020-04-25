@@ -41,6 +41,9 @@ var nconf = require('nconf');
     nconf.file({file: conf_file});
     nconf.load();
 
+//Load current theme
+var theme = nconf.get('global:theme')
+
 //Enable Azure Monitoring if enabled
 var azureEnable = nconf.get('monitoring:azureEnable')
 var azureKey = nconf.get('monitoring:azureKey')
@@ -71,7 +74,7 @@ var port = normalizePort(process.env.PORT || '3000');
 var app = express();
     app.set('port', port);
     // view engine setup
-    app.set('views', path.join(__dirname, 'views'));
+    app.set('views', path.join(__dirname,'themes',theme, 'views'));
     app.set('view engine', 'ejs');
     app.set('trust proxy', 'loopback, linklocal, uniquelocal');
 
@@ -107,7 +110,7 @@ adminio.on('connection', function (socket) {
 //    });
 });
 
-app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+app.use(favicon(path.join(__dirname,'themes',theme, 'public', 'favicon.ico')));
 
 // set socket.io to be shared across all modules
 app.use(function(req,res,next){
@@ -139,7 +142,7 @@ app.use(session(sessSet));
 app.use(passport.initialize());
 app.use(passport.session()); // persistent login sessions
 app.use(flash());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname,'themes',theme, 'public')));
 app.use('/node_modules', express.static(path.join(__dirname, 'node_modules')));
 app.use(function(req, res, next) {
   res.locals.version = version;
