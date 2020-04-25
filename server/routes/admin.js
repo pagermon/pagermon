@@ -4,7 +4,6 @@ var router = express.Router();
 var bcrypt = require('bcryptjs');
 var fs = require('fs');
 var logger = require('../log');
-var path = require('path');
 var util = require('util');
 var passport = require('passport');
 require('../config/passport')(passport); // pass passport for configuration
