@@ -363,6 +363,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
           }
           $scope.settings = results.settings;
           $scope.plugins = results.plugins;
+          $scope.themes = results.themes;
         }
         $scope.aliasLoad();
       });
