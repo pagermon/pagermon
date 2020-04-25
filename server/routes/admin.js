@@ -4,6 +4,7 @@ var router = express.Router();
 var bcrypt = require('bcryptjs');
 var fs = require('fs');
 var logger = require('../log');
+var path = require('path');
 var util = require('util');
 var passport = require('passport');
 require('../config/passport')(passport); // pass passport for configuration
@@ -75,8 +76,14 @@ router.route('/settingsData')
                     plugins.push(pConf);
             }
         });
+        let themes = [];
+        fs.readdirSync('./themes').forEach(file => {
+            var jsonpath = path.join (file, file)
+            var jsonpath = jsonpath + '.json'
+            logger.main.debug(jsonpath)
+        });
         // logger.main.debug(util.format('Plugin Config:\n\n%o',plugins));
-        let data = {"settings": settings, "plugins": plugins}
+        let data = {"settings": settings, "plugins": plugins, "themes": themes}
         res.json(data);
     })
     .post(isLoggedIn, function(req, res, next) {
