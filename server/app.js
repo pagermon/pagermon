@@ -43,6 +43,12 @@ var nconf = require('nconf');
 
 //Load current theme
 var theme = nconf.get('global:theme')
+// set the theme if none found, for backwards compatibility
+if (!theme) {
+  nconf.set('global:theme', "default");
+  nconf.save();
+  var theme = nconf.get('global:theme')
+}
 
 //Enable Azure Monitoring if enabled
 var azureEnable = nconf.get('monitoring:azureEnable')
