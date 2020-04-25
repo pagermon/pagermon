@@ -9,6 +9,8 @@ var _ = require('underscore');
 var pluginHandler = require('../plugins/pluginHandler');
 var logger = require('../log');
 var db = require('../knex/knex.js');
+var converter = require('json-2-csv');
+
 require('../config/passport')(passport); // pass passport for configuration
 
 var nconf = require('nconf');
@@ -1005,6 +1007,33 @@ router.post('/capcodeRefresh', isLoggedIn, function(req, res, next) {
   })
 });
 
+router.post('/capcodeExport', isLoggedIn, function(req, res, next) {
+  nconf.load();
+  var dbtype = nconf.get('database:type');
+  var filename = 'export.csv'
+  db.from('capcodes')
+    .select('*')
+    .modify(function(queryBuilder) {
+      if (dbtype == 'oracledb')
+        queryBuilder.orderByRaw(`REPLACE("address", '_', '%')`);
+      else
+        queryBuilder.orderByRaw(`REPLACE(address, '_', '%')`)
+    })
+    .then((rows) => {
+      converter.json2csv(rows, function(err, data) {
+        if (err) {
+          res.status(500).send(err);
+        } else {
+          res.status(200).send({ 'status': 'ok', 'data': data })
+        }
+      }) 
+    })
+    .catch((err) => {
+      logger.main.error(err);
+      return next(err);
+    })
+});
+
 router.use([handleError]);
 
 module.exports = router;
@@ -1016,7 +1045,7 @@ function inParam (sql, arr) {
 // route middleware to make sure a user is logged in
 function isLoggedIn(req, res, next) {
   if (req.method == 'GET') {
-    if (apiSecurity || ((req.url.match(/capcodes/i) || req.url.match(/capcodeCheck/i)) && !(req.url.match(/agency$/))) ) { //check if Secure mode is on, or if the route is a capcode route
+    if (apiSecurity || req.url.match(/capcodeExport/i) || ((req.url.match(/capcodes/i) || req.url.match(/capcodeCheck/i)) && !(req.url.match(/agency$/))) ) { //check if Secure mode is on, or if the route is a capcode route
       if (req.isAuthenticated()) {
         // if user is authenticated in the session, carry on
         return next();

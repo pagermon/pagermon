@@ -1,4 +1,4 @@
-angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'ui.bootstrap', 'color.picker', 'ui.validate', 'textAngular'])
+angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'ui.bootstrap', 'color.picker', 'ui.validate', 'textAngular', 'ngFileSaver'])
     // Service
     .factory('Api', ['$resource',
      function($resource) {
@@ -20,12 +20,15 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         }),
         AliasRefresh: $resource('/api/capcodeRefresh', null, {
           'post': { method:'POST', isArray: false }
-        })
+        }),
+        AliasExport: $resource('/api/capcodeExport', null, {
+          'post': { method:'POST', isArray: false }
+        }),
       };
     }])
     
     // Controller
-    .controller('AliasController', ['$scope', '$routeParams', 'Api', '$uibModal', '$filter', '$location', '$timeout', function ($scope, $routeParams, Api, $uibModal, $filter, $location, $timeout) {
+    .controller('AliasController', ['$scope', '$routeParams', 'Api', '$uibModal', '$filter', '$location', '$timeout', 'FileSaver', function ($scope, $routeParams, Api, $uibModal, $filter, $location, $timeout, FileSaver) {
       $scope.loading = true;
       $scope.alertMessage = {};
       Api.Aliases.query(null, function(results) {
@@ -72,7 +75,37 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
           $scope.loading = false;          
         });
       };
-      
+
+      $scope.aliasExport = function () {
+        $scope.loading = true;
+        $scope.alertMessage = {};
+        Api.AliasExport.post(null, null).$promise.then(function (response) {
+          console.log(response);
+          $scope.loading = false;
+          if (response.data) {          
+            var blob = new Blob([response.data], { type: "text/csv;charset=utf-8" }); 
+            FileSaver.saveAs(blob, "export.csv"); 
+            $scope.alertMessage.text = 'Alias export complete!';
+            $scope.alertMessage.type = 'alert-success';
+            $scope.alertMessage.show = true;
+            $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+          } else {
+            $scope.alertMessage.text = 'Error exporting aliases: '+response.data.error;
+            $scope.alertMessage.type = 'alert-danger';
+            $scope.alertMessage.show = true;
+            $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+          }
+        }, function(response) {
+          console.log(response);
+          $scope.alertMessage.text = 'Error exporting aliases: '+response.data.error;
+          $scope.alertMessage.type = 'alert-danger';
+          $scope.alertMessage.show = true;
+          $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+          $scope.loading = false;          
+        });
+      };
+
+
       $scope.messageDetail = function(address) {
           $location.url('/aliases/'+address);
       };
