@@ -78,9 +78,7 @@ router.route('/settingsData')
         });
         let themes = [];
         fs.readdirSync('./themes').forEach(file => {
-            var jsonpath = path.join (file, file)
-            var jsonpath = jsonpath + '.json'
-            logger.main.debug(jsonpath)
+            themes.push(file)
         });
         // logger.main.debug(util.format('Plugin Config:\n\n%o',plugins));
         let data = {"settings": settings, "plugins": plugins, "themes": themes}
