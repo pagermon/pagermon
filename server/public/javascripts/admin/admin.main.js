@@ -80,7 +80,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         $scope.loading = true;
         $scope.alertMessage = {};
         Api.AliasExport.post(null, null).$promise.then(function (response) {
-          console.log(response.data);
+          console.log(response);
           $scope.loading = false;
           if (response.data) {          
             var blob = new Blob([response.data], { type: "text/csv;charset=utf-8" }); 

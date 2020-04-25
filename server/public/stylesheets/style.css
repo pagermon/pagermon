@@ -169,6 +169,14 @@ a:hover, a:focus {
     width: 225px;
 }
 
+#buttons-functions {
+    text-align: center;
+    position: fixed;
+    bottom:280px; 
+    right:50px;
+    width: 225px;
+}
+
 .btn-wide {
     width: 90%;
     margin: 5% 5%;
