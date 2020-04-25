@@ -75,8 +75,12 @@ router.route('/settingsData')
                     plugins.push(pConf);
             }
         });
+        let themes = [];
+        fs.readdirSync('./themes').forEach(file => {
+            themes.push(file)
+        });
         // logger.main.debug(util.format('Plugin Config:\n\n%o',plugins));
-        let data = {"settings": settings, "plugins": plugins}
+        let data = {"settings": settings, "plugins": plugins, "themes": themes}
         res.json(data);
     })
     .post(isLoggedIn, function(req, res, next) {

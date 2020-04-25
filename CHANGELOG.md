@@ -1,6 +1,8 @@
 ﻿# 0.3.8 - Unreleased
 
 * Add CSV Export for Aliases #383 @DanrwAU
+* Add Theme support #385 @DanrwAU
+
 
 # 0.3.7 - 2020-04-21
 

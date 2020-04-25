@@ -5,7 +5,8 @@
     "frontPopupEnable": false,
     "frontPopupTitle": "",
     "frontPopupContent": "",
-    "searchLocation": "bottom"
+    "searchLocation": "bottom",
+    "theme": "default"
   },
   "database": {
     "file": "./messages.db",
