@@ -144,7 +144,7 @@ docker start pagermon
 ``` yaml
 version: "2"
 services:
-  pagernet-station:
+  pagermon:
     #build: ./server # To build localy
     image: pagermon/pagermon:<VERSION>
     container_name: pagermon
@@ -185,13 +185,14 @@ docker-compose up -d
 | `-e PGID=1000` | for GroupID |
 | `-e SKIP_APP=true` | Don't start app, useful for development. |
 | `-e TZ=Europe/London` | Specify a timezone to use eg. Europe/London. |
-| `-v <path>:/config` | Mount config diretory, so config persist during container restarts |
-| `-v <volumename>:/config` | Create named volume for config diretory, so config persist during container restarts |
-| `-v /config` | Create unnamed volume for config diretory, so config persist during container restarts |
+| `-v <path>:/config` | Mount config diretory, so config persist during container restarts (option 1) |
+| `-v <volumename>:/config` | Create named volume for config diretory, so config persist during container restarts (option 2)|
+| `-v /config` | Create unnamed volume for config diretory, so config persist during container restarts (option 3)|
+| `-p 3000:3000` | Expose container port |
 
 **Note:**
 
-- Configuration is stored in `/config` in container and it is owned by *node* user with UID/GID 1000. To fix config directory ownership use `-e PUID=<UID>` and `-e PGID=<GID>`. (Here are database and config file stored)
+- Configuration is stored in `/config` inside container and it is owned by *node* user with UID/GID 1000. To fix config directory ownership use `-e PUID=<UID>` and `-e PGID=<GID>`. (Here are database and config file stored)
 - The local port `3000` will be forwarded to the docker container to port `3000` (by `-p 3000:3000`)
 - In case you would like to follow the logfile, run `docker logs -f pagermon` (by `--name pagermon`)
 - To shutdown and remove the container (if using compose), run `docker-compose down`
@@ -199,6 +200,8 @@ docker-compose up -d
 - To run on *Raspberry Pi* use **armhf** variant (add `-armhf` at the end of version), but **be aware** that OracleDB does not work there.
 
 See [additional parameters](https://github.com/SloCompTech/docker-baseimage).
+
+**Tip:** You probably want to setup docker log rotation before, more can be found [here](https://success.docker.com/article/how-to-setup-log-rotation-post-installation).
 
 ## Support
 
