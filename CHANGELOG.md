@@ -1,9 +1,9 @@
 ﻿# 0.3.8 - Unreleased
 
-* Add CSV Export for Aliases #383 @DanrwAU
+* Add CSV Export for Aliases #383 #388 @DanrwAU
 * Add Theme support #385 @DanrwAU
 * Docker documentation update #387 @SloCompTech
-* Fix button sizings from #383 #388 @DanrwAU
+* Implement FontAwesome 5 #389 @Maaaaattee @DanrwAU 
 
 # 0.3.7 - 2020-04-21
 
