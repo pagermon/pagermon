@@ -3,6 +3,7 @@
 * Add CSV Export for Aliases #383 @DanrwAU
 * Add Theme support #385 @DanrwAU
 * Docker documentation update #387 @SloCompTech
+* Fix button sizings from #383 #388 @DanrwAU
 
 # 0.3.7 - 2020-04-21
 
