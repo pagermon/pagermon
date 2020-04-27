@@ -24,6 +24,9 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         AliasExport: $resource('/api/capcodeExport', null, {
           'post': { method:'POST', isArray: false }
         }),
+        AliasImport: $resource('/api/capcodeImport', null, {
+          'post': { method:'POST', isArray: true }
+        }),
       };
     }])
     
@@ -105,6 +108,46 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         });
       };
 
+      $scope.aliasImport = function () {
+        var modalHtml =  '<div class="modal-header"><h5 class="modal-title" id="modal-title">Impot Aliases</h5></div>';
+            modalHtml += '<div class="modal-body"><p><input type="file" id="importcsv"/></p><p>CSV file to be imported</p></div>';
+            modalHtml += '<div class="modal-footer"><button class="btn btn-success" ng-click="confirmImport()">Import</button><button class="btn btn-danger" ng-click="cancelImport()">Cancel</button></div>';
+            var modalInstance = $uibModal.open({
+              template: modalHtml,
+              controller: ImportController
+            });
+            modalInstance.result.then(function() {
+              $scope.aliasImportConfirmed();
+            }, function () {
+              //$log.info('Modal dismissed at: ' + new Date());
+            });
+      };
+
+      $scope.aliasImportConfirmed = function () {
+        var filename = document.getElementById("importcsv");
+        if (filename.value.length < 1) {
+          
+        } else {
+
+          var file = filename.files[0];
+          console.log(file)
+          var fileSize = 0;
+          if (filename.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+              var rows = e.target.result.split("\n");
+              Api.AliasImport.post(rows).$promise.then(function (response) {
+                console.log(response);
+                $scope.loading = false;
+              }, function(response) {
+                console.log(response)
+              })
+            }
+            reader.readAsText(filename.files[0]);
+          }
+          return false;
+        }
+      };
 
       $scope.messageDetail = function(address) {
           $location.url('/aliases/'+address);
@@ -181,6 +224,16 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         };
       
         $scope.cancelDelete = function() {
+          $uibModalInstance.dismiss('cancel');
+        };
+      };
+      
+      var ImportController = function($scope, $uibModalInstance) {
+        $scope.confirmImport = function() {
+          $uibModalInstance.close();
+        };
+      
+        $scope.cancelImport = function() {
           $uibModalInstance.dismiss('cancel');
         };
       };
