@@ -1035,9 +1035,11 @@ router.post('/capcodeExport', isLoggedIn, function(req, res, next) {
 });
 
 router.post('/capcodeImport', isLoggedIn, function(req, res, next) {
-  var importdata = req.body
+  var importdata = req.body.join('\n');
   console.log(importdata)
-  
+    converter.csv2json(importdata, function (err,data) {
+      console.log(data)
+    });
   
 });
 
