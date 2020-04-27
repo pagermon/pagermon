@@ -1034,6 +1034,13 @@ router.post('/capcodeExport', isLoggedIn, function(req, res, next) {
     })
 });
 
+router.post('/capcodeImport', isLoggedIn, function(req, res, next) {
+  var importdata = req.body
+  console.log(importdata)
+  
+  
+});
+
 router.use([handleError]);
 
 module.exports = router;

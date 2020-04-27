@@ -124,11 +124,11 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
       };
 
       $scope.aliasImportConfirmed = function () {
+        //$scope.loading = true;
         var filename = document.getElementById("importcsv");
         if (filename.value.length < 1) {
           
         } else {
-
           var file = filename.files[0];
           console.log(file)
           var fileSize = 0;
@@ -144,7 +144,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
               })
             }
             reader.readAsText(filename.files[0]);
-          }
+          } 
           return false;
         }
       };
