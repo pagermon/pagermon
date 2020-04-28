@@ -1052,7 +1052,7 @@ router.post('/capcodeImport', isLoggedIn, function(req, res, next) {
         var icon = capcode.icon || 'question';
         var ignore = capcode.ignore || 0;
         var pluginconf = JSON.stringify(capcode.pluginconf) || "{}";
-        await db('capcodes')
+        db('capcodes')
         .returning('id')
         .where('address', '=', address)
         .first()
