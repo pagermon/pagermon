@@ -1043,7 +1043,8 @@ router.post('/capcodeImport', isLoggedIn, function(req, res, next) {
   // join data but remove the last newline to prevent the last one being malformed. 
   var importdata = req.body.join('\n').slice(0,-1);
     converter.csv2json(importdata, function (err,data) {
-      const importresults =[]
+      const importresults = {}
+      importresults.results = [];
       data.forEach (function(capcode) {
         var address = capcode.address || 0;
         var alias = capcode.alias || 'null';
@@ -1070,17 +1071,17 @@ router.post('/capcodeImport', isLoggedIn, function(req, res, next) {
               pluginconf: pluginconf
             })
             .then ((result) => {
-              importresults.push({
-                'address': address,
-                'alias': alias,
-                'result': 'updated'
+              importresults.results.push({
+                address: address,
+                alias: alias,
+                result: 'updated'
               })
             })
             .catch ((err) => {
-              importresults.push({
-                'address': address,
-                'alias': alias,
-                'result': 'failed' + err
+              importresults.results.push({
+                address: address,
+                alias: alias,
+                result: 'failed' + err
               })
             })
           } else {
@@ -1095,30 +1096,30 @@ router.post('/capcodeImport', isLoggedIn, function(req, res, next) {
               pluginconf: pluginconf
             })
             .then ((result) => {
-              importresults.push({
-                'address': address,
-                'alias': alias,
-                'result': 'created'
+              importresults.results.push({
+                address: address,
+                alias: alias,
+                result: 'created'
               })
             })
             .catch ((err) => {
-              importresults.push({
-                'address': address,
-                'alias': alias,
-                'result': 'failed' + err
+              importresults.results.push({
+                address: address,
+                alias: alias,
+                result: 'failed' + err
               })
             })
           }
         })
         .catch((err) => {
-          importresults.push({
+          importresults.results.push({
             'address': address,
             'alias': alias,
             'result': 'failed' + err
           })
         })
       });
-      console.log(importresults)
+      console.log(importresults.results)
       res.status(200).send({ 'status': 'ok', 'results': importresults })
     });
 });
