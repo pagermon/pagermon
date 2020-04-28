@@ -1041,9 +1041,9 @@ router.post('/capcodeImport', isLoggedIn, function(req, res, next) {
     req.body[key] = req.body[key].replace(/\n/g, '');
   }
   // join data but remove the last newline to prevent the last one being malformed. 
-  var importresults =[]
   var importdata = req.body.join('\n').slice(0,-1);
     converter.csv2json(importdata, function (err,data) {
+      const importresults =[]
       data.forEach (function(capcode) {
         var address = capcode.address || 0;
         var alias = capcode.alias || 'null';
@@ -1057,7 +1057,6 @@ router.post('/capcodeImport', isLoggedIn, function(req, res, next) {
         .where('address', '=', address)
         .first()
         .then((rows) => { 
-          console.log(rows)
           if (rows) {
             db('capcodes')
               .where('id', '=', rows.id)
@@ -1071,8 +1070,18 @@ router.post('/capcodeImport', isLoggedIn, function(req, res, next) {
               pluginconf: pluginconf
             })
             .then ((result) => {
+              importresults.push({
+                'address': address,
+                'alias': alias,
+                'result': 'updated'
+              })
             })
             .catch ((err) => {
+              importresults.push({
+                'address': address,
+                'alias': alias,
+                'result': 'failed' + err
+              })
             })
           } else {
            db('capcodes').insert({
@@ -1086,17 +1095,30 @@ router.post('/capcodeImport', isLoggedIn, function(req, res, next) {
               pluginconf: pluginconf
             })
             .then ((result) => {
-              console.log(result)
+              importresults.push({
+                'address': address,
+                'alias': alias,
+                'result': 'created'
+              })
             })
             .catch ((err) => {
-              console.log(err)
+              importresults.push({
+                'address': address,
+                'alias': alias,
+                'result': 'failed' + err
+              })
             })
           }
         })
         .catch((err) => {
-          console.log(err)
+          importresults.push({
+            'address': address,
+            'alias': alias,
+            'result': 'failed' + err
+          })
         })
       });
+      console.log(importresults)
       res.status(200).send({ 'status': 'ok', 'results': importresults })
     });
 });
