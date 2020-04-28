@@ -139,6 +139,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
               Api.AliasImport.post(rows).$promise.then(function (response) {
                 console.log(response);
                 $scope.loading = false;
+
               }, function(response) {
                 console.log(response)
               })

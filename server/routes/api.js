@@ -1041,11 +1041,10 @@ router.post('/capcodeImport', isLoggedIn, function(req, res, next) {
     req.body[key] = req.body[key].replace(/\n/g, '');
   }
   // join data but remove the last newline to prevent the last one being malformed. 
-  var importdata = req.body.join('\n').slice(0,-1);
-    converter.csv2json(importdata, function (err,data) {
-      const importresults = {}
-      importresults.results = [];
-      data.forEach (function(capcode) {
+    var importdata = req.body.join('\n').slice(0,-1);
+    converter.csv2jsonAsync(importdata, function (err,data) {
+      var importresults = [];
+        data.forEach(function(capcode) {
         var address = capcode.address || 0;
         var alias = capcode.alias || 'null';
         var agency = capcode.agency || 'null';
@@ -1053,7 +1052,7 @@ router.post('/capcodeImport', isLoggedIn, function(req, res, next) {
         var icon = capcode.icon || 'question';
         var ignore = capcode.ignore || 0;
         var pluginconf = JSON.stringify(capcode.pluginconf) || "{}";
-        db('capcodes')
+        await db('capcodes')
         .returning('id')
         .where('address', '=', address)
         .first()
@@ -1071,14 +1070,14 @@ router.post('/capcodeImport', isLoggedIn, function(req, res, next) {
               pluginconf: pluginconf
             })
             .then ((result) => {
-              importresults.results.push({
+              importresults.push({
                 address: address,
                 alias: alias,
                 result: 'updated'
               })
             })
             .catch ((err) => {
-              importresults.results.push({
+              importresults.push({
                 address: address,
                 alias: alias,
                 result: 'failed' + err
@@ -1096,14 +1095,14 @@ router.post('/capcodeImport', isLoggedIn, function(req, res, next) {
               pluginconf: pluginconf
             })
             .then ((result) => {
-              importresults.results.push({
+              importresults.push({
                 address: address,
                 alias: alias,
                 result: 'created'
               })
             })
             .catch ((err) => {
-              importresults.results.push({
+              importresults.push({
                 address: address,
                 alias: alias,
                 result: 'failed' + err
@@ -1112,15 +1111,15 @@ router.post('/capcodeImport', isLoggedIn, function(req, res, next) {
           }
         })
         .catch((err) => {
-          importresults.results.push({
+          importresults.push({
             'address': address,
             'alias': alias,
             'result': 'failed' + err
           })
         })
       });
-      console.log(importresults.results)
-      res.status(200).send({ 'status': 'ok', 'results': importresults })
+      console.log(importresults)
+      res.status(200)
     });
 });
 
