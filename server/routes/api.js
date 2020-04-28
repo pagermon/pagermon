@@ -1042,7 +1042,7 @@ router.post('/capcodeImport', isLoggedIn, function(req, res, next) {
   }
   // join data but remove the last newline to prevent the last one being malformed. 
     var importdata = req.body.join('\n').slice(0,-1);
-    converter.csv2jsonAsync(importdata, function (err,data) {
+    converter.csv2json(importdata, function (err,data) {
       var importresults = [];
         data.forEach(function(capcode) {
         var address = capcode.address || 0;
