@@ -1035,12 +1035,70 @@ router.post('/capcodeExport', isLoggedIn, function(req, res, next) {
 });
 
 router.post('/capcodeImport', isLoggedIn, function(req, res, next) {
-  var importdata = req.body.join('\n');
-  console.log(importdata)
+  for (var key in req.body) {
+    //remove newline chars from dataset
+    req.body[key] = req.body[key].replace(/\r/g, '');
+    req.body[key] = req.body[key].replace(/\n/g, '');
+  }
+  // join data but remove the last newline to prevent the last one being malformed. 
+  var importresults =[]
+  var importdata = req.body.join('\n').slice(0,-1);
     converter.csv2json(importdata, function (err,data) {
-      console.log(data)
+      data.forEach (function(capcode) {
+        var address = capcode.address || 0;
+        var alias = capcode.alias || 'null';
+        var agency = capcode.agency || 'null';
+        var color = capcode.color || 'black';
+        var icon = capcode.icon || 'question';
+        var ignore = capcode.ignore || 0;
+        var pluginconf = JSON.stringify(capcode.pluginconf) || "{}";
+        db('capcodes')
+        .returning('id')
+        .where('address', '=', address)
+        .first()
+        .then((rows) => { 
+          console.log(rows)
+          if (rows) {
+            db('capcodes')
+              .where('id', '=', rows.id)
+              .update({
+              address: address,
+              alias: alias,
+              agency: agency,
+              color: color,
+              icon: icon,
+              ignore: ignore,
+              pluginconf: pluginconf
+            })
+            .then ((result) => {
+            })
+            .catch ((err) => {
+            })
+          } else {
+           db('capcodes').insert({
+              id: null,
+              address: address,
+              alias: alias,
+              agency: agency,
+              color: color,
+              icon: icon,
+              ignore: ignore,
+              pluginconf: pluginconf
+            })
+            .then ((result) => {
+              console.log(result)
+            })
+            .catch ((err) => {
+              console.log(err)
+            })
+          }
+        })
+        .catch((err) => {
+          console.log(err)
+        })
+      });
+      res.status(200).send({ 'status': 'ok', 'results': importresults })
     });
-  
 });
 
 router.use([handleError]);
