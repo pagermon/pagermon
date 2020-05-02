@@ -4,7 +4,7 @@
       <button type="button" class="navbar-toggle btn-xs" data-toggle="collapse" data-target="#myNavbar">
         <i class="fa fa-bars fa-2x" aria-label="toggle menu"></i>
       </button>
-      <a class="navbar-brand" href="/">PagerMon</a></a></a>
+      <a class="navbar-brand" href="/"><% if (typeof monitorName == undefined) { %> PagerMon <% } else { %><%= monitorName %><% } %></a></a></a>
     </div>
     <div class="collapse navbar-collapse" id="myNavbar">
       <ul class="nav navbar-nav">

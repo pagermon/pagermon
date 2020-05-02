@@ -22,6 +22,7 @@ router.use(function (req, res, next) {
   res.locals.frontPopupTitle = nconf.get('global:frontPopupTitle');
   res.locals.frontPopupContent = nconf.get('global:frontPopupContent');
   res.locals.searchLocation = nconf.get('global:searchLocation');
+  res.locals.monitorName = nconf.get("global:monitorName");
   next();
 });
 
@@ -32,7 +33,7 @@ router.route('/login')
             user = req.user;
         }
        res.render('login', { 
-           title: 'PagerMon - Login',
+           pageTitle: 'Login',
            message: req.flash('loginMessage'),
            user: user
        }); 
@@ -54,13 +55,13 @@ router.get('/testLogin', isLoggedIn, function(req, res) {
         console.log(req.user);
         res.render('index', {
             user : req.user, // get the user out of session and pass to template
-            title: 'PagerMon'
+            pageTitle: 'Home'
         });
     });
     
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'PagerMon' });
+  res.render('index', { pageTitle: 'Home' });
 });
 
 module.exports = router;

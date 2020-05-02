@@ -10,6 +10,7 @@ require('../config/passport')(passport); // pass passport for configuration
 
 router.use(function (req, res, next) {
   res.locals.login = req.isAuthenticated();
+  res.locals.monitorName = nconf.get("global:monitorName");
   next();
 });
 
@@ -27,7 +28,7 @@ router.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 router.route('/login')
     .get(function(req, res, next) {
        res.render('login', { 
-           title: 'PagerMon - Login',
+           pageTitle: 'Login',
            message: req.flash('loginMessage'),
            user: req.user
        }); 
@@ -98,7 +99,7 @@ router.route('/settingsData')
     });
 
 router.get('*', isLoggedIn, function(req, res, next) {
-  res.render('admin', { title: 'PagerMon - Admin' });
+  res.render('admin', { pageTitle: 'Admin' });
 });
 
 module.exports = router;
