@@ -17,7 +17,6 @@
 * Docker: Fix for saving config in docker if changed UID,GID #376 @SloCompTech
 * Docker: Multistage build #377 @SloCompTech
 * Add option to relocate searchbar #378 @marshyonline, @DanrWAU
-* Readability update #390 @RyanUnderwood
 
 Note: FontAwesome V5 removed due to compatibility issues
 
