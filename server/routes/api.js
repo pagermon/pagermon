@@ -1125,7 +1125,7 @@ router.post('/capcodeImport', isLoggedIn, function (req, res, next) {
         let results = { "results": importresults }
         res.status(200)
         res.json(results)
-        logger.main.debug('Import:' + results)
+        logger.main.debug('Import:' + importresults)
         nconf.set('database:aliasRefreshRequired', 1);
         nconf.save();
       } else {
