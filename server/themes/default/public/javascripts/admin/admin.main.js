@@ -163,7 +163,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
                       template: resultModalHtml,
                       controller: ImportController,
                       resolve: {
-                        results: $scope.results
+                        results: function () { return $scope.results }
                       }
                 });
               }, function(response) {
