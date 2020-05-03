@@ -1045,23 +1045,50 @@ router.post('/capcodeImport', isLoggedIn, function (req, res, next) {
   var importresults = [];
   converter.csv2jsonAsync(importdata)
     .then(async (data) => {
-      for await (capcode of data) {
-        var address = capcode.address || 0;
-        var alias = capcode.alias || 'null';
-        var agency = capcode.agency || 'null';
-        var color = capcode.color || 'black';
-        var icon = capcode.icon || 'question';
-        var ignore = capcode.ignore || 0;
-        var pluginconf = JSON.stringify(capcode.pluginconf) || "{}";
-        await db('capcodes')
-          .returning('id')
-          .where('address', '=', address)
-          .first()
-          .then((rows) => {
-            if (rows) {
-              return db('capcodes')
-                .where('id', '=', rows.id)
-                .update({
+      var header = data[0]
+      if (('address' in header) && ('alias' in header)) {
+        for await (capcode of data) {
+          var address = capcode.address || 0;
+          var alias = capcode.alias || 'null';
+          var agency = capcode.agency || 'null';
+          var color = capcode.color || 'black';
+          var icon = capcode.icon || 'question';
+          var ignore = capcode.ignore || 0;
+          var pluginconf = JSON.stringify(capcode.pluginconf) || "{}";
+          await db('capcodes')
+            .returning('id')
+            .where('address', '=', address)
+            .first()
+            .then((rows) => {
+              if (rows) {
+                return db('capcodes')
+                  .where('id', '=', rows.id)
+                  .update({
+                    address: address,
+                    alias: alias,
+                    agency: agency,
+                    color: color,
+                    icon: icon,
+                    ignore: ignore,
+                    pluginconf: pluginconf
+                  })
+                  .then((result) => {
+                    importresults.push({
+                      address: address,
+                      alias: alias,
+                      result: 'updated'
+                    })
+                  })
+                  .catch((err) => {
+                    importresults.push({
+                      address: address,
+                      alias: alias,
+                      result: 'failed' + err
+                    })
+                  })
+              } else {
+                return db('capcodes').insert({
+                  id: null,
                   address: address,
                   alias: alias,
                   agency: agency,
@@ -1070,64 +1097,44 @@ router.post('/capcodeImport', isLoggedIn, function (req, res, next) {
                   ignore: ignore,
                   pluginconf: pluginconf
                 })
-                .then((result) => {
-                  importresults.push({
-                    address: address,
-                    alias: alias,
-                    result: 'updated'
+                  .then((result) => {
+                    importresults.push({
+                      address: address,
+                      alias: alias,
+                      result: 'created'
+                    })
                   })
-                })
-                .catch((err) => {
-                  importresults.push({
-                    address: address,
-                    alias: alias,
-                    result: 'failed' + err
+                  .catch((err) => {
+                    importresults.push({
+                      address: address,
+                      alias: alias,
+                      result: 'failed' + err
+                    })
                   })
-                })
-            } else {
-              return db('capcodes').insert({
-                id: null,
-                address: address,
-                alias: alias,
-                agency: agency,
-                color: color,
-                icon: icon,
-                ignore: ignore,
-                pluginconf: pluginconf
-              })
-                .then((result) => {
-                  importresults.push({
-                    address: address,
-                    alias: alias,
-                    result: 'created'
-                  })
-                })
-                .catch((err) => {
-                  importresults.push({
-                    address: address,
-                    alias: alias,
-                    result: 'failed' + err
-                  })
-                })
-            }
-          })
-          .catch((err) => {
-            importresults.push({
-              'address': address,
-              'alias': alias,
-              'result': 'failed' + err
+              }
             })
-          });
-      };
+            .catch((err) => {
+              importresults.push({
+                'address': address,
+                'alias': alias,
+                'result': 'failed' + err
+              })
+            });
+        };
+        
+        let results = { "results": importresults }
+        res.status(200)
+        res.json(results)
+        logger.main.debug('Import:' + results)
+        nconf.set('database:aliasRefreshRequired', 1);
+        nconf.save();
+      } else {
+        throw 'Error parasing CSV header'
+      }
     })
     .catch((err) => {
-      res.status(500)
-      res.send(err)
-    })
-    .finally(() => {
-      let results = {"results": importresults}
-      res.status(200)
-      res.json(results)
+      res.status(500).send(err)
+      logger.main.error(err)
     })
 });
 

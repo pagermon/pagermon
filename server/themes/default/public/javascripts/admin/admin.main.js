@@ -110,7 +110,8 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
 
       $scope.aliasImport = function () {
         var modalHtml =  '<div class="modal-header"><h5 class="modal-title" id="modal-title">Impot Aliases</h5></div>';
-        var messages = '<p>Available Columns: address, alias, agency, color, icon, ignore, pluginconf <p>Required columns are "address" and "alias", all others are optional.</p>';
+        var messages = `<p>Available Columns: address, alias, agency, color, icon, ignore, pluginconf</p>
+                        <p>Required columns are "address" and "alias", all others are optional.</p>`;
             modalHtml += '<div class="modal-body"><p><input type="file" id="importcsv"/></p><p>CSV file to be imported</p>' + messages + '</div>';
             modalHtml += '<div class="modal-footer"><button class="btn btn-success" ng-click="confirmImport()">Import</button><button class="btn btn-danger" ng-click="cancelImport()">Cancel</button></div>';
             var modalInstance = $uibModal.open({
@@ -139,6 +140,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
             reader.onload = function (e) {
               var rows = e.target.result.split("\n");
               Api.AliasImport.post(rows).$promise.then(function (response) {
+                console.log(response)
                 $scope.loading = false;
                 $scope.results = response.results
                 var resultModalHtml = '<div class="modal-header"><h5 class="modal-title" id="modal-title">Import Results</h5></div>';
@@ -166,9 +168,20 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
                       controller: ImportController,
                       scope: $scope
                 });
+                
               }, function(response) {
                 $scope.loading = false;
                 console.log(response)
+                var resultModalHtml = '<div class="modal-header"><h5 class="modal-title" id="modal-title">Import Failed</h5></div>';
+                    resultModalHtml += `<div class="modal-body">  
+                    <p>Failed to Parse CSV file, please check the file and try again!</p>
+                    `
+                    resultModalHtml += '<div class="modal-footer"><button class="btn btn-success" ng-click="okfailedImport()">OK</button></div>';
+                var modalInstance = $uibModal.open( {
+                      template: resultModalHtml,
+                      controller: ImportController,
+                      scope: $scope
+                });
               })
             }
             reader.readAsText(filename.files[0]);
@@ -246,24 +259,33 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         });
       };
       
-      var ConfirmController = function($scope, $uibModalInstance) {
-        $scope.confirmDelete = function() {
+      var ConfirmController = function ($scope, $uibModalInstance) {
+        $scope.confirmDelete = function () {
           $uibModalInstance.close();
         };
-      
-        $scope.cancelDelete = function() {
+
+        $scope.cancelDelete = function () {
           $uibModalInstance.dismiss('cancel');
         };
       };
-      
-      var ImportController = function($scope, $uibModalInstance) {
-        $scope.confirmImport = function() {
+
+      var ImportController = function ($scope, $uibModalInstance) {
+        $scope.confirmImport = function () {
           $uibModalInstance.close();
         };
-        $scope.cancelImport = function() {
+        $scope.cancelImport = function () {
           $uibModalInstance.dismiss('cancel');
         };
         $scope.okImport = function () {
+          $uibModalInstance.close();
+          $scope.aliasRefreshRequired = 1
+          $scope.alertMessage.text = 'Alias refresh required!';
+          $scope.alertMessage.type = 'alert-warning';
+          $scope.alertMessage.show = true;
+          $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+          $location.url('/aliases/');
+        }
+        $scope.okfailedImport = function () {
           $uibModalInstance.close();
         }
       };
