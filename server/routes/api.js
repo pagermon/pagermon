@@ -1076,7 +1076,6 @@ router.post('/capcodeImport', isLoggedIn, function (req, res, next) {
                     alias: alias,
                     result: 'updated'
                   })
-                  console.log(importresults)
                 })
                 .catch((err) => {
                   importresults.push({
@@ -1084,7 +1083,6 @@ router.post('/capcodeImport', isLoggedIn, function (req, res, next) {
                     alias: alias,
                     result: 'failed' + err
                   })
-                  console.log(importresults)
                 })
             } else {
               return db('capcodes').insert({
@@ -1103,7 +1101,6 @@ router.post('/capcodeImport', isLoggedIn, function (req, res, next) {
                     alias: alias,
                     result: 'created'
                   })
-                  console.log(importresults)
                 })
                 .catch((err) => {
                   importresults.push({
@@ -1111,7 +1108,6 @@ router.post('/capcodeImport', isLoggedIn, function (req, res, next) {
                     alias: alias,
                     result: 'failed' + err
                   })
-                  console.log(importresults)
                 })
             }
           })
@@ -1121,15 +1117,17 @@ router.post('/capcodeImport', isLoggedIn, function (req, res, next) {
               'alias': alias,
               'result': 'failed' + err
             })
-            console.log(importresults)
           });
       };
     })
     .catch((err) => {
-
+      res.status(500)
+      res.send(err)
     })
     .finally(() => {
+      let results = {"results": importresults}
       res.status(200)
+      res.json(results)
     })
 });
 

@@ -25,7 +25,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
           'post': { method:'POST', isArray: false }
         }),
         AliasImport: $resource('/api/capcodeImport', null, {
-          'post': { method:'POST', isArray: true }
+          'post': { method:'POST', isArray: false }
         }),
       };
     }])
@@ -110,11 +110,13 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
 
       $scope.aliasImport = function () {
         var modalHtml =  '<div class="modal-header"><h5 class="modal-title" id="modal-title">Impot Aliases</h5></div>';
-            modalHtml += '<div class="modal-body"><p><input type="file" id="importcsv"/></p><p>CSV file to be imported</p></div>';
+        var messages = '<p>Available Columns: address, alias, agency, color, icon, ignore, pluginconf <p>Required columns are "address" and "alias", all others are optional.</p>';
+            modalHtml += '<div class="modal-body"><p><input type="file" id="importcsv"/></p><p>CSV file to be imported</p>' + messages + '</div>';
             modalHtml += '<div class="modal-footer"><button class="btn btn-success" ng-click="confirmImport()">Import</button><button class="btn btn-danger" ng-click="cancelImport()">Cancel</button></div>';
             var modalInstance = $uibModal.open({
               template: modalHtml,
-              controller: ImportController
+              controller: ImportController,
+              
             });
             modalInstance.result.then(function() {
               $scope.aliasImportConfirmed();
@@ -124,7 +126,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
       };
 
       $scope.aliasImportConfirmed = function () {
-        //$scope.loading = true;
+        $scope.loading = true;
         var filename = document.getElementById("importcsv");
         if (filename.value.length < 1) {
           
@@ -137,10 +139,35 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
             reader.onload = function (e) {
               var rows = e.target.result.split("\n");
               Api.AliasImport.post(rows).$promise.then(function (response) {
-                console.log(response);
                 $scope.loading = false;
-
+                $scope.results = response.results
+                console.log($scope.results)
+                var resultModalHtml = '<div class="modal-header"><h5 class="modal-title" id="modal-title">Import Results</h5></div>';
+                var body = `  
+                  <table>
+                     <tr>
+                        <th>Address</th>
+                        <th>Alias</th>
+                        <th>Result</th>
+                      </tr>
+                      <tr ng-repeat="result in results">
+                        <td>{{ result.address }}</td>
+                        <td>{{ result.alias }}</td>
+                        <td>{{ result.result }}</td>
+                      </tr>
+                    </table>
+                    `;
+                    resultModalHtml += '<div class="modal-body">' + body + '</div>';
+                    resultModalHtml += '<div class="modal-footer"><button class="btn btn-success" ng-click="okImport()">OK</button></div>';
+                var modalInstance = $uibModal.open( {
+                      template: resultModalHtml,
+                      controller: ImportController,
+                      resolve: {
+                        results: $scope.results
+                      }
+                });
               }, function(response) {
+                $scope.loading = false;
                 console.log(response)
               })
             }
@@ -233,10 +260,12 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         $scope.confirmImport = function() {
           $uibModalInstance.close();
         };
-      
         $scope.cancelImport = function() {
           $uibModalInstance.dismiss('cancel');
         };
+        $scope.okImport = function () {
+          $uibModalInstance.close();
+        }
       };
     }])
     
