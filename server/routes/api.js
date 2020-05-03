@@ -1045,7 +1045,7 @@ router.post('/capcodeImport', isLoggedIn, function(req, res, next) {
     converter.csv2jsonAsync(importdata) 
              .then(async (data) => {
               var importresults = [];
-              await data.forEach(function(capcode) {
+              for await(capcode of data) {
                   var address = capcode.address || 0;
                   var alias = capcode.alias || 'null';
                   var agency = capcode.agency || 'null';
@@ -1053,7 +1053,7 @@ router.post('/capcodeImport', isLoggedIn, function(req, res, next) {
                   var icon = capcode.icon || 'question';
                   var ignore = capcode.ignore || 0;
                   var pluginconf = JSON.stringify(capcode.pluginconf) || "{}";
-                  db('capcodes')
+                  await db('capcodes')
                   .returning('id')
                   .where('address', '=', address)
                   .first()
@@ -1127,15 +1127,14 @@ router.post('/capcodeImport', isLoggedIn, function(req, res, next) {
                     })
                     console.log(result)
                     console.log(importresults)
-                  })
-                  return importresults
-                });
+                  });
+                };
              })
              .catch ((err) => {
 
              })
-             .finally((results) => {
-              console.log('FINAL:' + results)
+             .finally((importresults) => {
+              console.log('FINAL:' + importresults)
               res.status(200)
              })
 });
