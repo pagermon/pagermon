@@ -1007,26 +1007,26 @@ router.post('/capcodeRefresh', isLoggedIn, function(req, res, next) {
   })
 });
 
-router.post('/capcodeExport', isLoggedIn, function(req, res, next) {
+router.post('/capcodeExport', isLoggedIn, function (req, res, next) {
   nconf.load();
   var dbtype = nconf.get('database:type');
   var filename = 'export.csv'
   db.from('capcodes')
     .select('*')
-    .modify(function(queryBuilder) {
+    .modify(function (queryBuilder) {
       if (dbtype == 'oracledb')
         queryBuilder.orderByRaw(`REPLACE("address", '_', '%')`);
       else
         queryBuilder.orderByRaw(`REPLACE(address, '_', '%')`)
     })
     .then((rows) => {
-      converter.json2csv(rows, function(err, data) {
+      converter.json2csv(rows, function (err, data) {
         if (err) {
           res.status(500).send(err);
         } else {
           res.status(200).send({ 'status': 'ok', 'data': data })
         }
-      }) 
+      })
     })
     .catch((err) => {
       logger.main.error(err);
@@ -1121,7 +1121,7 @@ router.post('/capcodeImport', isLoggedIn, function (req, res, next) {
               })
             });
         };
-        
+
         let results = { "results": importresults }
         res.status(200)
         res.json(results)
