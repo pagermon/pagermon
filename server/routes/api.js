@@ -1036,9 +1036,8 @@ router.post('/capcodeExport', isLoggedIn, function (req, res, next) {
 
 router.post('/capcodeImport', isLoggedIn, function (req, res, next) {
   for (var key in req.body) {
-    //remove newline chars from dataset
-    req.body[key] = req.body[key].replace(/\r/g, '');
-    req.body[key] = req.body[key].replace(/\n/g, '');
+    //remove newline chars from dataset - yes i realise we are adding them in admin.main.js, it doesn't submit without them.
+    req.body[key] = req.body[key].replace(/[\r\n]/g, '');
   }
   // join data but remove the last newline to prevent the last one being malformed. 
   var importdata = req.body.join('\n').slice(0, -1);
@@ -1047,6 +1046,7 @@ router.post('/capcodeImport', isLoggedIn, function (req, res, next) {
     .then(async (data) => {
       var header = data[0]
       if (('address' in header) && ('alias' in header)) {
+        //this checks if the csv has the required headings, should replace this with some form of proper validation
         for await (capcode of data) {
           var address = capcode.address || 0;
           var alias = capcode.alias || 'null';
@@ -1061,6 +1061,7 @@ router.post('/capcodeImport', isLoggedIn, function (req, res, next) {
             .first()
             .then((rows) => {
               if (rows) {
+                //Update the existing alias if one is found.
                 return db('capcodes')
                   .where('id', '=', rows.id)
                   .update({
@@ -1087,6 +1088,7 @@ router.post('/capcodeImport', isLoggedIn, function (req, res, next) {
                     })
                   })
               } else {
+                //Create new alias if one didn't get returned.
                 return db('capcodes').insert({
                   id: null,
                   address: address,
@@ -1121,7 +1123,7 @@ router.post('/capcodeImport', isLoggedIn, function (req, res, next) {
               })
             });
         };
-
+        //Gather all the results, format for the frontend and send it back.
         let results = { "results": importresults }
         res.status(200)
         res.json(results)

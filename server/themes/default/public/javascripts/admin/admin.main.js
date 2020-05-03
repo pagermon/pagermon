@@ -130,7 +130,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         $scope.loading = true;
         var filename = document.getElementById("importcsv");
         if (filename.value.length < 1) {
-
+          // noidea i stole this code. 
         } else {
           var file = filename.files[0];
           console.log(file)
@@ -186,7 +186,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
             }
             reader.readAsText(filename.files[0]);
           }
-          return false;
+          return false; //no idea what this does, was also in the code i stole and it doesn't work without it. 
         }
       };
 
