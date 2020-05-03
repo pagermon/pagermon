@@ -109,28 +109,28 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
       };
 
       $scope.aliasImport = function () {
-        var modalHtml =  '<div class="modal-header"><h5 class="modal-title" id="modal-title">Impot Aliases</h5></div>';
+        var modalHtml = '<div class="modal-header"><h5 class="modal-title" id="modal-title">Impot Aliases</h5></div>';
         var messages = `<p>Available Columns: address, alias, agency, color, icon, ignore, pluginconf</p>
                         <p>Required columns are "address" and "alias", all others are optional.</p>`;
-            modalHtml += '<div class="modal-body"><p><input type="file" id="importcsv"/></p><p>CSV file to be imported</p>' + messages + '</div>';
-            modalHtml += '<div class="modal-footer"><button class="btn btn-success" ng-click="confirmImport()">Import</button><button class="btn btn-danger" ng-click="cancelImport()">Cancel</button></div>';
-            var modalInstance = $uibModal.open({
-              template: modalHtml,
-              controller: ImportController,
-              
-            });
-            modalInstance.result.then(function() {
-              $scope.aliasImportConfirmed();
-            }, function () {
-              //$log.info('Modal dismissed at: ' + new Date());
-            });
+        modalHtml += '<div class="modal-body"><p><input type="file" id="importcsv"/></p><p>CSV file to be imported</p>' + messages + '</div>';
+        modalHtml += '<div class="modal-footer"><button class="btn btn-success" ng-click="confirmImport()">Import</button><button class="btn btn-danger" ng-click="cancelImport()">Cancel</button></div>';
+        var modalInstance = $uibModal.open({
+          template: modalHtml,
+          controller: ImportController,
+
+        });
+        modalInstance.result.then(function () {
+          $scope.aliasImportConfirmed();
+        }, function () {
+          //$log.info('Modal dismissed at: ' + new Date());
+        });
       };
 
       $scope.aliasImportConfirmed = function () {
         $scope.loading = true;
         var filename = document.getElementById("importcsv");
         if (filename.value.length < 1) {
-          
+
         } else {
           var file = filename.files[0];
           console.log(file)
@@ -144,7 +144,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
                 $scope.loading = false;
                 $scope.results = response.results
                 var resultModalHtml = '<div class="modal-header"><h5 class="modal-title" id="modal-title">Import Results</h5></div>';
-                    resultModalHtml += `<div class="modal-body">  
+                resultModalHtml += `<div class="modal-body">  
                     <table class="table table-striped">
                        <thead>
                        <tr>
@@ -162,30 +162,30 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
                         </tbody>
                       </table>
                       </div>`
-                    resultModalHtml += '<div class="modal-footer"><button class="btn btn-success" ng-click="okImport()">OK</button></div>';
-                var modalInstance = $uibModal.open( {
-                      template: resultModalHtml,
-                      controller: ImportController,
-                      scope: $scope
+                resultModalHtml += '<div class="modal-footer"><button class="btn btn-success" ng-click="okImport()">OK</button></div>';
+                var modalInstance = $uibModal.open({
+                  template: resultModalHtml,
+                  controller: ImportController,
+                  scope: $scope
                 });
-                
-              }, function(response) {
+
+              }, function (response) {
                 $scope.loading = false;
                 console.log(response)
                 var resultModalHtml = '<div class="modal-header"><h5 class="modal-title" id="modal-title">Import Failed</h5></div>';
-                    resultModalHtml += `<div class="modal-body">  
+                resultModalHtml += `<div class="modal-body">  
                     <p>Failed to Parse CSV file, please check the file and try again!</p>
                     `
-                    resultModalHtml += '<div class="modal-footer"><button class="btn btn-success" ng-click="okfailedImport()">OK</button></div>';
-                var modalInstance = $uibModal.open( {
-                      template: resultModalHtml,
-                      controller: ImportController,
-                      scope: $scope
+                resultModalHtml += '<div class="modal-footer"><button class="btn btn-success" ng-click="okfailedImport()">OK</button></div>';
+                var modalInstance = $uibModal.open({
+                  template: resultModalHtml,
+                  controller: ImportController,
+                  scope: $scope
                 });
               })
             }
             reader.readAsText(filename.files[0]);
-          } 
+          }
           return false;
         }
       };
