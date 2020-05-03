@@ -5,6 +5,7 @@
 * Docker documentation update #387 @SloCompTech
 * Implement FontAwesome 5 #389 @Maaaaattee @DanrwAU 
 * Fix typo for readability #390 @RyanUnderwood  
+* Add CSV Import for Aliases #392 @DanrwAU
 
 # 0.3.7 - 2020-04-21
 

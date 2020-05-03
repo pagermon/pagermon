@@ -1007,30 +1007,136 @@ router.post('/capcodeRefresh', isLoggedIn, function(req, res, next) {
   })
 });
 
-router.post('/capcodeExport', isLoggedIn, function(req, res, next) {
+router.post('/capcodeExport', isLoggedIn, function (req, res, next) {
   nconf.load();
   var dbtype = nconf.get('database:type');
   var filename = 'export.csv'
   db.from('capcodes')
     .select('*')
-    .modify(function(queryBuilder) {
+    .modify(function (queryBuilder) {
       if (dbtype == 'oracledb')
         queryBuilder.orderByRaw(`REPLACE("address", '_', '%')`);
       else
         queryBuilder.orderByRaw(`REPLACE(address, '_', '%')`)
     })
     .then((rows) => {
-      converter.json2csv(rows, function(err, data) {
+      converter.json2csv(rows, function (err, data) {
         if (err) {
           res.status(500).send(err);
         } else {
           res.status(200).send({ 'status': 'ok', 'data': data })
         }
-      }) 
+      })
     })
     .catch((err) => {
       logger.main.error(err);
       return next(err);
+    })
+});
+
+router.post('/capcodeImport', isLoggedIn, function (req, res, next) {
+  for (var key in req.body) {
+    //remove newline chars from dataset - yes i realise we are adding them in admin.main.js, it doesn't submit without them.
+    req.body[key] = req.body[key].replace(/[\r\n]/g, '');
+  }
+  // join data but remove the last newline to prevent the last one being malformed. 
+  var importdata = req.body.join('\n').slice(0, -1);
+  var importresults = [];
+  converter.csv2jsonAsync(importdata)
+    .then(async (data) => {
+      var header = data[0]
+      if (('address' in header) && ('alias' in header)) {
+        //this checks if the csv has the required headings, should replace this with some form of proper validation
+        for await (capcode of data) {
+          var address = capcode.address || 0;
+          var alias = capcode.alias || 'null';
+          var agency = capcode.agency || 'null';
+          var color = capcode.color || 'black';
+          var icon = capcode.icon || 'question';
+          var ignore = capcode.ignore || 0;
+          var pluginconf = JSON.stringify(capcode.pluginconf) || "{}";
+          await db('capcodes')
+            .returning('id')
+            .where('address', '=', address)
+            .first()
+            .then((rows) => {
+              if (rows) {
+                //Update the existing alias if one is found.
+                return db('capcodes')
+                  .where('id', '=', rows.id)
+                  .update({
+                    address: address,
+                    alias: alias,
+                    agency: agency,
+                    color: color,
+                    icon: icon,
+                    ignore: ignore,
+                    pluginconf: pluginconf
+                  })
+                  .then((result) => {
+                    importresults.push({
+                      address: address,
+                      alias: alias,
+                      result: 'updated'
+                    })
+                  })
+                  .catch((err) => {
+                    importresults.push({
+                      address: address,
+                      alias: alias,
+                      result: 'failed' + err
+                    })
+                  })
+              } else {
+                //Create new alias if one didn't get returned.
+                return db('capcodes').insert({
+                  id: null,
+                  address: address,
+                  alias: alias,
+                  agency: agency,
+                  color: color,
+                  icon: icon,
+                  ignore: ignore,
+                  pluginconf: pluginconf
+                })
+                  .then((result) => {
+                    importresults.push({
+                      address: address,
+                      alias: alias,
+                      result: 'created'
+                    })
+                  })
+                  .catch((err) => {
+                    importresults.push({
+                      address: address,
+                      alias: alias,
+                      result: 'failed' + err
+                    })
+                  })
+              }
+            })
+            .catch((err) => {
+              importresults.push({
+                'address': address,
+                'alias': alias,
+                'result': 'failed' + err
+              })
+            });
+        };
+        //Gather all the results, format for the frontend and send it back.
+        let results = { "results": importresults }
+        res.status(200)
+        res.json(results)
+        logger.main.debug('Import:' + JSON.stringify(importresults))
+        nconf.set('database:aliasRefreshRequired', 1);
+        nconf.save();
+      } else {
+        throw 'Error parasing CSV header'
+      }
+    })
+    .catch((err) => {
+      res.status(500).send(err)
+      logger.main.error(err)
     })
 });
 
