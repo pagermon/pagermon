@@ -1042,85 +1042,102 @@ router.post('/capcodeImport', isLoggedIn, function(req, res, next) {
   }
   // join data but remove the last newline to prevent the last one being malformed. 
     var importdata = req.body.join('\n').slice(0,-1);
-    converter.csv2json(importdata, function (err,data) {
-      var importresults = [];
-        data.forEach(function(capcode) {
-        var address = capcode.address || 0;
-        var alias = capcode.alias || 'null';
-        var agency = capcode.agency || 'null';
-        var color = capcode.color || 'black';
-        var icon = capcode.icon || 'question';
-        var ignore = capcode.ignore || 0;
-        var pluginconf = JSON.stringify(capcode.pluginconf) || "{}";
-        db('capcodes')
-        .returning('id')
-        .where('address', '=', address)
-        .first()
-        .then((rows) => { 
-          if (rows) {
-            db('capcodes')
-              .where('id', '=', rows.id)
-              .update({
-              address: address,
-              alias: alias,
-              agency: agency,
-              color: color,
-              icon: icon,
-              ignore: ignore,
-              pluginconf: pluginconf
-            })
-            .then ((result) => {
-              importresults.push({
-                address: address,
-                alias: alias,
-                result: 'updated'
-              })
-            })
-            .catch ((err) => {
-              importresults.push({
-                address: address,
-                alias: alias,
-                result: 'failed' + err
-              })
-            })
-          } else {
-           db('capcodes').insert({
-              id: null,
-              address: address,
-              alias: alias,
-              agency: agency,
-              color: color,
-              icon: icon,
-              ignore: ignore,
-              pluginconf: pluginconf
-            })
-            .then ((result) => {
-              importresults.push({
-                address: address,
-                alias: alias,
-                result: 'created'
-              })
-            })
-            .catch ((err) => {
-              importresults.push({
-                address: address,
-                alias: alias,
-                result: 'failed' + err
-              })
-            })
-          }
-        })
-        .catch((err) => {
-          importresults.push({
-            'address': address,
-            'alias': alias,
-            'result': 'failed' + err
-          })
-        })
-      });
-      console.log(importresults)
-      res.status(200)
-    });
+    converter.csv2jsonAsync(importdata) 
+             .then(async (data) => {
+              var importresults = [];
+              await data.forEach(function(capcode) {
+                  var address = capcode.address || 0;
+                  var alias = capcode.alias || 'null';
+                  var agency = capcode.agency || 'null';
+                  var color = capcode.color || 'black';
+                  var icon = capcode.icon || 'question';
+                  var ignore = capcode.ignore || 0;
+                  var pluginconf = JSON.stringify(capcode.pluginconf) || "{}";
+                  db('capcodes')
+                  .returning('id')
+                  .where('address', '=', address)
+                  .first()
+                  .then((rows) => { 
+                    if (rows) {
+                      db('capcodes')
+                        .where('id', '=', rows.id)
+                        .update({
+                        address: address,
+                        alias: alias,
+                        agency: agency,
+                        color: color,
+                        icon: icon,
+                        ignore: ignore,
+                        pluginconf: pluginconf
+                      })
+                      .then ((result) => {
+                        importresults.push({
+                          address: address,
+                          alias: alias,
+                          result: 'updated'
+                        })
+                        console.log(result)
+                        console.log(importresults)
+                      })
+                      .catch ((err) => {
+                        importresults.push({
+                          address: address,
+                          alias: alias,
+                          result: 'failed' + err
+                        })
+                        console.log(result)
+                        console.log(importresults)
+                      })
+                    } else {
+                    db('capcodes').insert({
+                        id: null,
+                        address: address,
+                        alias: alias,
+                        agency: agency,
+                        color: color,
+                        icon: icon,
+                        ignore: ignore,
+                        pluginconf: pluginconf
+                      })
+                      .then ((result) => {
+                        importresults.push({
+                          address: address,
+                          alias: alias,
+                          result: 'created'
+                        })
+                        console.log(result)
+                        console.log(importresults)
+                      })
+                      .catch ((err) => {
+                        importresults.push({
+                          address: address,
+                          alias: alias,
+                          result: 'failed' + err
+                        })
+                        console.log(result)
+                        console.log(importresults)
+                      })
+                    }
+                  })
+                  .catch((err) => {
+                    importresults.push({
+                      'address': address,
+                      'alias': alias,
+                      'result': 'failed' + err
+                    })
+                    console.log(result)
+                    console.log(importresults)
+                  })
+                  return importresults
+                });
+             })
+             .catch ((err) => {
+
+             })
+             .finally((results) => {
+              console.log('FINAL:' + results)
+              res.status(200)
+             })
 });
 
 router.use([handleError]);
