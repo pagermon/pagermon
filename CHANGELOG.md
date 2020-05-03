@@ -4,6 +4,7 @@
 * Add Theme support #385 @DanrwAU
 * Docker documentation update #387 @SloCompTech
 * Implement FontAwesome 5 #389 @Maaaaattee @DanrwAU 
+* Add CSV Import for Aliases #392 @DanrwAU
 
 # 0.3.7 - 2020-04-21
 
