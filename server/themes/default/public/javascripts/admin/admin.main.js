@@ -141,30 +141,30 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
               Api.AliasImport.post(rows).$promise.then(function (response) {
                 $scope.loading = false;
                 $scope.results = response.results
-                console.log($scope.results)
                 var resultModalHtml = '<div class="modal-header"><h5 class="modal-title" id="modal-title">Import Results</h5></div>';
-                var body = `  
-                  <table>
-                     <tr>
-                        <th>Address</th>
-                        <th>Alias</th>
-                        <th>Result</th>
-                      </tr>
-                      <tr ng-repeat="result in results">
-                        <td>{{ result.address }}</td>
-                        <td>{{ result.alias }}</td>
-                        <td>{{ result.result }}</td>
-                      </tr>
-                    </table>
-                    `;
-                    resultModalHtml += '<div class="modal-body">' + body + '</div>';
+                    resultModalHtml += `<div class="modal-body">  
+                    <table class="table table-striped">
+                       <thead>
+                       <tr>
+                          <th>Address</th>
+                          <th>Alias</th>
+                          <th>Result</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="result in results">
+                          <td>{{ result.address }}</td>
+                          <td>{{ result.alias }}</td>
+                          <td>{{ result.result }}</td>
+                        </tr>
+                        </tbody>
+                      </table>
+                      </div>`
                     resultModalHtml += '<div class="modal-footer"><button class="btn btn-success" ng-click="okImport()">OK</button></div>';
                 var modalInstance = $uibModal.open( {
                       template: resultModalHtml,
                       controller: ImportController,
-                      resolve: {
-                        results: function () { return $scope.results }
-                      }
+                      scope: $scope
                 });
               }, function(response) {
                 $scope.loading = false;
