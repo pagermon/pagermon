@@ -574,6 +574,8 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
         res.status(200);
         return res.send('Ignoring filtered');
       }
+
+      logger.main.error('Say hello to API.JS - IS RAW GEOLOCATION HERE?! Following: ' + JSON.stringify(data));
         var address = data.address || '0000000';
         var message = data.message || 'null';
         var datetime = data.datetime || 1;
@@ -671,7 +673,8 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                         timestamp: datetime, 
                         source: source,
                         alias_id: alias_id, 
-                        raw_geolocation : raw_geolocation}
+                        raw_geolocation : raw_geolocation
+                      }
                       db('messages').insert(insertmsg).returning('id')
                       .then((result) => {
                         // emit the full message

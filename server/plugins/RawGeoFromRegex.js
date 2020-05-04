@@ -14,17 +14,29 @@ function run(trigger, scope, data, config, callback) {
     	* Simples.
    		*/
         data.raw_geolocation = 0;
-        for (var i = config.filters.length - 1; i >= 0; i--) {
-            logger.main.error(' filter object ' + JSON.stringify(config.filters[i]));
-            var currentFilter = config.filters[i];
+        for (var i = config.filters.length; i >= 0; i--) {
+            logger.main.error(' filter object ' + JSON.stringify(config.filters[i-1]));
+            var currentFilter = config.filters[i-1];
             logger.main.error('current Filter: ' + JSON.stringify(currentFilter));
             if (currentFilter.agency == data.agency) {
                 data.raw_geolocation = data.message.match(new RegExp(currentFilter.regex))[0];
+                db.from('messages')
+                    .where('id', '=', data.id)
+                    .update({
+                        raw_geolocation : data.raw_geolocation
+                    })
+                    .then ((result) => { 
+                        logger.main.error('RESULT OF DB OPERATION: ' + JSON.stringify(result));
+                    })
+                    .catch ((err) => {
+                        logger.main.error('GEO DB ERROR = ' + err);
+                    });
                 logger.main.error('filtered message = ' + data.raw_geolocation);
-                return;
+                break;
             }
         }
 	}
+
 
     logger.main.error("GEOLOCATION AFTER LOOP - " + data.raw_geolocation);
 
