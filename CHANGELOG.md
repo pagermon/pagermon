@@ -6,6 +6,7 @@
 * Implement FontAwesome 5 #389 @Maaaaattee @DanrwAU 
 * Readability update #390 @RyanUnderwood
 * Add title support #391 @RyanUnderwood
+* Add CSV Import for Aliases #392 @DanrwAU
 
 # 0.3.7 - 2020-04-21
 

@@ -28,7 +28,7 @@ The UI is built around a Node/Express/Angular/Bootstrap stack, while the client 
 * Keyword highlighting
 * WebSockets support - messages are delivered to clients in near realtime
 * Pretty HTML5
-* Native browner notifications
+* Native browser notifications
 * Plugin Support - Current Plugins:
     * [Pushover](https://pushover.net/) near realtime muti-device notification service
     * [Prowl](https://prowlapp.com) near realtime iOS notification service with Apple Watch support
