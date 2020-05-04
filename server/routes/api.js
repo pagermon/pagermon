@@ -579,6 +579,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
         var datetime = data.datetime || 1;
         var timeDiff = datetime - dupeTime;
         var source = data.source || 'UNK';
+        var raw_geolocation = data.raw_geolocation || 0;
         db.from('messages')
           .select('*')
           .modify(function (queryBuilder) {
@@ -664,7 +665,13 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                     }
 
                     if (insert == true) {
-                      var insertmsg = {address: address, message: message, timestamp: datetime, source: source, alias_id: alias_id}
+                      var insertmsg = {
+                        address: address, 
+                        message: message, 
+                        timestamp: datetime, 
+                        source: source,
+                        alias_id: alias_id, 
+                        raw_geolocation : raw_geolocation}
                       db('messages').insert(insertmsg).returning('id')
                       .then((result) => {
                         // emit the full message
@@ -736,7 +743,7 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
                                       "agency": row.agency,
                                       "icon": row.icon,
                                       "color": row.color,
-                                      "ignore": row.ignore
+                                      "ignore": row.ignore,
                                     };
                                     req.io.emit('messagePost', row);
                                   }

@@ -1,0 +1,23 @@
+{
+    "name": "RawGeoFromRegex",
+    "description": "Grabs the geo data based on defined Regex for messages of a specific agency (assumes all will meet a certain format)",
+    "disable": false,
+    "trigger": "message",
+    "scope": "after",
+    "config": [
+            {
+                "name": "kakakakka",
+                "label": "Regex to match with",
+                "description": "If the message content matches this regex pattern, its matching part will be replaced with the below text.",
+                "type": "text"
+            },
+            {
+                "name": "apappapa",
+                "label": "Replacement text for matched Regex",
+                "description": "This string will be what replaces the matched regex sections.",
+                "type": "text"
+            }
+    ],
+    "aliasConfig": [
+    ]
+}
