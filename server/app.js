@@ -129,8 +129,13 @@ var secret = nconf.get('global:sessionSecret');
 // compress all responses
 app.use(compression());
 app.use(require("morgan")("combined", { "stream": logger.http.stream }));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json({
+  limit: '1mb',
+}));       // to support JSON-encoded bodies
+app.use(bodyParser.urlencoded({     
+  extended: true,
+  limit: '1mb',
+})); // to support URL-encoded bodies
 app.use(cookieParser());
 
 var sessSet = {

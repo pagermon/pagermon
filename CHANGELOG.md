@@ -1,4 +1,8 @@
-﻿# 0.3.8 - 2020-05-04
+﻿# 0.3.9 - Unreleased
+ 
+ * Add fix allowing for greater than 100KB CSV files #397 @DanrwAU
+ 
+ # 0.3.8 - 2020-05-04
 
 * Add CSV Export for Aliases #383 #388 @DanrwAU
 * Add Theme support #385 @DanrwAU
