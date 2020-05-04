@@ -24,6 +24,15 @@
               </div>
             </div>
             <div class="form-group">
+              <label for="global.theme" class="col-xs-4 col-sm-3 control-label">Theme</label>
+              <div class="col-xs-8 col-sm-9">
+                <select name="global.theme" ng-model="settings.global.theme" class="form-control">
+                  <option ng-repeat="theme in themes" value="{{theme}}">{{theme}}</option>
+                </select>
+                <span id="helpBlock" class="help-block">Choose an installed theme. Note: An application restart is required. </span>
+              </div>
+            </div>
+            <div class="form-group">
               <label for="global.sessionSecret" class="col-xs-4 col-sm-3 control-label">Session Secret</label>
               <div class="col-xs-8 col-sm-9">
                 <div class="input-group">
@@ -43,6 +52,13 @@
                   <option value="bottom">Bottom</option>
                 </select>
                 <span id="helpBlock" class="help-block">Sets the location of the Search Bar.</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="global.monitorName" class="col-xs-4 col-sm-3 control-label">Monitor Name</label>
+              <div class="col-xs-8 col-sm-9">
+                  <input class="form-control" type="text" name="global.monitorName" ng-model="settings.global.monitorName">
+                <span id="helpBlock" class="help-block">Set the title of your PagerMon website</span>
               </div>
             </div>
             <div class="form-group">

@@ -1,4 +1,15 @@
-﻿# 0.3.7 - 2020-04-21
+﻿# 0.3.8 - 2020-05-04
+
+* Add CSV Export for Aliases #383 #388 @DanrwAU
+* Add Theme support #385 @DanrwAU
+* Docker documentation update #387 @SloCompTech
+* Implement FontAwesome 5 #389 @Maaaaattee @DanrwAU 
+* Readability update #390 @RyanUnderwood
+* Add title support #391 @RyanUnderwood
+* Add CSV Import for Aliases #392 @DanrwAU
+* Add fix for Sitename being blank #395 @DanrwAU @davidmckenzie 
+
+# 0.3.7 - 2020-04-21
 
 * Add Oracle support because why the heck not #345 @davidmckenzie
 * Fix new FLEX multimon format #357 @davidmckenzie

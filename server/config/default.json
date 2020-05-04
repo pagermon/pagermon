@@ -5,7 +5,9 @@
     "frontPopupEnable": false,
     "frontPopupTitle": "",
     "frontPopupContent": "",
-    "searchLocation": "bottom"
+    "searchLocation": "bottom",
+    "theme": "default",
+    "monitorName": "PagerMon"
   },
   "database": {
     "file": "./messages.db",
