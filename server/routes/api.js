@@ -575,13 +575,14 @@ router.post('/messages', isLoggedIn, function(req, res, next) {
         return res.send('Ignoring filtered');
       }
 
-      logger.main.error('Say hello to API.JS - IS RAW GEOLOCATION HERE?! Following: ' + JSON.stringify(data));
+      // logger.main.error('Say hello to API.JS - IS RAW GEOLOCATION HERE?! Following: ' + JSON.stringify(data));
         var address = data.address || '0000000';
         var message = data.message || 'null';
         var datetime = data.datetime || 1;
         var timeDiff = datetime - dupeTime;
         var source = data.source || 'UNK';
         var raw_geolocation = data.raw_geolocation || 0;
+        var coords = data.coords || 0;
         db.from('messages')
           .select('*')
           .modify(function (queryBuilder) {
