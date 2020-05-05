@@ -177,13 +177,18 @@ app.use(function(req, res, next) {
 
 // error handler
 app.use(function(err, req, res, next) {
+  var title = nconf.get('global:monitorName') || 'PagerMon';
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
+  //these 3 have to be here to stop the error handler shitting up the logs with undefined references when it receives a 500 error ... nfi why
+  res.locals.login = req.isAuthenticated();
+  res.locals.gaEnable = nconf.get('monitoring:gaEnable');
+  res.locals.monitorName = nconf.get("global:monitorName");
 
   // render the error page
   res.status(err.status || 500);
-  res.render('global/error', { title: 'PagerMon' });
+  res.render(path.join(__dirname,'themes',theme, 'views', 'global', 'error'), { title: title });
 });
 
 // Add cronjob to automatically refresh aliases
