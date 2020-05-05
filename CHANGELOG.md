@@ -1,6 +1,9 @@
 ﻿# 0.3.9 - Unreleased
  
  * Add fix allowing for greater than 100KB CSV files #397 @DanrwAU
+ * Remove errant packages that shouldn't have made the release #398 @DanrwAU
+ * Fix 500 errors filling the logs with errors #398 @DanrwAU
+ * Convert PMX to PM2/IO #398 @DanrwAU
  
  # 0.3.8 - 2020-05-04
 
