@@ -99,7 +99,7 @@
               <span ng-if="filter || hasQuery" class="pull-left" style="vertical-align: middle; padding-right: 10px;">
                   <strong>Filter:</strong> <a ng-href="/" style="margin-bottom: 3px;" class="btn btn-primary btn-xs">{{filter || origQuery}} <i class="fa fa-fw fa-times"></i></a>
               </span></th>
-            <th style="text-align:center">Filtered Geodata</th>
+            <th style="text-align:center">Co-ords!</th>
           </tr>
         </thead>
         <tbody>
@@ -148,7 +148,7 @@
             </td>
             <td class="expand"><div highlight="message.message" replacement="init.replaceText" class="pagerMessage"></td>
             <td>
-            {{ message.raw_geolocation }}
+          <a href="https://www.google.com/maps/search/{{message.coords}}" target="_blank">{{message.coords}}</a>
             </td>
           </tr>
         </tbody>
