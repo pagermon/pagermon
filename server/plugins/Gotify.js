@@ -1,79 +1,50 @@
-var http = require('http');
-var https = require('https');
+const axios = require('axios').default;
+const path = require('path');
 var logger = require('../log');
 
 function run(trigger, scope, data, config, callback) {
-    let pConf = data.pluginconf.Gotify;
-    if (pConf && pConf.enable) {
+  let pConf = data.pluginconf.Gotify;
+  if (pConf && pConf.enable) {
+    const message = {
+      title: data.agency + ' - ' + data.alias,
+      message: data.message,
+      priority: (pConf.priority) ? parseInt(pConf.priority) : 1,
+    };
+    const url = path.join(config.URL, 'message');
 
-        let port = 80; // default
-        if (config.port) {
-            port = parseInt(config.port);
-        }
+    logger.main.debug('Gotify: Sending to ' + url + ': ' + JSON.stringify(message));
 
-        let priority = 1; // default
-        if (pConf.priority) {
-            priority = parseInt(pConf.priority);
-        }
+    axios.post(url, message, {
+      headers: {
+        'X-Gotify-Key': config.APIKey,
+      },
+      timeout: 5000, // Timeout 5s
+    }).then(res => {
+      logger.main.info('Gotify: Message Sent');
+    }).catch(error => {
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        logger.main.error('Gotify: Headers: ' + JSON.stringify(error.response.headers));
+        logger.main.error('Gotify: Data: ' + error.response.data);
+        logger.main.error('Gotify: Status Code: ' + error.response.status);
+      } else if (error.request) {
+        // The request was made but no response was received
+        // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+        // http.ClientRequest in node.js
+        logger.main.error('Gotify: No response:' + error.request);
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        logger.main.error('Gotify: Error:' +  error.message);
+      }
+    });
 
-        // POST data
-        const dat = JSON.stringify({
-            title: data.agency+' - '+data.alias,
-            message: data.message,
-            priority: priority
-        });
-
-        // POST Options
-        let options = {
-            hostname: config.URL,
-            port: port,
-            path: '/message',
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Gotify-Key': config.APIKey
-            }
-        };
-
-        let req;
-
-        // SSL
-        if (config.SSL) {
-            // SSL POST Options
-            options.rejectUnauthorized = false;
-
-            // HTTPS request
-            req = https.request(options, (res) => {
-                logger.main.debug('Gotify: ' + res.statusCode);
-                res.on('data', (d) => {
-                    process.stdout.write(d)
-                })
-            });
-        } else {
-            // HTTP request
-            req = http.request(options, (res) => {
-                logger.main.debug('Gotify: ' + res.statusCode);
-                res.on('data', (d) => {
-                    process.stdout.write(d)
-                })
-            });
-
-        }
-
-        // HTTP error
-        req.on('error', (error) => {
-            logger.main.error('Gotify:' + error);
-        });
-
-        req.write(dat);
-        req.end();
-        callback();
-    } else {
-        callback();
-    }
-
+    callback();
+  } else {
+    callback();
+  }
 }
 
 module.exports = {
-    run: run
+  run: run
 }

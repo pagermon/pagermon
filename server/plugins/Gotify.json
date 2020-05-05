@@ -8,19 +8,9 @@
     {
       "name": "URL",
       "label": "Gotify URL (Without http/s)",
+      "description": "Gotify domain URL eq. https://example.org (Note: without /message)",
       "type": "text",
       "required": true
-
-    },
-    {
-      "name": "port",
-      "label": "Gotify Port",
-      "type": "text"
-    },
-    {
-      "name": "SSL",
-      "label": "Enable SSL",
-      "type": "checkbox"
     },
     {
       "name": "APIKey",

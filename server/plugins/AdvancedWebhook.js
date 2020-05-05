@@ -1,82 +1,57 @@
-var http = require('http');
-var https = require('https');
-var url = require('url');
+const axios = require('axios').default;
 var logger = require('../log');
 
 function run(trigger, scope, data, config, callback) {
-    let pConf = data.pluginconf.AdvancedWebhook;
-    // Conditions for sending - alias enabled, sending all messages, sending defined aliases and this message has an alias
-    if ((pConf && pConf.enable) || (config.filterMode.value == "2") || (config.filterMode.value == "1" && data.alias_id)) {
-        // Get the template
-        let dat = config.contentTemplate;
+  let pConf = data.pluginconf.AdvancedWebhook;
+  // Conditions for sending - alias enabled, sending all messages, sending defined aliases and this message has an alias
+  if ((pConf && pConf.enable) || (config.filterMode.value == "2") || (config.filterMode.value == "1" && data.alias_id)) {
+    // Get the template
+    let dat = config.contentTemplate;
 
-        // Replace placeholders with values
-        dat = dat.replace("/address/", data.address);
-        dat = dat.replace("/message/", data.message);
-        dat = dat.replace("/source/", data.source);
-        dat = dat.replace("/timestamp/", data.timestamp);
-        dat = dat.replace("/alias_id/", data.alias_id);
-        dat = dat.replace("/alias/", data.alias);
-        dat = dat.replace("/agency/", data.agency);
-        dat = dat.replace("/icon/", data.icon);
-        dat = dat.replace("/color/", data.color);
+    // Replace placeholders with values
+    dat = dat.replace("/address/", data.address);
+    dat = dat.replace("/message/", data.message);
+    dat = dat.replace("/source/", data.source);
+    dat = dat.replace("/timestamp/", data.timestamp);
+    dat = dat.replace("/alias_id/", data.alias_id);
+    dat = dat.replace("/alias/", data.alias);
+    dat = dat.replace("/agency/", data.agency);
+    dat = dat.replace("/icon/", data.icon);
+    dat = dat.replace("/color/", data.color);
 
-        // Parse URL
-        const webhookUrl = url.parse(config.URL);
+    logger.main.debug('AdvancedWebhook: Sending to ' + config.URL + ': ' + dat);
 
-        logger.main.debug('AdvancedWebhook: Sending ' + dat);
-        logger.main.debug('AdvancedWebhook: To URL' + config.URL);
+    axios.post(config.URL, dat, {
+      headers: {
+        'Content-Type': config.contentType || 'application/json;charset=utf-8',
+      },
+      timeout: 5000, // Timeout 5s
+    }).then(res => {
+      logger.main.info('AdvancedWebhook: Message Sent');
+    }).catch(error => {
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        logger.main.error('AdvancedWebhook: Headers: ' + JSON.stringify(error.response.headers));
+        logger.main.error('AdvancedWebhook: Data: ' + error.response.data);
+        logger.main.error('AdvancedWebhook: Status Code: ' + error.response.status);
+      } else if (error.request) {
+        // The request was made but no response was received
+        // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+        // http.ClientRequest in node.js
+        logger.main.error('AdvancedWebhook: No response:' + error.request);
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        logger.main.error('AdvancedWebhook: Error:' +  error.message);
+      }
+    });
 
-        // POST Options
-        let options = {
-            method: 'POST',
-            hostname: webhookUrl.hostname,
-            port: webhookUrl.port,
-            path: webhookUrl.path,
-            headers: {
-                'Content-Type': config.contentType
-            }
-        };
-
-        let req;
-
-        // SSL
-        if (webhookUrl.protocol == 'https:') {
-            // SSL POST Options
-            options.rejectUnauthorized = false;
-
-            // HTTPS request
-            req = https.request(options, (res) => {
-                logger.main.debug('AdvancedWebhook: ' + res.statusCode);
-                res.on('data', (d) => {
-                    process.stdout.write(d)
-                })
-            });
-        } else {
-            // HTTP request
-            req = http.request(options, (res) => {
-                logger.main.debug('AdvancedWebhook: ' + res.statusCode);
-                res.on('data', (d) => {
-                    process.stdout.write(d)
-                })
-            });
-
-        }
-
-        // HTTP error
-        req.on('error', (error) => {
-            logger.main.error('AdvancedWebhook:' + error);
-        });
-
-        req.write(dat);
-        req.end();
-        callback();
-    } else {
-        callback();
-    }
-
+    callback();
+  } else {
+    callback();
+  }
 }
 
 module.exports = {
-    run: run
+  run: run
 }
