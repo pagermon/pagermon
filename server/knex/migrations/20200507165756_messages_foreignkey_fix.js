@@ -6,6 +6,8 @@ exports.up = function(db, Promise) {
     return db.schema.alterTable('messages', function(table) {
         table.dropColumn('alias_id')
         table.integer('alias_id').unsigned().references('id').inTable('capcodes').onDelete('SET NULL');
+        nconf.set('database:aliasRefreshRequired', 1);
+        nconf.save();
       })
     } else {
         return Promise.resolve('Not Required')
