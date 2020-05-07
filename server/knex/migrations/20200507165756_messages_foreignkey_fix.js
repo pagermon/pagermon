@@ -11,9 +11,8 @@ exports.up = function (db, Promise) {
                     table.dropColumn('alias_id')
                 })
                     .then(function () {
-                        return db.schema.table('', function (table) {
-                            table.integer('alias_id').unsigned().references('id').inTable('capcodes').onDelete('SET NULL');
-                            
+                        return db.schema.table('messages', function (table) {
+                            table.integer('alias_id').unsigned().references('id').inTable('capcodes').onDelete('SET NULL'); 
                         })
                         .then(function () {
                             nconf.set('database:aliasRefreshRequired', 1);
