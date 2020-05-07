@@ -4,7 +4,8 @@ var dbtype = nconf.get('database:type')
 exports.up = function(db, Promise) {
     if (dbtype == 'mysql') {
     return db.schema.alterTable('messages', function(table) {
-        table.integer('alias_id').unsigned().references('id').inTable('capcodes').onDelete('SET NULL').alter();
+        table.dropColumn('alias_id')
+        table.integer('alias_id').unsigned().references('id').inTable('capcodes').onDelete('SET NULL');
       })
     } else {
         return Promise.resolve('Not Required')
