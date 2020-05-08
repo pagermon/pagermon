@@ -17,30 +17,31 @@ function run(trigger, scope, data, config, callback) {
     	* Simples.
    		*/
         // data.raw_geolocation = 0;
-        for (var i = config.filters.length; i >= 0; i--) {
-            //logger.main.error(' filter object ' + JSON.stringify(config.filters[i-1]));
-            var currentFilter = config.filters[i-1];
-            //logger.main.error('current Filter: ' + JSON.stringify(currentFilter));
+        var filterConfig = false;
+        for (var i = 0; i <= (config.filters.length-1); i++) {
+            var currentFilter = config.filters[i];
             if (currentFilter.agency == data.agency) {
-                logger.main.error('before the normalize check');
-                
-                data.raw_geolocation = data.message.match(new RegExp(currentFilter.regex))[0];
-
-                logger.main.error('RAW GEOLOCATION -- ' + JSON.stringify(data.raw_geolocation));
-
-                //TODO - rename raw to processed lol
-                normalizeAddressData(
-                        data.raw_geolocation, 
-                        currentFilter.flags,
-                        config.location_services.api_key,
-                        data.id
-                );
-
-                // logger.main.error('after the normalize check - ' + JSON.stringify(data));
+                filterConfig = currentFilter;
             }
         }
-	}
 
+        if (filterConfig) {
+            logger.main.error('before the normalize check');
+            
+            data.raw_geolocation = data.message.match(new RegExp(filterConfig.regex))[0];
+
+            logger.main.error('RAW GEOLOCATION -- ' + JSON.stringify(data.raw_geolocation));
+
+            //TODO - rename raw to processed lol
+            data.cords = normalizeAddressData(
+                    data.raw_geolocation, 
+                    filterConfig.flags,
+                    config.location_services.api_key,
+                    data.id
+            );
+            // logger.main.error('after the normalize check - ' + JSON.stringify(data));
+        }
+	}
 
     // logger.main.error("GEOLOCATION AFTER LOOP - " + data.raw_geolocation);
 
@@ -66,7 +67,7 @@ function updateDB(raw, coords, messageID) {
             logger.main.error('GEO DB ERROR = ' + err);
         });
     // logger.main.error('filtered message = ' + data.raw_geolocation);
-    return true;
+    return coords;
 }
 
 function getCoordsFromAddress(address, apiKey, messageID) {
@@ -98,7 +99,8 @@ function normalizeAddressData(rawData, flags, apiKey = 0, messageID)
 
         case 'coords':
             logger.main.error('entered coords switch');
-            updateDB(rawData, messageID);
+            rawData = rawData.split(' ').join(',');
+            updateDB(rawData, rawData, messageID);
             return;
 
         case 'full_address':
