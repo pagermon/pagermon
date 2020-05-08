@@ -25,34 +25,18 @@ function run(trigger, scope, data, config, callback) {
                 logger.main.error('before the normalize check');
                 
                 data.raw_geolocation = data.message.match(new RegExp(currentFilter.regex))[0];
-                
 
                 logger.main.error('RAW GEOLOCATION -- ' + JSON.stringify(data.raw_geolocation));
 
                 //TODO - rename raw to processed lol
-                data.coords = normalizeAddressData(
-                       data.raw_geolocation, 
+                normalizeAddressData(
+                        data.raw_geolocation, 
                         currentFilter.flags,
-                        config.location_services.api_key
+                        config.location_services.api_key,
+                        data.id
                 );
 
-                logger.main.error('after the normalize check - ' + JSON.stringify(data));
-
-
-                db.from('messages')
-                    .where('id', '=', data.id)
-                    .update({
-                        raw_geolocation : data.raw_geolocation,
-                        coords : data.coords
-                    })
-                    .then ((result) => { 
-                        logger.main.error('RESULT OF DB OPERATION: ' + JSON.stringify(result));
-                    })
-                    .catch ((err) => {
-                        logger.main.error('GEO DB ERROR = ' + err);
-                    });
-                // logger.main.error('filtered message = ' + data.raw_geolocation);
-                break;
+                // logger.main.error('after the normalize check - ' + JSON.stringify(data));
             }
         }
 	}
@@ -65,11 +49,41 @@ function run(trigger, scope, data, config, callback) {
     callback(data);
 }
 
-function normalizeAddressData(rawData, flags, apiKey = 0)
-{
+
+function updateDB(raw, coords, messageID) {
+    logger.main.error('RAW: ' + raw + '; Coords: ' + coords + '; messageID: ' + messageID);
+
+    db.from('messages')
+        .where('id', '=', messageID)
+        .update({
+            raw_geolocation : raw,
+            coords : coords
+        })
+        .then ((result) => { 
+            logger.main.error('RESULT OF DB OPERATION: ' + JSON.stringify(result));
+        })
+        .catch ((err) => {
+            logger.main.error('GEO DB ERROR = ' + err);
+        });
+    // logger.main.error('filtered message = ' + data.raw_geolocation);
+    return true;
+}
+
+function getCoordsFromAddress(address, apiKey, messageID) {
+    getJSON('https://eu1.locationiq.com/v1/search.php?key=' + apiKey + '&q=' + address +'&format=json', 
+    function(error, response) {
+        logger.main.error('JSON RESPONSE FROM LOCATIONIQ = '+JSON.stringify(response));
+        var c = response[0].lat + ',' + response[0].lon;
+        logger.main.error('co-ords string after liq- ' + c);
+        updateDB(address, (response[0].lat + ',' + response[0].lon), messageID);
+    });
+}
+
+function normalizeAddressData(rawData, flags, apiKey = 0, messageID)
+{ 
+
     switch(flags) {
         case 'grid_reference':
-
             logger.main.error('grid reference switch. rawdata = ' + JSON.stringify(rawData));
             gridRefArr = rawData.trim().split(' ')
             logger.main.error('value of gridRefArr = ' + JSON.stringify(gridRefArr));
@@ -78,31 +92,20 @@ function normalizeAddressData(rawData, flags, apiKey = 0)
                 return;
             }   
             var convertedCoords = new OSPoint(gridRefArr[1], gridRefArr[0]).toWGS84();
-            logger.main.error('GRID REF TO COORDS RESULT IS - ' + convertedCoords);
-            return convertedCoords['latitude'] + ',' + convertedCoords['longitude'];    
+            logger.main.error('GRID REF TO COORDS RESULT IS - ' + JSON.stringify(convertedCoords));
+            updateDB(rawData, (convertedCoords.latitude + ',' + convertedCoords.longitude), messageID);
+            return; 
 
         case 'coords':
             logger.main.error('entered coords switch');
-            // return 0;
-            // logger.main.error('coords switch');
-
-            // getJson(
-            //     'https://us1.locationiq.com/v1/reverse.php?key=' + apikey + "&lat=LATITUDE&lon=LONGITUDE&format=json'
-            //     )``
-            return rawData;
+            updateDB(rawData, messageID);
+            return;
 
         case 'full_address':
             // todo cache full_address for possibility of co-ordinate reuse
             logger.main.error('entered full_address switch');
-            var coords = getJSON(
-                'https://eu1.locationiq.com/v1/search.php?key=' + apiKey + '&q=' + rawData +'&format=json', 
-                function(error, response) {
-                    logger.main.error('JSON RESPONSE FROM LOCATIONIQ = '+JSON.stringify(response));
-                    var c = response[0].lat + ',' + response[0].lon;
-                    logger.main.error('co-ords string after liq- ' + c);
-                    return c;
-                });
-            return coords;
+            getCoordsFromAddress(rawData, apiKey, messageID);
+            return;
  
         default:
             logger.main.error('default switch');
