@@ -7,7 +7,7 @@
   "config": [
     {
       "name": "URL",
-      "label": "Gotify URL (Without http/s)",
+      "label": "Gotify URL (with http(s)://)",
       "description": "Gotify domain URL eq. https://example.org (Note: without /message)",
       "type": "text",
       "required": true

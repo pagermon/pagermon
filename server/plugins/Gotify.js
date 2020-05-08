@@ -10,7 +10,13 @@ function run(trigger, scope, data, config, callback) {
       message: data.message,
       priority: (pConf.priority) ? parseInt(pConf.priority) : 1,
     };
-    const url = path.join(config.URL, 'message');
+
+    let url = config.URL;
+    if (!/^https+:\/\//.test(url)) // URL doesn't start with http(s)
+      url = `https://${url}`; // Add https:// if not present
+    if (config.port && !isNaN(config.port)) 
+      url = `${url}:${parseInt(config.port, 10)}`; // Add port to the end
+    url = path.join(url, 'message'); // Append /message to URL
 
     logger.main.debug('Gotify: Sending to ' + url + ': ' + JSON.stringify(message));
 
