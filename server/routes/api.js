@@ -1180,6 +1180,18 @@ function isLoggedIn(req, res, next) {
           return res.status(401).json({ error: 'Authentication failed.' });
         }
     }
+  } else if (req.method == 'DELETE') { //Check if user is authenticated for POST methods
+    if (req.isAuthenticated()) {
+      return next();
+    } else {
+      passport.authenticate('localapikey', { session: false, failWithError: true }) (req,res,next),
+        function (next) {
+          next();
+        },
+        function (res) {
+          return res.status(401).json({ error: 'Authentication failed.' });
+        }
+    }
   }
 }
 
