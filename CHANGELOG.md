@@ -4,6 +4,7 @@
  * Remove errant packages that shouldn't have made the release #398 @DanrwAU
  * Fix 500 errors filling the logs with errors #398 @DanrwAU
  * Convert PMX to PM2/IO #398 @DanrwAU
+ * Migrated plugins from request and http to axios client #401 @SloCompTech
  * Add fix for Multi-Delete on MySQL DB #403 @DanrwAU
  * Fix Delete button on AliasDetail screen #404 @DanrwAU
  
