@@ -5,6 +5,7 @@
  * Fix 500 errors filling the logs with errors #398 @DanrwAU
  * Convert PMX to PM2/IO #398 @DanrwAU
  * Migrated plugins from request and http to axios client #401 @SloCompTech
+ * Add fix for Multi-Delete on MySQL DB #405 @DanrwAU
  
  # 0.3.8 - 2020-05-04
 
