@@ -18,47 +18,61 @@
     </div>
 </div>
 
-<div class="row">
-    <div class="col-xs-12">
-    <p></p>
-    <div class="">
-      <table class="table table-condensed table-hover table-striped valign">
-        <thead class="thead-default">
-          <tr>
-            <th></th>
-            <th style="text-align: center;">ID</th>
-            <th style="text-align: center;">Address</th>
-            <th style="text-align: center;">Color</th>
-            <th style="text-align: center;">Icon</th>
-            <th style="text-align: center;">Agency</th>
-            <th style="text-align: center;">Filter</th>
-            <th style="text-align: center;">Alias</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr ng-repeat="alias in aliases | filter: search">
-            <!-- TODO: Add links to filters -->
-            <td class="shrink" style="vertical-align: middle;"><input type="checkbox" ng-model="alias.selected"/></td>
-            <td class="shrink clickable-td" style="color: Maroon;" ng-click="messageDetail(alias.id);">
-              <span style="font-family: monospace;"><strong>{{alias.id}}</strong></span>
-              </td>
-            <td class="shrink clickable-td" style="color: Maroon;" ng-click="messageDetail(alias.id);">
-              <span style="font-family: monospace;"><strong>{{alias.address}}</strong></span>
-              </td>
-            <td class="shrink" style="background-color: {{alias.color || 'transparent'}};">
-              <span style="color: {{ alias.color ? 'white' : 'black' }};"><strong>{{alias.color}}</strong></span>
-            <td class="shrink">
-              <span ng-if="alias.icon" class="fa-stack fa-lg fa-fw" style="color: {{alias.color || 'transparent'}};">
-                <i class="fa fa-circle fa-stack-2x"></i>
-                <i class="fa fa-{{alias.icon}} fa-stack-1x fa-inverse"></i>
-              </span>
-              <span style="vertical-align: middle;">{{alias.icon}}</span>
-            </td>
-            <td class="shrink"><strong>{{alias.agency || ''}}</strong></td>
-            <td class="shrink"><i ng-if="alias.ignore == 0" class="fa fa-circle text-success"></i><i ng-if="alias.ignore == 1" class="fa fa-exclamation-circle text-danger"></i></td>
-            <td class="expand clickable-td" ng-click="messageDetail(alias.id);" style="color: Maroon;">{{alias.alias || ''}}</td>
-        </tbody>
-      </table>
+<div class="container-fluid disable-text-selection" style="background: #1e323f;padding-top:15px;">
+  <!-- Dark Theme Card Template -->
+    <div ng-repeat="alias in aliases | filter: search" class="row">
+        <div class="col-12 list" data-check-all="checkAll">
+            <div class="card d-flex flex-row mb-3" style="border-left: solid 5px {{alias.color || 'grey'}};">
+                <div class="d-flex flex-grow-1 min-width-zero">
+                    <div class="card-body align-self-center d-flex flex-column flex-md-row min-width-zero align-items-md-center" style="z-index: 0;">
+                        <div class="pl-0 align-self-center d-flex flex-column flex-lg-row">
+                          <div class="min-width-zero">
+                              <span class="shrink" style="vertical-align: middle;margin-right: 10px;"><input type="checkbox" ng-model="alias.selected"/></span>
+                          </div>
+                        </div>
+                        <div class="nomobile pl-0 align-self-center d-flex flex-column flex-lg-row">
+                          <div class="min-width-zero">
+                              <span class="shrink alias-card" ng-click="messageDetail(alias.id);">
+                                <span style="font-family: monospace;"><strong>{{alias.id}}</strong></span>
+                              </span>
+                          </div>
+                        </div>
+                        <div class="pl-0 align-self-center d-flex flex-column flex-lg-row address-row" style="margin-right: 10px;">
+                          <div class="min-width-zero">
+                              <span class="shrink mini-capcode" style="color:#ffffff;" ng-click="messageDetail(alias.id);">
+                                <span style="font-family: monospace;"><strong>{{alias.address}}</strong></span>
+                              </span>
+                          </div>
+                        </div>
+                        <div class="nomobile pl-0 align-self-center d-flex flex-column flex-lg-row">
+                          <div class="min-width-zero">
+                            <span class="shrink alias-color-back" style="background-color: {{alias.color || 'transparent'}};">
+                              <span style="color: {{ alias.color ? 'white' : 'black' }};"><strong>{{alias.color}}</strong></span>
+                            </span>
+                          </div>
+                        </div>
+                        <div class="pl-0 align-self-center d-flex flex-column flex-lg-row">
+                          <div class="min-width-zero">
+                              <span class="shrink">
+                                <span ng-if="alias.icon" class="fa-stack fa-lg fa-fw" style="color: {{alias.color || 'transparent'}};">
+                                  <i class="fa fa-circle fa-stack-2x"></i>
+                                  <i class="fa fa-{{alias.icon}} fa-stack-1x fa-inverse"></i>
+                                </span>
+                                <span style="vertical-align: middle;" class="nomobile">{{alias.icon}}</span>
+                              </span>
+                          </div>
+                        </div>
+                        <div class="pl-0 align-self-center min-width-zero" style="float:right; margin-left:auto;">
+                          <div class="min-width-zero">
+                            <span class="shrink alias-right"><strong>{{alias.agency || ''}}</strong></span>
+                              <span class="alias-desc" ng-click="messageDetail(alias.id);" style="color: white;padding-right:10px">{{alias.alias || ''}}</span>
+                              <span class="shrink"><i ng-if="alias.ignore == 0" class="fas fa-check-circle text-success"></i><i ng-if="alias.ignore == 1" class="fas fa-times-circle text-danger"></i></span>
+                          </div>
+                        </div>
+                    </div>
+                </div>
+            </div> 
+        </div>
     </div>
   </div>
 <div class="btn-group-vertical" id="buttons-functions">

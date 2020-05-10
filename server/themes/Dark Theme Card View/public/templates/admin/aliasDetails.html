@@ -12,9 +12,10 @@
           <hr />
           <form ng-submit="aliasSubmit()" class="form-horizontal" name="alias">
           <h5>Alias Details</h5>
-          <p>Aliases are ordered so that the closest match takes precedence.<br />
-          Aliases with a full 7 digit capcode will be used first, followed by those with one wildcard, and so on.<br />
-          Those that start with a wildcard will always be ordered last, and thus are only matched with a message if no other alias matches.</p>
+          <div class="alert alert-info">
+            <i class="fas fa-lg fa-info-circle" style="margin-right:5px;"></i><a style="text-decoration:none;"><br>Aliases are ordered so that the closest match takes precedence.<br />
+              Aliases with a full 7 digit capcode will be used first, followed by those with one wildcard, and so on. Those that start with a wildcard will always be ordered last, and thus are only matched with a message if no other alias matches.</a>.
+          </div>
             <div class="form-group has-feedback" ng-class="!alias.address || existingAddress ? 'has-error' : 'has-success'">
               <label for="alias.address" class="col-xs-4 col-sm-3 control-label">Address</label>
               <div class="col-xs-8 col-sm-9">
