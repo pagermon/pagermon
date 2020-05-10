@@ -8,9 +8,9 @@ exports.up = function(db, Promise) {
                 table.increments('id').primary().unique().notNullable();
                 table.string('givenname', [255]).notNullable();
                 table.string('surname',[255])
-                table.text('username').notNullable();
+                table.text('username').notNullable().unique();
                 table.string('password').notNullable()
-                table.string('email').notNullable();
+                table.string('email').notNullable().unique();
                 table.enu('role', ['admin', 'user']).notNullable().defaultTo('user')
                 table.enu('status', ['active', 'disabled']).notNullable().defaultTo('disabled')
                 table.datetime('lastlogondate').notNullable();
