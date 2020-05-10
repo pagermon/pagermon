@@ -149,6 +149,13 @@ a:hover, a:focus {
     border-bottom: none!important;
     background-color:#203f52!important;
 }
+.nav-tabs>li>a:hover, .nav-tabs>li>a:focus:hover, .nav>li>a:hover, .nav>li>a:focus:hover {
+    color: #E8563F!important;
+    -webkit-box-shadow: inset 0 -2px 0  #E8563F!important;
+    -mox-box-shadow: inset 0 -2px 0  #E8563F!important;
+    box-shadow: inset 0 -2px 0  #E8563F!important;
+    background-color: #f9f9f9;
+}
 .mb-3, .my-3 {
     margin-bottom: 1rem !important;
 }
@@ -187,7 +194,20 @@ a:hover, a:focus {
 .alert-error {
     background-color: #E8563F!important;
 }
-
+.btn-login {
+    color: #E8563F!important;
+    background-color: transparent!important;
+    border-color: #E8563F!important;
+    border: 2px solid #E8563F!important;
+    box-shadow: none!important;
+    width: 200px!important;
+}
+.alert-danger {
+    background-color: #E8563F!important;
+}
+.triangle-down {
+    border-top: 30px solid #E8563F!important;
+}
 
 
 /* Responsivenessss */
