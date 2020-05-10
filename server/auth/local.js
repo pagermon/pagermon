@@ -2,6 +2,9 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const LocalAPIKeyStrategy = require('passport-localapikey-update').Strategy;
 var logger = require('../log');
+var nconf = require('nconf');
+var conf_file = './config/config.json';
+nconf.file({file: conf_file});
 
 const init = require('./passport');
 var db = require('../knex/knex.js');
@@ -10,6 +13,7 @@ const authHelpers = require('./_helpers');
 const options = {};
 
 init();
+
 
 passport.use('login-user', new LocalStrategy(options, (username, password, done) => {
     // check to see if the username exists
@@ -27,7 +31,8 @@ passport.use('login-user', new LocalStrategy(options, (username, password, done)
 
 passport.use('login-api', new LocalAPIKeyStrategy(
     function (apikey, done) {
-        var auth = getAuth();
+        nconf.load();
+        var auth = nconf.get('auth');
         var key = auth.keys.find(x => x.key === apikey);
         //var key = auth.keys.find({ key: apikey });
         if (key) {

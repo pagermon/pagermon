@@ -15,6 +15,9 @@ exports.up = function(db, Promise) {
                 table.enu('status', ['active', 'disabled']).notNullable().defaultTo('disabled')
                 table.datetime('lastlogondate').notNullable();
             })
+            .then(function (){
+              //add function to migrate existing user account. 
+            })
         } else {
           return Promise.resolve('Not Required')
         }

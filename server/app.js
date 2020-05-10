@@ -22,9 +22,8 @@ var fs = require('fs');
 var session = require('express-session');
 var request = require('request');
 var SQLiteStore = require('connect-sqlite3')(session);
-var passport = require('passport');
 var flash    = require('connect-flash');
-require('./config/passport')(passport);
+var passport = require('./auth/local');
 
 process.on('SIGINT', function() {
     console.log( "\nGracefully shutting down from SIGINT (Ctrl-C)" );
