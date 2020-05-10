@@ -377,7 +377,10 @@ a:hover, a:focus {
 .form-control {
     color:#ffffff!important
 }
-
+.control-label {
+    color: #E8564F!important;
+    font-weight: 800;
+}
 
 
 /* Table Overrides */
@@ -393,10 +396,9 @@ a:hover, a:focus {
 
 /* Form Overrides */
 .form-horizontal .form-group {
-    border-left: 1px solid #9e9e9e99;;
-    border-right: 1px solid #9e9e9e99;;
     border-radius: 10px;
     box-shadow: 0 0px 12px rgba(0, 0, 0, 0.2);
+    background: #203f52;
 }
 .form-group {
     margin-bottom: 20px!important;
