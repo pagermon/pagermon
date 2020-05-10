@@ -60,24 +60,6 @@ router.route('/settingsData')
         }
     });
 
-router.route('/user')
-    .get(isAdmin, function(req, res, next) {
-        // List all users
-        res.status(200).json({message: 'OK'});
-    })
-    .post(isAdmin, function(req, res, next) {
-        // Create user
-        res.status(200).json({message: 'OK'});
-    });
-    
-router.route('/user/:id')
-    .get(isAdmin, function(req, res, next) {
-         // Get Single User..
-     })
-    .delete(isAdmin, function(req, res, next) {
-        // Delete Single User
-    });
-
 router.get('*', isAdmin, function (req, res, next) {
     res.render('admin', { pageTitle: 'Admin' });
 });
@@ -85,13 +67,12 @@ router.get('*', isAdmin, function (req, res, next) {
 module.exports = router;
 
 function isAdmin(req, res, next) {
-
     // if user is authenticated in the session, carry on 
     if (req.isAuthenticated() && req.user.role == 'admin') {
         return next();
     } else {
         // if they aren't redirect them to the home page
-        req.flash('loginMessage', 'You are not supposed to be here!');
         res.redirect('/');
+        logger.auth.debug(req.user.username + 'attempted to access admin functions')
     }
 }

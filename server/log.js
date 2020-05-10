@@ -86,7 +86,7 @@ winston.loggers.add('db', {
 winston.loggers.add('auth', {
     format: format.combine(
         format.colorize(),
-        format.label({ label: '[db]' }),
+        format.label({ label: '[auth]' }),
         format.timestamp({format:"YYYY-MM-DD HH:mm:ss"}),
         format.prettyPrint(),
         format.printf(

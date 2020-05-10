@@ -6,15 +6,25 @@ function comparePass(userPassword, databasePassword) {
     return bcrypt.compareSync(userPassword, databasePassword);
 }
 
-function usernameExists(req, res) {
-    var userExists = false;
-    db.table('users').where({ username: req.body.username }).pluck('id').then(function (ids) { userExists = true; });
-    return userExists;
+function usernameExists(req) {
+
+    console.log(req.body.username)
+    db.table('users')
+        .where({ username: req.body.username })
+        .first()
+        .then((row) => {
+            if (row) {
+                return true;
+            } else {
+                return false;
+            }
+        })
 }
 
 function createUser(req) {
     const salt = bcrypt.genSaltSync();
     const hash = bcrypt.hashSync(req.body.password, salt);
+    
     return db('users')
         .insert({
             username: req.body.username,
