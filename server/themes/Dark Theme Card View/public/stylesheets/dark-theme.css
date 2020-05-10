@@ -184,6 +184,9 @@ a:hover, a:focus {
     font-size: .76rem!important;
     line-height: .9rem!important;
 }
+.alert-error {
+    background-color: #E8563F!important;
+}
 
 
 
@@ -191,6 +194,12 @@ a:hover, a:focus {
 @media (max-width: 768px) {
     .nomobile {
         display: none!important;
+    }
+}
+@media (min-width: 768px) {
+    .alert-desktop {
+        width: 50%;
+        margin: 0 auto;
     }
 }
 

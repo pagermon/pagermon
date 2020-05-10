@@ -152,13 +152,15 @@
     <% if (apisecurity) { %>
       <% if (!login) { %>
         <div class="container-fluid">
-          <div class="col-12" style="text-align: center; vertical-align: middle;">
-            <h2>Secure Mode Enabled</h2>
-            <h4>Please <a href="/login">sign in</a> to view messages</h4>
+          <div class="col-12" style="text-align: center; vertical-align: middle; margin-top: 50px; margin-bottom: 50px;">
+            <div class="alert alert-error alert-desktop" role="alert">
+              <h4 class="alert-heading">Secure Mode Enabled</h4>
+              <h4>Please <a href="/login">sign in</a> to view messages</h4>
+              <hr>
               <p>If you believe you reached this message by error, <a href="https://github.com/pagermon/pagermon/issues" target="_blank">log an issue.</a></p>
             </div>
+            </div>
           </div>
-        </div>
       <% } %>
     <% } %>
     <% if (searchLocation === 'bottom' || typeof searchLocation == 'undefined') { %>
