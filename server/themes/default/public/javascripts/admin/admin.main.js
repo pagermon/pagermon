@@ -27,6 +27,8 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         AliasImport: $resource('/api/capcodeImport', null, {
           'post': { method:'POST', isArray: false }
         }),
+        Users: $resource('/api/user', null, {
+        }),
       };
     }])
     
@@ -289,6 +291,117 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
           $uibModalInstance.close();
         }
       };
+    }])
+
+    .controller('UserController', ['$scope', '$routeParams', 'Api', '$uibModal', '$filter', '$location', '$timeout', 'FileSaver', function ($scope, $routeParams, Api, $uibModal, $filter, $location, $timeout, FileSaver) {
+      $scope.loading = true;
+      $scope.alertMessage = {};
+      Api.Users.query(null, function(results) {
+        $scope.users = results;
+        $scope.page = 'users';
+        $scope.loading = false;
+      });
+      
+      $scope.userDetail = function(id) {
+          $location.url('/users/'+id);
+      };
+ /*
+     $scope.userSelected = function() {
+        if ($scope.users) {
+          var trues = $filter("filter")($scope.users, {
+              selected: true
+          });
+          return trues.length;
+        }
+      };
+      
+      $scope.userDelete = function () {
+        var numSelected = $scope.aliasSelected();
+        var modalHtml =  '<div class="modal-header"><h5 class="modal-title" id="modal-title">Delete aliases</h5></div>';
+        var message   =  '<p>Are you sure you want to delete these aliases?</p><p>Aliases cannot be restored after saving.</p><p><strong>'+numSelected+' aliases selected for deletion.</strong></p>';
+            modalHtml += '<div class="modal-body">' + message + '</div>';
+            modalHtml += '<div class="modal-footer"><button class="btn btn-danger" ng-click="confirmDelete()">OK</button><button class="btn btn-primary" ng-click="cancelDelete()">Cancel</button></div>';
+ 
+        var modalInstance = $uibModal.open({
+          template: modalHtml,
+          controller: ConfirmController
+        });
+    
+        modalInstance.result.then(function() {
+          $scope.userDeleteConfirmed();
+        }, function () {
+          //$log.info('Modal dismissed at: ' + new Date());
+        });
+      };
+      
+      $scope.userDeleteConfirmed = function () {
+        var deleteList = [];
+        $scope.loading = true;
+        $scope.selectedAll = false;
+        angular.forEach($scope.aliases, function(selected){
+            if(selected.selected){
+                deleteList.push(selected.id);
+            }
+        });
+        var data = {'deleteList': deleteList};
+        console.log(data);
+        Api.AliasDetail.post({id: 'deleteMultiple' }, data).$promise.then(function (response) {
+          console.log(response);
+          $scope.loading = false;
+          if (response.status == 'ok') {
+            $scope.alertMessage.text = 'Alias deleted!';
+            $scope.alertMessage.type = 'alert-success';
+            $scope.alertMessage.show = true;
+            $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+            $scope.aliasRefreshRequired = 1;
+            $location.url('/aliases/');
+          } else {
+            $scope.alertMessage.text = 'Error deleting alias: '+response.data.error;
+            $scope.alertMessage.type = 'alert-danger';
+            $scope.alertMessage.show = true;
+            $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+          }
+        }, function(response) {
+          console.log(response);
+          $scope.alertMessage.text = 'Error deleting alias: '+response.data.error;
+          $scope.alertMessage.type = 'alert-danger';
+          $scope.alertMessage.show = true;
+          $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+          $scope.loading = false;          
+        });
+      };
+      
+      var ConfirmController = function ($scope, $uibModalInstance) {
+        $scope.confirmDelete = function () {
+          $uibModalInstance.close();
+        };
+
+        $scope.cancelDelete = function () {
+          $uibModalInstance.dismiss('cancel');
+        };
+      };
+
+      var ImportController = function ($scope, $uibModalInstance) {
+        $scope.confirmImport = function () {
+          $uibModalInstance.close();
+        };
+        $scope.cancelImport = function () {
+          $uibModalInstance.dismiss('cancel');
+        };
+        $scope.okImport = function () {
+          $uibModalInstance.close();
+          $scope.aliasRefreshRequired = 1
+          $scope.alertMessage.text = 'Alias refresh required!';
+          $scope.alertMessage.type = 'alert-warning';
+          $scope.alertMessage.show = true;
+          $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+          $location.url('/aliases/');
+        }
+        $scope.okfailedImport = function () {
+          $uibModalInstance.close();
+        }
+      };
+*/
     }])
     
     .controller('AliasDetailCtrl', ['$scope', '$routeParams', 'Api', '$uibModal', '$filter', '$location', '$timeout', function ($scope, $routeParams, Api, $uibModal, $filter, $location, $timeout) {
@@ -709,6 +822,10 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         .when('/aliases', {
           templateUrl: '/templates/admin/aliases.html',
           controller: 'AliasController'
+        })
+        .when('/users', {
+          templateUrl: '/templates/admin/users.html',
+          controller: 'UserController'
         })
         .when('/settings', {
           templateUrl: '/templates/admin/settings.html',

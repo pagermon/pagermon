@@ -6,21 +6,6 @@ function comparePass(userPassword, databasePassword) {
     return bcrypt.compareSync(userPassword, databasePassword);
 }
 
-function usernameExists(req) {
-
-    console.log(req.body.username)
-    db.table('users')
-        .where({ username: req.body.username })
-        .first()
-        .then((row) => {
-            if (row) {
-                return true;
-            } else {
-                return false;
-            }
-        })
-}
-
 function createUser(req) {
     const salt = bcrypt.genSaltSync();
     const hash = bcrypt.hashSync(req.body.password, salt);
@@ -62,6 +47,5 @@ function isAdmin(req, res, next) {
 module.exports = {
     comparePass,
     createUser,
-    usernameExists,
     isAdmin
 };
