@@ -3,6 +3,9 @@ var express = require('express');
 var router = express.Router();
 var passport = require('passport');
 var nconf = require('nconf');
+var db = require('../knex/knex.js');
+var logger = require('../log');
+
 nconf.file({file: conf_file});
 nconf.load();
 
@@ -60,8 +63,39 @@ router.get('/testLogin', isLoggedIn, function(req, res) {
     });
     
 /* GET home page. */
-router.get('/', function(req, res, next) {
+router.get('/', function(req, res, next) {7
   res.render('index', { pageTitle: 'Home' });
+});
+
+router.get('/map', function(req,res,next) {
+  const LIMIT_DEFAULT = 100;
+  db.from('messages')
+    .select('*')
+    .groupBy('coords')
+    .havingRaw("coords IS NOT ?", [null])
+    .modify(function(queryBuilder) {
+      if (req.query.agency) {
+        queryBuilder.andWhere('agency', req.query.agency);
+      }
+      if (req.query.stringSearch) {
+        queryBuilder.andWhere('message', 'like', '%'+req.query.stringSearch+'%')
+      }
+    })
+    .orderBy('id', 'desc')
+    .modify(function(queryBuilder) {
+      if (req.query.limit && !isNaN(req.query.limit)) {
+        queryBuilder.limit(req.query.limit);
+      } else{
+        queryBuilder.limit(LIMIT_DEFAULT);
+      }
+    })
+    .then(rows => {
+      res.render('map', { pagetitle: 'Map', messages: rows });
+    })
+    .catch(err => { 
+      logger.main.error(err);
+      res.render('index', { pageTitle: 'Home' });
+    });
 });
 
 module.exports = router;
