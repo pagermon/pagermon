@@ -49,6 +49,8 @@ function run(trigger, scope, data, config, callback) {
     }else{
       logger.main.info('File '+full_file_name+' not exist');
     }
+
+    callback(data);
   }
 }
 
