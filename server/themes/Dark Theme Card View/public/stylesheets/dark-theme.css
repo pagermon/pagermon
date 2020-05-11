@@ -231,6 +231,11 @@ a:hover, a:focus {
         margin: 0 auto;
     }
 }
+@media (max-width: 768px) {
+    .fw-admin-mobile {
+        width:100%!important;
+    }
+}
 
 
 
@@ -455,7 +460,7 @@ a:hover, a:focus {
 }
 
 .admin-buttons {
-    width: 33.1%!important;
+    width: 33.1%;
  }
 
 .flex-row {
