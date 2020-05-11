@@ -9,41 +9,107 @@
     <div class="col-xs-12">
       <h4 style="padding-left: 15px;"><a href="/admin/">Admin</a></h4>
       <hr />
-      <div class="btn-group btn-group-justified hidden-xs">
-        <a href="/admin/aliases" class="btn btn-default btn-lg"><i class="fa fa-fw fa-address-card fa-3x pull-left"> </i>Aliases
-          <br /><br /><div class="btn-subtext"><i>Manage capcode aliases</i></div></a>
-        <a href="/admin/messages" class="btn btn-default btn-lg disabled"><i class="fa fa-fw fa-inbox fa-3x pull-left"> </i>Messages
-          <br /><br /><div class="btn-subtext"><i>View/delete messages</i></div></a>
-        <a href="/admin/aliases" class="btn btn-default btn-lg disabled"><i class="fa fa-fw fa-book fa-3x pull-left"> </i>Logs
-          <br /><br /><div class="btn-subtext"><i>View log files</i></div></a>
-      </div>
-      <div class="btn-group btn-group-vertical visible-xs">
-        <a href="/admin/aliases" class="btn btn-default btn-lg"><i class="fa fa-fw fa-address-card fa-2x pull-left"> </i>Aliases
-          <br /><div class="btn-subtext"><i>Manage capcode aliases</i></div></a>
-        <a href="/admin/messages" class="btn btn-default btn-lg disabled"><i class="fa fa-fw fa-inbox fa-2x pull-left"> </i>Messages
-          <br /><div class="btn-subtext"><i>View/delete messages</i></div></a>
-        <a href="/admin/aliases" class="btn btn-default btn-lg disabled"><i class="fa fa-fw fa-book fa-2x pull-left"> </i>Logs
-          <br /><div class="btn-subtext"><i>View log files</i></div></a>
-      </div>      
+
+      <div class="col-md-6 col-lg-12 col-12">
+        <div class="row">
+            <div class="admin-buttons" style="display:inline-block;padding: 5px;">
+              <a href="/admin/aliases">
+                <div class="card mb-4 progress-banner">
+                    <div class="card-body justify-content-between d-flex flex-row align-items-center">
+                      <div>
+                        <p class="text-white">Aliases</p>
+                        <p class="admin-button-sub text-white">Manage capcode aliases</p>
+                    </div>
+                      <div>
+                          <i class="fa fa-fw fa-address-card fa-3x pull-left" style="color:#E8563F"> </i>
+                        </div>
+                    </div>
+                </div>
+              </a>
+            </div>
+
+            <div class="admin-buttons" style="display:inline-block;padding: 5px;">
+              <a href=""></a>
+                <div class="card mb-4 progress-banner">
+                    <div class="card-body justify-content-between d-flex flex-row align-items-center">
+                      <div>
+                        <p class="text-white text-muted">Messages</p>
+                        <p class="admin-button-sub text-white text-muted">View/delete messages</p>
+                    </div>
+                      <div>
+                          <i class="fa fa-fw fa-inbox fa-3x pull-left" style="color:#E8563F"> </i>
+                        </div>
+                    </div>
+                </div>
+              </a>
+            </div>
+            <div class="admin-buttons" style="display:inline-block;padding: 5px;">
+              <a href=""></a>
+                <div class="card mb-4 progress-banner">
+                    <div class="card-body justify-content-between d-flex flex-row align-items-center">
+                      <div>
+                        <p class="text-white text-muted">Logs</p>
+                        <p class="admin-button-sub text-white text-muted">View log files</p>
+                    </div>
+                      <div>
+                          <i class="fa fa-fw fa-book fa-3x pull-left" style="color:#E8563F"> </i>
+                        </div>
+                    </div>
+                </div>
+              </a>
+            </div>
+        </div>
     </div>
-</div>  
-<div class="row">
-    <div class="col-xs-12">
-      <div class="btn-group btn-group-justified hidden-xs" style="padding-top: 15px">
-        <a href="/admin/settings" class="btn btn-default btn-lg"><i class="fa fa-fw fa-cogs fa-3x pull-left"> </i>Settings
-          <br /><br /><div class="btn-subtext"><i>Configure system settings</i></div></a>
-        <a href="/admin/reset" class="btn btn-default btn-lg"><i class="fa fa-fw fa-key fa-3x pull-left"> </i>Reset Password
-          <br /><br /><div class="btn-subtext"><i>Change the admin user password</i></div></a>
-        <a href="https://github.com/pagermon/pagermon#support" class="btn btn-default btn-lg" target="_blank"><i class="fa fa-fw fa-life-ring fa-3x pull-left"> </i>Help
-          <br /><br /><div class="btn-subtext"><i>Documentation and support</i></div></a>
+
+    <div class="col-md-6 col-lg-12 col-12">
+      <div class="row">
+          <div class="admin-buttons" style="display:inline-block;padding: 5px;">
+            <a href="/admin/settings">
+              <div class="card mb-4 progress-banner">
+                  <div class="card-body justify-content-between d-flex flex-row align-items-center">
+                    <div>
+                      <p class="text-white">Settings</p>
+                      <p class="admin-button-sub text-white">Configure system settings</p>
+                  </div>
+                    <div>
+                        <i class="fa fa-fw fa-cogs fa-3x pull-left" style="color:#E8563F"> </i>
+                      </div>
+                  </div>
+              </div>
+            </a>
+          </div>
+
+          <div class="admin-buttons" style="display:inline-block;padding: 5px;">
+            <a href="/admin/reset">
+              <div class="card mb-4 progress-banner">
+                  <div class="card-body justify-content-between d-flex flex-row align-items-center">
+                    <div>
+                      <p class="text-white">Reset Password</p>
+                      <p class="admin-button-sub text-white">Change the admin user password</p>
+                  </div>
+                    <div>
+                        <i class="fa fa-fw fa-key fa-3x pull-left" style="color:#E8563F"> </i>
+                      </div>
+                  </div>
+              </div>
+            </a>
+          </div>
+          <div class="admin-buttons" style="display:inline-block;padding: 5px;">
+            <a href="https://github.com/pagermon/pagermon#support">
+              <div class="card mb-4 progress-banner">
+                  <div class="card-body justify-content-between d-flex flex-row align-items-center">
+                    <div>
+                      <p class="text-white">Help</p>
+                      <p class="admin-button-sub text-white">Documentation and support</p>
+                  </div>
+                    <div>
+                        <i class="fa fa-fw fa-life-ring fa-3x pull-left" style="color:#E8563F"> </i>
+                      </div>
+                  </div>
+              </div>
+            </a>
+          </div>
       </div>
-      <div class="btn-group btn-group-vertical visible-xs">
-        <a href="/admin/settings" class="btn btn-default btn-lg"><i class="fa fa-fw fa-cogs fa-2x pull-left"> </i>Settings
-          <br /><div class="btn-subtext"><i>Configure system settings</i></div></a>
-        <a href="/admin/reset" class="btn btn-default btn-lg"><i class="fa fa-fw fa-key fa-2x pull-left"> </i>Reset Password
-          <br /><div class="btn-subtext"><i>Change the admin user password</i></div></a>
-        <a href="/admin/aliases" class="btn btn-default btn-lg disabled"><i class="fa fa-fw fa-life-ring fa-2x pull-left"> </i>Help
-          <br /><div class="btn-subtext"><i>Documentation and support</i></div></a>
-      </div>      
-    </div>
+  </div>    
 </div>
+</div>  

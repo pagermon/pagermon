@@ -209,6 +209,15 @@ a:hover, a:focus {
     border-top: 30px solid #E8563F!important;
 }
 
+.text-white {
+    color:#ffffff;
+    font-size: 20px;
+}
+
+.admin-button-sub {
+    font-size: 12px!important;
+}
+
 
 /* Responsivenessss */
 @media (max-width: 768px) {
@@ -435,6 +444,20 @@ a:hover, a:focus {
     padding-right: 15px;
     padding-left: 15px;
 }
+@media (min-width: 768px) {
+.col-sm-4 {
+    width: 33.33333333%;
+    }
+}
+
+.col-4 {
+   width: 33.33333333%!important;
+}
+
+.admin-buttons {
+    width: 33.1%!important;
+ }
+
 .flex-row {
     -webkit-box-orient: horizontal !important;
     -webkit-box-direction: normal !important;
