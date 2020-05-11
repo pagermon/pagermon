@@ -33,7 +33,7 @@ function run(trigger, scope, data, config, callback) {
             logger.main.error('RAW GEOLOCATION -- ' + JSON.stringify(data.raw_geolocation));
 
             //TODO - rename raw to processed lol
-            data.cords = normalizeAddressData(
+            data.coords = normalizeAddressData(
                     data.raw_geolocation, 
                     filterConfig.flags,
                     config.location_services.api_key,
@@ -45,7 +45,8 @@ function run(trigger, scope, data, config, callback) {
 
     // logger.main.error("GEOLOCATION AFTER LOOP - " + data.raw_geolocation);
 
-	// logger.main.error('data object after processing : ' + JSON.stringify(data));
+	logger.main.error('data object before giving to CALLBACK : ' + JSON.stringify(data));
+
 
     callback(data);
 }
