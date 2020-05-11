@@ -111,7 +111,7 @@ rl.on('line', (line) => {
       } else if (line.match(/FLEX[:|] ?\d+-\d+-\d+ \d{2}:\d{2}:\d{2}/)) {
         timeString = line.match(/\d+-\d+-\d+ \d{2}:\d{2}:\d{2}/)[0];
         if (moment(timeString).isValid()) {
-          datetime = moment(timeString).unix();
+          datetime = moment.utc(timeString).unix();
         }
       }
     }
