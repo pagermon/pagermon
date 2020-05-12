@@ -7,6 +7,7 @@
  * Migrated plugins from request and http to axios client #401 @SloCompTech
  * Add fix for Multi-Delete on MySQL DB #403 @DanrwAU
  * Fix Delete button on AliasDetail screen #404 @DanrwAU
+ * Fix Shell Plugin callbacks #407 @all3kcis
  
  # 0.3.8 - 2020-05-04
 
