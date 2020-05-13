@@ -1,13 +1,14 @@
 var version = "0.3.8-beta";
 
 var debug = require('debug')('pagermon:server');
-var pmx = require('pmx').init({
+var io = require('@pm2/io').init({
     http          : true, // HTTP routes logging (default: true)
     ignore_routes : [/socket\.io/, /notFound/], // Ignore http routes with this pattern (Default: [])
     errors        : true, // Exceptions logging (default: true)
     custom_probes : true, // Auto expose JS Loop Latency and HTTP req/s as custom metrics
     network       : true, // Network monitoring at the application level
-    ports         : true  // Shows which ports your app is listening on (default: false)
+    ports         : true,  // Shows which ports your app is listening on (default: false)
+    transactions  : true
 });
 var http = require('http');
 var compression = require('compression');
@@ -129,8 +130,13 @@ var secret = nconf.get('global:sessionSecret');
 // compress all responses
 app.use(compression());
 app.use(require("morgan")("combined", { "stream": logger.http.stream }));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json({
+  limit: '1mb',
+}));       // to support JSON-encoded bodies
+app.use(bodyParser.urlencoded({     
+  extended: true,
+  limit: '1mb',
+})); // to support URL-encoded bodies
 app.use(cookieParser());
 
 var sessSet = {
@@ -172,13 +178,18 @@ app.use(function(req, res, next) {
 
 // error handler
 app.use(function(err, req, res, next) {
+  var title = nconf.get('global:monitorName') || 'PagerMon';
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
+  //these 3 have to be here to stop the error handler shitting up the logs with undefined references when it receives a 500 error ... nfi why
+  res.locals.login = req.isAuthenticated();
+  res.locals.gaEnable = nconf.get('monitoring:gaEnable');
+  res.locals.monitorName = nconf.get("global:monitorName");
 
   // render the error page
   res.status(err.status || 500);
-  res.render('global/error', { title: 'PagerMon' });
+  res.render(path.join(__dirname,'themes',theme, 'views', 'global', 'error'), { title: title });
 });
 
 // Add cronjob to automatically refresh aliases

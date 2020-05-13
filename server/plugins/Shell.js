@@ -50,6 +50,8 @@ function run(trigger, scope, data, config, callback) {
       logger.main.info('File '+full_file_name+' not exist');
     }
   }
+  
+  callback(data);
 }
 
 module.exports = {

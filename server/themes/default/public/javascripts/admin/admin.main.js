@@ -7,7 +7,8 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
           'delete': { method:'DELETE', hasBody: true }
         }),
         AliasDetail: $resource('/api/capcodes/:id', {id: '@id'}, {
-          'post': { method:'POST', isArray: false }
+          'post': { method:'POST', isArray: false },
+          'delete': { method: 'DELETE', isArray: false}
         }),
         ResetPass: $resource('/admin/resetPass', null, {
           'post': { method:'POST', isArray: false }
