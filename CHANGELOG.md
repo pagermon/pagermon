@@ -1,4 +1,4 @@
-﻿# 0.3.9 - Unreleased
+﻿# 0.3.9 - 2020-05-13
  
  * Add fix allowing for greater than 100KB CSV files #397 @DanrwAU
  * Remove errant packages that shouldn't have made the release #398 @DanrwAU
