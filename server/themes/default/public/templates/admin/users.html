@@ -38,26 +38,26 @@
         <tbody>
           <tr ng-repeat="user in users | filter: search">
             <!-- TODO: Add links to filters -->
-            <td class="shrink" style="vertical-align: middle;"><input type="checkbox" ng-model="alias.selected" /></td>
-            <td class="shrink clickable-td" style="color: Maroon;" ng-click="messageDetail(alias.id);">
+            <td class="shrink" style="vertical-align: middle;"><input type="checkbox" ng-model="user.selected" /></td>
+            <td class="shrink clickable-td" style="color: Maroon;" ng-click="userDetail(user.id);">
               <span style="font-family: monospace;"><strong>{{user.id}}</strong></span>
             </td>
-            <td class="shrink clickable-td" style="color: Maroon;" ng-click="messageDetail(alias.id);">
+            <td class="shrink clickable-td" style="color: Maroon;" ng-click="userDetail(user.id);">
               <span style="font-family: monospace;"><strong>{{user.username}}</strong></span>
             </td>
-            <td class="shrink clickable-td" style="color: Maroon;" ng-click="messageDetail(alias.id);">
+            <td class="shrink clickable-td" style="color: Maroon;" ng-click="userDetail(user.id);">
               <span style="font-family: monospace;"><strong>{{user.givenname}}</strong></span>
             </td>
-            <td class="shrink clickable-td" style="color: Maroon;" ng-click="messageDetail(alias.id);">
+            <td class="shrink clickable-td" style="color: Maroon;" ng-click="userDetail(user.id);">
               <span style="font-family: monospace;"><strong>{{user.surname}}</strong></span>
             </td>
-            <td class="shrink clickable-td" style="color: Maroon;" ng-click="messageDetail(alias.id);">
+            <td class="shrink clickable-td" style="color: Maroon;" ng-click="userDetail(user.id);">
               <span style="font-family: monospace;"><strong>{{user.email}}</strong></span>
             </td>
-            <td class="shrink clickable-td" style="color: Maroon;" ng-click="messageDetail(alias.id);">
+            <td class="shrink clickable-td" style="color: Maroon;" ng-click="userDetail(user.id);">
               <span style="font-family: monospace;"><strong>{{user.role}}</strong></span>
             </td>
-            <td class="shrink clickable-td" style="color: Maroon;" ng-click="messageDetail(alias.id);">
+            <td class="shrink clickable-td" style="color: Maroon;" ng-click="userDetail(user.id);">
               <span style="font-family: monospace;"><strong>{{user.status}}</strong></span>
             </td>
         </tbody>
@@ -65,7 +65,6 @@
     </div>
   </div>
 <div class="btn-group-vertical" id="buttons-management">
-  <button type="button" ng-disabled="!aliasSelected()" ng-click="aliasDelete()" class="btn btn-danger ">Delete Selected</button>
-  <button ng-if="aliasRefreshRequired == 1" type="button" ng-click="aliasRefresh();" class="btn btn-warning ">Refresh Aliases</button>
-  <button type="button" ng-click="messageDetail('new');" class="btn btn-success ">Add New</button>
+  <button type="button" ng-disabled="!userSelected()" ng-click="userDelete()" class="btn btn-danger ">Delete Selected</button>
+  <button type="button" ng-click="userDetail('new');" class="btn btn-success ">Add New</button>
 </div>

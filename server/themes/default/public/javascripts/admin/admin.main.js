@@ -29,6 +29,9 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         }),
         Users: $resource('/api/user', null, {
         }),
+        UserDetail: $resource('/api/user/:id', {id: '@id'}, {
+          'post': { method:'POST', isArray: false }
+        }),
       };
     }])
     
@@ -402,6 +405,158 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         }
       };
 */
+    }])
+
+    .controller('UserDetailController', ['$scope', '$routeParams', 'Api', '$uibModal', '$filter', '$location', '$timeout', function ($scope, $routeParams, Api, $uibModal, $filter, $location, $timeout) {
+      $scope.page = 'userDetail';
+      $scope.alertMessage = {};
+
+      /*
+      // controls the form validation on the address field
+      $scope.checkAddress = function() {
+        $scope.userLoading = true;
+        if ($scope.alias.address) {
+          Api.AliasDupeCheck.get({id: $scope.alias.address }, function(results) {
+            if (results.address) {
+              $scope.aliasLoading = false;
+              if (results.address == $scope.alias.originalAddress) {
+                $scope.existingAddress = false;
+                return false;
+              } else {
+                $scope.existingID = results.id;
+                $scope.existingAddress = true;
+                return true;
+              }
+            } else {
+              $scope.aliasLoading = false;
+              $scope.existingAddress = false;
+              return false;
+            }
+          });
+        } else {
+          $scope.aliasLoading = false;
+          $scope.existingAddress = false;
+          return false;
+        }
+      };
+      */
+      $scope.userSubmit = function() {
+        if ($scope.existingUsername) {
+          $scope.alertMessage.text = 'Error saving user: User with this address already exists.';
+          $scope.alertMessage.type = 'alert-danger';
+          $scope.alertMessage.show = true;
+          $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+        } else {
+          $scope.loading = true;
+          var id;
+          if ($scope.user.id) {
+            id = $routeParams.id;
+          } else {
+            id = "new";
+          }
+          Api.UserDetail.save({ id: id }, $scope.user).$promise.then(function (response) {
+            console.log(response);
+            if (response.status == 'ok') {
+              $scope.alertMessage.text = 'User saved!';
+              $scope.alertMessage.type = 'alert-success';
+              $scope.alertMessage.show = true;
+              $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+              $scope.loading = false;
+              if ($scope.isNew) {
+                $location.url('/users/' + response.id);
+              }
+            } else {
+              $scope.alertMessage.text = 'Error saving user: ' + response;
+              $scope.alertMessage.type = 'alert-danger';
+              $scope.alertMessage.show = true;
+              $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+              $scope.loading = false;
+            }
+          }, function (response) {
+            console.log(response);
+            $scope.alertMessage.text = 'Error saving user: ' + response.data.error;
+            $scope.alertMessage.type = 'alert-danger';
+            $scope.alertMessage.show = true;
+            $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+            $scope.loading = false;
+          });
+        }
+      };
+      /*
+      $scope.aliasDelete = function () {
+        var modalHtml =  '<div class="modal-header"><h5 class="modal-title" id="modal-title">Delete Alias</h5></div>';
+            modalHtml += '<div class="modal-body"><p>Are you sure you want to delete this alias?</p><p>Aliases cannot be restored after deletion.</p></div>';
+            modalHtml += '<div class="modal-footer"><button class="btn btn-danger" ng-click="confirmDelete()">OK</button><button class="btn btn-primary" ng-click="cancelDelete()">Cancel</button></div>';
+        var modalInstance = $uibModal.open({
+          template: modalHtml,
+          controller: ConfirmController
+        });
+        modalInstance.result.then(function() {
+          $scope.aliasDeleteConfirmed();
+        }, function () {
+          //$log.info('Modal dismissed at: ' + new Date());
+        });
+      };
+      
+      $scope.aliasDeleteConfirmed = function () {
+        console.log('Deleting alias '+$scope.alias.address);
+        $scope.loading = true;
+        Api.AliasDetail.delete({id: $routeParams.id }, $scope.alias).$promise.then(function (response) {
+          console.log(response);
+          if (response.status == 'ok') {
+            $scope.alertMessage.text = 'Alias deleted!';
+            $scope.alertMessage.type = 'alert-success';
+            $scope.alertMessage.show = true;
+            $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+            $scope.loading = false;
+            $location.url('/aliases/');
+          } else {
+            $scope.alertMessage.text = 'Error deleting alias: '+response.data.error;
+            $scope.alertMessage.type = 'alert-danger';
+            $scope.alertMessage.show = true;
+            $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+            $scope.loading = false;
+          }
+        }, function(response) {
+          console.log(response);
+          $scope.alertMessage.text = 'Error deleting alias: '+response.data.error;
+          $scope.alertMessage.type = 'alert-danger';
+          $scope.alertMessage.show = true;
+          $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+          $scope.loading = false;          
+        });
+      };
+      
+      var ConfirmController = function($scope, $uibModalInstance) {
+        $scope.confirmDelete = function() {
+          $uibModalInstance.close();
+        };
+        $scope.cancelDelete = function() {
+          $uibModalInstance.dismiss('cancel');
+        };
+      };
+      */
+      // get data on load
+      $scope.loading = true;
+      Api.UserDetail.get({ id: $routeParams.id }, function (results) {
+        $scope.user = results;
+        $scope.userLoading = false;
+        $scope.existingUsername = false;
+        $scope.existingEmail = false;
+        $scope.loading = false;
+
+        if (results.username) {
+          $scope.user.originalUsername = results.username;
+          $scope.isNew = false;
+          $scope.user.lastlogondate = new Date(results.lastlogondate).toLocaleString('en-AU')
+          console.log(results)
+        } else {
+          $scope.user.username = $routeParams.username || '';
+          $scope.alias.originalUsername = $routeParams.username || '';
+          $scope.isNew = true;
+          //console.log(results);
+        }
+      });
     }])
     
     .controller('AliasDetailCtrl', ['$scope', '$routeParams', 'Api', '$uibModal', '$filter', '$location', '$timeout', function ($scope, $routeParams, Api, $uibModal, $filter, $location, $timeout) {
@@ -826,6 +981,10 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         .when('/users', {
           templateUrl: '/templates/admin/users.html',
           controller: 'UserController'
+        })
+        .when('/users/:id', {
+          templateUrl: '/templates/admin/userDetails.html',
+          controller: 'UserDetailController'
         })
         .when('/settings', {
           templateUrl: '/templates/admin/settings.html',

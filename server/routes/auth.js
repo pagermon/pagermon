@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 var logger = require('../log');
-
+var db = require('../knex/knex.js');
 
 const authHelpers = require('../auth/_helpers');
 const passport = require('../auth/local');
@@ -50,27 +50,47 @@ router.get('/login', (req, res, next) => {
 
 router.post('/login', (req, res, next) => {
     passport.authenticate('login-user', (err, user, info) => {
-        if (err) { 
+        if (err) {
             req.flash('loginMessage', 'An error has occured');
             res.redirect('login')
             logger.auth.error(err)
-         }
-        if (!user) { 
+        }
+        if (!user) {
             req.flash('loginMessage', 'User not found');
             res.redirect('login')
             logger.auth.debug('User not found' + req.user.username)
         }
         if (user) {
-            req.logIn(user, function (err) {
-                if (err) { 
-                    req.flash('loginMessage', 'Incorrect Password');
-                    res.redirect('login')
-                    logger.auth.debug('Failed login ' + user + ' ' + err)
-                 } else {
-                    res.redirect('/');
-                    logger.auth.debug('Successful login ' + user)
-                 }
-            });
+            console.log(user)
+            if (user.status != 'disabled') {
+                req.logIn(user, function (err) {
+                    if (err) {
+                        req.flash('loginMessage', 'Incorrect Password');
+                        res.redirect('login')
+                        logger.auth.debug('Failed login ' + JSON.stringify(user) + ' ' + err)
+                    } else {
+                        res.redirect('/');
+                        logger.auth.debug('Successful login ' + JSON.stringify(user))
+                        //Update last logon timestamp for user
+                        var id = user.id
+                        db
+                            .from('users')
+                            .where('id', '=', id)
+                            .update({
+                                lastlogondate: Date.now()
+                            })
+                            .then((result) => {
+                            })
+                            .catch((err) => {
+                                logger.db.error(err)
+                            })
+                    }
+                });
+            } else {
+                req.flash('loginMessage', 'User is disabled');
+                res.redirect('login')
+                logger.auth.debug('User not found' + req.user.username)
+            }
         }
     })(req, res, next);
 });
