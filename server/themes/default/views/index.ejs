@@ -592,19 +592,20 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
       });
       
     }])
+    
     // Routes
     .config(['$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider) {
-      $routeProvider
-        .when('/', {
-          templateUrl: '/messages.html',
-          controller: 'MessageController'
-        })
-        .when('/:page', {
-          templateUrl: '/messages.html',
-          controller: 'MessageController'
-       });
-      $locationProvider.html5Mode({ enabled: true, requireBase: false, rewriteLinks: false});
-    }]);
+    $routeProvider
+      .when('/', {
+        templateUrl: '/messages.html',
+        controller: 'MessageController'
+      })
+      .when('/:page', {
+        templateUrl: '/messages.html',
+        controller: 'MessageController'
+      })
+    $locationProvider.html5Mode({ enabled: true, requireBase: false, rewriteLinks: false });
+  }]);
 
 function notify(notifyTitle,notifyMessage) {
     if (!("Notification" in window)) {

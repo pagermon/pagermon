@@ -1220,44 +1220,98 @@ router.get('/user/:id', isAdmin, function (req, res, next) {
 
 router.post('/user/:id', isAdmin, function (req, res, next) {
   var id = req.params.id || req.body.id || null;
-  if (req.body.username && req.body.email && req.body.givenname) {
-    if (id == 'new') {
-      id = null;
-    }
-    var username = req.body.username;
-    var givenname = req.body.givenname;
-    var surname = req.body.surname || '';
-    var email = req.body.email;
-    var role = req.body.role || 'user';
-    var status = req.body.status || 'disabled';
-    var lastlogondate = Date.now()
+  if (id == 'deleteMultiple') {
+    // do delete multiple
+    var idList = req.body.deleteList || [0, 0];
+    if (!idList.some(isNaN)) {
+      logger.main.info('Deleting: ' + idList);
+      db.from('users')
+        .del()
+        .where('id', 'in', idList)
+        .then((result) => {
+          res.status(200).send({ 'status': 'ok' });
 
-    console.time('insert');
-    db.from('users')
-      .returning('id')
-      .where('id', '=', id)
-      .update({
-        id: id,
-        username: username,
-        givenname: givenname,
-        surname: surname,
-        email: email,
-        role: role,
-        status: status,
-        lastlogondate: lastlogondate
-      })
-      .then((result) => {
-        console.timeEnd('insert');
-        res.status(200).send({ 'status': 'ok', 'id': result })
-      })
-      .catch((err) => {
-        console.timeEnd('insert');
-        logger.main.error(err)
-        res.status(500).send(err);
-      })
-    logger.main.debug(util.format('%o', req.body || 'request body empty'));
+        }).catch((err) => {
+          res.status(500).send(err);
+        })
+    } else {
+      res.status(500).send({ 'status': 'id list contained non-numbers' });
+    }
   } else {
-    res.status(500).json({ message: 'Error - required field missing' });
+    if (req.body.username && req.body.email && req.body.givenname) {
+      if (id == 'new') {
+        id = null;
+      }
+      var username = req.body.username;
+      var givenname = req.body.givenname;
+      var surname = req.body.surname || '';
+      var email = req.body.email;
+      var password = req.body.password || null;
+      var role = req.body.role || 'user';
+      var status = req.body.status || 'disabled';
+      var lastlogondate = Date.now()
+
+      console.time('insert');
+      db.from('users')
+        .returning('id')
+        .where('id', '=', id)
+        .modify(function (queryBuilder) {
+          if (password != null) {
+            const salt = bcrypt.genSaltSync();
+            const hash = bcrypt.hashSync(password, salt);
+            if (id == null) {
+              queryBuilder.insert({
+                id: id,
+                username: username,
+                givenname: givenname,
+                surname: surname,
+                password: hash,
+                email: email,
+                role: role,
+                status: status,
+                lastlogondate: lastlogondate
+              })
+            } else {
+              queryBuilder.update({
+                id: id,
+                username: username,
+                givenname: givenname,
+                surname: surname,
+                password: hash,
+                email: email,
+                role: role,
+                status: status,
+                lastlogondate: lastlogondate
+              })
+            }
+          } else {
+
+            queryBuilder.update({
+              id: id,
+              username: username,
+              givenname: givenname,
+              surname: surname,
+              email: email,
+              role: role,
+              status: status,
+              lastlogondate: lastlogondate
+            })
+
+          }
+        })
+        .then((result) => {
+          console.timeEnd('insert');
+          res.status(200).send({ 'status': 'ok', 'id': result })
+        })
+        .catch((err) => {
+          console.timeEnd('insert');
+          logger.main.error(err)
+          res.status(500).send(err);
+        })
+      logger.main.debug(util.format('%o', req.body || 'request body empty'));
+    } else {
+      res.status(500).json({ message: 'Error - required field missing' });
+    }
   }
 })
 

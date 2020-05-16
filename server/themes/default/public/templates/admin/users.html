@@ -37,7 +37,6 @@
         </thead>
         <tbody>
           <tr ng-repeat="user in users | filter: search">
-            <!-- TODO: Add links to filters -->
             <td class="shrink" style="vertical-align: middle;"><input type="checkbox" ng-model="user.selected" /></td>
             <td class="shrink clickable-td" style="color: Maroon;" ng-click="userDetail(user.id);">
               <span style="font-family: monospace;"><strong>{{user.id}}</strong></span>

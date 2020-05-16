@@ -73,6 +73,6 @@ function isAdmin(req, res, next) {
     } else {
         // if they aren't redirect them to the home page
         res.redirect('/');
-        logger.auth.debug(req.user.username + 'attempted to access admin functions')
+        logger.auth.debug(req.user.username + ' attempted to access admin functions')
     }
 }

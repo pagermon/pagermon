@@ -9,9 +9,6 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         AliasDetail: $resource('/api/capcodes/:id', {id: '@id'}, {
           'post': { method:'POST', isArray: false }
         }),
-        ResetPass: $resource('/admin/resetPass', null, {
-          'post': { method:'POST', isArray: false }
-        }),
         Settings: $resource('/admin/settingsData', null, {
           'post': { method:'POST', isArray: false }
         }),
@@ -308,7 +305,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
       $scope.userDetail = function(id) {
           $location.url('/users/'+id);
       };
- /*
+ 
      $scope.userSelected = function() {
         if ($scope.users) {
           var trues = $filter("filter")($scope.users, {
@@ -319,9 +316,9 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
       };
       
       $scope.userDelete = function () {
-        var numSelected = $scope.aliasSelected();
-        var modalHtml =  '<div class="modal-header"><h5 class="modal-title" id="modal-title">Delete aliases</h5></div>';
-        var message   =  '<p>Are you sure you want to delete these aliases?</p><p>Aliases cannot be restored after saving.</p><p><strong>'+numSelected+' aliases selected for deletion.</strong></p>';
+        var numSelected = $scope.userSelected();
+        var modalHtml =  '<div class="modal-header"><h5 class="modal-title" id="modal-title">Delete Users</h5></div>';
+        var message   =  '<p>Are you sure you want to delete these users?</p><p>Users cannot be restored after saving.</p><p><strong>'+numSelected+' users selected for deletion.</strong></p>';
             modalHtml += '<div class="modal-body">' + message + '</div>';
             modalHtml += '<div class="modal-footer"><button class="btn btn-danger" ng-click="confirmDelete()">OK</button><button class="btn btn-primary" ng-click="cancelDelete()">Cancel</button></div>';
  
@@ -341,32 +338,32 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         var deleteList = [];
         $scope.loading = true;
         $scope.selectedAll = false;
-        angular.forEach($scope.aliases, function(selected){
+        angular.forEach($scope.users, function(selected){
             if(selected.selected){
                 deleteList.push(selected.id);
             }
         });
         var data = {'deleteList': deleteList};
         console.log(data);
-        Api.AliasDetail.post({id: 'deleteMultiple' }, data).$promise.then(function (response) {
+        Api.UserDetail.post({id: 'deleteMultiple' }, data).$promise.then(function (response) {
           console.log(response);
           $scope.loading = false;
           if (response.status == 'ok') {
-            $scope.alertMessage.text = 'Alias deleted!';
+            $scope.alertMessage.text = 'Users deleted!';
             $scope.alertMessage.type = 'alert-success';
             $scope.alertMessage.show = true;
             $timeout(function () { $scope.alertMessage.show = false; }, 3000);
             $scope.aliasRefreshRequired = 1;
-            $location.url('/aliases/');
+            $location.url('/users/');
           } else {
-            $scope.alertMessage.text = 'Error deleting alias: '+response.data.error;
+            $scope.alertMessage.text = 'Error deleting users: '+response.data.error;
             $scope.alertMessage.type = 'alert-danger';
             $scope.alertMessage.show = true;
             $timeout(function () { $scope.alertMessage.show = false; }, 3000);
           }
         }, function(response) {
           console.log(response);
-          $scope.alertMessage.text = 'Error deleting alias: '+response.data.error;
+          $scope.alertMessage.text = 'Error deleting users: '+response.data.error;
           $scope.alertMessage.type = 'alert-danger';
           $scope.alertMessage.show = true;
           $timeout(function () { $scope.alertMessage.show = false; }, 3000);
@@ -383,28 +380,6 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
           $uibModalInstance.dismiss('cancel');
         };
       };
-
-      var ImportController = function ($scope, $uibModalInstance) {
-        $scope.confirmImport = function () {
-          $uibModalInstance.close();
-        };
-        $scope.cancelImport = function () {
-          $uibModalInstance.dismiss('cancel');
-        };
-        $scope.okImport = function () {
-          $uibModalInstance.close();
-          $scope.aliasRefreshRequired = 1
-          $scope.alertMessage.text = 'Alias refresh required!';
-          $scope.alertMessage.type = 'alert-warning';
-          $scope.alertMessage.show = true;
-          $timeout(function () { $scope.alertMessage.show = false; }, 3000);
-          $location.url('/aliases/');
-        }
-        $scope.okfailedImport = function () {
-          $uibModalInstance.close();
-        }
-      };
-*/
     }])
 
     .controller('UserDetailController', ['$scope', '$routeParams', 'Api', '$uibModal', '$filter', '$location', '$timeout', function ($scope, $routeParams, Api, $uibModal, $filter, $location, $timeout) {
@@ -552,7 +527,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
           console.log(results)
         } else {
           $scope.user.username = $routeParams.username || '';
-          $scope.alias.originalUsername = $routeParams.username || '';
+          $scope.user.originalUsername = $routeParams.username || '';
           $scope.isNew = true;
           //console.log(results);
         }
@@ -776,37 +751,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
     }])
     
     // handles password resets, needs cleanup
-    .controller('ResetController', ['$scope', '$routeParams', 'Api', '$timeout', function ($scope, $routeParams, Api, $timeout) {
-      $scope.form = {};
-      $scope.alertMessage = {};
-      $scope.page = 'reset';
-      $scope.submitPass = function() {
-        $scope.loading = true;
-        var pass = {'password': $scope.password};
-        Api.ResetPass.post(null, pass).$promise.then(function (response) {
-          console.log(response);
-          $scope.loading = false;
-          if (response.status == 'ok') {
-            $scope.alertMessage.text = 'Password changed!';
-            $scope.alertMessage.type = 'alert-success';
-            $scope.alertMessage.show = true;
-            $timeout(function () { $scope.alertMessage.show = false; }, 3000);
-          } else {
-            $scope.alertMessage.text = 'Error changing password: '+response.data.error;
-            $scope.alertMessage.type = 'alert-danger';
-            $scope.alertMessage.show = true;
-            $timeout(function () { $scope.alertMessage.show = false; }, 3000);
-          }
-        }, function(response) {
-          console.log(response);
-          $scope.alertMessage.text = 'Error changing password: '+response.data.error;
-          $scope.alertMessage.type = 'alert-danger';
-          $scope.alertMessage.show = true;
-          $timeout(function () { $scope.alertMessage.show = false; }, 3000);
-          $scope.loading = false;          
-        });
-        };
-    }])
+    
     
     // needs cleanup
     .controller('SettingsController', ['$scope', '$routeParams', 'Api', 'uuid', '$uibModal', '$filter', '$timeout', '$sanitize', function ($scope, $routeParams, Api, uuid, $uibModal, $filter, $timeout, $sanitize) {
@@ -989,10 +934,6 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         .when('/settings', {
           templateUrl: '/templates/admin/settings.html',
           controller: 'SettingsController'
-        })
-        .when('/reset', {
-          templateUrl: '/templates/admin/reset.html',
-          controller: 'ResetController'
         })
         .when('/aliases/:id', {
           templateUrl: '/templates/admin/aliasDetails.html',

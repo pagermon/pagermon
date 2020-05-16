@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 var logger = require('../log');
 var db = require('../knex/knex.js');
+const bcrypt = require('bcryptjs');
 
 const authHelpers = require('../auth/_helpers');
 const passport = require('../auth/local');
@@ -94,6 +95,51 @@ router.post('/login', (req, res, next) => {
         }
     })(req, res, next);
 });
+
+router.get('/reset', (req, res, next) => {
+    var user = '';
+    if (typeof req.username != 'undefined') {
+        user = req.username;   
+    } 
+    if (req.user) {
+        return res.render('reset', {
+            title: 'PagerMon - Reset Password',
+            message: req.flash('loginMessage'),
+            username: user
+        });
+    } else {
+        res.redirect('/auth/login')
+    }
+});
+
+router.post('/reset', function(req, res, next) {
+    // find a user via passport
+        var password = req.body.password;
+        // bcrypt function
+        if (password) {
+            const salt = bcrypt.genSaltSync();
+            const hash = bcrypt.hashSync(req.body.password, salt);
+            id = req.user.id
+            db.from('users')
+            .returning('id')
+            .where('id', '=', id)
+            .update({
+                password: hash
+            })
+            .then((result) => {
+                res.redirect('/').send({'status': 'ok'});
+                logger.auth.debug(req.username + 'Password Reset Successfully')
+            })
+            .catch((err) => {
+                res.status(500);
+                res.json({'error': err});
+                logger.auth.error(err)
+            })
+        } else {
+            res.status(500);
+            res.json({'error': 'Password empty'});
+        }
+    });
 
 router.get('/logout', (req, res, next) => {
     req.logout();
