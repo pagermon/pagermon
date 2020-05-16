@@ -482,36 +482,36 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
           });
         }
       };
-      /*
-      $scope.aliasDelete = function () {
-        var modalHtml =  '<div class="modal-header"><h5 class="modal-title" id="modal-title">Delete Alias</h5></div>';
-            modalHtml += '<div class="modal-body"><p>Are you sure you want to delete this alias?</p><p>Aliases cannot be restored after deletion.</p></div>';
+      
+      $scope.userDelete = function () {
+        var modalHtml =  '<div class="modal-header"><h5 class="modal-title" id="modal-title">Delete User</h5></div>';
+            modalHtml += '<div class="modal-body"><p>Are you sure you want to delete this user?</p><p>Users cannot be restored after deletion.</p></div>';
             modalHtml += '<div class="modal-footer"><button class="btn btn-danger" ng-click="confirmDelete()">OK</button><button class="btn btn-primary" ng-click="cancelDelete()">Cancel</button></div>';
         var modalInstance = $uibModal.open({
           template: modalHtml,
           controller: ConfirmController
         });
         modalInstance.result.then(function() {
-          $scope.aliasDeleteConfirmed();
+          $scope.userDeleteConfirmed();
         }, function () {
           //$log.info('Modal dismissed at: ' + new Date());
         });
       };
       
-      $scope.aliasDeleteConfirmed = function () {
-        console.log('Deleting alias '+$scope.alias.address);
+      $scope.userDeleteConfirmed = function () {
+        console.log('Deleting user '+$scope.user.username);
         $scope.loading = true;
-        Api.AliasDetail.delete({id: $routeParams.id }, $scope.alias).$promise.then(function (response) {
+        Api.UserDetail.delete({id: $routeParams.id }, $scope.user).$promise.then(function (response) {
           console.log(response);
           if (response.status == 'ok') {
-            $scope.alertMessage.text = 'Alias deleted!';
+            $scope.alertMessage.text = 'User deleted!';
             $scope.alertMessage.type = 'alert-success';
             $scope.alertMessage.show = true;
             $timeout(function () { $scope.alertMessage.show = false; }, 3000);
             $scope.loading = false;
-            $location.url('/aliases/');
+            $location.url('/users/');
           } else {
-            $scope.alertMessage.text = 'Error deleting alias: '+response.data.error;
+            $scope.alertMessage.text = 'Error deleting user: '+response.data.error;
             $scope.alertMessage.type = 'alert-danger';
             $scope.alertMessage.show = true;
             $timeout(function () { $scope.alertMessage.show = false; }, 3000);
@@ -519,7 +519,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
           }
         }, function(response) {
           console.log(response);
-          $scope.alertMessage.text = 'Error deleting alias: '+response.data.error;
+          $scope.alertMessage.text = 'Error deleting user: '+response.data.error;
           $scope.alertMessage.type = 'alert-danger';
           $scope.alertMessage.show = true;
           $timeout(function () { $scope.alertMessage.show = false; }, 3000);
@@ -535,7 +535,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
           $uibModalInstance.dismiss('cancel');
         };
       };
-      */
+      
       // get data on load
       $scope.loading = true;
       Api.UserDetail.get({ id: $routeParams.id }, function (results) {
