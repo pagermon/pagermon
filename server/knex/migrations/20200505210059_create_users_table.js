@@ -1,3 +1,4 @@
+var bcrypt = require('bcryptjs');
 
 exports.up = function(db, Promise) {
     return db.schema.hasTable('users').then(function(exists) {
@@ -16,7 +17,22 @@ exports.up = function(db, Promise) {
                 table.datetime('lastlogondate').notNullable();
             })
             .then(function (){
-              //add function to migrate existing user account. 
+              const salt = bcrypt.genSaltSync();
+              const hash = bcrypt.hashSync('changeme', salt);
+              return db('users')
+                     .insert({
+                       givenname: 'Admin',
+                       surname: '',
+                       username: 'admin',
+                       password: hash,
+                       email: 'none@none.com',
+                       role: 'admin',
+                       status: 'active',
+                       lastlogondate: Date.now()
+                     })
+                     .then (function () {
+
+                     })
             })
         } else {
           return Promise.resolve('Not Required')

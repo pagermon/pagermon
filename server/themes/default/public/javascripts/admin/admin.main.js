@@ -338,10 +338,12 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         var deleteList = [];
         $scope.loading = true;
         $scope.selectedAll = false;
-        angular.forEach($scope.users, function(selected){
-            if(selected.selected){
-                deleteList.push(selected.id);
+        angular.forEach($scope.users, function (selected) {
+          if (selected.selected) {
+            if (selected.id != 1) {
+              deleteList.push(selected.id);
             }
+          }
         });
         var data = {'deleteList': deleteList};
         console.log(data);
