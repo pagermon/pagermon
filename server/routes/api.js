@@ -1317,18 +1317,23 @@ router.post('/user/:id', isAdmin, function (req, res, next) {
 
 router.delete('/user/:id', isAdmin, function (req, res, next) {
   var id = parseInt(req.params.id, 10);
-  logger.main.info('Deleting User ' + id);
-  db.from('users')
-    .del()
-    .where('id', id)
-    .then((result) => {
-      res.status(200).send({ 'status': 'ok' });
-    })
-    .catch((err) => {
-      res.status(500).send(err);
-      logger.main.error(err)
-    })
-  logger.main.debug(util.format('%o', req.body || 'request body empty'));
+  if (id != 1) {
+    logger.main.info('Deleting User ' + id);
+    db.from('users')
+      .del()
+      .where('id', id)
+      .then((result) => {
+        res.status(200).send({ 'status': 'ok' });
+      })
+      .catch((err) => {
+        res.status(500).send(err);
+        logger.main.error(err)
+      })
+    logger.main.debug(util.format('%o', req.body || 'request body empty'));
+  } else {
+    res.status(500).json({'error': 'User ID 1 is protected'});
+    logger.main.error('Unable to delete user ID 1')
+  }
 });
 
 

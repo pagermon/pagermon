@@ -749,10 +749,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         $scope.aliasLoad();
       });
     }])
-    
-    // handles password resets, needs cleanup
-    
-    
+ 
     // needs cleanup
     .controller('SettingsController', ['$scope', '$routeParams', 'Api', 'uuid', '$uibModal', '$filter', '$timeout', '$sanitize', function ($scope, $routeParams, Api, uuid, $uibModal, $filter, $timeout, $sanitize) {
       $scope.alertMessage = {};
