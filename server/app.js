@@ -187,6 +187,7 @@ app.use(function(err, req, res, next) {
   res.locals.login = req.isAuthenticated();
   res.locals.gaEnable = nconf.get('monitoring:gaEnable');
   res.locals.monitorName = nconf.get("global:monitorName");
+  res.locals.registration = nconf.get('auth:registration')
 
   // render the error page
   res.status(err.status || 500);

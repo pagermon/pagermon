@@ -17,6 +17,7 @@ exports.up = function(db, Promise) {
                 table.datetime('lastlogondate').notNullable();
             })
             .then(function (){
+              //create the default admin user
               const salt = bcrypt.genSaltSync();
               const hash = bcrypt.hashSync('changeme', salt);
               return db('users')
