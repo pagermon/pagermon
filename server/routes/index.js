@@ -32,11 +32,11 @@ router.route('/login')
         if (typeof req.user != 'undefined') {
             user = req.user;
         }
-       res.render('login', { 
+       res.render('login', {
            pageTitle: 'Login',
            message: req.flash('loginMessage'),
            user: user
-       }); 
+       });
     })
     // process the login form
     .post(passport.authenticate('local-login', {
@@ -44,7 +44,7 @@ router.route('/login')
         failureRedirect : '/login?=login_failed', // redirect back to the signup page if there is an error
         failureFlash : true // allow flash messages
     }));
-    
+
 router.route('/logout')
     .get(function(req, res, next) {
         req.logout();
@@ -58,7 +58,7 @@ router.get('/testLogin', isLoggedIn, function(req, res) {
             pageTitle: 'Home'
         });
     });
-    
+
 /* GET home page. */
 router.get('/', function(req, res, next) {
   res.render('index', { pageTitle: 'Home' });
@@ -69,7 +69,7 @@ module.exports = router;
 // route middleware to make sure a user is logged in
 function isLoggedIn(req, res, next) {
 
-    // if user is authenticated in the session, carry on 
+    // if user is authenticated in the session, carry on
     if (req.isAuthenticated())
         return next();
 

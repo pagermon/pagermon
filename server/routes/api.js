@@ -145,16 +145,16 @@ router.get('/messages', isLoggedIn, function(req, res, next) {
                   };
                 }
               }
-              if (row) {
-                result.push(row);
-              } else {
-                logger.main.info('empty results');
-              }
-          } 
+            if (row) {
+              result.push(row);
+            } else {
+              logger.main.info('empty results');
+            }
+          }
         })
-        .catch(err => { 
-          logger.main.error(err); 
-        })
+          .catch(err => {
+            logger.main.error(err);
+          })
         .finally(() => {
           if (rowCount > 0) {
             console.timeEnd('sql');
@@ -240,51 +240,68 @@ router.get('/messageSearch', isLoggedIn, function(req, res, next) {
   var query;
   var agency;
   var address;
+  var alias;
   // dodgy handling for unexpected results
-  if (typeof req.query.q !== 'undefined') { query = req.query.q;
-  } else { query = ''; }
-  if (typeof req.query.agency !== 'undefined') { agency = req.query.agency;
-  } else { agency = ''; }
-  if (typeof req.query.address !== 'undefined') { address = req.query.address;
-  } else { address = ''; }
+  if (typeof req.query.q !== 'undefined') {
+    query = req.query.q;
+  } else {
+    query = '';
+  }
+  if (typeof req.query.agency !== 'undefined') {
+    agency = req.query.agency;
+  } else {
+    agency = '';
+  }
+  if (typeof req.query.address !== 'undefined') {
+    address = req.query.address;
+  } else {
+    address = '';
+  }
+  if (typeof req.query.alias !== 'undefined') {
+    alias = req.query.alias;
+  } else {
+    alias = '';
+  }
 
   // set select commands based on query type
 
   var data = []
   console.time('sql')
   db.select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore')
-    .modify(function(qb) {
-    if (dbtype == 'sqlite3' && query != '') {
-      qb.from('messages_search_index')
-        .leftJoin('messages', 'messages.id', '=', 'messages_search_index.rowid')
-    } else {
-      qb.from('messages');
-    }
-    if (pdwMode) {
-      if (adminShow && req.isAuthenticated()) {
-        qb.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id');
-      } else {
-        qb.innerJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id');
-      }
-    } else {
-      qb.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id');
-    }
-    if (dbtype == 'sqlite3' && query != '') {
-      qb.whereRaw('messages_search_index MATCH ?', query)
-    } else if (dbtype == 'mysql' && query != '') {
-      //This wraps the search query in quotes so MySQL searches for the complete term rather than individual words.
-      query = '"' + query + '"'
-      qb.whereRaw(`MATCH(messages.message, messages.address, messages.source) AGAINST (? IN BOOLEAN MODE)`, query)
-    } else if (dbtype == 'oracledb' && query != '') {
-      qb.whereRaw(`CONTAINS("messages"."message", ?, 1) > 0`, query)
-    } else {
-      if (address != '')
-        qb.where('messages.address', 'LIKE', address).orWhere('messages.source', address);
-      if (agency != '')
-        qb.whereIn('messages.alias_id', function(qb2) {
-                qb2.select('id').from('capcodes').where('agency',agency).where('ignore',0);
-        })
-    }
+      .modify(function (qb) {
+        if (dbtype == 'sqlite3' && query != '') {
+          qb.from('messages_search_index')
+              .leftJoin('messages', 'messages.id', '=', 'messages_search_index.rowid')
+        } else {
+          qb.from('messages');
+        }
+        if (pdwMode) {
+          if (adminShow && req.isAuthenticated()) {
+            qb.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id');
+          } else {
+            qb.innerJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id');
+          }
+        } else {
+          qb.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id');
+        }
+        if (dbtype == 'sqlite3' && query != '') {
+          qb.whereRaw('messages_search_index MATCH ?', query)
+        } else if (dbtype == 'mysql' && query != '') {
+          //This wraps the search query in quotes so MySQL searches for the complete term rather than individual words.
+          query = '"' + query + '"'
+          qb.whereRaw(`MATCH(messages.message, messages.address, messages.source) AGAINST (? IN BOOLEAN MODE)`, query)
+        } else if (dbtype == 'oracledb' && query != '') {
+          qb.whereRaw(`CONTAINS("messages"."message", ?, 1) > 0`, query)
+        } else {
+          if (address != '')
+            qb.where('messages.address', 'LIKE', address).orWhere('messages.source', address);
+          if (agency != '')
+            qb.whereIn('messages.alias_id', function (qb2) {
+              qb2.select('id').from('capcodes').where('agency', agency).where('ignore', 0);
+            })
+          if (alias != '')
+            qb.where('messages.alias_id', alias);
+        }
   }).orderBy('messages.timestamp', 'desc')
     .then((rows) => {
       if (rows) {
@@ -310,7 +327,7 @@ router.get('/messageSearch', isLoggedIn, function(req, res, next) {
               data.push(row);
             } else {
             if (row.ignore == 0)
-              data.push(row); 
+              data.push(row);
             }
           } else {
             if (!row.ignore || row.ignore == 0)
@@ -1039,7 +1056,7 @@ router.post('/capcodeImport', isLoggedIn, function (req, res, next) {
     //remove newline chars from dataset - yes i realise we are adding them in admin.main.js, it doesn't submit without them.
     req.body[key] = req.body[key].replace(/[\r\n]/g, '');
   }
-  // join data but remove the last newline to prevent the last one being malformed. 
+  // join data but remove the last newline to prevent the last one being malformed.
   var importdata = req.body.join('\n').slice(0, -1);
   var importresults = [];
   converter.csv2jsonAsync(importdata)
@@ -1122,7 +1139,7 @@ router.post('/capcodeImport', isLoggedIn, function (req, res, next) {
                 'result': 'failed' + err
               })
             });
-        };
+        }
         //Gather all the results, format for the frontend and send it back.
         let results = { "results": importresults }
         res.status(200)
