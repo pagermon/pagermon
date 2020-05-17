@@ -24,28 +24,7 @@ function createUser(req) {
         .returning('*');
 }
 
-function isAdmin(req, res, next) {
-    if (!req.user) return false;
-    return db('users').where({
-        username: req.user.username
-    })
-        .first()
-        .then((user) => {
-            if (!user.role === 'admin') {
-                return false;
-            } else {
-                return true;
-            }
-        })
-        .catch((err) => {
-            return false;
-        });
-    return false;
-}
-
-
 module.exports = {
     comparePass,
-    createUser,
-    isAdmin
+    createUser
 };

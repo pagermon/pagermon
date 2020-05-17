@@ -1328,14 +1328,14 @@ function inParam(sql, arr) {
   return sql.replace('?#', arr.map(() => '?').join(','));
 }
 
-// route middleware to make sure a user is logged in
+// route middleware to make sure a user is logged in where required
 function isLoggedIn(req, res, next) {
   if (apiSecurity) { //check if Secure mode is on
     if (req.isAuthenticated()) {
       // if user is authenticated in the session, carry on
       return next();
     } else {
-      //logger.main.debug('Basic auth failed, attempting API auth');
+      //perform api authentication - all api keys are assumed to be admin 
       passport.authenticate('login-api', { session: false, failWithError: true })(req, res, next),
         function (next) {
           next();
@@ -1348,11 +1348,13 @@ function isLoggedIn(req, res, next) {
     return next();
   }
 }
-
+//route middleware to make sure the user is an admin where required
 function isAdmin(req, res, next) {
   if (req.isAuthenticated() && req.user.role == 'admin') {
+    //if the user is authenticated and the user's role is admin carry on
     return next();
   } else {
+    //perform api authentication - all api keys are assumed to be admin 
     passport.authenticate('login-api', { session: false, failWithError: true })(req, res, next),
       function (next) {
         next();
