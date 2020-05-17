@@ -363,7 +363,7 @@ router.get('/messageSearch', isLoggedIn, function (req, res, next) {
 
 
 // capcodes aren't pagified at the moment, this should probably be removed
-router.get('/capcodes/init', isLoggedIn, function (req, res, next) {
+router.get('/capcodes/init', isAdmin, function (req, res, next) {
   //set current page if specifed as get variable (eg: /?page=2)
   if (typeof req.query.page !== 'undefined') {
     var page = parseInt(req.query.page, 10);
@@ -393,7 +393,7 @@ router.get('/capcodes/init', isLoggedIn, function (req, res, next) {
 
 // all capcode get methods are only used in admin area, so lock down to logged in users as they may contain sensitive data
 
-router.get('/capcodes', isLoggedIn, function (req, res, next) {
+router.get('/capcodes', isAdmin, function (req, res, next) {
   nconf.load();
   var dbtype = nconf.get('database:type');
   db.from('capcodes')
@@ -413,7 +413,7 @@ router.get('/capcodes', isLoggedIn, function (req, res, next) {
     })
 });
 
-router.get('/capcodes/agency', isLoggedIn, function (req, res, next) {
+router.get('/capcodes/agency', isAdmin, function (req, res, next) {
   db.from('capcodes')
     .distinct('agency')
     .then((rows) => {
@@ -426,7 +426,7 @@ router.get('/capcodes/agency', isLoggedIn, function (req, res, next) {
     })
 });
 
-router.get('/capcodes/:id', isLoggedIn, function (req, res, next) {
+router.get('/capcodes/:id', isAdmin, function (req, res, next) {
   var id = req.params.id;
   var defaults = {
     "id": "",
@@ -463,7 +463,7 @@ router.get('/capcodes/:id', isLoggedIn, function (req, res, next) {
   }
 });
 
-router.get('/capcodeCheck/:id', isLoggedIn, function (req, res, next) {
+router.get('/capcodeCheck/:id', isAdmin, function (req, res, next) {
   var id = req.params.id;
   db.from('capcodes')
     .select('*')
@@ -495,7 +495,7 @@ router.get('/capcodeCheck/:id', isLoggedIn, function (req, res, next) {
     })
 });
 
-router.get('/capcodes/agency/:id', isLoggedIn, function (req, res, next) {
+router.get('/capcodes/agency/:id', isAdmin, function (req, res, next) {
   var id = req.params.id;
   db.from('capcodes')
     .select('*')
@@ -519,7 +519,7 @@ router.get('/capcodes/agency/:id', isLoggedIn, function (req, res, next) {
 // dupe init
 var msgBuffer = [];
 
-router.post('/messages', isLoggedIn, function (req, res, next) {
+router.post('/messages', isAdmin, function (req, res, next) {
   nconf.load();
   if (req.body.address && req.body.message) {
     var dbtype = nconf.get('database:type');
@@ -792,7 +792,7 @@ router.post('/messages', isLoggedIn, function (req, res, next) {
   }
 });
 
-router.post('/capcodes', isLoggedIn, function (req, res, next) {
+router.post('/capcodes', isAdmin, function (req, res, next) {
   nconf.load();
   var updateRequired = nconf.get('database:aliasRefreshRequired');
   if (req.body.address && req.body.alias) {
@@ -850,7 +850,7 @@ router.post('/capcodes', isLoggedIn, function (req, res, next) {
   }
 });
 
-router.post('/capcodes/:id', isLoggedIn, function (req, res, next) {
+router.post('/capcodes/:id', isAdmin, function (req, res, next) {
   var dbtype = nconf.get('database:type');
   var id = req.params.id || req.body.id || null;
   nconf.load();
@@ -961,7 +961,7 @@ router.post('/capcodes/:id', isLoggedIn, function (req, res, next) {
   }
 });
 
-router.delete('/capcodes/:id', isLoggedIn, function (req, res, next) {
+router.delete('/capcodes/:id', isAdmin, function (req, res, next) {
   // delete single alias
   var id = parseInt(req.params.id, 10);
   nconf.load();
@@ -983,7 +983,7 @@ router.delete('/capcodes/:id', isLoggedIn, function (req, res, next) {
   logger.main.debug(util.format('%o', req.body || 'request body empty'));
 });
 
-router.post('/capcodeRefresh', isLoggedIn, function (req, res, next) {
+router.post('/capcodeRefresh', isAdmin, function (req, res, next) {
   nconf.load();
   var dbtype = nconf.get('database:type');
   console.time('updateMap');
@@ -1011,7 +1011,7 @@ router.post('/capcodeRefresh', isLoggedIn, function (req, res, next) {
     })
 });
 
-router.post('/capcodeExport', isLoggedIn, function (req, res, next) {
+router.post('/capcodeExport', isAdmin, function (req, res, next) {
   nconf.load();
   var dbtype = nconf.get('database:type');
   var filename = 'export.csv'
@@ -1038,7 +1038,7 @@ router.post('/capcodeExport', isLoggedIn, function (req, res, next) {
     })
 });
 
-router.post('/capcodeImport', isLoggedIn, function (req, res, next) {
+router.post('/capcodeImport', isAdmin, function (req, res, next) {
   for (var key in req.body) {
     //remove newline chars from dataset - yes i realise we are adding them in admin.main.js, it doesn't submit without them.
     req.body[key] = req.body[key].replace(/[\r\n]/g, '');
@@ -1347,9 +1347,8 @@ function inParam(sql, arr) {
 
 // route middleware to make sure a user is logged in
 function isLoggedIn(req, res, next) {
-  if (req.method == 'GET') {
-    if (apiSecurity || req.url.match(/capcodeExport/i) || ((req.url.match(/capcodes/i) || req.url.match(/capcodeCheck/i)) && !(req.url.match(/agency$/)))) { //check if Secure mode is on, or if the route is a capcode route
-      if (req.isAuthenticated() && req.user.role == 'admin') {
+    if (apiSecurity) { //check if Secure mode is on
+      if (req.isAuthenticated()) {
         // if user is authenticated in the session, carry on
         return next();
       } else {
@@ -1365,19 +1364,6 @@ function isLoggedIn(req, res, next) {
     } else {
       return next();
     }
-  } else if (req.method == 'POST') { //Check if user is authenticated for POST methods
-    if (req.isAuthenticated() && req.user.role == 'admin') {
-      return next();
-    } else {
-      passport.authenticate('login-api', { session: false, failWithError: true })(req, res, next),
-        function (next) {
-          next();
-        },
-        function (res) {
-          return res.status(401).json({ error: 'Authentication failed.' });
-        }
-    }
-  }
 }
 
 function isAdmin(req, res, next) {
