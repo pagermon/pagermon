@@ -1,9 +1,13 @@
-﻿# 0.3.9 - Unreleased
+﻿# 0.3.9 - 2020-05-13
  
  * Add fix allowing for greater than 100KB CSV files #397 @DanrwAU
  * Remove errant packages that shouldn't have made the release #398 @DanrwAU
  * Fix 500 errors filling the logs with errors #398 @DanrwAU
  * Convert PMX to PM2/IO #398 @DanrwAU
+ * Migrated plugins from request and http to axios client #401 @SloCompTech
+ * Add fix for Multi-Delete on MySQL DB #403 @DanrwAU
+ * Fix Delete button on AliasDetail screen #404 @DanrwAU
+ * Fix Shell Plugin callbacks #407 @all3kcis
  
  # 0.3.8 - 2020-05-04
 
