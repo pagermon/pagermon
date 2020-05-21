@@ -25,7 +25,20 @@ router.route('/register')
     .post(function (req, res, next) {
         var reg = nconf.get('auth:registration')
         if (reg === 'enabled') {
-            return authHelpers.createUser(req, res)
+            const salt = bcrypt.genSaltSync();
+            const hash = bcrypt.hashSync(req.body.password, salt);
+    
+            return db('users')
+                .insert({
+                    username: req.body.username,
+                    password: hash,
+                    givenname: req.body.givenname,
+                    surname: req.body.surname,
+                    email: req.body.email,
+                    role: 'user',
+                    status: 'active',
+                    lastlogondate: Date.now()
+                })
                 .then((response) => {
                     passport.authenticate('login-user', (err, user, info) => {
                         if (user) {

@@ -1154,7 +1154,20 @@ router.route('/user')
           console.log(row)
           res.status(401).send({ 'status': 'error' });
         } else {
-          return authHelpers.createUser(req, res)
+          const salt = bcrypt.genSaltSync();
+          const hash = bcrypt.hashSync(req.body.password, salt);
+    
+        return db('users')
+            .insert({
+                username: req.body.username,
+                password: hash,
+                givenname: req.body.givenname,
+                surname: req.body.surname,
+                email: req.body.email,
+                role: req.body.role,
+                status: req.body.status,
+                lastlogondate: Date.now()
+            })
             .then((response) => {
               console.log(response)
               logger.main.debug('created user id: ' + response)
