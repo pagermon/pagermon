@@ -19,7 +19,7 @@ router.route('/login')
             user = req.username;
         }
         res.render('auth', {
-            pageTitle: 'Admin'
+            pageTitle: 'User'
         });
     })
     .post(function (req, res, next) {
@@ -78,13 +78,19 @@ router.route('/logout')
         logger.auth.debug('Successful Logout ' + req.user.username)
     });
 
+router.route('/profile')
+    .get(function (req, res, next) {
+        res.render('auth', {
+            pageTitle: 'User',
+        })
+    });
 
 router.route('/register')
     .get(function (req, res, next) {
         var reg = nconf.get('auth:registration')
         if (reg === 'enabled') {
             return res.render('auth', {
-                title: 'PagerMon - Registration',
+                title: 'Registration',
                 message: req.flash('registerMessage'),
             });
         } else {
@@ -148,7 +154,7 @@ router.route('/reset')
         }
         if (req.user) {
             return res.render('auth', {
-                title: 'PagerMon - Reset Password',
+                title: 'User - Reset Password',
                 message: req.flash('loginMessage'),
                 username: user
             });

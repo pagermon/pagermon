@@ -4,9 +4,12 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         function ($resource) {
             return {
                 Login: $resource('/auth/login/', null, {
-                    'post': { method:'POST', isArray: false }
+                    'post': { method: 'POST', isArray: false }
                 }),
                 Reset: $resource('/auth/reset/', null, {
+                    'post': { method: 'POST', isArray: false }
+                }),
+                UserDetail: $resource('/api/user/:id', {id: '@id'}, {
                     'post': { method:'POST', isArray: false }
                 })
             };
@@ -40,16 +43,16 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         };
 
     }])
-    
+
     .controller('RegisterController', ['$scope', '$routeParams', 'Api', '$uibModal', '$filter', '$location', '$timeout', function ($scope, $routeParams, Api, $uibModal, $filter, $location, $timeout) {
-       
+        
     }])
 
     .controller('ResetController', ['$scope', '$routeParams', 'Api', '$uibModal', '$filter', '$location', '$timeout', '$window', function ($scope, $routeParams, Api, $uibModal, $filter, $location, $timeout, $window) {
         $scope.resetMessage = {};
         $scope.resetSubmit = function () {
             $scope.loading = false
-            var vars = {'user': $scope.user , 'password': $scope.password};
+            var vars = { 'user': $scope.user, 'password': $scope.password };
 
             Api.Reset.post(null, vars).$promise.then(function (response) {
                 console.log(response);
@@ -74,7 +77,48 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
     }])
 
     .controller('ProfileController', ['$scope', '$routeParams', 'Api', '$uibModal', '$filter', '$location', '$timeout', function ($scope, $routeParams, Api, $uibModal, $filter, $location, $timeout) {
-      
+        $scope.alertMessage = {};
+        $scope.userSubmit = function () {
+                $scope.loading = true;
+                var id;
+                id = $routeParams.id;
+                Api.UserDetail.save({ id: id }, $scope.user).$promise.then(function (response) {
+                    console.log(response);
+                    if (response.status == 'ok') {
+                        $scope.alertMessage.text = 'User saved!';
+                        $scope.alertMessage.type = 'alert-success';
+                        $scope.alertMessage.show = true;
+                        $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+                        $scope.loading = false;
+                    } else {
+                        $scope.alertMessage.text = 'Error saving user: ' + response;
+                        $scope.alertMessage.type = 'alert-danger';
+                        $scope.alertMessage.show = true;
+                        $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+                        $scope.loading = false;
+                    }
+                }, function (response) {
+                    console.log(response);
+                    $scope.alertMessage.text = 'Error saving user: ' + response.data.error;
+                    $scope.alertMessage.type = 'alert-danger';
+                    $scope.alertMessage.show = true;
+                    $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+                    $scope.loading = false;
+                });
+            };
+        console.log($scope)
+        $scope.loading = true;
+        Api.UserDetail.get({ id: id }, function (results) {
+            console.log($routeParams)
+            $scope.user = results;
+            $scope.userLoading = false;
+            $scope.existingUsername = false;
+            $scope.existingEmail = false;
+            $scope.loading = false;
+            $scope.user.lastlogondate = new Date(results.lastlogondate).toLocaleString('en-AU')
+            console.log(results)
+            
+        });
     }])
 
     .config(['$routeProvider', '$locationProvider', '$httpProvider', function ($routeProvider, $locationProvider, $httpProvider) {
@@ -83,7 +127,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
                 templateUrl: '/templates/auth/login.html',
                 controller: 'LoginController'
             })
-            .when('profile', {
+            .when('/profile', {
                 templateUrl: '/templates/auth/profile.html',
                 controller: 'ProfileController'
             })
