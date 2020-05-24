@@ -35,7 +35,6 @@ router.route('/login')
                 logger.auth.debug('User not found' + req.user.username)
             }
             if (user) {
-                console.log(user)
                 if (user.status != 'disabled') {
                     req.logIn(user, function (err) {
                         if (err) {
@@ -87,7 +86,6 @@ router.route('/profile/')
 
 router.route('/profile/:id')
     .get(isLoggedIn, function (req, res, next) {
-        console.log(req)
             var username = req.user.username
             db.from('users')
                 .select('*')
@@ -219,8 +217,6 @@ router.route('/reset')
         if (password && (!authHelpers.comparePass(password, req.user.password))) {
             const salt = bcrypt.genSaltSync();
             const hash = bcrypt.hashSync(req.body.password, salt);
-            console.log(req.user.password)
-            console.log(hash)
             id = req.user.id
             db.from('users')
                 .returning('id')

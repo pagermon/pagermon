@@ -1151,7 +1151,7 @@ router.route('/user')
       .first()
       .then((row) => {
         if (row) {
-          console.log(row)
+          //add logging
           res.status(401).send({ 'status': 'error' });
         } else {
           const salt = bcrypt.genSaltSync();
@@ -1169,7 +1169,7 @@ router.route('/user')
               lastlogondate: Date.now()
             })
             .then((response) => {
-              console.log(response)
+              //add logging
               logger.main.debug('created user id: ' + response)
               res.status(200).send({ 'status': 'ok' });
             })

@@ -646,7 +646,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
           $scope.user.username = $routeParams.username || '';
           $scope.user.originalUsername = $routeParams.username || '';
           $scope.isNew = true;
-          //console.log(results);
+          console.log(results);
         }
       });
     }])
