@@ -15,7 +15,7 @@
             <div class="form-group has-feedback" ng-class="!user.username || existingUsername ? 'has-error' : 'has-success'">
               <label for="user.username" class="col-xs-4 col-sm-3 control-label">Username</label>
               <div class="col-xs-8 col-sm-9">
-                <input class="form-control" type="text" name="user.username" ng-model="user.username" ng-change="userdupeCheck()" ng-model-options="{updateOn: 'blur'}" required>
+                <input class="form-control" type="text" name="user.username" ng-model="user.username" ng-change="checkUsername()" ng-model-options="{updateOn: 'blur'}" required>
                 <span ng-if="userLoading" class="fa fa-refresh fa-spin fa-2x fa-fw form-control-feedback" aria-hidden="true"></span>
                 <span id="helpBlock" class="help-block">Required</span>
                 <span ng-if="existingUsername" class="text-danger pull-left">Username already exists! </span>
@@ -38,7 +38,7 @@
             <div class="form-group has-feedback" ng-class="!user.email || existingEmail ? 'has-error' : 'has-success'">
               <label for="user.email" class="col-xs-4 col-sm-3 control-label">Email Address</label>
               <div class="col-xs-8 col-sm-9">
-                <input class="form-control" type="text" name="user.email" ng-model="user.email" ng-change="userdupeCheck()" ng-model-options="{updateOn: 'blur'}" required>
+                <input class="form-control" type="text" name="user.email" ng-model="user.email" ng-change="checkEmail()" ng-model-options="{updateOn: 'blur'}" required>
                 <span ng-if="userLoading" class="fa fa-refresh fa-spin fa-2x fa-fw form-control-feedback" aria-hidden="true"></span>
                 <span id="helpBlock" class="help-block">Required</span>
                 <span ng-if="existingEmail" class="text-danger pull-left">Email already exists! </span>
@@ -71,7 +71,7 @@
                 <span id="helpBlock" class="help-block"></span>
               </div>
             </div>
-            <div class="form-group">
+            <div class="form-group" ng-if="!isNew">
               <label for="user.lastlogondate" class="col-xs-4 col-sm-3 control-label">Last Logon Date</label>
               <div class="col-xs-8 col-sm-9">
                 <div class="input-group">
@@ -82,6 +82,7 @@
             </div>
             <div class="btn-group-vertical" id="buttons-aliasDetail">
               <button type="button" ng-if="!isNew" ng-click="userDelete()" class="btn btn-danger">Delete</button>
+              <button type="button" ng-if="!isNew" ng-click="userReset()" class="btn btn-warning ">Reset Password</button>
               <button type="submit" class="btn btn-success">Save</button>
             </div>
           </form>

@@ -30,6 +30,12 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         UserDetail: $resource('/api/user/:id', {id: '@id'}, {
           'post': { method:'POST', isArray: false }
         }),
+        UsernameCheck: $resource('/api/userCheck/username/:id', {id: '@id'}, {
+          'post': { method:'POST', isArray: false }
+        }),
+        UseremailCheck: $resource('/api/userCheck/email/:id', {id: '@id'}, {
+          'post': { method:'POST', isArray: false }
+        }),
       };
     }])
     
@@ -389,38 +395,69 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
       $scope.page = 'userDetail';
       $scope.alertMessage = {};
 
-      /*
-      // controls the form validation on the address field
-      $scope.checkAddress = function() {
+      // controls the form validation on the username field
+      $scope.checkUsername = function() {
         $scope.userLoading = true;
-        if ($scope.alias.address) {
-          Api.AliasDupeCheck.get({id: $scope.alias.address }, function(results) {
-            if (results.address) {
-              $scope.aliasLoading = false;
-              if (results.address == $scope.alias.originalAddress) {
-                $scope.existingAddress = false;
+        if ($scope.user.username) {
+          Api.UsernameCheck.get({id: $scope.user.username }, function(results) {
+            if (results.username) {
+              $scope.userLoading = false;
+              if (results.username == $scope.user.originalUsername) {
+                $scope.existingUser = false;
                 return false;
               } else {
                 $scope.existingID = results.id;
-                $scope.existingAddress = true;
+                $scope.existingUsername = true;
                 return true;
               }
             } else {
-              $scope.aliasLoading = false;
-              $scope.existingAddress = false;
+              $scope.userLoading = false;
+              $scope.existingUsername = false;
               return false;
             }
           });
         } else {
-          $scope.aliasLoading = false;
-          $scope.existingAddress = false;
+          $scope.userLoading = false;
+          $scope.existingUsername = false;
           return false;
         }
       };
-      */
+
+      $scope.checkEmail = function() {
+        $scope.userLoading = true;
+        if ($scope.user.email) {
+          Api.UseremailCheck.get({id: $scope.user.email }, function(results) {
+            if (results.email) {
+              $scope.userLoading = false;
+              if (results.email == $scope.user.originalEmail) {
+                $scope.existingEmail= false;
+                return false;
+              } else {
+                $scope.existingID = results.id;
+                $scope.existingEmail = true;
+                return true;
+              }
+            } else {
+              $scope.userLoading = false;
+              $scope.existingEmail = false;
+              return false;
+            }
+          });
+        } else {
+          $scope.userLoading = false;
+          $scope.existingEmail = false;
+          return false;
+        }
+      };
+
       $scope.userSubmit = function() {
         if ($scope.existingUsername) {
           $scope.alertMessage.text = 'Error saving user: User with this address already exists.';
+          $scope.alertMessage.type = 'alert-danger';
+          $scope.alertMessage.show = true;
+          $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+        } else if ($scope.existingEmail) {
+          $scope.alertMessage.text = 'Error saving user: User with this email already exists.';
           $scope.alertMessage.type = 'alert-danger';
           $scope.alertMessage.show = true;
           $timeout(function () { $scope.alertMessage.show = false; }, 3000);
@@ -504,12 +541,88 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
           $scope.loading = false;          
         });
       };
+
+      $scope.userReset = function () {
+        var resetModalHtml = '<div class="modal-header"><h5 class="modal-title" id="modal-title">Password Reset</h5></div>';
+        resetModalHtml += `<div class="modal-body">  
+                <div class="row" style="padding-top: 10px">
+                <div class="col-xs-12">
+                  <div class="col-xs-12 col-md-offset-2 col-md-8">
+                    <form name="form">
+                      <div class="form-group">
+                        <label for="password">Password:</label>
+                        <input type="password" class="form-control" id="user.password" name="user.newpassword" ng-model="user.newpassword" autofocus=true
+                          required>
+                      </div>
+                      <div class="form-group">
+                        <label for="confirm_password">Confirm Password:</label>
+                        <input type="password" class="form-control" id="confirm_password" name="confirm_password"
+                          ng-model="confirm_password" required ui-validate=" '$value==user.newpassword' " ui-validate-watch=" 'user.newpassword' ">
+                        <span class="text-danger" ng-show='form.confirm_password.$error.validator'>Passwords do not match!</span>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+              </div>`
+        resetModalHtml += '<button ng-disabled="form.confirm_password.$error.validator" ng-click="confirmReset()" class="btn btn-default">Ok</button><button class="btn btn-primary" ng-click="cancelReset()">Cancel</button></div>';
+
+
+        var modalInstance = $uibModal.open({
+          template: resetModalHtml,
+          controller: ConfirmController,
+          scope: $scope,
+        });
+    
+        modalInstance.result.then(function(result) {
+          $scope.userResetConfirmed();
+        }, function () {
+          //$log.info('Modal dismissed at: ' + new Date());
+        });
+      };
+
+      $scope.userResetConfirmed = function () {
+        var id = $routeParams.id
+        Api.UserDetail.save({ id: id }, $scope.user).$promise.then(function (response) {
+          console.log(response);
+          if (response.status == 'ok') {
+            $scope.alertMessage.text = 'User saved!';
+            $scope.alertMessage.type = 'alert-success';
+            $scope.alertMessage.show = true;
+            $scope.user.newpassword = null;
+            $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+            $scope.loading = false;
+            if ($scope.isNew) {
+              $location.url('/users/' + response.id);
+            }
+          } else {
+            $scope.alertMessage.text = 'Error saving user: ' + response;
+            $scope.alertMessage.type = 'alert-danger';
+            $scope.alertMessage.show = true;
+            $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+            $scope.loading = false;
+          }
+        }, function (response) {
+          console.log(response);
+          $scope.alertMessage.text = 'Error saving user: ' + response.data.error;
+          $scope.alertMessage.type = 'alert-danger';
+          $scope.alertMessage.show = true;
+          $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+          $scope.loading = false;
+        });
+      }
       
       var ConfirmController = function($scope, $uibModalInstance) {
         $scope.confirmDelete = function() {
           $uibModalInstance.close();
         };
         $scope.cancelDelete = function() {
+          $uibModalInstance.dismiss('cancel');
+        };
+        $scope.confirmReset = function () {
+          $uibModalInstance.close();
+        };
+        $scope.cancelReset = function() {
           $uibModalInstance.dismiss('cancel');
         };
       };
@@ -525,6 +638,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
 
         if (results.username) {
           $scope.user.originalUsername = results.username;
+          $scope.user.originalEmail = results.email;
           $scope.isNew = false;
           $scope.user.lastlogondate = new Date(results.lastlogondate).toLocaleString('en-AU')
           console.log(results)

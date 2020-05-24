@@ -1156,17 +1156,17 @@ router.route('/user')
         } else {
           const salt = bcrypt.genSaltSync();
           const hash = bcrypt.hashSync(req.body.password, salt);
-    
-        return db('users')
+
+          return db('users')
             .insert({
-                username: req.body.username,
-                password: hash,
-                givenname: req.body.givenname,
-                surname: req.body.surname,
-                email: req.body.email,
-                role: req.body.role,
-                status: req.body.status,
-                lastlogondate: Date.now()
+              username: req.body.username,
+              password: hash,
+              givenname: req.body.givenname,
+              surname: req.body.surname,
+              email: req.body.email,
+              role: req.body.role,
+              status: req.body.status,
+              lastlogondate: Date.now()
             })
             .then((response) => {
               console.log(response)
@@ -1178,6 +1178,68 @@ router.route('/user')
               res.status(500).send({ 'status': 'error' });
             });
         }
+      })
+  });
+
+router.route('/userCheck/username/:id')
+  .get(isAdmin, function (req, res, next) {
+    var id = req.params.id;
+    db.from('users')
+      .select('*')
+      .where('username', id)
+      .then((row) => {
+        if (row.length > 0) {
+          row = row[0]
+          res.status(200);
+          res.json(row);
+        } else {
+          row = {
+            "username": "",
+            "password": "",
+            "givenname": "",
+            "surname": "",
+            "email": "",
+            "role": "user",
+            "status": "active"
+          };
+          res.status(200);
+          res.json(row);
+        }
+      })
+      .catch((err) => {
+        logger.main.error(err);
+        return next(err);
+      })
+  });
+
+  router.route('/userCheck/email/:id')
+  .get(isAdmin, function (req, res, next) {
+    var id = req.params.id;
+    db.from('users')
+      .select('*')
+      .where('email', id)
+      .then((row) => {
+        if (row.length > 0) {
+          row = row[0]
+          res.status(200);
+          res.json(row);
+        } else {
+          row = {
+            "username": "",
+            "password": "",
+            "givenname": "",
+            "surname": "",
+            "email": "",
+            "role": "user",
+            "status": "active"
+          };
+          res.status(200);
+          res.json(row);
+        }
+      })
+      .catch((err) => {
+        logger.main.error(err);
+        return next(err);
       })
   });
 
@@ -1244,11 +1306,10 @@ router.route('/user/:id')
         var givenname = req.body.givenname;
         var surname = req.body.surname || '';
         var email = req.body.email;
-        var password = req.body.password || null;
+        var password = req.body.newpassword || null;
         var role = req.body.role || 'user';
         var status = req.body.status || 'disabled';
         var lastlogondate = Date.now()
-
         console.time('insert');
         db.from('users')
           .returning('id')
@@ -1283,7 +1344,6 @@ router.route('/user/:id')
                 })
               }
             } else {
-
               queryBuilder.update({
                 id: id,
                 username: username,
@@ -1332,6 +1392,9 @@ router.route('/user/:id')
       logger.main.error('Unable to delete user ID 1')
     }
   });
+
+
+
 
 router.use([handleError]);
 
