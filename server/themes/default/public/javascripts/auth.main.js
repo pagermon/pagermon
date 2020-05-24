@@ -20,6 +20,9 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
                 }),
                 UseremailCheck: $resource('/auth/userCheck/email/:id', { id: '@id' }, {
                     'post': { method: 'POST', isArray: false }
+                }),
+                Profile: $resource('/auth/profile/me', null, {
+                    'post': { method: 'POST', isArray: false }
                 })
             };
         }])
@@ -111,37 +114,37 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
                 $scope.alertMessage.type = 'alert-danger';
                 $scope.alertMessage.show = true;
                 $timeout(function () { $scope.alertMessage.show = false; }, 3000);
-              } else if ($scope.existingEmail) {
+            } else if ($scope.existingEmail) {
                 $scope.alertMessage.text = 'Error creating user: User with this email already exists.';
                 $scope.alertMessage.type = 'alert-danger';
                 $scope.alertMessage.show = true;
                 $timeout(function () { $scope.alertMessage.show = false; }, 3000);
-              } else {
+            } else {
                 $scope.userLoading = true;
                 Api.Register.save(null, $scope.user).$promise.then(function (response) {
-                  console.log(response);
-                  if (response.status == 'ok') {
-                    $scope.alertMessage.text = 'User created!';
-                    $scope.alertMessage.type = 'alert-success';
-                    $scope.alertMessage.show = true;
-                    $timeout(function () { $scope.alertMessage.show = false; }, 3000);
-                    $scope.userLoading = false;
-                    $window.location.href = response.redirect
-                  } else {
-                    $scope.alertMessage.text = 'Error creating user: ' + response;
+                    console.log(response);
+                    if (response.status == 'ok') {
+                        $scope.alertMessage.text = 'User created!';
+                        $scope.alertMessage.type = 'alert-success';
+                        $scope.alertMessage.show = true;
+                        $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+                        $scope.userLoading = false;
+                        $window.location.href = response.redirect
+                    } else {
+                        $scope.alertMessage.text = 'Error creating user: ' + response;
+                        $scope.alertMessage.type = 'alert-danger';
+                        $scope.alertMessage.show = true;
+                        $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+                        $scope.userLoading = false;
+                    }
+                }, function (response) {
+                    console.log(response);
+                    $scope.alertMessage.text = 'Error creating user: ' + response.data.error;
                     $scope.alertMessage.type = 'alert-danger';
                     $scope.alertMessage.show = true;
                     $timeout(function () { $scope.alertMessage.show = false; }, 3000);
                     $scope.userLoading = false;
-                  }
-                }, function (response) {
-                  console.log(response);
-                  $scope.alertMessage.text = 'Error creating user: ' + response.data.error;
-                  $scope.alertMessage.type = 'alert-danger';
-                  $scope.alertMessage.show = true;
-                  $timeout(function () { $scope.alertMessage.show = false; }, 3000);
-                  $scope.userLoading = false;
-                });  
+                });
             }
         };
     }])
@@ -176,11 +179,10 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
 
     .controller('ProfileController', ['$scope', '$routeParams', 'Api', '$uibModal', '$filter', '$location', '$timeout', function ($scope, $routeParams, Api, $uibModal, $filter, $location, $timeout) {
         $scope.alertMessage = {};
+        $scope.loading = true;
         $scope.userSubmit = function () {
             $scope.loading = true;
-            var id;
-            id = $routeParams.id;
-            Api.UserDetail.save({ id: id }, $scope.user).$promise.then(function (response) {
+            Api.Profile.save(null, $scope.user).$promise.then(function (response) {
                 console.log(response);
                 if (response.status == 'ok') {
                     $scope.alertMessage.text = 'User saved!';
@@ -204,8 +206,20 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
                 $scope.loading = false;
             });
         };
-        console.log($scope)
-        $scope.loading = true;
+        Api.Profile.get( function (results) {
+            $scope.user = results;
+            $scope.userLoading = false;
+            $scope.existingUsername = false;
+            $scope.existingEmail = false;
+            $scope.loading = false;
+
+            if (results.username) {
+                $scope.user.originalUsername = results.username;
+                $scope.user.originalEmail = results.email;
+                $scope.user.lastlogondate = new Date(results.lastlogondate).toLocaleString('en-AU')
+                console.log(results)
+            }
+        });
     }])
 
     .config(['$routeProvider', '$locationProvider', '$httpProvider', function ($routeProvider, $locationProvider, $httpProvider) {

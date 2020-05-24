@@ -78,11 +78,66 @@ router.route('/logout')
         logger.auth.debug('Successful Logout ' + req.user.username)
     });
 
-router.route('/profile')
+router.route('/profile/')
     .get(isLoggedIn, function (req, res, next) {
         res.render('auth', {
             pageTitle: 'User',
         })
+    });
+
+router.route('/profile/:id')
+    .get(isLoggedIn, function (req, res, next) {
+        console.log(req)
+            var username = req.user.username
+            db.from('users')
+                .select('*')
+                .where('username', username)
+                .then(function (row) {
+                    if (row.length > 0) {
+                        row = row[0]
+                        res.status(200);
+                        res.json(row);
+                    } else {
+                        res.status(500).json({ 'status': 'failed', 'error': error });
+                        logger.auth.error('failed to select user')
+                    }
+                })
+                .catch((err) => {
+                    logger.main.error(err);
+                    return next(err);
+                })
+    })
+    .post(isLoggedIn, function (req, res, next) {
+    if (req.body.username === req.user.username) {
+        var username = req.body.username;
+        var givenname = req.body.givenname;
+        var surname = req.body.surname || '';
+        var email = req.body.email;
+        var lastlogondate = Date.now()
+        console.time('insert');
+        db.from('users')
+          .returning('id')
+          .where('username', '=', req.user.username)
+          .update({
+            username: username,
+            givenname: givenname,
+            surname: surname,
+            email: email,
+            lastlogondate: lastlogondate
+          })
+          .then((result) => {
+            console.timeEnd('insert');
+            res.status(200).send({ 'status': 'ok', 'id': result })
+          })
+          .catch((err) => {
+            console.timeEnd('insert');
+            logger.main.error(err)
+            res.status(500).send(err);
+          })
+      } else {
+        res.status(500).json({ message: 'Please update your own details only' });
+        logger.auth.error('Possible attempt to compromise security POST:/auth/profile')
+      }
     });
 
 router.route('/register')
@@ -119,22 +174,22 @@ router.route('/register')
                         if (user) {
                             req.logIn(user, function (err) {
                                 if (err) {
-                                    res.status(500).json({'status': 'failed' , 'error': err , 'redirect': '/auth/register' });
+                                    res.status(500).json({ 'status': 'failed', 'error': err, 'redirect': '/auth/register' });
                                     logger.auth.error(err)
                                 } else {
-                                    res.status(200).json({'status': 'ok' ,  'redirect': '/' });
+                                    res.status(200).json({ 'status': 'ok', 'redirect': '/' });
                                     logger.auth.info('Created Account: ' + user)
                                 }
                             })
                         } else {
                             logger.auth.error(err)
-                            res.status(500).json({'status': 'failed' , 'error':  err , 'redirect': '/auth/register' });
+                            res.status(500).json({ 'status': 'failed', 'error': err, 'redirect': '/auth/register' });
                         }
                     })(req, res, next);
                 })
                 .catch((err) => {
                     logger.auth.error(err)
-                    res.status(500).json({'status': 'failed' , 'error': 'registration disabled' , 'redirect': '/auth/register' });
+                    res.status(500).json({ 'status': 'failed', 'error': 'registration disabled', 'redirect': '/auth/register' });
                 });
         } else {
             logger.auth.error('Registration attempted with registration disabled')
