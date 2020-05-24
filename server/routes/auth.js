@@ -82,7 +82,6 @@ router.route('/profile')
     .get(isLoggedIn, function (req, res, next) {
         res.render('auth', {
             pageTitle: 'User',
-            user: req.user
         })
     });
 
@@ -120,26 +119,22 @@ router.route('/register')
                         if (user) {
                             req.logIn(user, function (err) {
                                 if (err) {
-                                    req.flash('signupMessage', 'Failed to created account, please try again')
-                                    res.redirect('/auth/register');
+                                    res.status(500).json({'status': 'failed' , 'error': err , 'redirect': '/auth/register' });
                                     logger.auth.error(err)
                                 } else {
-                                    req.flash('signupMessage', 'Account created successfully');
-                                    res.redirect('/');
+                                    res.status(200).json({'status': 'ok' ,  'redirect': '/' });
                                     logger.auth.info('Created Account: ' + user)
                                 }
                             })
                         } else {
                             logger.auth.error(err)
-                            req.flash('signupMessage', 'Failed to create account, please try again.');
-                            res.redirect('/auth/register');
+                            res.status(500).json({'status': 'failed' , 'error':  err , 'redirect': '/auth/register' });
                         }
                     })(req, res, next);
                 })
                 .catch((err) => {
                     logger.auth.error(err)
-                    req.flash('signupMessage', 'Failed to create account, please try again.');
-                    res.redirect('/auth/register');
+                    res.status(500).json({'status': 'failed' , 'error': 'registration disabled' , 'redirect': '/auth/register' });
                 });
         } else {
             logger.auth.error('Registration attempted with registration disabled')
@@ -195,13 +190,13 @@ router.route('/userCheck/username/:id')
     .get(function (req, res, next) {
         var id = req.params.id;
         db.from('users')
-            .select('*')
+            .select('username')
             .where('username', id)
             .then((row) => {
                 if (row.length > 0) {
                     row = row[0]
                     res.status(200);
-                    res.send(row.username);
+                    res.json(row);
                 } else {
                     row = {
                         "username": "",
@@ -213,7 +208,7 @@ router.route('/userCheck/username/:id')
                         "status": "active"
                     };
                     res.status(200);
-                    res.send(row.username);
+                    res.json(row);
                 }
             })
             .catch((err) => {
@@ -226,13 +221,13 @@ router.route('/userCheck/email/:id')
     .get(function (req, res, next) {
         var id = req.params.id;
         db.from('users')
-            .select('*')
+            .select('email')
             .where('email', id)
             .then((row) => {
                 if (row.length > 0) {
                     row = row[0]
                     res.status(200);
-                    res.send(row.email);
+                    res.json(row);
                 } else {
                     row = {
                         "username": "",
@@ -244,7 +239,7 @@ router.route('/userCheck/email/:id')
                         "status": "active"
                     };
                     res.status(200);
-                    res.send(row.email);
+                    res.json(row);
                 }
             })
             .catch((err) => {
