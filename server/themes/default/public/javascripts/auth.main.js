@@ -11,6 +11,12 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
                 }),
                 UserDetail: $resource('/api/user/:id', {id: '@id'}, {
                     'post': { method:'POST', isArray: false }
+                }),
+                UsernameCheck: $resource('/auth/userCheck/username/:id', {id: '@id'}, {
+                    'post': { method:'POST', isArray: false }
+                }),
+                UseremailCheck: $resource('/auth/userCheck/email/:id', {id: '@id'}, {
+                    'post': { method:'POST', isArray: false }
                 })
             };
         }])
@@ -45,7 +51,54 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
     }])
 
     .controller('RegisterController', ['$scope', '$routeParams', 'Api', '$uibModal', '$filter', '$location', '$timeout', function ($scope, $routeParams, Api, $uibModal, $filter, $location, $timeout) {
+        $scope.userLoading = false;
+        $scope.existingUsername = false;
+        $scope.existingEmail = false;
+        $scope.loading = false;
         
+        $scope.checkUsername = function() {
+            $scope.userLoading = true;
+            if ($scope.user.username) {
+              Api.UsernameCheck.get({id: $scope.user.username }, function(results) {
+                console.log(results)
+                if (results.username) {
+                    $scope.userLoading = false;
+                    $scope.existingUsername = true;
+                    return true;
+                } else {
+                  $scope.userLoading = false;
+                  $scope.existingUsername = false;
+                  return false;
+                }
+              });
+            } else {
+              $scope.userLoading = false;
+              $scope.existingUsername = false;
+              return false;
+            }
+          };
+    
+          $scope.checkEmail = function() {
+            $scope.userLoading = true;
+            if ($scope.user.email) {
+              Api.UseremailCheck.get({id: $scope.user.email }, function(results) {
+                console.log(results)
+                if (results.email) {
+                    $scope.userLoading = false;
+                    $scope.existingEmail = true;
+                    return true;
+                } else {
+                  $scope.userLoading = false;
+                  $scope.existingEmail = false;
+                  return false;
+                }
+              });
+            } else {
+              $scope.userLoading = false;
+              $scope.existingEmail = false;
+              return false;
+            }
+          };
     }])
 
     .controller('ResetController', ['$scope', '$routeParams', 'Api', '$uibModal', '$filter', '$location', '$timeout', '$window', function ($scope, $routeParams, Api, $uibModal, $filter, $location, $timeout, $window) {
@@ -108,17 +161,6 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
             };
         console.log($scope)
         $scope.loading = true;
-        Api.UserDetail.get({ id: id }, function (results) {
-            console.log($routeParams)
-            $scope.user = results;
-            $scope.userLoading = false;
-            $scope.existingUsername = false;
-            $scope.existingEmail = false;
-            $scope.loading = false;
-            $scope.user.lastlogondate = new Date(results.lastlogondate).toLocaleString('en-AU')
-            console.log(results)
-            
-        });
     }])
 
     .config(['$routeProvider', '$locationProvider', '$httpProvider', function ($routeProvider, $locationProvider, $httpProvider) {

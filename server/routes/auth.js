@@ -72,16 +72,17 @@ router.route('/login')
     });
 
 router.route('/logout')
-    .get(function (req, res, next) {
+    .get(isLoggedIn, function (req, res, next) {
         req.logout();
         res.redirect('/');
         logger.auth.debug('Successful Logout ' + req.user.username)
     });
 
 router.route('/profile')
-    .get(function (req, res, next) {
+    .get(isLoggedIn, function (req, res, next) {
         res.render('auth', {
             pageTitle: 'User',
+            user: req.user
         })
     });
 
@@ -168,26 +169,88 @@ router.route('/reset')
         if (password && (!authHelpers.comparePass(password, req.user.password))) {
             const salt = bcrypt.genSaltSync();
             const hash = bcrypt.hashSync(req.body.password, salt);
-                console.log(req.user.password)
-                console.log(hash)
-                id = req.user.id
-                db.from('users')
-                    .returning('id')
-                    .where('id', '=', id)
-                    .update({
-                        password: hash
-                    })
-                    .then((result) => {
-                        res.status(200).send({ 'status': 'ok', 'redirect': '/' });
-                        logger.auth.debug(req.username + 'Password Reset Successfully')
-                    })
-                    .catch((err) => {
-                        res.status(500).send({ 'status': 'failed', 'error': 'Failed to update password' });
-                        logger.auth.error(req.username + 'error resetting password' + err)
-                    })
+            console.log(req.user.password)
+            console.log(hash)
+            id = req.user.id
+            db.from('users')
+                .returning('id')
+                .where('id', '=', id)
+                .update({
+                    password: hash
+                })
+                .then((result) => {
+                    res.status(200).send({ 'status': 'ok', 'redirect': '/' });
+                    logger.auth.debug(req.username + 'Password Reset Successfully')
+                })
+                .catch((err) => {
+                    res.status(500).send({ 'status': 'failed', 'error': 'Failed to update password' });
+                    logger.auth.error(req.username + 'error resetting password' + err)
+                })
         } else {
             res.status(500).send({ 'status': 'failed', 'error': 'Password Blank or the Same' });
         }
+    });
+
+router.route('/userCheck/username/:id')
+    .get(function (req, res, next) {
+        var id = req.params.id;
+        db.from('users')
+            .select('*')
+            .where('username', id)
+            .then((row) => {
+                if (row.length > 0) {
+                    row = row[0]
+                    res.status(200);
+                    res.send(row.username);
+                } else {
+                    row = {
+                        "username": "",
+                        "password": "",
+                        "givenname": "",
+                        "surname": "",
+                        "email": "",
+                        "role": "user",
+                        "status": "active"
+                    };
+                    res.status(200);
+                    res.send(row.username);
+                }
+            })
+            .catch((err) => {
+                logger.main.error(err);
+                return next(err);
+            })
+    });
+
+router.route('/userCheck/email/:id')
+    .get(function (req, res, next) {
+        var id = req.params.id;
+        db.from('users')
+            .select('*')
+            .where('email', id)
+            .then((row) => {
+                if (row.length > 0) {
+                    row = row[0]
+                    res.status(200);
+                    res.send(row.email);
+                } else {
+                    row = {
+                        "username": "",
+                        "password": "",
+                        "givenname": "",
+                        "surname": "",
+                        "email": "",
+                        "role": "user",
+                        "status": "active"
+                    };
+                    res.status(200);
+                    res.send(row.email);
+                }
+            })
+            .catch((err) => {
+                logger.main.error(err);
+                return next(err);
+            })
     });
 
 
