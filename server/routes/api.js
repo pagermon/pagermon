@@ -1306,7 +1306,7 @@ router.route('/user/:id')
         var givenname = req.body.givenname;
         var surname = req.body.surname || '';
         var email = req.body.email;
-        var password = req.body.newpassword || null;
+        var password = req.body.newpassword || req.body.password||  null;
         var role = req.body.role || 'user';
         var status = req.body.status || 'disabled';
         var lastlogondate = null
@@ -1358,6 +1358,7 @@ router.route('/user/:id')
             }
           })
           .then((result) => {
+            console.log(result)
             console.timeEnd('insert');
             res.status(200).send({ 'status': 'ok', 'id': result })
           })
