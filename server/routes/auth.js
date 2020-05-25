@@ -10,7 +10,20 @@ var conf_file = './config/config.json';
 nconf.file({ file: conf_file });
 nconf.load();
 
-
+// Brute force protection for public dupe checking routes
+const ExpressBrute = require('express-brute');
+const BruteKnex = require('brute-knex');
+let store = new BruteKnex({
+    createTable: true,
+    knex: db,
+    tablename: 'protection' 
+});
+const bruteforce = new ExpressBrute(store, {
+    freeRetries: 5,
+    minWait: 5*60*1000, // 5 minutes
+    maxWait: 60*60*1000
+});
+//End Bruteforce
 
 router.route('/login')
     .get(function (req, res, next) {
@@ -249,7 +262,7 @@ router.route('/reset')
     });
 
 router.route('/userCheck/username/:id')
-    .get(function (req, res, next) {
+    .get(bruteforce.prevent, function (req, res, next) {
         var id = req.params.id;
         db.from('users')
             .select('username')
@@ -280,7 +293,7 @@ router.route('/userCheck/username/:id')
     });
 
 router.route('/userCheck/email/:id')
-    .get(function (req, res, next) {
+    .get(bruteforce.prevent, function (req, res, next) {
         var id = req.params.id;
         db.from('users')
             .select('email')
