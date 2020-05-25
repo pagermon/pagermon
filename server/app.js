@@ -185,6 +185,7 @@ app.use(function(err, req, res, next) {
   res.locals.error = req.app.get('env') === 'development' ? err : {};
   //these 3 have to be here to stop the error handler shitting up the logs with undefined references when it receives a 500 error ... nfi why
   res.locals.login = req.isAuthenticated();
+  res.locals.role = req.user.role || 'user';
   res.locals.gaEnable = nconf.get('monitoring:gaEnable');
   res.locals.monitorName = nconf.get("global:monitorName");
   res.locals.register = nconf.get('auth:registration')
