@@ -36,8 +36,8 @@ exports.up = function(db, Promise) {
                      })
                      .then (function () {
 
-                     })
-            })
+                     });
+            });
         } else {
           return Promise.resolve('Not Required')
         }
