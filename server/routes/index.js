@@ -11,7 +11,6 @@ const passport = require('../auth/local');
 router.use(function (req, res, next) {
     res.locals.login = req.isAuthenticated();
     res.locals.user = req.user || false;
-    res.locals.role = req.user.role || 'user';
     res.locals.register = nconf.get('auth:registration')
     res.locals.hidecapcode = nconf.get('messages:HideCapcode');
     res.locals.pdwmode = nconf.get('messages:pdwMode');

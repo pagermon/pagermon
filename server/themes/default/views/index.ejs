@@ -87,10 +87,10 @@
                 </span>
                 </div>
             </th>
-            <% if (!hidesource || (login && role == 'admin')) { %>
+            <% if (!hidesource || login) { %>
               <th class="noMobile noSmall" style="text-align: center;">Src</th>
             <% } %>
-            <% if (!hidecapcode || (login && role == 'admin')) { %>
+            <% if (!hidecapcode || login) { %>
               <th class="noMobile" style="text-align: center;">Capcode</th>
             <% } %>
             <th class="noMobile noSmall"></th>
@@ -105,12 +105,12 @@
           <tr ng-repeat="message in messages | filter: search">
             <td class="shrink noMobile noSmall">{{message.date}}</td>
             <td class="shrink">{{message.timestamp}}</td>
-            <% if (!hidesource || (login && role == 'admin')) { %>
+            <% if (!hidesource || login) { %>
               <td class="shrink noMobile noSmall clickable-td" uib-popover-template="'templates/popover.html'" popover-append-to-body=true ng-click="popoverEl = 'source'" popover-trigger="'outsideClick'" style="background-color: {{message.color || 'grey'}}; text-align: center;">
                 <span class="small" style="color: white; font-family: monospace;"><strong>{{message.source}}</strong></span>
               </td>
             <% } %>
-            <% if (!hidecapcode || (login && role == 'admin')) { %>
+            <% if (!hidecapcode || login) { %>
               <td class="shrink noMobile noSmall clickable-td" uib-popover-template="'templates/popover.html'" popover-append-to-body=true ng-click="popoverEl = 'address'" popover-trigger="'outsideClick'" style="background-color: {{message.color || 'grey'}}; text-align: center;">
                 <span class="small" style="color: white; font-family: monospace;"><strong>{{message.address}}</strong></span>
               </td>
