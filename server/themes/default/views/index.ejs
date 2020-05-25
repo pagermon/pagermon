@@ -87,10 +87,10 @@
                 </span>
                 </div>
             </th>
-            <% if (!hidesource || login) { %>
+            <% if (!hidesource || (login && user.role == 'admin')) { %>
               <th class="noMobile noSmall" style="text-align: center;">Src</th>
             <% } %>
-            <% if (!hidecapcode || login) { %>
+            <% if (!hidecapcode || (login && user.role == 'admin')) { %>
               <th class="noMobile" style="text-align: center;">Capcode</th>
             <% } %>
             <th class="noMobile noSmall"></th>
@@ -105,12 +105,12 @@
           <tr ng-repeat="message in messages | filter: search">
             <td class="shrink noMobile noSmall">{{message.date}}</td>
             <td class="shrink">{{message.timestamp}}</td>
-            <% if (!hidesource || login) { %>
+            <% if (!hidesource || (login && user.role == 'admin')) { %>
               <td class="shrink noMobile noSmall clickable-td" uib-popover-template="'templates/popover.html'" popover-append-to-body=true ng-click="popoverEl = 'source'" popover-trigger="'outsideClick'" style="background-color: {{message.color || 'grey'}}; text-align: center;">
                 <span class="small" style="color: white; font-family: monospace;"><strong>{{message.source}}</strong></span>
               </td>
             <% } %>
-            <% if (!hidecapcode || login) { %>
+            <% if (!hidecapcode || (login && user.role == 'admin')) { %>
               <td class="shrink noMobile noSmall clickable-td" uib-popover-template="'templates/popover.html'" popover-append-to-body=true ng-click="popoverEl = 'address'" popover-trigger="'outsideClick'" style="background-color: {{message.color || 'grey'}}; text-align: center;">
                 <span class="small" style="color: white; font-family: monospace;"><strong>{{message.address}}</strong></span>
               </td>
@@ -296,7 +296,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
   //for some reason, socket opens both sockets, so the adminSocket is required to be closed after opening to prevent leaking data
   <% if (!apisecurity) { %>
     <% if (hidecapcode) { %>
-      <% if (login) { %>
+      <% if ((login && user.role == 'admin')) { %>
         var socketMode = adminSocket
         adminSocket.open();
       <% } else { %>
@@ -306,7 +306,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
         <% } %>
     <%} else { %>
       <% if (pdwmode) { %>
-        <% if (login) { %>
+        <% if ((login && user.role == 'admin')) { %>
           var socketMode = adminSocket
           adminSocket.open();
         <% } else { %>
@@ -321,7 +321,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
       <% } %>
     <% } %>	
   <% } else { %>
-    <% if (login) { %>
+    <% if ((login && user.role == 'admin')) { %>
       var socketMode = adminSocket
       adminSocket.open();
       <% } else { %>
@@ -334,7 +334,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
     socketMode.on('messagePost', function(message) {
         // Send Browser Notifications  
     <% if (apisecurity) { %>
-        <% if (login) { %>
+        <% if ((login && user.role == 'admin')) { %>
         if ($scope.notificationEnabled == 'true') {
         if (!message.agency) {
           //Not showing messages for things that we don't know
