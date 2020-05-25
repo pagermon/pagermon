@@ -3,7 +3,7 @@ var nconf = require('nconf');
 var conf_file = './config/config.json';
 nconf.file({ file: conf_file });
 var user = nconf.get('auth:user')
-var pwd = nconf.get('auth.encPass')
+var pwd = nconf.get('auth:encPass')
 
 exports.up = function(db, Promise) {
     return db.schema.hasTable('users').then(function(exists) {
