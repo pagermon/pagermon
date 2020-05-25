@@ -330,11 +330,11 @@
             <div class="form-group">
               <label for="auth.registration" class="col-xs-4 col-sm-3 control-label">Type</label>
               <div class="col-xs-8 col-sm-9">
-                <select name="auth.registration" ng-model="settings.auth.registration" class="form-control">
-                  <option value="enabled">Enabled</option>
-                  <option value="disabled">Disabled</option>
-                </select>
-                <span>Enable user registration (Allows users to register themselves)</span>
+                <label>
+                  <input type="checkbox" name="auth.registration" ng-model="settings.auth.registration">
+                  Enables user registration. Allows users to register an account. 
+                    <p><b> Note: You must restart the application after making this change.</b>
+                  </label>
               </div>
             </fieldset>
             </div>
