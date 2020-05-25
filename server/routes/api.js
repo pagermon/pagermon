@@ -1152,7 +1152,7 @@ router.route('/user')
       .then((row) => {
         if (row) {
           //add logging
-          res.status(401).send({ 'status': 'error' });
+          res.status(400).send({ 'status': 'error', 'error': 'Username or Email exists' });
         } else {
           const salt = bcrypt.genSaltSync();
           const hash = bcrypt.hashSync(req.body.password, salt);
@@ -1369,7 +1369,7 @@ router.route('/user/:id')
           })
         logger.main.debug(util.format('%o', req.body || 'request body empty'));
       } else {
-        res.status(500).json({ message: 'Error - required field missing' });
+        res.status(400).json({ message: 'Error - required field missing' });
       }
     }
   })
@@ -1389,7 +1389,7 @@ router.route('/user/:id')
         })
       logger.main.debug(util.format('%o', req.body || 'request body empty'));
     } else {
-      res.status(500).json({ 'error': 'User ID 1 is protected' });
+      res.status(400).json({ 'error': 'User ID 1 is protected' });
       logger.main.error('Unable to delete user ID 1')
     }
   });

@@ -31,14 +31,14 @@ router.route('/login')
             }
             if (!user) {
                 req.flash('loginMessage', 'User not found');
-                res.status(500).send({ 'status': 'failed', 'error': 'Login Failed - Check Details and try again' });
+                res.status(401).send({ 'status': 'failed', 'error': 'Login Failed - Check Details and try again' });
                 logger.auth.debug('User not found' + req.user.username)
             }
             if (user) {
                 if (user.status != 'disabled') {
                     req.logIn(user, function (err) {
                         if (err) {
-                            res.status(500).send({ 'status': 'failed', 'error': 'Incorrect Password' });
+                            res.status(401).send({ 'status': 'failed', 'error': 'Incorrect Password' });
                             logger.auth.debug('Failed login ' + JSON.stringify(user) + ' ' + err)
                         } else {
                             if (user.role !== 'admin') {
@@ -63,7 +63,7 @@ router.route('/login')
                         }
                     });
                 } else {
-                    res.status(500).send({ 'status': 'failed', 'error': 'User Disabled' });
+                    res.status(401).send({ 'status': 'failed', 'error': 'User Disabled' });
                     logger.auth.debug('User Disabled' + req.user.username)
                 }
             }
@@ -133,7 +133,7 @@ router.route('/profile/:id')
             res.status(500).send(err);
           })
       } else {
-        res.status(500).json({ message: 'Please update your own details only' });
+        res.status(401).json({ message: 'Please update your own details only' });
         logger.auth.error('Possible attempt to compromise security POST:/auth/profile')
       }
     });
@@ -233,7 +233,7 @@ router.route('/reset')
                     logger.auth.error(req.username + 'error resetting password' + err)
                 })
         } else {
-            res.status(500).send({ 'status': 'failed', 'error': 'Password Blank or the Same' });
+            res.status(400).send({ 'status': 'failed', 'error': 'Password Blank or the Same' });
         }
     });
 
