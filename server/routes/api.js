@@ -1302,59 +1302,33 @@ router.route('/user/:id')
         if (id == 'new') {
           id = null;
         }
-        var username = req.body.username;
-        var givenname = req.body.givenname;
-        var surname = req.body.surname || '';
-        var email = req.body.email;
         var password = req.body.newpassword || req.body.password||  null;
-        var role = req.body.role || 'user';
-        var status = req.body.status || 'disabled';
-        var lastlogondate = null
         console.time('insert');
         db.from('users')
           .returning('id')
           .where('id', '=', id)
           .modify(function (queryBuilder) {
+            const userobj ={
+              id: id,
+              username: req.body.username,
+              givenname: req.body.givenname,
+              surname: req.body.surname || '',
+              email: req.body.email,
+              role: req.body.role || 'user',
+              status: req.body.status || 'disabled',
+              lastlogondate: null
+            }
             if (password != null) {
               const salt = bcrypt.genSaltSync();
               const hash = bcrypt.hashSync(password, salt);
+              userobj.password = hash
               if (id == null) {
-                queryBuilder.insert({
-                  id: id,
-                  username: username,
-                  givenname: givenname,
-                  surname: surname,
-                  password: hash,
-                  email: email,
-                  role: role,
-                  status: status,
-                  lastlogondate: lastlogondate
-                })
+                queryBuilder.insert(userobj)
               } else {
-                queryBuilder.update({
-                  id: id,
-                  username: username,
-                  givenname: givenname,
-                  surname: surname,
-                  password: hash,
-                  email: email,
-                  role: role,
-                  status: status,
-                  lastlogondate: lastlogondate
-                })
+                queryBuilder.update(userobj)
               }
             } else {
-              queryBuilder.update({
-                id: id,
-                username: username,
-                givenname: givenname,
-                surname: surname,
-                email: email,
-                role: role,
-                status: status,
-                lastlogondate: lastlogondate
-              })
-
+              queryBuilder.update(userobj)
             }
           })
           .then((result) => {
