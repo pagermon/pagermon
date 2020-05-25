@@ -155,43 +155,54 @@ router.route('/register')
         if (reg) {
             const salt = bcrypt.genSaltSync();
             const hash = bcrypt.hashSync(req.body.password, salt);
-
+            //dupecheck to prevent a non-literal insert being abused to reset passwords
             return db('users')
-                .insert({
-                    username: req.body.username,
-                    password: hash,
-                    givenname: req.body.givenname,
-                    surname: req.body.surname,
-                    email: req.body.email,
-                    role: 'user',
-                    status: 'active',
-                    lastlogondate: Date.now()
-                })
-                .then((response) => {
-                    passport.authenticate('login-user', (err, user, info) => {
-                        if (user) {
-                            req.logIn(user, function (err) {
-                                if (err) {
-                                    res.status(500).json({ 'status': 'failed', 'error': err, 'redirect': '/auth/register' });
-                                    logger.auth.error(err)
-                                } else {
-                                    res.status(200).json({ 'status': 'ok', 'redirect': '/' });
-                                    logger.auth.info('Created Account: ' + user)
-                                }
-                            })
-                        } else {
-                            logger.auth.error(err)
-                            res.status(500).json({ 'status': 'failed', 'error': err, 'redirect': '/auth/register' });
-                        }
-                    })(req, res, next);
-                })
-                .catch((err) => {
-                    logger.auth.error(err)
-                    res.status(500).json({ 'status': 'failed', 'error': 'registration disabled', 'redirect': '/auth/register' });
-                });
+            .where('username' , '=' , req.body.username)
+            .orWhere('email', '=', req.body.email)
+            .select('id')
+            .then((row) => {
+                if (row.length > 0) {
+                    logger.auth.error('Duplicate registration via API' + JSON.stringify(row))
+                    res.status(401).json({ 'error': 'access denied' });
+                } else {
+                    return db('users')
+                    .insert({
+                        username: req.body.username,
+                        password: hash,
+                        givenname: req.body.givenname,
+                        surname: req.body.surname,
+                        email: req.body.email,
+                        role: 'user',
+                        status: 'active',
+                        lastlogondate: Date.now()
+                    })
+                    .then((response) => {
+                        passport.authenticate('login-user', (err, user, info) => {
+                            if (user) {
+                                req.logIn(user, function (err) {
+                                    if (err) {
+                                        res.status(500).json({ 'status': 'failed', 'error': err, 'redirect': '/auth/register' });
+                                        logger.auth.error(err)
+                                    } else {
+                                        res.status(200).json({ 'status': 'ok', 'redirect': '/' });
+                                        logger.auth.info('Created Account: ' + user)
+                                    }
+                                })
+                            } else {
+                                logger.auth.error(err)
+                                res.status(500).json({ 'status': 'failed', 'error': err, 'redirect': '/auth/register' });
+                            }
+                        })(req, res, next);
+                    })
+                    .catch((err) => {
+                        logger.auth.error(err)
+                        res.status(500).json({ 'status': 'failed', 'error': 'registration disabled', 'redirect': '/auth/register' });
+                    });
+                }
+            })    
         } else {
             logger.auth.error('Registration attempted with registration disabled')
-            res.status(500).json({ 'error': 'registration disabled' });
+            res.status(400).json({ 'error': 'registration disabled' });
         }
     });
 
