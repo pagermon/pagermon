@@ -88,7 +88,7 @@ router.route('/profile/:id')
     .get(isLoggedIn, function (req, res, next) {
             var username = req.user.username
             db.from('users')
-                .select('*')
+                .select('id','givenname','surname','username','email','lastlogondate')
                 .where('username', username)
                 .then(function (row) {
                     if (row.length > 0) {
@@ -141,7 +141,7 @@ router.route('/profile/:id')
 router.route('/register')
     .get(function (req, res, next) {
         var reg = nconf.get('auth:registration')
-        if (reg === 'enabled') {
+        if (reg) {
             return res.render('auth', {
                 title: 'Registration',
                 message: req.flash('registerMessage'),
@@ -152,7 +152,7 @@ router.route('/register')
     })
     .post(function (req, res, next) {
         var reg = nconf.get('auth:registration')
-        if (reg === 'enabled') {
+        if (reg) {
             const salt = bcrypt.genSaltSync();
             const hash = bcrypt.hashSync(req.body.password, salt);
 

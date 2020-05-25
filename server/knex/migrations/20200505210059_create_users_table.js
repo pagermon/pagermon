@@ -1,4 +1,9 @@
 var bcrypt = require('bcryptjs');
+var nconf = require('nconf');
+var conf_file = './config/config.json';
+nconf.file({ file: conf_file });
+var user = nconf.get('auth:user')
+var pwd = nconf.get('auth.encPass')
 
 exports.up = function(db, Promise) {
     return db.schema.hasTable('users').then(function(exists) {
@@ -14,22 +19,20 @@ exports.up = function(db, Promise) {
                 table.string('email').notNullable().unique();
                 table.enu('role', ['admin', 'user']).notNullable().defaultTo('user')
                 table.enu('status', ['active', 'disabled']).notNullable().defaultTo('disabled')
-                table.datetime('lastlogondate').notNullable();
+                table.datetime('lastlogondate')
             })
             .then(function (){
-              //create the default admin user
-              const salt = bcrypt.genSaltSync();
-              const hash = bcrypt.hashSync('changeme', salt);
+              //Migrate the current admin user. 
               return db('users')
                      .insert({
                        givenname: 'Admin',
                        surname: '',
-                       username: 'admin',
-                       password: hash,
+                       username: user,
+                       password: pwd,
                        email: 'none@none.com',
                        role: 'admin',
                        status: 'active',
-                       lastlogondate: Date.now()
+                       lastlogondate: null
                      })
                      .then (function () {
 

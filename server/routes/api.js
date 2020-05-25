@@ -1133,7 +1133,7 @@ router.route('/capcodeImport')
 router.route('/user')
   .get(isAdmin, function (req, res, next) {
     db.from('users')
-      .select('*')
+      .select('id','givenname','surname','username','email','role','status','lastlogondate')
       .then((rows) => {
         res.json(rows);
       })
@@ -1166,7 +1166,7 @@ router.route('/user')
               email: req.body.email,
               role: req.body.role,
               status: req.body.status,
-              lastlogondate: Date.now()
+              lastlogondate: null
             })
             .then((response) => {
               //add logging
@@ -1185,7 +1185,7 @@ router.route('/userCheck/username/:id')
   .get(isAdmin, function (req, res, next) {
     var id = req.params.id;
     db.from('users')
-      .select('*')
+      .select('id','givenname','surname','username','email','role','status','lastlogondate')
       .where('username', id)
       .then((row) => {
         if (row.length > 0) {
@@ -1216,7 +1216,7 @@ router.route('/userCheck/username/:id')
   .get(isAdmin, function (req, res, next) {
     var id = req.params.id;
     db.from('users')
-      .select('*')
+      .select('id','givenname','surname','username','email','role','status','lastlogondate')
       .where('email', id)
       .then((row) => {
         if (row.length > 0) {
@@ -1260,7 +1260,7 @@ router.route('/user/:id')
       res.json(defaults);
     } else {
       db.from('users')
-        .select('*')
+        .select('id','givenname','surname','username','email','role','status','lastlogondate')
         .where('id', id)
         .then(function (row) {
           if (row.length > 0) {
@@ -1309,7 +1309,7 @@ router.route('/user/:id')
         var password = req.body.newpassword || null;
         var role = req.body.role || 'user';
         var status = req.body.status || 'disabled';
-        var lastlogondate = Date.now()
+        var lastlogondate = null
         console.time('insert');
         db.from('users')
           .returning('id')
