@@ -17,16 +17,22 @@ init();
 
 passport.use('login-user', new LocalStrategy(options, (username, password, done) => {
     // check to see if the username exists
-    db('users').where({ username }).first()
+    db('users')
+        .where('username' , '=' , username)
+        .first()
         .then((user) => {
-            if (!user) return done(null, false);
+            if (!user) {
+                return done(null, false);
+            }
             if (!authHelpers.comparePass(password, user.password)) {
                 return done(null, false);
             } else {
                 return done(null, user);
             }
         })
-        .catch((err) => { return done(err); });
+        .catch((err) => { 
+            return done(err); 
+        });
 }));
 
 passport.use('login-api', new LocalAPIKeyStrategy(
