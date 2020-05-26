@@ -60,23 +60,23 @@ router.route('/login')
                             res.status(401).send({ 'status': 'failed', 'error': 'Incorrect Password' });
                             logger.auth.debug('Failed login ' + JSON.stringify(user) + ' ' + err)
                         } else {
-                            //reset the bruteforce timer after successful login
-                            bruteforcelogin.reset(null)
-                            if (user.role !== 'admin') {
-                                res.status(200).send({ 'status': 'ok', 'redirect': '/' });
-                            } else {
-                                res.status(200).send({ 'status': 'ok', 'redirect': '/admin' });
-                            }
-                            logger.auth.debug('Successful login ' + JSON.stringify(user))
                             //Update last logon timestamp for user
                             var id = user.id
-                            db
+                            return db
                                 .from('users')
                                 .where('id', '=', id)
                                 .update({
                                     lastlogondate: Date.now()
                                 })
                                 .then((result) => {
+                                    //reset the bruteforce timer after successful login
+                                    bruteforcelogin.reset(null)
+                                    if (user.role !== 'admin') {
+                                        res.status(200).send({ 'status': 'ok', 'redirect': '/' });
+                                    } else {
+                                        res.status(200).send({ 'status': 'ok', 'redirect': '/admin' });
+                                    }
+                                    logger.auth.debug('Successful login ' + JSON.stringify(user))
                                 })
                                 .catch((err) => {
                                     logger.db.error(err)
