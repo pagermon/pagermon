@@ -33,7 +33,7 @@ const bruteforcelogin= new ExpressBrute(store, {
 //End Bruteforce
 
 router.route('/login')
-    .get(bruteforcelogin.prevent, function (req, res, next) {
+    .get(function (req, res, next) {
         var user = '';
         if (typeof req.username != 'undefined') {
             user = req.username;
@@ -42,19 +42,19 @@ router.route('/login')
             pageTitle: 'User'
         });
     })
-    .post(function (req, res, next) {
+    .post(bruteforcelogin.prevent, function (req, res, next) {
         passport.authenticate('login-user', (err, user, info) => {
             if (err) {
                 req.flash('loginMessage', 'An error has occured');
                 res.status(500).send({ 'status': 'failed', 'error': 'Error Occured' });
                 logger.auth.error(err)
             }
-            if (!user) {
+            else if (!user) {
                 req.flash('loginMessage', 'User not found');
                 res.status(401).send({ 'status': 'failed', 'error': 'Login Failed - Check Details and try again' });
                 logger.auth.debug('User not found' + req.user.username)
             }
-            if (user) {
+            else if (user) {
                 if (user.status != 'disabled') {
                     req.logIn(user, function (err) {
                         if (err) {
