@@ -324,7 +324,11 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
     <% if ((login && user.role == 'admin')) { %>
       var socketMode = adminSocket
       adminSocket.open();
-      <% } else { %>
+    <% } else if (login) { %>
+      var socketMode = socket
+      socket.open();
+      adminSocket.close()
+    <% } else { %>
       var socketMode = socket
       socket.close();
       adminSocket.close();
@@ -334,7 +338,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
     socketMode.on('messagePost', function(message) {
         // Send Browser Notifications  
     <% if (apisecurity) { %>
-        <% if ((login && user.role == 'admin')) { %>
+      <% if ((login && user.role == 'admin')) { %>
         if ($scope.notificationEnabled == 'true') {
         if (!message.agency) {
           //Not showing messages for things that we don't know
