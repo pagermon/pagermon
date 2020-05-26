@@ -5,6 +5,7 @@ var db = require('../knex/knex.js');
 const bcrypt = require('bcryptjs');
 const authHelpers = require('../auth/_helpers');
 const passport = require('../auth/local');
+const moment = require('moment')
 var nconf = require('nconf');
 var conf_file = './config/config.json';
 nconf.file({ file: conf_file });
@@ -62,11 +63,14 @@ router.route('/login')
                         } else {
                             //Update last logon timestamp for user
                             var id = user.id
+                            // create the datetime, thanks mysql ┌∩┐(◣_◢)┌∩┐
+                            let currentTimestamp = moment().unix();//in seconds
+                            let currentDatetime = moment(currentTimestamp*1000).format("YYYY-MM-DD HH:mm:ss");
                             return db
                                 .from('users')
                                 .where('id', '=', id)
                                 .update({
-                                    lastlogondate: Date.now()
+                                    lastlogondate: currentDatetime
                                 })
                                 .then((result) => {
                                     //reset the bruteforce timer after successful login

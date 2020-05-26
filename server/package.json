@@ -35,7 +35,7 @@
     "express-session": "^1.15.3",
     "json-2-csv": "^3.6.2",
     "knex": "^0.16.3",
-    "moment": "^2.18.1",
+    "moment": "^2.26.0",
     "morgan": "~1.9.1",
     "mysql": "^2.16.0",
     "nconf": "^0.8.4",
