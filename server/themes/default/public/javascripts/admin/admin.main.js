@@ -640,7 +640,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
           $scope.user.originalUsername = results.username;
           $scope.user.originalEmail = results.email;
           $scope.isNew = false;
-          $scope.user.lastlogondate = new Date(results.lastlogondate).toLocaleString('en-AU')
+          $scope.user.lastlogondate = new Date(results.lastlogondate).toLocaleString()
           console.log(results)
         } else {
           $scope.user.username = $routeParams.username || '';
