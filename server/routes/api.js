@@ -1168,6 +1168,7 @@ router.route('/user')
               status: req.body.status,
               lastlogondate: null
             })
+            .returning('id')
             .then((response) => {
               //add logging
               logger.main.debug('created user id: ' + response)
@@ -1331,6 +1332,7 @@ router.route('/user/:id')
               queryBuilder.update(userobj)
             }
           })
+          .returning('id')
           .then((result) => {
             console.log(result)
             console.timeEnd('insert');
@@ -1367,9 +1369,6 @@ router.route('/user/:id')
       logger.main.error('Unable to delete user ID 1')
     }
   });
-
-
-
 
 router.use([handleError]);
 
