@@ -60,6 +60,8 @@ router.route('/login')
                             res.status(401).send({ 'status': 'failed', 'error': 'Incorrect Password' });
                             logger.auth.debug('Failed login ' + JSON.stringify(user) + ' ' + err)
                         } else {
+                            //reset the bruteforce timer after successful login
+                            bruteforcelogin.reset(null)
                             if (user.role !== 'admin') {
                                 res.status(200).send({ 'status': 'ok', 'redirect': '/' });
                             } else {
