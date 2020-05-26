@@ -17,7 +17,7 @@
               <div class="col-xs-8 col-sm-9">
                 <input class="form-control" type="text" name="user.username" ng-model="user.username" ng-change="checkUsername()" ng-model-options="{updateOn: 'blur'}" required>
                 <span ng-if="userLoading" class="fa fa-refresh fa-spin fa-2x fa-fw form-control-feedback" aria-hidden="true"></span>
-                <span id="helpBlock" class="help-block">Required</span>
+                <span id="helpBlock" class="help-block">Minimum Length - 6 Characters</span>
                 <span ng-if="existingUsername" class="text-danger pull-left">Username already exists! </span>
               </div>
             </div>
@@ -38,7 +38,7 @@
             <div class="form-group has-feedback" ng-class="!user.email || existingEmail ? 'has-error' : 'has-success'">
               <label for="user.email" class="col-xs-4 col-sm-3 control-label">Email Address</label>
               <div class="col-xs-8 col-sm-9">
-                <input class="form-control" type="text" name="user.email" ng-model="user.email" ng-change="checkEmail()" ng-model-options="{updateOn: 'blur'}" required>
+                <input class="form-control" type="email" name="user.email" ng-model="user.email" ng-change="checkEmail()" ng-model-options="{updateOn: 'blur'}" required>
                 <span ng-if="userLoading" class="fa fa-refresh fa-spin fa-2x fa-fw form-control-feedback" aria-hidden="true"></span>
                 <span id="helpBlock" class="help-block">Required</span>
                 <span ng-if="existingEmail" class="text-danger pull-left">Email already exists! </span>
@@ -47,8 +47,8 @@
             <div class="form-group has-feedback" ng-class="!user.password ? 'has-error' : 'has-success'">
               <label for="user.password" class="col-xs-4 col-sm-3 control-label">Password</label>
               <div class="col-xs-8 col-sm-9">
-                <input class="form-control" type="password" name="user.password" ng-model="user.password" required>
-                <span id="helpBlock" class="help-block">Required</span>
+                <input class="form-control" type="password" name="user.password" ng-minlength="6" ng-model="user.password" required>
+                <span id="helpBlock" class="help-block">Password must be at least 6 characters</span>
               </div>
             </div>
             <div class="btn-group-vertical" id="buttons-aliasDetail">
