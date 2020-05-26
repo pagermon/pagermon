@@ -1316,13 +1316,13 @@ router.route('/user/:id')
               email: req.body.email,
               role: req.body.role || 'user',
               status: req.body.status || 'disabled',
-              lastlogondate: null
             }
             if (password != null) {
               const salt = bcrypt.genSaltSync();
               const hash = bcrypt.hashSync(password, salt);
               userobj.password = hash
               if (id == null) {
+                userobj.lastlogondate = null
                 queryBuilder.insert(userobj)
               } else {
                 queryBuilder.update(userobj)
