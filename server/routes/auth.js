@@ -18,15 +18,21 @@ let store = new BruteKnex({
     knex: db,
     tablename: 'protection' 
 });
-const bruteforce = new ExpressBrute(store, {
+const bruteforcedupe = new ExpressBrute(store, {
+    freeRetries: 10,
+    minWait: 5000, // 5 seconds
+    maxWait: 20000 // 20 seconds
+});
+
+const bruteforcelogin= new ExpressBrute(store, {
     freeRetries: 5,
     minWait: 5*60*1000, // 5 minutes
-    maxWait: 60*60*1000
+    maxWait: 15*60*1000 // 15 minutes
 });
 //End Bruteforce
 
 router.route('/login')
-    .get(function (req, res, next) {
+    .get(bruteforcelogin.prevent, function (req, res, next) {
         var user = '';
         if (typeof req.username != 'undefined') {
             user = req.username;
@@ -262,7 +268,7 @@ router.route('/reset')
     });
 
 router.route('/userCheck/username/:id')
-    .get(bruteforce.prevent, function (req, res, next) {
+    .get(bruteforcedupe.prevent, function (req, res, next) {
         var id = req.params.id;
         db.from('users')
             .select('username')
@@ -293,7 +299,7 @@ router.route('/userCheck/username/:id')
     });
 
 router.route('/userCheck/email/:id')
-    .get(bruteforce.prevent, function (req, res, next) {
+    .get(bruteforcedupe.prevent, function (req, res, next) {
         var id = req.params.id;
         db.from('users')
             .select('email')
