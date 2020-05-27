@@ -364,45 +364,80 @@ router.route('/messages')
                                 logger.main.debug('afterMessage done');
                                 // remove the pluginconf object before firing socket message
                                 delete row.pluginconf;
-                                if (HideCapcode || apiSecurity) {
-                                  //Emit full details to the admin socket
-                                  if (pdwMode && adminShow) {
-                                    req.io.of('adminio').emit('messagePost', row);
-                                  } else if (!pdwMode || row.alias_id != null) {
-                                    req.io.of('adminio').emit('messagePost', row);
-                                  } else {
-                                    // do nothing if PDWMode on and AdminShow is disabled
-                                  }
-                                  //Only emit to normal socket if HideCapcode is on and ApiSecurity is off.
-                                  if (HideCapcode && !apiSecurity) {
-                                    if (pdwMode && row.alias_id == null) {
-                                      //do nothing if pdwMode on and there isn't an alias_id
+                                //begin socket handling - this is the most horrible block of spaghetti code i've seen in my life and i hate myself for being involved in it
+                                if (HideCapcode) {
+                                  if (pdwMode) {
+                                    if (adminShow) {
+                                      //If PDWMode on and AdminShow is on send always
+                                      req.io.of('adminio').emit('messagePost', row);
+                                      if (row.alias_id != null) {
+                                        // send to normal user as well if not null alias_id
+                                        rowuser = {
+                                          "id": row.id,
+                                          "message": row.message,
+                                          "source": row.source,
+                                          "timestamp": row.timestamp,
+                                          "alias_id": row.alias_id,
+                                          "alias": row.alias,
+                                          "agency": row.agency,
+                                          "icon": row.icon,
+                                          "color": row.color,
+                                          "ignore": row.ignore
+                                        };
+                                        req.io.emit('messagePost', rowuser);
+                                      }
                                     } else {
-                                      // Emit No capcode to normal socket
-                                      row = {
-                                        "id": row.id,
-                                        "message": row.message,
-                                        "source": row.source,
-                                        "timestamp": row.timestamp,
-                                        "alias_id": row.alias_id,
-                                        "alias": row.alias,
-                                        "agency": row.agency,
-                                        "icon": row.icon,
-                                        "color": row.color,
-                                        "ignore": row.ignore
-                                      };
-                                      req.io.emit('messagePost', row);
+                                      // if AdminShow not on only send if not null alias_id
+                                      if (row.alias_id != null) {
+                                        req.io.of('adminio').emit('messagePost', row);
+                                        rowuser = {
+                                          "id": row.id,
+                                          "message": row.message,
+                                          "source": row.source,
+                                          "timestamp": row.timestamp,
+                                          "alias_id": row.alias_id,
+                                          "alias": row.alias,
+                                          "agency": row.agency,
+                                          "icon": row.icon,
+                                          "color": row.color,
+                                          "ignore": row.ignore
+                                        };
+                                        req.io.emit('messagePost', rowuser);
+                                      }
                                     }
+                                  } else {
+                                    req.io.of('adminio').emit('messagePost', row);
+                                    rowuser = {
+                                      "id": row.id,
+                                      "message": row.message,
+                                      "source": row.source,
+                                      "timestamp": row.timestamp,
+                                      "alias_id": row.alias_id,
+                                      "alias": row.alias,
+                                      "agency": row.agency,
+                                      "icon": row.icon,
+                                      "color": row.color,
+                                      "ignore": row.ignore
+                                    };
+                                    req.io.emit('messagePost', rowuser);
                                   }
                                 } else {
-                                  if (pdwMode && row.alias_id == null) {
+                                  if (pdwMode) {
                                     if (adminShow) {
+                                      //If PDWMode on and AdminShow is on send always
                                       req.io.of('adminio').emit('messagePost', row);
+                                      if (row.alias_id != null) {
+                                        // send to normal user as well if not null alias_id
+                                        req.io.emit('messagePost', row);
+                                      }
                                     } else {
-                                      //do nothing
+                                      // if AdminShow not on only send if not null alias_id
+                                      if (row.alias_id != null) {
+                                        req.io.of('adminio').emit('messagePost', row);
+                                        req.io.emit('messagePost', row);
+                                      }
                                     }
                                   } else {
-                                    //Just emit - No Security enabled
                                     req.io.of('adminio').emit('messagePost', row);
                                     req.io.emit('messagePost', row);
                                   }
