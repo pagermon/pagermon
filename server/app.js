@@ -23,7 +23,7 @@ var session = require('express-session');
 var request = require('request');
 var SQLiteStore = require('connect-sqlite3')(session);
 var flash    = require('connect-flash');
-var passport = require('./auth/local');
+
 
 process.on('SIGINT', function() {
     console.log( "\nGracefully shutting down from SIGINT (Ctrl-C)" );
@@ -70,6 +70,8 @@ if (azureEnable) {
 var dbinit = require('./db');
     dbinit.init();
 var db = require('./knex/knex.js');
+
+var passport = require('./auth/local');
 
 // routes
 var index = require('./routes/index');
