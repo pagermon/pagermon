@@ -27,7 +27,7 @@ const bruteforcedupe = new ExpressBrute(store, {
 
 const bruteforcelogin= new ExpressBrute(store, {
     freeRetries: 5,
-    minWait: 5*60*1000, // 5 minutes
+    minWait: 10000, // 10 seconds
     maxWait: 15*60*1000 // 15 minutes
 });
 //End Bruteforce
