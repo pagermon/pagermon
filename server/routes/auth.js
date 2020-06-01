@@ -19,16 +19,24 @@ let store = new BruteKnex({
     knex: db,
     tablename: 'protection' 
 });
+
+var lockoutCallback = function (req, res, next, nextValidRequestDate) {
+    res.status(429).send({ 'status': 'lockedout', 'error': 'Too many attempts, please try again later' });
+    logger.auth.info('Lockout: ' + req.ip + ' Next Valid: ' + nextValidRequestDate)
+};
+
 const bruteforcedupe = new ExpressBrute(store, {
     freeRetries: 10,
     minWait: 5000, // 5 seconds
-    maxWait: 20000 // 20 seconds
+    maxWait: 20000, // 20 seconds
+    failCallback: lockoutCallback
 });
 
 const bruteforcelogin= new ExpressBrute(store, {
     freeRetries: 5,
     minWait: 10000, // 10 seconds
-    maxWait: 15*60*1000 // 15 minutes
+    maxWait: 15*60*1000, // 15 minutes
+    failCallback: lockoutCallback
 });
 //End Bruteforce
 
@@ -45,13 +53,11 @@ router.route('/login')
     .post(bruteforcelogin.prevent, function (req, res, next) {
         passport.authenticate('login-user', (err, user, info) => {
             if (err) {
-                req.flash('loginMessage', 'An error has occured');
-                res.status(500).send({ 'status': 'failed', 'error': 'Error Occured' });
+                res.status(500).send({ 'status': 'failed', 'error': 'An Error Occured' });
                 logger.auth.error(err)
             }
             else if (!user) {
-                req.flash('loginMessage', 'User not found');
-                res.status(401).send({ 'status': 'failed', 'error': 'Login Failed - Check Details and try again' });
+                res.status(401).send({ 'status': 'failed', 'error': 'Check Details and try again' });
                 logger.auth.debug('User not found' + req.user.username)
             }
             else if (user) {
