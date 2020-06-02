@@ -58,7 +58,7 @@ router.route('/login')
             }
             else if (!user) {
                 res.status(401).send({ 'status': 'failed', 'error': 'Check Details and try again' });
-                logger.auth.debug('User not found' + req.user.username)
+                logger.auth.debug('Login Failed: ' + req.body.username)
             }
             else if (user) {
                 if (user.status != 'disabled') {
