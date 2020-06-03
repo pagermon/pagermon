@@ -35,6 +35,7 @@ function run (trigger, scope, data, config, callback) {
       axios.post(config.repeatURI, message, {
         headers: {
           apikey: config.repeatAPIKEY,
+          'User-Agent': 'Pagermon - Message Repeat Plugin'
         },
         timeout: 5000, // Timeout 5s
       }).then(res => {
