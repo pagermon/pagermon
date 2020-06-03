@@ -284,7 +284,6 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
       <% if(typeof user != 'undefined'){ %>
         $scope.user="<%=user%>";
         $scope.role="<%=user.role%>"
-        console.log($scope.role)
       <% }else{ %>
         $scope.user="";
       <% } %>
