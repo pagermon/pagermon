@@ -24,6 +24,7 @@ function run(trigger, scope, data, config, callback) {
     axios.post(config.URL, dat, {
       headers: {
         'Content-Type': config.contentType || 'application/json;charset=utf-8',
+        'User-Agent': 'Pagermon - Advanced Webhook Plugin'
       },
       timeout: 5000, // Timeout 5s
     }).then(res => {
