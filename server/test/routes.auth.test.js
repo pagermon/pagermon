@@ -21,8 +21,6 @@ passportStub.install(server);
 nconf.file({ file: confFile });
 nconf.load();
 // set required settings in config file
-nconf.set('auth:registration', true);
-nconf.save();
 
 beforeEach(() => db.migrate.rollback().then(() => db.migrate.latest().then(() => db.seed.run())));
 
@@ -148,6 +146,8 @@ describe('GET /auth/profile/:id', () => {
 });
 
 describe('GET /auth/register', () => {
+        nconf.set('auth:registration', true);
+        nconf.save();           
         it('should return the registration page if enabled', done => {
                 chai.request(server)
                         .get('/auth/register')
@@ -155,6 +155,19 @@ describe('GET /auth/register', () => {
                                 should.not.exist(err);
                                 res.status.should.eql(200);
                                 res.type.should.eql('text/html');
+                                done();
+                        });
+        });
+        nconf.set('auth:registration', true);
+        nconf.save();
+        it('should return the index if disabled', done => {
+                chai.request(server)
+                        .get('/auth/register')
+                        .redirects(0)
+                        .end((err, res) => {
+                                should.not.exist(err);
+                                res.status.should.eql(302);
+                                res.should.redirectTo('/');
                                 done();
                         });
         });

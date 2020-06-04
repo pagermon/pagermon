@@ -23,6 +23,8 @@ const store = new BruteKnex({
         tablename: 'protection',
 });
 
+const reg = nconf.get('auth:registration');
+
 const lockoutCallback = function(req, res, next, nextValidRequestDate) {
         res.status(429).send({ status: 'lockedout', error: 'Too many attempts, please try again later' });
         logger.auth.info(`Lockout: ${req.ip} Next Valid: ${nextValidRequestDate}`);
@@ -46,15 +48,15 @@ const bruteforcelogin = new ExpressBrute(store, {
 router.route('/login')
         .get(function(req, res) {
                 if (!req.isAuthenticated()) {
-                let user = '';
-                if (typeof req.username !== 'undefined') {
-                        user = req.username;
-                }
-                res.render('auth', {
-                        pageTitle: 'User',
-                });
+                        let user = '';
+                        if (typeof req.username !== 'undefined') {
+                                user = req.username;
+                        }
+                        res.render('auth', {
+                                pageTitle: 'User',
+                        });
                 } else {
-                res.redirect('/');      
+                        res.redirect('/');
                 }
         })
         .post(bruteforcelogin.prevent, function(req, res, next) {
@@ -191,14 +193,14 @@ router.route('/profile/:id')
 
 router.route('/register')
         .get(function(req, res) {
-                const reg = nconf.get('auth:registration');
                 if (reg) {
-                        return res.render('auth', {
+                        res.render('auth', {
                                 title: 'Registration',
                                 message: req.flash('registerMessage'),
                         });
+                } else {
+                        res.redirect('/');
                 }
-                res.redirect('/');
         })
         .post(function(req, res, next) {
                 const reg = nconf.get('auth:registration');
