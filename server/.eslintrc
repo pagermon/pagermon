@@ -1,0 +1,19 @@
+{
+    "extends": [
+        "wesbos"
+    ],
+    "rules": {
+        "no-console": 2,
+        "no-unused-expressions": 0,
+        "camelcase": 1,
+        "prettier/prettier": [
+            "error",
+            {
+                "trailingComma": "es5",
+                "singleQuote": true,
+                "printWidth": 120,
+                "tabWidth": 8,
+            }
+        ]
+    }
+}
