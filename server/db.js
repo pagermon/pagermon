@@ -2,9 +2,9 @@ var fs = require('fs');
 var logger = require('./log');
 var moment = require('moment');
 var nconf = require('nconf');
-var conf_file = './config/config.json';
+var confFile = './config/config.json';
 var db = require('./knex/knex.js');
-nconf.file({file: conf_file});
+nconf.file({file: confFile});
 nconf.load();
 
 // initialize the database if it does not already exist

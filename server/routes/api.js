@@ -14,8 +14,8 @@ var passport = require('../auth/local'); // pass passport for configuration
 const authHelpers = require('../auth/_helpers');
 
 var nconf = require('nconf');
-var conf_file = './config/config.json';
-nconf.file({ file: conf_file });
+var confFile = './config/config.json';
+nconf.file({ file: confFile });
 nconf.load();
 
 router.use(bodyParser.json());       // to support JSON-encoded bodies

@@ -7,18 +7,32 @@ const chaiHttp = require('chai-http');
 
 chai.use(chaiHttp);
 
-const server = require('../app');
-const db = require('../knex/knex.js');
-// This needs to be sorted out, use a different config file when testing?
-const conf_file = './config/config.json';
+const confFile = './config/config.json';
 // load the config file
 const nconf = require('nconf');
 
-nconf.file({ file: conf_file });
+const server = require('../app');
+const db = require('../knex/knex.js');
+// This needs to be sorted out, use a different config file when testing?
+
+nconf.file({ file: confFile });
 nconf.load();
 // set required settings in config file
 nconf.set('auth:registration', true);
 nconf.save();
+
+describe('GET /auth/login', () => {
+        it('should return the login page', done => {
+                chai.request(server)
+                        .get('/auth/login')
+                        .end((err, res) => {
+                                should.not.exist(err);
+                                res.status.should.eql(200);
+                                res.type.should.eql('text/html');
+                                done();
+                        });
+        });
+});
 
 describe('GET /auth/register', () => {
         it('should return the registration page if enabled', done => {

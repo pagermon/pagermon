@@ -15,9 +15,9 @@ router.use(function (req, res, next) {
 });
 
 var nconf = require('nconf');
-var conf_file = './config/config.json';
+var confFile = './config/config.json';
 var conf_backup = './config/backup.json';
-nconf.file({ file: conf_file });
+nconf.file({ file: confFile });
 nconf.load();
 
 router.use(bodyParser.json());       // to support JSON-encoded bodies
@@ -52,7 +52,7 @@ router.route('/settingsData')
             //console.log(req.body);
             var currentConfig = nconf.get();
             fs.writeFileSync(conf_backup, JSON.stringify(currentConfig, null, 2));
-            fs.writeFileSync(conf_file, JSON.stringify(req.body, null, 2));
+            fs.writeFileSync(confFile, JSON.stringify(req.body, null, 2));
             nconf.load();
             res.status(200).send({ 'status': 'ok' });
         } else {
