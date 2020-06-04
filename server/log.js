@@ -9,6 +9,7 @@ nconf.load();
 
 var loglevel = nconf.get('global:loglevel');
 
+
 winston.loggers.add('pagermon', {
     format: format.combine(
         format.colorize(),

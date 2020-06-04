@@ -39,6 +39,8 @@ function init() {
                 })
             }
         })
+    }
+    if(process.env.NODE_ENV != 'test') { 
         db.migrate.currentVersion().then((result) => {
             logger.main.info("Current DB version: " + result);
             logger.main.info('Checking for database upgrades')
@@ -56,21 +58,7 @@ function init() {
         }).catch((err) => {
             logger.main.error('Error retrieving database version' + err)
         })
-    } else {
-        logger.main.info('Checking for database upgrades')
-        db.migrate.latest()
-        .then((result) => {
-            if (result[0] === 1) {
-                logger.main.info('Database upgrades complete')
-            }
-            else if (result[0] === 2) {
-                logger.main.info('Database upgrade not required')
-            }
-        })
-        .catch((err) => {
-            logger.main.error('Error upgrading database:' + err)
-        })
-    }
+    }   
 }
 
 module.exports = {

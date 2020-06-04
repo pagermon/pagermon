@@ -36,8 +36,9 @@ var dbconfig = {
       },
     }
 }
-
-if (dbtype == 'sqlite3') {
+if(process.env.NODE_ENV === 'test') {
+  dbconfig.connection.filename = './test/messages.db'
+}else if (dbtype == 'sqlite3') {
   dbconfig.connection.filename = nconf.get('database:file');
 } else if (dbtype == 'mysql') {
   dbconfig.connection.host = nconf.get('database:server');
@@ -53,6 +54,7 @@ if (dbtype == 'sqlite3') {
 
 //this is required because of the silly way knex migrations handle environments 
 module.exports = Object.assign({}, dbconfig, {
+  test: dbconfig,
   development: dbconfig,
   staging: dbconfig,
   production: dbconfig,

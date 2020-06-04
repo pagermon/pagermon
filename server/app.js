@@ -228,6 +228,14 @@ if (dbtype == 'mysql') {
   }, null, true);
 }
 
+//Disable all logging for tests
+if(process.env.NODE_ENV === 'test') { 
+  logger.main.silent = true
+  logger.auth.silent = true
+  logger.db.silent = true
+  logger.http.silent = true
+}
+
 module.exports = app;
 
 function normalizePort(val) {

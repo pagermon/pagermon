@@ -45,5 +45,5 @@ exports.up = function(db, Promise) {
 };
 
 exports.down = function(db, Promise) {
-  
+  return db.schema.dropTable('users');
 };
