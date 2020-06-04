@@ -21,6 +21,9 @@ var dbconfig = {
       tableName: 'knex_migrations',
       directory: __dirname + '/knex/migrations'
     },
+    seeds: {
+      directory: __dirname + '/knex/seeds'
+    },
     log: {
       warn(message) {
         logger.db.info(JSON.stringify(message))

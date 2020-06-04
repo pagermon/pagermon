@@ -45,6 +45,7 @@ const bruteforcelogin = new ExpressBrute(store, {
 
 router.route('/login')
         .get(function(req, res) {
+                if (!req.isAuthenticated()) {
                 let user = '';
                 if (typeof req.username !== 'undefined') {
                         user = req.username;
@@ -52,6 +53,9 @@ router.route('/login')
                 res.render('auth', {
                         pageTitle: 'User',
                 });
+                } else {
+                res.redirect('/');      
+                }
         })
         .post(bruteforcelogin.prevent, function(req, res, next) {
                 passport.authenticate('login-user', (err, user) => {
