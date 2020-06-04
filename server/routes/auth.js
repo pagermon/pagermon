@@ -109,10 +109,14 @@ router.route('/logout')
     });
 
 router.route('/profile/')
-    .get(isLoggedIn, function (req, res, next) {
-        res.render('auth', {
-            pageTitle: 'User',
-        })
+    .get(function (req, res, next) {
+        if (req.isAuthenticated()) {
+            res.render('auth', {
+                pageTitle: 'User',
+            })
+        } else {
+            res.redirect('/auth/login');
+        }
     });
 
 router.route('/profile/:id')
