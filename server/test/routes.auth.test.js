@@ -29,19 +29,6 @@ describe('GET /auth/register', () => {
           done();
         });
     });
-    it('should not return the registration page if disabled', (done) => {
-      chai
-        .request(server)
-        .get('/auth/register')
-        .redirects(0)
-        .end((err, res) => {
-          should.not.exist(err);
-          res.status.should.eql(200);
-          res.redirectTo.should.eql('/')
-          res.type.should.eql('text/html');
-          done();
-        });
-    });
   });
 
 describe('POST /auth/register', () => {
@@ -87,6 +74,26 @@ describe('POST /auth/register', () => {
           res.status.should.eql(401);
           res.type.should.eql('application/json');
           res.body.error.should.eql('access denied');
+          done();
+        });
+    });
+    it('should not allow registration when registration is disabled in config', (done) => {
+      nconf.set('auth:registration', false);
+      nconf.save();
+      chai
+        .request(server)
+        .post('/auth/register')
+        .send({
+          username: 'test',
+          password: '$2a$08$De/aXnQkZIEbQ9p8J22tHuzLltqIbsAxE2CGgRMPLaaIwwHmVrpsu',
+          givenname: 'Admin',
+          surname: 'User',
+          email: 'Test@test.com',
+        })
+        .end((err, res) => {
+          res.status.should.eql(400);
+          res.type.should.eql('application/json');
+          res.body.error.should.eql('registration disabled');
           done();
         });
     });
