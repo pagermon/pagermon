@@ -44,7 +44,7 @@ const bruteforcelogin = new ExpressBrute(store, {
 // End Bruteforce
 
 router.route('/login')
-        .get(function(req, res, next) {
+        .get(function(req, res) {
                 let user = '';
                 if (typeof req.username !== 'undefined') {
                         user = req.username;
@@ -54,7 +54,7 @@ router.route('/login')
                 });
         })
         .post(bruteforcelogin.prevent, function(req, res, next) {
-                passport.authenticate('login-user', (err, user, info) => {
+                passport.authenticate('login-user', (err, user) => {
                         if (err) {
                                 res.status(500).send({ status: 'failed', error: 'An Error Occured' });
                                 logger.auth.error(err);
@@ -86,7 +86,7 @@ router.route('/login')
                                                                 .update({
                                                                         lastlogondate: currentDatetime,
                                                                 })
-                                                                .then(result => {
+                                                                .then(() => {
                                                                         // reset the bruteforce timer after successful login
                                                                         bruteforcelogin.reset(null);
                                                                         if (user.role !== 'admin') {
@@ -119,13 +119,13 @@ router.route('/login')
                 })(req, res, next);
         });
 
-router.route('/logout').get(isLoggedIn, function(req, res, next) {
+router.route('/logout').get(isLoggedIn, function(req, res) {
         req.logout();
         res.redirect('/');
         logger.auth.debug(`Successful Logout ${req.user.username}`);
 });
 
-router.route('/profile/').get(isLoggedIn, function(req, res, next) {
+router.route('/profile/').get(isLoggedIn, function(req, res) {
         res.render('auth', {
                 pageTitle: 'User',
         });
@@ -139,9 +139,9 @@ router.route('/profile/:id')
                         .where('username', username)
                         .then(function(row) {
                                 if (row.length > 0) {
-                                        row = row[0];
+                                        const rowsend = row[0];
                                         res.status(200);
-                                        res.json(row);
+                                        res.json(rowsend);
                                 } else {
                                         res.status(500).json({ status: 'failed', error: '' });
                                         logger.auth.error('failed to select user');
@@ -152,7 +152,7 @@ router.route('/profile/:id')
                                 return next(err);
                         });
         })
-        .post(isLoggedIn, function(req, res, next) {
+        .post(isLoggedIn, function(req, res) {
                 if (req.body.username === req.user.username) {
                         const { username } = req.body;
                         const { givenname } = req.body;
@@ -186,7 +186,7 @@ router.route('/profile/:id')
         });
 
 router.route('/register')
-        .get(function(req, res, next) {
+        .get(function(req, res) {
                 const reg = nconf.get('auth:registration');
                 if (reg) {
                         return res.render('auth', {
@@ -224,50 +224,38 @@ router.route('/register')
                                                                 status: 'active',
                                                                 lastlogondate: Date.now(),
                                                         })
-                                                        .then(response => {
-                                                                passport.authenticate(
-                                                                        'login-user',
-                                                                        (err, user, info) => {
-                                                                                if (user) {
-                                                                                        req.logIn(user, function(err) {
-                                                                                                if (err) {
-                                                                                                        res.status(
-                                                                                                                500
-                                                                                                        ).json({
-                                                                                                                status:
-                                                                                                                        'failed',
-                                                                                                                error: err,
-                                                                                                                redirect:
-                                                                                                                        '/auth/register',
-                                                                                                        });
-                                                                                                        logger.auth.error(
-                                                                                                                err
-                                                                                                        );
-                                                                                                } else {
-                                                                                                        res.status(
-                                                                                                                200
-                                                                                                        ).json({
-                                                                                                                status:
-                                                                                                                        'ok',
-                                                                                                                redirect:
-                                                                                                                        '/',
-                                                                                                        });
-                                                                                                        logger.auth.info(
-                                                                                                                `Created Account: ${user}`
-                                                                                                        );
-                                                                                                }
-                                                                                        });
-                                                                                } else {
-                                                                                        logger.auth.error(err);
-                                                                                        res.status(500).json({
-                                                                                                status: 'failed',
-                                                                                                error: err,
-                                                                                                redirect:
-                                                                                                        '/auth/register',
-                                                                                        });
-                                                                                }
+                                                        .then(() => {
+                                                                passport.authenticate('login-user', (err, user) => {
+                                                                        if (user) {
+                                                                                req.logIn(user, function(err) {
+                                                                                        if (err) {
+                                                                                                res.status(500).json({
+                                                                                                        status:
+                                                                                                                'failed',
+                                                                                                        error: err,
+                                                                                                        redirect:
+                                                                                                                '/auth/register',
+                                                                                                });
+                                                                                                logger.auth.error(err);
+                                                                                        } else {
+                                                                                                res.status(200).json({
+                                                                                                        status: 'ok',
+                                                                                                        redirect: '/',
+                                                                                                });
+                                                                                                logger.auth.info(
+                                                                                                        `Created Account: ${user}`
+                                                                                                );
+                                                                                        }
+                                                                                });
+                                                                        } else {
+                                                                                logger.auth.error(err);
+                                                                                res.status(500).json({
+                                                                                        status: 'failed',
+                                                                                        error: err,
+                                                                                        redirect: '/auth/register',
+                                                                                });
                                                                         }
-                                                                )(req, res, next);
+                                                                })(req, res, next);
                                                         })
                                                         .catch(err => {
                                                                 logger.auth.error(err);
@@ -285,7 +273,7 @@ router.route('/register')
         });
 
 router.route('/reset')
-        .get(function(req, res, next) {
+        .get(function(req, res) {
                 let user = '';
                 if (typeof req.username !== 'undefined') {
                         user = req.username;
@@ -299,7 +287,7 @@ router.route('/reset')
                 }
                 res.redirect('/auth/login');
         })
-        .post(isLoggedIn, function(req, res, next) {
+        .post(isLoggedIn, function(req, res) {
                 const { password } = req.body;
                 // bcrypt function
                 if (password && !authHelpers.comparePass(password, req.user.password)) {
@@ -312,7 +300,7 @@ router.route('/reset')
                                 .update({
                                         password: hash,
                                 })
-                                .then(result => {
+                                .then(() => {
                                         res.status(200).send({ status: 'ok', redirect: '/' });
                                         logger.auth.debug(`${req.username}Password Reset Successfully`);
                                 })
@@ -332,11 +320,11 @@ router.route('/userCheck/username/:id').get(bruteforcedupe.prevent, function(req
                 .where('username', id)
                 .then(row => {
                         if (row.length > 0) {
-                                row = row[0];
+                                const rowsend = row[0];
                                 res.status(200);
-                                res.json(row);
+                                res.json(rowsend);
                         } else {
-                                row = {
+                                const rowsend = {
                                         username: '',
                                         password: '',
                                         givenname: '',
@@ -346,7 +334,7 @@ router.route('/userCheck/username/:id').get(bruteforcedupe.prevent, function(req
                                         status: 'active',
                                 };
                                 res.status(200);
-                                res.json(row);
+                                res.json(rowsend);
                         }
                 })
                 .catch(err => {
@@ -362,11 +350,11 @@ router.route('/userCheck/email/:id').get(bruteforcedupe.prevent, function(req, r
                 .where('email', id)
                 .then(row => {
                         if (row.length > 0) {
-                                row = row[0];
+                                const rowsend = row[0];
                                 res.status(200);
-                                res.json(row);
+                                res.json(rowsend);
                         } else {
-                                row = {
+                                const rowsend = {
                                         username: '',
                                         password: '',
                                         givenname: '',
@@ -376,7 +364,7 @@ router.route('/userCheck/email/:id').get(bruteforcedupe.prevent, function(req, r
                                         status: 'active',
                                 };
                                 res.status(200);
-                                res.json(row);
+                                res.json(rowsend);
                         }
                 })
                 .catch(err => {
@@ -391,25 +379,12 @@ function isLoggedIn(req, res, next) {
                 return next();
         }
         // perform api authentication - all api keys are assumed to be admin
+        // eslint-disable-next-line no-sequences
         passport.authenticate('login-api', { session: false, failWithError: true })(req, res, next),
                 function(next) {
                         next();
                 },
-                function(res) {
-                        return res.status(401).json({ error: 'Authentication failed.' });
-                };
-}
-// route middleware to make sure the user is an admin where required
-function isAdmin(req, res, next) {
-        if (req.isAuthenticated() && req.user.role == 'admin') {
-                // if the user is authenticated and the user's role is admin carry on
-                return next();
-        }
-        // perform api authentication - all api keys are assumed to be admin
-        passport.authenticate('login-api', { session: false, failWithError: true })(req, res, next),
-                function(next) {
-                        next();
-                },
+                // eslint-disable-next-line no-shadow
                 function(res) {
                         return res.status(401).json({ error: 'Authentication failed.' });
                 };

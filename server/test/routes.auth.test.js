@@ -34,6 +34,15 @@ describe('GET /auth/login', () => {
         });
 });
 
+describe('GET /auth/profile', () => {
+        it('should return the profile page if the user is logged in', done => {});
+        it('should return an error if user is not logged in', done => {});
+});
+
+describe('POST /auth/profile', () => {
+        it('should return the profile page if the user is logged in', done => {});
+});
+
 describe('GET /auth/register', () => {
         it('should return the registration page if enabled', done => {
                 chai.request(server)
