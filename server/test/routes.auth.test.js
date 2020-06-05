@@ -55,6 +55,7 @@ describe('GET /auth/login', () => {
 });
 
 describe('POST /auth/login', () => {
+        
 });
 
 describe('GET /auth/profile', () => {
@@ -158,9 +159,10 @@ describe('GET /auth/register', () => {
                                 done();
                         });
         });
-        nconf.set('auth:registration', true);
-        nconf.save();
+        
         it('should return the index if disabled', done => {
+                nconf.set('auth:registration', false);
+                nconf.save();
                 chai.request(server)
                         .get('/auth/register')
                         .redirects(0)
@@ -173,8 +175,10 @@ describe('GET /auth/register', () => {
         });
 });
 
-describe('POST /auth/register', () => {
+describe('POST /auth/register', () => {   
         it('should register a new user', done => {
+                nconf.set('auth:registration', true);
+                nconf.save();
                 chai.request(server)
                         .post('/auth/register')
                         .send({

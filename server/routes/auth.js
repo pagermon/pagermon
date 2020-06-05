@@ -25,8 +25,6 @@ const store = new BruteKnex({
         tablename: 'protection',
 });
 
-const reg = nconf.get('auth:registration');
-
 const lockoutCallback = function(req, res, next, nextValidRequestDate) {
         res.status(429).send({ status: 'lockedout', error: 'Too many attempts, please try again later' });
         logger.auth.info(`Lockout: ${req.ip} Next Valid: ${nextValidRequestDate}`);
@@ -195,6 +193,7 @@ router.route('/profile/:id')
 
 router.route('/register')
         .get(function(req, res) {
+                const reg = nconf.get('auth:registration');
                 if (reg) {
                         res.render('auth', {
                                 title: 'Registration',
