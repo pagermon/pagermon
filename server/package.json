@@ -5,7 +5,7 @@
   "license": "Unlicense",
   "scripts": {
     "start": "node ./bin/www",
-    "test": "mocha --exit -t 60000",
+    "test": "nyc mocha --exit -t 60000",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
@@ -81,6 +81,7 @@
     "eslint-plugin-prettier": "^3.0.1",
     "eslint-plugin-react": "^7.12.4",
     "eslint-plugin-react-hooks": "^1.3.0",
+    "nyc": "^15.1.0",
     "passport-stub": "^1.1.1",
     "prettier": "^1.16.4"
   }

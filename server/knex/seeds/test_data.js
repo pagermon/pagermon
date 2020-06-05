@@ -97,6 +97,16 @@ exports.seed = function(db, Promise) {
         role: 'admin',
         status: 'active',
       });
+    }).then(function () {
+      return db('users').insert({
+        givenname: 'Disabled',
+        surname: 'Admin',
+        username: 'admindisabled',
+        password: '$2a$08$De/aXnQkZIEbQ9p8J22tHuzLltqIbsAxE2CGgRMPLaaIwwHmVrpsu',
+        email: 'none3@none.com',
+        role: 'admin',
+        status: 'disabled',
+      });
     })
 };
 

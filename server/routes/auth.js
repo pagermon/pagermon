@@ -43,6 +43,7 @@ const bruteforcelogin = new ExpressBrute(store, {
         maxWait: 15 * 60 * 1000, // 15 minutes
         failCallback: lockoutCallback,
 });
+
 // End Bruteforce
 
 router.route('/login')
@@ -62,7 +63,8 @@ router.route('/login')
         .post(bruteforcelogin.prevent, function(req, res, next) {
                 passport.authenticate('login-user', (err, user) => {
                         if (err) {
-                                res.status(500).send({ status: 'failed', error: 'An Error Occured' });
+                                //this is commented out as it seems to fire when a user is disabled?! even tho the below functions still run
+                                //res.status(500).send({ status: 'failed', error: 'An Error Occured' });
                                 logger.auth.error(err);
                         } else if (!user) {
                                 res.status(401).send({ status: 'failed', error: 'Check Details and try again' });
@@ -73,7 +75,7 @@ router.route('/login')
                                                 if (err) {
                                                         res.status(401).send({
                                                                 status: 'failed',
-                                                                error: 'Incorrect Password',
+                                                                error: 'An error occured',
                                                         });
                                                         logger.auth.debug(
                                                                 `Failed login ${JSON.stringify(user)} ${err}`
@@ -291,8 +293,9 @@ router.route('/reset')
                                 message: req.flash('loginMessage'),
                                 username: user,
                         });
-                }
+                } else {
                 res.redirect('/auth/login');
+                }
         })
         .post(isLoggedIn, function(req, res) {
                 const { password } = req.body;
