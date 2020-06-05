@@ -6,24 +6,24 @@ const moment = require('moment');
 const should = chai.should();
 const chaiHttp = require('chai-http');
 
-var datetime = moment().unix();
+const datetime = moment().unix();
 
 chai.use(chaiHttp);
 
 const confFile = './config/config.json';
 // load the config file
 const nconf = require('nconf');
-nconf.file({ file: confFile });;
+
+nconf.file({ file: confFile });
 nconf.load();
 
-
-
 const passportStub = require('passport-stub');
+// eslint-disable-next-line vars-on-top
 var server = require('../app');
 const db = require('../knex/knex.js');
 // This needs to be sorted out, use a different config file when testing?
 
-//Force someconfigs back to default
+// Force someconfigs back to default
 nconf.set('messages:HideCapcode', false);
 nconf.set('messages:HideSource', false);
 nconf.set('messages:apiSecurity', false);
@@ -31,7 +31,6 @@ nconf.save();
 
 passportStub.install(server);
 // set required settings in config file
-
 
 beforeEach(() => db.migrate.rollback().then(() => db.migrate.latest().then(() => db.seed.run())));
 afterEach(() => db.migrate.rollback().then(() => passportStub.logout()));
@@ -74,11 +73,73 @@ describe('GET /api/messages', () => {
                                 res.status.should.eql(200);
                                 res.type.should.eql('application/json');
                                 res.body.should.be.a('array');
-                                (res.body[0]).should.have.property('id').eql(5);
-                                (res.body[0]).should.have.property('address').eql('1234570');
-                                (res.body[0]).should.have.property('message').eql('This is a Test Message to Address 1234570');
-                                (res.body[0]).should.have.property('source').eql('Client 4');
+                                res.body[0].should.have.property('id').eql(5);
+                                res.body[0].should.have.property('address').eql('1234570');
+                                res.body[0].should.have
+                                        .property('message')
+                                        .eql('This is a Test Message to Address 1234570');
+                                res.body[0].should.have.property('source').eql('Client 4');
                                 done();
                         });
+        });
+        it('should show capcode in hidecapcode mode if logged in ', done => {
+                nconf.set('messages:HideCapcode', true);
+                nconf.save();
+                passportStub.login({
+                        username: 'useractive',
+                        password: 'changeme',
+                });
+                chai.request(server)
+                        .get('/api/messages')
+                        .end((err, res) => {
+                                should.not.exist(err);
+                                res.status.should.eql(200);
+                                res.type.should.eql('application/json');
+                                res.body.should.be.a('object');
+                                res.body.messages[0].should.have.property('id').eql(4);
+                                res.body.messages[0].should.have.property('address').eql('1234569');
+                                res.body.messages[0].should.have
+                                        .property('message')
+                                        .eql('This is a Test Message to Address 1234569');
+                                res.body.messages[0].should.have.property('source').eql('Client 3');
+                                done();
+                        });
+                nconf.set('messages:HideCapcode', false);
+        });
+        it('should not show capcode in hidecapcode mode if not logged in ', done => {
+                nconf.set('messages:HideCapcode', true);
+                nconf.save();
+                chai.request(server)
+                        .get('/api/messages')
+                        .end((err, res) => {
+                                should.not.exist(err);
+                                res.status.should.eql(200);
+                                res.type.should.eql('application/json');
+                                res.body.should.be.a('object');
+                                res.body.messages[0].should.have.property('id').eql(4);
+                                res.body.messages[0].should.not.have.property('address').eql('1234569');
+                                res.body.messages[0].should.have
+                                        .property('message')
+                                        .eql('This is a Test Message to Address 1234569');
+                                res.body.messages[0].should.have.property('source').eql('Client 3');
+                                done();
+                        });
+                nconf.set('messages:HideCapcode', false);
+        });
+        it('should 401 if securemode is enabled and not logged in ', done => {
+                nconf.set('messages:apiSecurity', true);
+                nconf.set('messages:HideCapcode', false);
+                nconf.save();
+                passportStub.logout();
+                chai.request(server)
+                        .get('/api/messages')
+                        .end((err, res) => {
+                                should.not.exist(err);
+                                res.status.should.eql(401);
+                                res.type.should.eql('application/json');
+                                res.body.error.name.should.eql('AuthenticationError');
+                                done();
+                        });
+                nconf.set('messages:apiSecurity', false);
         });
 });

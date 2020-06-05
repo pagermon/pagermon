@@ -1423,6 +1423,7 @@ function inParam(sql, arr) {
 
 // route middleware to make sure a user is logged in where required
 function isLoggedIn(req, res, next) {
+  var apiSecurity = nconf.get('messages:apiSecurity');
   if (apiSecurity) { //check if Secure mode is on
     if (req.isAuthenticated()) {
       // if user is authenticated in the session, carry on
