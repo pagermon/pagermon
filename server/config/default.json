@@ -40,7 +40,7 @@
     "apiSecurity": false
   },
   "auth": {
-    "type": "local",
+    "registration": false,
     "user": "admin",
     "encPass": "$2a$08$De/aXnQkZIEbQ9p8J22tHuzLltqIbsAxE2CGgRMPLaaIwwHmVrpsu",
     "keys": [
