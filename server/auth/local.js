@@ -1,6 +1,7 @@
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const LocalAPIKeyStrategy = require('passport-localapikey-update').Strategy;
+
 const nconf = require('nconf');
 const logger = require('../log');
 
@@ -9,11 +10,13 @@ nconf.file({ file: confFile });
 
 const init = require('./passport');
 const db = require('../knex/knex.js');
+
 const authHelpers = require('./_helpers');
 
 const options = {};
 
 init();
+
 
 passport.use(
         'login-user',
@@ -54,3 +57,4 @@ passport.use(
 );
 
 module.exports = passport;
+

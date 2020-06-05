@@ -17,6 +17,7 @@ router.use(function (req, res, next) {
 var nconf = require('nconf');
 var confFile = './config/config.json';
 var conf_backup = './config/backup.json';
+
 nconf.file({ file: confFile });
 nconf.load();
 

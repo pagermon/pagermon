@@ -14,6 +14,7 @@ var passport = require('../auth/local'); // pass passport for configuration
 const authHelpers = require('../auth/_helpers');
 
 var nconf = require('nconf');
+
 var confFile = './config/config.json';
 nconf.file({ file: confFile });
 nconf.load();
@@ -57,6 +58,7 @@ router.route('/messages')
     var defaultLimit = nconf.get('messages:defaultLimit');
     var HideCapcode = nconf.get('messages:HideCapcode');
     var apiSecurity = nconf.get('messages:apiSecurity');
+
     initData.replaceText = nconf.get('messages:replaceText');
     if (typeof req.query.page !== 'undefined') {
       var page = parseInt(req.query.page, 10);
@@ -478,6 +480,7 @@ router.route('/messages')
     }
   });
 
+
 router.route('/messages/:id')
   .get(isLoggedIn, function (req, res, next) {
     nconf.load();
@@ -652,7 +655,6 @@ router.route('/messageSearch')
           }
           initData.offsetEnd = initData.offset + initData.limit;
           var limitResults = result.slice(initData.offset, initData.offsetEnd);
-
           console.timeEnd('initEnd');
           res.json({ 'init': initData, 'messages': limitResults });
         } else {

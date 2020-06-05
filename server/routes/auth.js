@@ -1,5 +1,6 @@
 const express = require('express');
 
+
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const moment = require('moment');
@@ -12,6 +13,7 @@ nconf.load();
 // Brute force protection for public dupe checking routes
 const ExpressBrute = require('express-brute');
 const BruteKnex = require('brute-knex');
+
 const db = require('../knex/knex.js');
 const logger = require('../log');
 const passport = require('../auth/local');
@@ -397,3 +399,4 @@ function isLoggedIn(req, res, next) {
 }
 
 module.exports = router;
+

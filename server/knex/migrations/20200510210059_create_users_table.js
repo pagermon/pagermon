@@ -1,7 +1,9 @@
 var bcrypt = require('bcryptjs');
 var nconf = require('nconf');
+
 var confFile = './config/config.json';
 nconf.file({ file: confFile });
+
 var user = nconf.get('auth:user')
 var pwd = nconf.get('auth:encPass')
 

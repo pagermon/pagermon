@@ -2,6 +2,7 @@ var confFile = './config/config.json';
 var express = require('express');
 var router = express.Router();
 var nconf = require('nconf');
+
 nconf.file({ file: confFile });
 nconf.load();
 

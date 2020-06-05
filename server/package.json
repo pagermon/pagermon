@@ -30,7 +30,7 @@
     "core-js": "^2.4.1",
     "cron": "^1.7.0",
     "debug": "~2.6.3",
-    "discord.js": "latest",
+    "discord.js": "^11.6.4",
     "ejs": "~2.5.6",
     "express": "~4.16.3",
     "express-basic-auth": "^1.1.1",
