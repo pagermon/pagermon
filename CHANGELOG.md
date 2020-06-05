@@ -2,6 +2,7 @@
 
 * Downgrade discord.js package to fix crashes #415 @DanrwAU
 * Add user-agent strings for webhook plugins #416 @DanrwAU
+* Cleanup redundant code in db.js #417 @DanrwAU
 
 # 0.3.9 - 2020-05-13
  
