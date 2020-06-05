@@ -13,6 +13,14 @@ chai.use(chaiHttp);
 const confFile = './config/config.json';
 // load the config file
 const nconf = require('nconf');
+nconf.file({ file: confFile });;
+nconf.load();
+
+//Force someconfigs back to default
+nconf.set('messages:HideCapcode', false);
+nconf.set('messages:HideSource', false);
+nconf.set('messages:apiSecurity', false);
+nconf.save();
 
 const passportStub = require('passport-stub');
 var server = require('../app');
@@ -20,10 +28,8 @@ const db = require('../knex/knex.js');
 // This needs to be sorted out, use a different config file when testing?
 
 passportStub.install(server);
-
-nconf.file({ file: confFile });
-nconf.load();
 // set required settings in config file
+
 
 beforeEach(() => db.migrate.rollback().then(() => db.migrate.latest().then(() => db.seed.run())));
 afterEach(() => db.migrate.rollback().then(() => passportStub.logout()));
@@ -55,9 +61,7 @@ describe('POST /api/messages', () => {
 
 describe('GET /api/messages', () => {
         it('should return message id 5', done => {
-                nconf.set('messages:HideCapcode', false);
-                nconf.save();  
-                chai.request(server)
+               chai.request(server)
                     .get('/api/messages/5')
                     .end((err, res) => {
                                 should.not.exist(err);
@@ -73,7 +77,7 @@ describe('GET /api/messages', () => {
         });
         it('should not show capcode in hidecapcode mode if not logged in ', done => {
                 nconf.set('messages:HideCapcode', true);
-                nconf.save();
+                nconf.save(); 
                 chai.request(server)
                         .get('/api/messages/5')
                         .end((err, res) => {
