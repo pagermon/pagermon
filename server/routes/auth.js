@@ -268,9 +268,9 @@ router.route('/register')
                                                         })
                                                         .catch(err => {
                                                                 logger.auth.error(err);
-                                                                res.status(500).json({
+                                                                res.status(400).json({
                                                                         status: 'failed',
-                                                                        error: 'Error registering user',
+                                                                        error: 'invalid data',
                                                                 });
                                                         });
                                         }

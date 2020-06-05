@@ -323,6 +323,44 @@ describe('POST /auth/register', () => {
                                 done();
                         });
         });
+        it('should not register a user with invalid data', done => {
+                nconf.set('auth:registration', true);
+                nconf.save();
+                chai.request(server)
+                        .post('/auth/register')
+                        .send({
+                                username: 'testuser3',
+                                password: '$2a$08$De/aXnQkZIEbQ9p8J22tHuzLltqIbsAxE2CGgRMPLaaIwwHmVrpsu',
+                                givenname: 'Test',
+                                surname: 'User',
+                                email: null,
+                        })
+                        .end((err, res) => {
+                                res.status.should.eql(400);
+                                res.type.should.eql('application/json');
+                                res.body.error.should.eql('invalid data');
+                                done();
+                        });
+        });
+        it('should not register a user with invalid data', done => {
+                nconf.set('auth:registration', true);
+                nconf.save();
+                chai.request(server)
+                        .post('/auth/register')
+                        .send({
+                                username: '',
+                                password: '$2a$08$De/aXnQkZIEbQ9p8J22tHuzLltqIbsAxE2CGgRMPLaaIwwHmVrpsu',
+                                givenname: 'Test',
+                                surname: 'User',
+                                email: 'unique@snowflake.com',
+                        })
+                        .end((err, res) => {
+                                res.status.should.eql(500);
+                                res.type.should.eql('application/json');
+                                res.body.status.should.eql('failed');
+                                done();
+                        });
+        });
 });
 
 describe('GET /auth/reset', () => {
