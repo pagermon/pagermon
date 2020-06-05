@@ -480,6 +480,8 @@ router.route('/messages/:id')
   .get(isLoggedIn, function (req, res, next) {
     nconf.load();
     var pdwMode = nconf.get('messages:pdwMode');
+    var HideCapcode = nconf.get('messages:HideCapcode');
+    var apiSecurity = nconf.get('messages:apiSecurity');
     var id = req.params.id;
 
     db.from('messages')
