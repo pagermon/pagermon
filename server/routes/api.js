@@ -55,6 +55,8 @@ router.route('/messages')
     var adminShow = nconf.get('messages:adminShow');
     var maxLimit = nconf.get('messages:maxLimit');
     var defaultLimit = nconf.get('messages:defaultLimit');
+    var HideCapcode = nconf.get('messages:HideCapcode');
+    var apiSecurity = nconf.get('messages:apiSecurity');
     initData.replaceText = nconf.get('messages:replaceText');
     if (typeof req.query.page !== 'undefined') {
       var page = parseInt(req.query.page, 10);
@@ -528,6 +530,8 @@ router.route('/messageSearch')
     var pdwMode = nconf.get('messages:pdwMode');
     var adminShow = nconf.get('messages:adminShow');
     var maxLimit = nconf.get('messages:maxLimit');
+    var HideCapcode = nconf.get('messages:HideCapcode');
+    var apiSecurity = nconf.get('messages:apiSecurity');
     var defaultLimit = nconf.get('messages:defaultLimit');
     initData.replaceText = nconf.get('messages:replaceText');
 
