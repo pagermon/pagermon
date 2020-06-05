@@ -84,11 +84,32 @@ describe('GET /api/messages', () => {
                                     should.not.exist(err);
                                     res.status.should.eql(200);
                                     res.type.should.eql('application/json');
+                                    res.body.should.be.a('object');
+                                    res.body.should.have.property('id').eql(5);
+                                    res.body.should.not.have.property('address')
+                                    res.body.should.have.property('message').eql('This is a Test Message to Address 1234570');
+                                    res.body.should.have.property('source').eql('Client 4');
+                                    done();
+                        });
+            });
+            it('should show capcode in hidecapcode mode if logged in ', done => {
+                nconf.set('messages:HideCapcode', true);
+                nconf.save(); 
+                passportStub.login({
+                        username: 'useractive',
+                        password: 'changeme'
+                      });
+                chai.request(server)
+                        .get('/api/messages/5')
+                        .end((err, res) => {
+                                    should.not.exist(err);
+                                    res.status.should.eql(200);
+                                    res.type.should.eql('application/json');
                                     res.body.should.be.a('array');
                                     (res.body[0]).should.have.property('id').eql(5);
+                                    (res.body[0]).should.have.property('address').eql('1234570');
                                     (res.body[0]).should.have.property('message').eql('This is a Test Message to Address 1234570');
                                     (res.body[0]).should.have.property('source').eql('Client 4');
-                                    (res.body[0]).should.not.have.property('address');
                                     done();
                         });
             });
