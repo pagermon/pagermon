@@ -10,9 +10,6 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
           'post': { method:'POST', isArray: false },
           'delete': { method: 'DELETE', isArray: false}
         }),
-        ResetPass: $resource('/admin/resetPass', null, {
-          'post': { method:'POST', isArray: false }
-        }),
         Settings: $resource('/admin/settingsData', null, {
           'post': { method:'POST', isArray: false }
         }),
@@ -26,6 +23,17 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
           'post': { method:'POST', isArray: false }
         }),
         AliasImport: $resource('/api/capcodeImport', null, {
+          'post': { method:'POST', isArray: false }
+        }),
+        Users: $resource('/api/user', null, {
+        }),
+        UserDetail: $resource('/api/user/:id', {id: '@id'}, {
+          'post': { method:'POST', isArray: false }
+        }),
+        UsernameCheck: $resource('/api/userCheck/username/:id', {id: '@id'}, {
+          'post': { method:'POST', isArray: false }
+        }),
+        UseremailCheck: $resource('/api/userCheck/email/:id', {id: '@id'}, {
           'post': { method:'POST', isArray: false }
         }),
       };
@@ -291,6 +299,357 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         }
       };
     }])
+
+    .controller('UserController', ['$scope', '$routeParams', 'Api', '$uibModal', '$filter', '$location', '$timeout', 'FileSaver', function ($scope, $routeParams, Api, $uibModal, $filter, $location, $timeout, FileSaver) {
+      $scope.loading = true;
+      $scope.alertMessage = {};
+      Api.Users.query(null, function(results) {
+        $scope.users = results;
+        $scope.page = 'users';
+        $scope.loading = false;
+      });
+      
+      $scope.userDetail = function(id) {
+          $location.url('/users/'+id);
+      };
+ 
+     $scope.userSelected = function() {
+        if ($scope.users) {
+          var trues = $filter("filter")($scope.users, {
+              selected: true
+          });
+          return trues.length;
+        }
+      };
+      
+      $scope.userDelete = function () {
+        var numSelected = $scope.userSelected();
+        var modalHtml =  '<div class="modal-header"><h5 class="modal-title" id="modal-title">Delete Users</h5></div>';
+        var message   =  '<p>Are you sure you want to delete these users?</p><p>Users cannot be restored after saving.</p><p><strong>'+numSelected+' users selected for deletion.</strong></p>';
+            modalHtml += '<div class="modal-body">' + message + '</div>';
+            modalHtml += '<div class="modal-footer"><button class="btn btn-danger" ng-click="confirmDelete()">OK</button><button class="btn btn-primary" ng-click="cancelDelete()">Cancel</button></div>';
+ 
+        var modalInstance = $uibModal.open({
+          template: modalHtml,
+          controller: ConfirmController
+        });
+    
+        modalInstance.result.then(function() {
+          $scope.userDeleteConfirmed();
+        }, function () {
+          //$log.info('Modal dismissed at: ' + new Date());
+        });
+      };
+      
+      $scope.userDeleteConfirmed = function () {
+        var deleteList = [];
+        $scope.loading = true;
+        $scope.selectedAll = false;
+        angular.forEach($scope.users, function (selected) {
+          if (selected.selected) {
+            if (selected.id != 1) {
+              deleteList.push(selected.id);
+            }
+          }
+        });
+        var data = {'deleteList': deleteList};
+        console.log(data);
+        Api.UserDetail.post({id: 'deleteMultiple' }, data).$promise.then(function (response) {
+          console.log(response);
+          $scope.loading = false;
+          if (response.status == 'ok') {
+            $scope.alertMessage.text = 'Users deleted!';
+            $scope.alertMessage.type = 'alert-success';
+            $scope.alertMessage.show = true;
+            $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+            $scope.aliasRefreshRequired = 1;
+            $location.url('/users/');
+          } else {
+            $scope.alertMessage.text = 'Error deleting users: '+response.data.error;
+            $scope.alertMessage.type = 'alert-danger';
+            $scope.alertMessage.show = true;
+            $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+          }
+        }, function(response) {
+          console.log(response);
+          $scope.alertMessage.text = 'Error deleting users: '+response.data.error;
+          $scope.alertMessage.type = 'alert-danger';
+          $scope.alertMessage.show = true;
+          $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+          $scope.loading = false;          
+        });
+      };
+      
+      var ConfirmController = function ($scope, $uibModalInstance) {
+        $scope.confirmDelete = function () {
+          $uibModalInstance.close();
+        };
+
+        $scope.cancelDelete = function () {
+          $uibModalInstance.dismiss('cancel');
+        };
+      };
+    }])
+
+    .controller('UserDetailController', ['$scope', '$routeParams', 'Api', '$uibModal', '$filter', '$location', '$timeout', function ($scope, $routeParams, Api, $uibModal, $filter, $location, $timeout) {
+      $scope.page = 'userDetail';
+      $scope.alertMessage = {};
+
+      // controls the form validation on the username field
+      $scope.checkUsername = function() {
+        $scope.userLoading = true;
+        if ($scope.user.username) {
+          Api.UsernameCheck.get({id: $scope.user.username }, function(results) {
+            if (results.username) {
+              $scope.userLoading = false;
+              if (results.username == $scope.user.originalUsername) {
+                $scope.existingUser = false;
+                return false;
+              } else {
+                $scope.existingID = results.id;
+                $scope.existingUsername = true;
+                return true;
+              }
+            } else {
+              $scope.userLoading = false;
+              $scope.existingUsername = false;
+              return false;
+            }
+          });
+        } else {
+          $scope.userLoading = false;
+          $scope.existingUsername = false;
+          return false;
+        }
+      };
+
+      $scope.checkEmail = function() {
+        $scope.userLoading = true;
+        if ($scope.user.email) {
+          Api.UseremailCheck.get({id: $scope.user.email }, function(results) {
+            if (results.email) {
+              $scope.userLoading = false;
+              if (results.email == $scope.user.originalEmail) {
+                $scope.existingEmail= false;
+                return false;
+              } else {
+                $scope.existingID = results.id;
+                $scope.existingEmail = true;
+                return true;
+              }
+            } else {
+              $scope.userLoading = false;
+              $scope.existingEmail = false;
+              return false;
+            }
+          });
+        } else {
+          $scope.userLoading = false;
+          $scope.existingEmail = false;
+          return false;
+        }
+      };
+
+      $scope.userSubmit = function() {
+        if ($scope.existingUsername) {
+          $scope.alertMessage.text = 'Error saving user: User with this address already exists.';
+          $scope.alertMessage.type = 'alert-danger';
+          $scope.alertMessage.show = true;
+          $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+        } else if ($scope.existingEmail) {
+          $scope.alertMessage.text = 'Error saving user: User with this email already exists.';
+          $scope.alertMessage.type = 'alert-danger';
+          $scope.alertMessage.show = true;
+          $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+        } else {
+          $scope.loading = true;
+          var id;
+          if ($scope.user.id) {
+            id = $routeParams.id;
+          } else {
+            id = "new";
+          }
+          Api.UserDetail.save({ id: id }, $scope.user).$promise.then(function (response) {
+            console.log(response);
+            if (response.status == 'ok') {
+              $scope.alertMessage.text = 'User saved!';
+              $scope.alertMessage.type = 'alert-success';
+              $scope.alertMessage.show = true;
+              $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+              $scope.loading = false;
+              if ($scope.isNew) {
+                $location.url('/users/' + response.id);
+              }
+            } else {
+              $scope.alertMessage.text = 'Error saving user: ' + response;
+              $scope.alertMessage.type = 'alert-danger';
+              $scope.alertMessage.show = true;
+              $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+              $scope.loading = false;
+            }
+          }, function (response) {
+            console.log(response);
+            $scope.alertMessage.text = 'Error saving user: ' + response.data.error;
+            $scope.alertMessage.type = 'alert-danger';
+            $scope.alertMessage.show = true;
+            $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+            $scope.loading = false;
+          });
+        }
+      };
+      
+      $scope.userDelete = function () {
+        var modalHtml =  '<div class="modal-header"><h5 class="modal-title" id="modal-title">Delete User</h5></div>';
+            modalHtml += '<div class="modal-body"><p>Are you sure you want to delete this user?</p><p>Users cannot be restored after deletion.</p></div>';
+            modalHtml += '<div class="modal-footer"><button class="btn btn-danger" ng-click="confirmDelete()">OK</button><button class="btn btn-primary" ng-click="cancelDelete()">Cancel</button></div>';
+        var modalInstance = $uibModal.open({
+          template: modalHtml,
+          controller: ConfirmController
+        });
+        modalInstance.result.then(function() {
+          $scope.userDeleteConfirmed();
+        }, function () {
+          //$log.info('Modal dismissed at: ' + new Date());
+        });
+      };
+      
+      $scope.userDeleteConfirmed = function () {
+        console.log('Deleting user '+$scope.user.username);
+        $scope.loading = true;
+        Api.UserDetail.delete({id: $routeParams.id }, $scope.user).$promise.then(function (response) {
+          console.log(response);
+          if (response.status == 'ok') {
+            $scope.alertMessage.text = 'User deleted!';
+            $scope.alertMessage.type = 'alert-success';
+            $scope.alertMessage.show = true;
+            $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+            $scope.loading = false;
+            $location.url('/users/');
+          } else {
+            $scope.alertMessage.text = 'Error deleting user: '+response.data.error;
+            $scope.alertMessage.type = 'alert-danger';
+            $scope.alertMessage.show = true;
+            $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+            $scope.loading = false;
+          }
+        }, function(response) {
+          console.log(response);
+          $scope.alertMessage.text = 'Error deleting user: '+response.data.error;
+          $scope.alertMessage.type = 'alert-danger';
+          $scope.alertMessage.show = true;
+          $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+          $scope.loading = false;          
+        });
+      };
+
+      $scope.userReset = function () {
+        var resetModalHtml = '<div class="modal-header"><h5 class="modal-title" id="modal-title">Password Reset</h5></div>';
+        resetModalHtml += `<div class="modal-body">  
+                <div class="row" style="padding-top: 10px">
+                <div class="col-xs-12">
+                  <div class="col-xs-12 col-md-offset-2 col-md-8">
+                    <form name="form">
+                      <div class="form-group">
+                        <label for="password">Password:</label>
+                        <input type="password" class="form-control" id="user.password" name="user.newpassword" ng-model="user.newpassword" autofocus=true
+                          required>
+                      </div>
+                      <div class="form-group">
+                        <label for="confirm_password">Confirm Password:</label>
+                        <input type="password" class="form-control" id="confirm_password" name="confirm_password"
+                          ng-model="confirm_password" required ui-validate=" '$value==user.newpassword' " ui-validate-watch=" 'user.newpassword' ">
+                        <span class="text-danger" ng-show='form.confirm_password.$error.validator'>Passwords do not match!</span>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+              </div>`
+        resetModalHtml += '<button ng-disabled="form.confirm_password.$error.validator" ng-click="confirmReset()" class="btn btn-default">Ok</button><button class="btn btn-primary" ng-click="cancelReset()">Cancel</button></div>';
+
+
+        var modalInstance = $uibModal.open({
+          template: resetModalHtml,
+          controller: ConfirmController,
+          scope: $scope,
+        });
+    
+        modalInstance.result.then(function(result) {
+          $scope.userResetConfirmed();
+        }, function () {
+          //$log.info('Modal dismissed at: ' + new Date());
+        });
+      };
+
+      $scope.userResetConfirmed = function () {
+        var id = $routeParams.id
+        Api.UserDetail.save({ id: id }, $scope.user).$promise.then(function (response) {
+          console.log(response);
+          if (response.status == 'ok') {
+            $scope.alertMessage.text = 'User saved!';
+            $scope.alertMessage.type = 'alert-success';
+            $scope.alertMessage.show = true;
+            $scope.user.newpassword = null;
+            $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+            $scope.loading = false;
+            if ($scope.isNew) {
+              $location.url('/users/' + response.id);
+            }
+          } else {
+            $scope.alertMessage.text = 'Error saving user: ' + response;
+            $scope.alertMessage.type = 'alert-danger';
+            $scope.alertMessage.show = true;
+            $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+            $scope.loading = false;
+          }
+        }, function (response) {
+          console.log(response);
+          $scope.alertMessage.text = 'Error saving user: ' + response.data.error;
+          $scope.alertMessage.type = 'alert-danger';
+          $scope.alertMessage.show = true;
+          $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+          $scope.loading = false;
+        });
+      }
+      
+      var ConfirmController = function($scope, $uibModalInstance) {
+        $scope.confirmDelete = function() {
+          $uibModalInstance.close();
+        };
+        $scope.cancelDelete = function() {
+          $uibModalInstance.dismiss('cancel');
+        };
+        $scope.confirmReset = function () {
+          $uibModalInstance.close();
+        };
+        $scope.cancelReset = function() {
+          $uibModalInstance.dismiss('cancel');
+        };
+      };
+      
+      // get data on load
+      $scope.loading = true;
+      Api.UserDetail.get({ id: $routeParams.id }, function (results) {
+        $scope.user = results;
+        $scope.userLoading = false;
+        $scope.existingUsername = false;
+        $scope.existingEmail = false;
+        $scope.loading = false;
+
+        if (results.username) {
+          $scope.user.originalUsername = results.username;
+          $scope.user.originalEmail = results.email;
+          $scope.isNew = false;
+          $scope.user.lastlogondate = new Date(results.lastlogondate).toLocaleString()
+          console.log(results)
+        } else {
+          $scope.user.username = $routeParams.username || '';
+          $scope.user.originalUsername = $routeParams.username || '';
+          $scope.isNew = true;
+          console.log(results);
+        }
+      });
+    }])
     
     .controller('AliasDetailCtrl', ['$scope', '$routeParams', 'Api', '$uibModal', '$filter', '$location', '$timeout', function ($scope, $routeParams, Api, $uibModal, $filter, $location, $timeout) {
       $scope.page = 'aliasDetail';
@@ -507,40 +866,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         $scope.aliasLoad();
       });
     }])
-    
-    // handles password resets, needs cleanup
-    .controller('ResetController', ['$scope', '$routeParams', 'Api', '$timeout', function ($scope, $routeParams, Api, $timeout) {
-      $scope.form = {};
-      $scope.alertMessage = {};
-      $scope.page = 'reset';
-      $scope.submitPass = function() {
-        $scope.loading = true;
-        var pass = {'password': $scope.password};
-        Api.ResetPass.post(null, pass).$promise.then(function (response) {
-          console.log(response);
-          $scope.loading = false;
-          if (response.status == 'ok') {
-            $scope.alertMessage.text = 'Password changed!';
-            $scope.alertMessage.type = 'alert-success';
-            $scope.alertMessage.show = true;
-            $timeout(function () { $scope.alertMessage.show = false; }, 3000);
-          } else {
-            $scope.alertMessage.text = 'Error changing password: '+response.data.error;
-            $scope.alertMessage.type = 'alert-danger';
-            $scope.alertMessage.show = true;
-            $timeout(function () { $scope.alertMessage.show = false; }, 3000);
-          }
-        }, function(response) {
-          console.log(response);
-          $scope.alertMessage.text = 'Error changing password: '+response.data.error;
-          $scope.alertMessage.type = 'alert-danger';
-          $scope.alertMessage.show = true;
-          $timeout(function () { $scope.alertMessage.show = false; }, 3000);
-          $scope.loading = false;          
-        });
-        };
-    }])
-    
+ 
     // needs cleanup
     .controller('SettingsController', ['$scope', '$routeParams', 'Api', 'uuid', '$uibModal', '$filter', '$timeout', '$sanitize', function ($scope, $routeParams, Api, uuid, $uibModal, $filter, $timeout, $sanitize) {
       $scope.alertMessage = {};
@@ -711,13 +1037,17 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
           templateUrl: '/templates/admin/aliases.html',
           controller: 'AliasController'
         })
+        .when('/users', {
+          templateUrl: '/templates/admin/users.html',
+          controller: 'UserController'
+        })
+        .when('/users/:id', {
+          templateUrl: '/templates/admin/userDetails.html',
+          controller: 'UserDetailController'
+        })
         .when('/settings', {
           templateUrl: '/templates/admin/settings.html',
           controller: 'SettingsController'
-        })
-        .when('/reset', {
-          templateUrl: '/templates/admin/reset.html',
-          controller: 'ResetController'
         })
         .when('/aliases/:id', {
           templateUrl: '/templates/admin/aliasDetails.html',
