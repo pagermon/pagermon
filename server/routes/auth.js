@@ -270,8 +270,7 @@ router.route('/register')
                                                                 logger.auth.error(err);
                                                                 res.status(500).json({
                                                                         status: 'failed',
-                                                                        error: 'registration disabled',
-                                                                        redirect: '/auth/register',
+                                                                        error: 'Error registering user',
                                                                 });
                                                         });
                                         }
@@ -389,12 +388,10 @@ function isLoggedIn(req, res, next) {
                 return next();
         }
         // perform api authentication - all api keys are assumed to be admin
-        // eslint-disable-next-line no-sequences
         passport.authenticate('login-api', { session: false, failWithError: true })(req, res, next),
                 function(next) {
                         next();
                 },
-                // eslint-disable-next-line no-shadow
                 function(res) {
                         return res.status(401).json({ error: 'Authentication failed.' });
                 };
