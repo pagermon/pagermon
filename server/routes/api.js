@@ -24,6 +24,8 @@ router.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: true
 }));
 
+var middleware = require('../middleware/api')
+
 router.use(function (req, res, next) {
   res.locals.login = req.isAuthenticated();
   res.locals.user = req.user || false;
@@ -49,7 +51,7 @@ var msgBuffer = [];
 
 
 router.route('/messages')
-  .get(isLoggedIn, function (req, res, next) {
+  .get(middleware.isLoggedIn, function (req, res, next) {
     nconf.load();
     console.time('init');
     var pdwMode = nconf.get('messages:pdwMode');
@@ -57,7 +59,6 @@ router.route('/messages')
     var maxLimit = nconf.get('messages:maxLimit');
     var defaultLimit = nconf.get('messages:defaultLimit');
     var HideCapcode = nconf.get('messages:HideCapcode');
-    var apiSecurity = nconf.get('messages:apiSecurity');
 
     initData.replaceText = nconf.get('messages:replaceText');
     if (typeof req.query.page !== 'undefined') {
@@ -482,7 +483,7 @@ router.route('/messages')
 
 
 router.route('/messages/:id')
-  .get(isLoggedIn, function (req, res, next) {
+  .get(middleware.isLoggedIn, function (req, res, next) {
     nconf.load();
     var pdwMode = nconf.get('messages:pdwMode');
     var HideCapcode = nconf.get('messages:HideCapcode');
@@ -526,7 +527,7 @@ router.route('/messages/:id')
   });
 
 router.route('/messageSearch')
-  .get(isLoggedIn, function (req, res, next) {
+  .get(middleware.isLoggedIn, function (req, res, next) {
     nconf.load();
     console.time('init');
     var dbtype = nconf.get('database:type');
@@ -1422,26 +1423,6 @@ function inParam(sql, arr) {
 }
 
 // route middleware to make sure a user is logged in where required
-function isLoggedIn(req, res, next) {
-  var apiSecurity = nconf.get('messages:apiSecurity');
-  if (apiSecurity) { //check if Secure mode is on
-    if (req.isAuthenticated()) {
-      // if user is authenticated in the session, carry on
-      return next();
-    } else {
-      //perform api authentication - all api keys are assumed to be admin 
-      passport.authenticate('login-api', { session: false, failWithError: true })(req, res, next),
-        function (next) {
-          next();
-        },
-        function (res) {
-          return res.status(401).json({ error: 'Authentication failed.' });
-        }
-    }
-  } else {
-    return next();
-  }
-}
 //route middleware to make sure the user is an admin where required
 function isAdmin(req, res, next) {
   if (req.isAuthenticated() && req.user.role == 'admin') {

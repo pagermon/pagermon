@@ -102,9 +102,10 @@ describe('GET /api/messages', () => {
                                         .property('message')
                                         .eql('This is a Test Message to Address 1234569');
                                 res.body.messages[0].should.have.property('source').eql('Client 3');
+                                nconf.set('messages:HideCapcode', false);
                                 done();
                         });
-                nconf.set('messages:HideCapcode', false);
+                
         });
         it('should not show capcode in hidecapcode mode if not logged in ', done => {
                 nconf.set('messages:HideCapcode', true);
@@ -122,24 +123,22 @@ describe('GET /api/messages', () => {
                                         .property('message')
                                         .eql('This is a Test Message to Address 1234569');
                                 res.body.messages[0].should.have.property('source').eql('Client 3');
+                                nconf.set('messages:HideCapcode', false);
                                 done();
-                        });
-                nconf.set('messages:HideCapcode', false);
+                        });   
         });
         it('should 401 if securemode is enabled and not logged in ', done => {
                 nconf.set('messages:apiSecurity', true);
-                nconf.set('messages:HideCapcode', false);
                 nconf.save();
-                passportStub.logout();
                 chai.request(server)
                         .get('/api/messages')
                         .end((err, res) => {
                                 should.not.exist(err);
                                 res.status.should.eql(401);
                                 res.type.should.eql('application/json');
-                                res.body.error.name.should.eql('AuthenticationError');
                                 done();
+                                nconf.set('messages:apiSecurity', false);
                         });
-                nconf.set('messages:apiSecurity', false);
+                
         });
 });
