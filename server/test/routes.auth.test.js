@@ -130,6 +130,30 @@ describe('POST /auth/login', () => {
                                 done();
                         });
         });
+        it('should return a 429 with too many invalid attempts', done => {
+                chai.request(server)
+                        .post('/auth/login')
+                        .send({
+                                username:'admindisabled',
+                                password: 'changeme'
+                        })
+                        .then(function() {
+                                chai.request(server)
+                                .post('/auth/login')
+                                .send({
+                                        username:'admindisabled',
+                                        password: 'changeme'
+                                })
+                                .end((err, res) => {
+                                        should.not.exist(err);
+                                        res.status.should.eql(429);
+                                        res.body.status.should.eql('lockedout')
+                                        res.body.error.should.eql('Too many attempts, please try again later')
+                                        done();
+                                });
+                });  
+                        
+        });
 });
 
 describe('GET /auth/logout', () => {
