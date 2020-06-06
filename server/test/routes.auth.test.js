@@ -261,6 +261,84 @@ describe('GET /auth/profile/:id', () => {
         });
 });
 
+describe('POST /auth/profile/:id', () => {
+        it('should save the information of the logged in user', done => {
+                passportStub.login({
+                        username: 'useractive',
+                        password: 'changeme'
+                      });
+                chai.request(server)
+                        .post('/auth/profile/1')
+                        .send({
+                                username: 'useractive',
+                                givenname: 'User',
+                                surname: 'Active',
+                                email:'none1@none1.com'
+                        })
+                        .end((err, res,) => {
+                                should.not.exist(err);
+                                res.status.should.eql(200);
+                                res.body.status.should.eql('ok')
+                                res.body.id.should.eql(1)
+                                done();
+                        });
+        });
+        it('should not allow saving of other users information', done => {
+                passportStub.login({
+                        username: 'useractive',
+                        password: 'changeme'
+                      });
+                chai.request(server)
+                        .post('/auth/profile/1')
+                        .send({
+                                username: 'adminactive',
+                                givenname: 'Admin',
+                                surname: 'Active',
+                                email:'none2@none2.com'
+                        })
+                        .end((err, res) => {
+                                should.not.exist(err);
+                                res.status.should.eql(401);
+                                res.body.message.should.eql('Please update your own details only')
+                                done();
+                        });
+        });
+        it('should not allow saving of invalid information', done => {
+                passportStub.login({
+                        username: 'useractive',
+                        password: 'changeme'
+                      });
+                chai.request(server)
+                        .post('/auth/profile/1')
+                        .send({
+                                username: 'useractive',
+                                givenname: 'User',
+                                surname: 'Active',
+                                email:null
+                        })
+                        .end((err, res) => {
+                                should.not.exist(err);
+                                res.status.should.eql(400);
+                                done();
+                        });
+        });
+        it('should not allow saving of information if no user is logged in ', done => {
+                chai.request(server)
+                        .post('/auth/profile/1')
+                        .send({
+                                username: 'adminactive',
+                                givenname: 'Admin',
+                                surname: 'Active',
+                                email:'none2@none2.com'
+                        })
+                        .end((err, res) => {
+                                should.not.exist(err);
+                                res.status.should.eql(401);
+                                done();
+                        });
+        });
+});
+
 describe('GET /auth/register', () => {
         nconf.set('auth:registration', true);
         nconf.save();           
@@ -409,6 +487,49 @@ describe('GET /auth/reset', () => {
                         .end((err, res) => {
                                 should.not.exist(err);
                                 res.should.redirectTo('/auth/login')
+                                done();
+                        });
+        });
+});
+
+describe('POST /auth/reset', () => {
+        it('should reset the password', done => {
+                passportStub.login({
+                        //hard set the ID as the query on the route doesn't lookup id's. This should be fixed in auth.js
+                        id: '1',
+                        username: 'useractive',
+                        password: 'changeme'
+                      });
+                chai.request(server)
+                        .post('/auth/reset')
+                        .send({
+                                password: 'changeme1'
+                        })
+                        .end((err, res) => {
+                                should.not.exist(err);
+                                res.status.should.eql(200);
+                                res.body.status.should.eql('ok')
+                                res.body.redirect.should.eql('/')
+                                done();
+                        });
+        });  
+        it('should not accept the same password', done => {
+                passportStub.login({
+                        //hard set the ID as the query on the route doesn't lookup id's. This should be fixed in auth.js
+                        id: '1',
+                        username: 'useractive',
+                        password: '$2a$10$neQ/6P4YwrGxlBeFMJzW4OHxYWGI6Xp23mn/sPFfSDcGORR9jiDYu'
+                      });
+                chai.request(server)
+                        .post('/auth/reset')
+                        .send({
+                                password: 'changeme'
+                        })
+                        .end((err, res) => {
+                                should.not.exist(err);
+                                res.status.should.eql(400);
+                                res.body.status.should.eql('failed')
+                                res.body.error.should.eql('Password Blank or the Same')
                                 done();
                         });
         });

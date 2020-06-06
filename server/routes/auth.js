@@ -185,7 +185,7 @@ router.route('/profile/:id')
                                 .catch(err => {
                                         console.timeEnd('insert');
                                         logger.main.error(err);
-                                        res.status(500).send(err);
+                                        res.status(400).send(err);
                                 });
                 } else {
                         res.status(401).json({ message: 'Please update your own details only' });
@@ -299,10 +299,11 @@ router.route('/reset')
         .post(isLoggedIn, function(req, res) {
                 const { password } = req.body;
                 // bcrypt function
-                if (password && !authHelpers.comparePass(password, req.user.password)) {
+                if (password.length && !authHelpers.comparePass(password, req.user.password)) {
                         const salt = bcrypt.genSaltSync();
                         const hash = bcrypt.hashSync(req.body.password, salt);
                         const { id } = req.user;
+                        //need to update this query to select the user first then update. 
                         db.from('users')
                                 .returning('id')
                                 .where('id', '=', id)
@@ -311,11 +312,12 @@ router.route('/reset')
                                 })
                                 .then(() => {
                                         res.status(200).send({ status: 'ok', redirect: '/' });
-                                        logger.auth.debug(`${req.username}Password Reset Successfully`);
+                                        logger.auth.debug(`${req.user.username} Password Reset Successfully`);
                                 })
                                 .catch(err => {
                                         res.status(500).send({ status: 'failed', error: 'Failed to update password' });
-                                        logger.auth.error(`${req.username}error resetting password${err}`);
+                                        logger.auth.error(`${req.user.username} error resetting password${err}`);
+                                        console.log(err)
                                 });
                 } else {
                         res.status(400).send({ status: 'failed', error: 'Password Blank or the Same' });
