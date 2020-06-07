@@ -534,3 +534,53 @@ describe('POST /auth/reset', () => {
                         });
         });
 });
+
+describe('GET /auth/userCheck/username/:id', () => {
+        it('should return an username if the submitted username exists', done => {
+                chai.request(server)
+                        .get('/auth/userCheck/username/useractive')
+                        .end((err, res) => {
+                                should.not.exist(err);
+                                res.status.should.eql(200);
+                                res.type.should.eql('application/json');
+                                res.body.username.should.eql('useractive')
+                                done();
+                        });
+        });
+        it('should return an empty username if the submitted username does not exist', done => {
+                chai.request(server)
+                        .get('/auth/userCheck/username/idontexist')
+                        .end((err, res) => {
+                                should.not.exist(err);
+                                res.status.should.eql(200);
+                                res.type.should.eql('application/json');
+                                res.body.username.should.eql('');
+                                done();
+                        });
+        });
+});
+
+describe('GET /auth/userCheck/email/:id', () => {
+        it('should return an email if the submitted email exists', done => {
+                chai.request(server)
+                        .get('/auth/userCheck/email/none1@none.com')
+                        .end((err, res) => {
+                                should.not.exist(err);
+                                res.status.should.eql(200);
+                                res.type.should.eql('application/json');
+                                res.body.email.should.eql('none1@none.com')
+                                done();
+                        });
+        });
+        it('should return an empty email if the submitted email does not exist', done => {
+                chai.request(server)
+                        .get('/auth/userCheck/email/idontexist@none.com')
+                        .end((err, res) => {
+                                should.not.exist(err);
+                                res.status.should.eql(200);
+                                res.type.should.eql('application/json');
+                                res.body.email.should.eql('');
+                                done();
+                        });
+        });
+});
