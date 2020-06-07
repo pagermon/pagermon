@@ -57,7 +57,7 @@ router.route('/settingsData')
             nconf.load();
             res.status(200).send({ 'status': 'ok' });
         } else {
-            res.status(500).send({ error: 'request body empty' });
+            res.status(400).send({ error: 'request body empty' });
         }
     });
 
@@ -73,7 +73,7 @@ function isAdmin(req, res, next) {
         return next();
     } else {
         // if they aren't redirect them to the home page
-        res.redirect('/');
+        res.status(401).redirect('/');
         logger.auth.debug(req.user.username + ' attempted to access admin functions')
     }
 }
