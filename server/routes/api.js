@@ -49,7 +49,7 @@ var msgBuffer = [];
 
 
 router.route('/messages')
-  .get(authHelper.isLoggedIn, function (req, res, next) {
+  .get(authHelper.isLoggedInMessages, function (req, res, next) {
     nconf.load();
     console.time('init');
     var pdwMode = nconf.get('messages:pdwMode');
@@ -481,7 +481,7 @@ router.route('/messages')
 
 
 router.route('/messages/:id')
-  .get(authHelper.isLoggedIn, function (req, res, next) {
+  .get(authHelper.isLoggedInMessages, function (req, res, next) {
     nconf.load();
     var pdwMode = nconf.get('messages:pdwMode');
     var HideCapcode = nconf.get('messages:HideCapcode');
@@ -525,7 +525,7 @@ router.route('/messages/:id')
   });
 
 router.route('/messageSearch')
-  .get(authHelper.isLoggedIn, function (req, res, next) {
+  .get(authHelper.isLoggedInMessages, function (req, res, next) {
     nconf.load();
     console.time('init');
     var dbtype = nconf.get('database:type');
