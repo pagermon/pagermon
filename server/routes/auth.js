@@ -16,7 +16,7 @@ const BruteKnex = require('brute-knex');
 const db = require('../knex/knex.js');
 const logger = require('../log');
 const passport = require('../auth/local');
-const authHelpers = require('../auth/_helpers');
+const authHelper = require('../middleware/authhelper')
 
 const store = new BruteKnex({
         createTable: true,
@@ -126,20 +126,20 @@ router.route('/login')
                 })(req, res, next);
         });
 
-router.route('/logout').get(isLoggedIn, function(req, res) {
+router.route('/logout').get(authHelper.isLoggedIn, function(req, res) {
         req.logout();
         res.redirect('/');
         logger.auth.debug(`Successful Logout ${req.user.username}`);
 });
 
-router.route('/profile/').get(isLoggedIn, function(req, res) {
+router.route('/profile/').get(authHelper.isLoggedIn, function(req, res) {
         res.render('auth', {
                 pageTitle: 'User',
         });
 });
 
 router.route('/profile/:id')
-        .get(isLoggedIn, function(req, res, next) {
+        .get(authHelper.isLoggedIn, function(req, res, next) {
                 const { username } = req.user;
                 db.from('users')
                         .select('id', 'givenname', 'surname', 'username', 'email', 'lastlogondate')
@@ -159,7 +159,7 @@ router.route('/profile/:id')
                                 return next(err);
                         });
         })
-        .post(isLoggedIn, function(req, res) {
+        .post(authHelper.isLoggedIn, function(req, res) {
                 if (req.body.username === req.user.username) {
                         const { username } = req.body;
                         const { givenname } = req.body;
@@ -295,10 +295,10 @@ router.route('/reset')
                 res.redirect('/auth/login');
                 }
         })
-        .post(isLoggedIn, function(req, res) {
+        .post(authHelper.isLoggedIn, function(req, res) {
                 const { password } = req.body;
                 // bcrypt function
-                if (password.length && !authHelpers.comparePass(password, req.user.password)) {
+                if (password.length && !authHelper.comparePass(password, req.user.password)) {
                         const salt = bcrypt.genSaltSync();
                         const hash = bcrypt.hashSync(req.body.password, salt);
                         const { id } = req.user;
@@ -382,21 +382,6 @@ router.route('/userCheck/email/:id').get(bruteforcedupe.prevent, function(req, r
                         return next(err);
                 });
 });
-
-function isLoggedIn(req, res, next) {
-        if (req.isAuthenticated()) {
-                // if user is authenticated in the session, carry on
-                return next();
-        }
-        // perform api authentication - all api keys are assumed to be admin
-        passport.authenticate('login-api', { session: false, failWithError: true })(req, res, next),
-                function(next) {
-                        next();
-                },
-                function(res) {
-                        return res.status(401).json({ error: 'Authentication failed.' });
-                };
-}
 
 module.exports = router;
 

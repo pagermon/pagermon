@@ -6,7 +6,6 @@ var nconf = require('nconf');
 nconf.file({ file: confFile });
 nconf.load();
 
-const authHelpers = require('../auth/_helpers');
 const passport = require('../auth/local');
 
 router.use(function (req, res, next) {

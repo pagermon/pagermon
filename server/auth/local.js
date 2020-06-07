@@ -11,12 +11,11 @@ nconf.file({ file: confFile });
 const init = require('./passport');
 const db = require('../knex/knex.js');
 
-const authHelpers = require('./_helpers');
+const authHelper = require('../middleware/authhelper')
 
 const options = {};
 
 init();
-
 
 passport.use(
         'login-user',
@@ -29,7 +28,7 @@ passport.use(
                                 if (!user) {
                                         return done(null, false);
                                 }
-                                if (!authHelpers.comparePass(password, user.password)) {
+                                if (!authHelper.comparePass(password, user.password)) {
                                         return done(null, false);
                                 }
                                 return done(null, user);

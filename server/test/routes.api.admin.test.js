@@ -44,7 +44,7 @@ describe('GET /admin/settingsData', () => {
                             done();
                     });
     });
-    it('should return the index if not admin', done => {
+    it('should 401 if not admin', done => {
         passportStub.login({
             username: 'useractive',
             password: 'changeme'
@@ -54,19 +54,17 @@ describe('GET /admin/settingsData', () => {
                     .redirects(0)
                     .end((err, res) => {
                         should.not.exist(err);
-                        res.status.should.eql(302);
-                        res.should.redirectTo('/')
+                        res.status.should.eql(401);
                         done();
                     });
     });
-    it('should return the index if not logged in', done => {
+    it('should 401 if not logged in', done => {
         chai.request(server)
                     .get('/admin/settingsData')
                     .redirects(0)
                     .end((err, res) => {
                         should.not.exist(err);
-                        res.status.should.eql(302);
-                        res.should.redirectTo('/')
+                        res.status.should.eql(401);
                         done();
                     });
     });
@@ -229,8 +227,7 @@ describe('POST /admin/settingsData', () => {
                     })
                     .end((err, res) => {
                         should.not.exist(err);
-                        res.status.should.eql(302);
-                        res.should.redirectTo('/')
+                        res.status.should.eql(401);
                         done();
                     });
     });

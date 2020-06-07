@@ -3,15 +3,12 @@ var bodyParser = require('body-parser');
 var router = express.Router();
 var basicAuth = require('express-basic-auth');
 var bcrypt = require('bcryptjs');
-var passport = require('passport');
 var util = require('util');
 var _ = require('underscore');
 var pluginHandler = require('../plugins/pluginHandler');
 var logger = require('../log');
 var db = require('../knex/knex.js');
 var converter = require('json-2-csv');
-var passport = require('../auth/local'); // pass passport for configuration
-const authHelpers = require('../auth/_helpers');
 
 var nconf = require('nconf');
 
@@ -24,7 +21,8 @@ router.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: true
 }));
 
-var middleware = require('../middleware/api')
+const passport = require('../auth/local');
+var authHelper = require('../middleware/authhelper')
 
 router.use(function (req, res, next) {
   res.locals.login = req.isAuthenticated();
@@ -51,7 +49,7 @@ var msgBuffer = [];
 
 
 router.route('/messages')
-  .get(middleware.isLoggedIn, function (req, res, next) {
+  .get(authHelper.isLoggedIn, function (req, res, next) {
     nconf.load();
     console.time('init');
     var pdwMode = nconf.get('messages:pdwMode');
@@ -173,7 +171,7 @@ router.route('/messages')
         }
       });
   })
-  .post(isAdmin, function (req, res, next) {
+  .post(authHelper.isAdmin, function (req, res, next) {
     nconf.load();
     if (req.body.address && req.body.message) {
       var dbtype = nconf.get('database:type');
@@ -483,7 +481,7 @@ router.route('/messages')
 
 
 router.route('/messages/:id')
-  .get(middleware.isLoggedIn, function (req, res, next) {
+  .get(authHelper.isLoggedIn, function (req, res, next) {
     nconf.load();
     var pdwMode = nconf.get('messages:pdwMode');
     var HideCapcode = nconf.get('messages:HideCapcode');
@@ -527,7 +525,7 @@ router.route('/messages/:id')
   });
 
 router.route('/messageSearch')
-  .get(middleware.isLoggedIn, function (req, res, next) {
+  .get(authHelper.isLoggedIn, function (req, res, next) {
     nconf.load();
     console.time('init');
     var dbtype = nconf.get('database:type');
@@ -672,7 +670,7 @@ router.route('/messageSearch')
 
 router.route('/capcodes/init')
   // Is this even used anymore?
-  .get(isAdmin, function (req, res, next) {
+  .get(authHelper.isAdmin, function (req, res, next) {
     //set current page if specifed as get variable (eg: /?page=2)
     if (typeof req.query.page !== 'undefined') {
       var page = parseInt(req.query.page, 10);
@@ -701,7 +699,7 @@ router.route('/capcodes/init')
   });
 
 router.route('/capcodes')
-  .get(isAdmin, function (req, res, next) {
+  .get(authHelper.isAdmin, function (req, res, next) {
     nconf.load();
     var dbtype = nconf.get('database:type');
     db.from('capcodes')
@@ -720,7 +718,7 @@ router.route('/capcodes')
         return next(err);
       })
   })
-  .post(isAdmin, function (req, res, next) {
+  .post(authHelper.isAdmin, function (req, res, next) {
     nconf.load();
     var updateRequired = nconf.get('database:aliasRefreshRequired');
     if (req.body.address && req.body.alias) {
@@ -779,7 +777,7 @@ router.route('/capcodes')
   });
 
 router.route('/capcodes/agency')
-  .get(isAdmin, function (req, res, next) {
+  .get(authHelper.isAdmin, function (req, res, next) {
     db.from('capcodes')
       .distinct('agency')
       .then((rows) => {
@@ -793,7 +791,7 @@ router.route('/capcodes/agency')
   });
 
 router.route('/capcodes/agency/:id')
-  .get(isAdmin, function (req, res, next) {
+  .get(authHelper.isAdmin, function (req, res, next) {
     var id = req.params.id;
     db.from('capcodes')
       .select('*')
@@ -809,7 +807,7 @@ router.route('/capcodes/agency/:id')
   });
 
 router.route('/capcodes/:id')
-  .get(isAdmin, function (req, res, next) {
+  .get(authHelper.isAdmin, function (req, res, next) {
     var id = req.params.id;
     var defaults = {
       "id": "",
@@ -845,7 +843,7 @@ router.route('/capcodes/:id')
         })
     }
   })
-  .post(isAdmin, function (req, res, next) {
+  .post(authHelper.isAdmin, function (req, res, next) {
     var dbtype = nconf.get('database:type');
     var id = req.params.id || req.body.id || null;
     nconf.load();
@@ -955,7 +953,7 @@ router.route('/capcodes/:id')
       }
     }
   })
-  .delete(isAdmin, function (req, res, next) {
+  .delete(authHelper.isAdmin, function (req, res, next) {
     // delete single alias
     var id = parseInt(req.params.id, 10);
     nconf.load();
@@ -978,7 +976,7 @@ router.route('/capcodes/:id')
   });
 
 router.route('/capcodeCheck/:id')
-  .get(isAdmin, function (req, res, next) {
+  .get(authHelper.isAdmin, function (req, res, next) {
     var id = req.params.id;
     db.from('capcodes')
       .select('*')
@@ -1011,7 +1009,7 @@ router.route('/capcodeCheck/:id')
   });
 
 router.route('/capcodeRefresh')
-  .post(isAdmin, function (req, res, next) {
+  .post(authHelper.isAdmin, function (req, res, next) {
     nconf.load();
     var dbtype = nconf.get('database:type');
     console.time('updateMap');
@@ -1040,7 +1038,7 @@ router.route('/capcodeRefresh')
   });
 
 router.route('/capcodeExport')
-  .post(isAdmin, function (req, res, next) {
+  .post(authHelper.isAdmin, function (req, res, next) {
     nconf.load();
     var dbtype = nconf.get('database:type');
     var filename = 'export.csv'
@@ -1068,7 +1066,7 @@ router.route('/capcodeExport')
   });
 
 router.route('/capcodeImport')
-  .post(isAdmin, function (req, res, next) {
+  .post(authHelper.isAdmin, function (req, res, next) {
     for (var key in req.body) {
       //remove newline chars from dataset - yes i realise we are adding them in admin.main.js, it doesn't submit without them.
       req.body[key] = req.body[key].replace(/[\r\n]/g, '');
@@ -1175,7 +1173,7 @@ router.route('/capcodeImport')
   });
 
 router.route('/user')
-  .get(isAdmin, function (req, res, next) {
+  .get(authHelper.isAdmin, function (req, res, next) {
     db.from('users')
       .select('id','givenname','surname','username','email','role','status','lastlogondate')
       .then((rows) => {
@@ -1186,7 +1184,7 @@ router.route('/user')
         return next(err);
       })
   })
-  .post(isAdmin, function (req, res, next) {
+  .post(authHelper.isAdmin, function (req, res, next) {
     var username = req.body.username
     var email = req.body.email
     db.table('users')
@@ -1227,7 +1225,7 @@ router.route('/user')
   });
 
 router.route('/userCheck/username/:id')
-  .get(isAdmin, function (req, res, next) {
+  .get(authHelper.isAdmin, function (req, res, next) {
     var id = req.params.id;
     db.from('users')
       .select('id','givenname','surname','username','email','role','status','lastlogondate')
@@ -1258,7 +1256,7 @@ router.route('/userCheck/username/:id')
   });
 
   router.route('/userCheck/email/:id')
-  .get(isAdmin, function (req, res, next) {
+  .get(authHelper.isAdmin, function (req, res, next) {
     var id = req.params.id;
     db.from('users')
       .select('id','givenname','surname','username','email','role','status','lastlogondate')
@@ -1289,7 +1287,7 @@ router.route('/userCheck/username/:id')
   });
 
 router.route('/user/:id')
-  .get(isAdmin, function (req, res, next) {
+  .get(authHelper.isAdmin, function (req, res, next) {
     var id = req.params.id;
     var defaults = {
       "username": "",
@@ -1323,7 +1321,7 @@ router.route('/user/:id')
         })
     }
   })
-  .post(isAdmin, function (req, res, next) {
+  .post(authHelper.isAdmin, function (req, res, next) {
     var id = req.params.id || req.body.id || null;
     if (id == 'deleteMultiple') {
       // do delete multiple
@@ -1393,7 +1391,7 @@ router.route('/user/:id')
       }
     }
   })
-  .delete(isAdmin, function (req, res, next) {
+  .delete(authHelper.isAdmin, function (req, res, next) {
     var id = parseInt(req.params.id, 10);
     if (id != 1) {
       logger.main.info('Deleting User ' + id);
@@ -1420,24 +1418,6 @@ module.exports = router;
 
 function inParam(sql, arr) {
   return sql.replace('?#', arr.map(() => '?').join(','));
-}
-
-// route middleware to make sure a user is logged in where required
-//route middleware to make sure the user is an admin where required
-function isAdmin(req, res, next) {
-  if (req.isAuthenticated() && req.user.role == 'admin') {
-    //if the user is authenticated and the user's role is admin carry on
-    return next();
-  } else {
-    //perform api authentication - all api keys are assumed to be admin 
-    passport.authenticate('login-api', { session: false, failWithError: true })(req, res, next),
-      function (next) {
-        next();
-      },
-      function (res) {
-        return res.status(401).json({ error: 'Authentication failed.' });
-      }
-  }
 }
 
 function handleError(err, req, res, next) {
