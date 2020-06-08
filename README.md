@@ -203,6 +203,14 @@ See [additional parameters](https://github.com/SloCompTech/docker-baseimage).
 
 **Tip:** You probably want to setup docker log rotation before, more can be found [here](https://success.docker.com/article/how-to-setup-log-rotation-post-installation).
 
+## PagermonPi - Raspberry Pi Image
+Check out our Raspberry Pi Image for Pi3 & Pi4 which has Pagermon pre-loaded on it.
+
+Check out the following links:
+
+[Releases](https://github.com/pagermon/pagermon/releases) for the latest version
+[Wiki](https://github.com/pagermon/pagermon/wiki/PagermonPi-Image-For-Raspberry-Pi) for PagermonPi support
+
 ## Support
 
 General PagerMon support can be requested in the #support channel of the PagerMon discord server.
