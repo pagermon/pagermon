@@ -209,7 +209,7 @@ Check out our Raspberry Pi Image for Pi3 & Pi4 which has Pagermon pre-loaded on 
 Check out the following links:
 
 [Releases](https://github.com/pagermon/pagermon/releases) for the latest version
-[Wiki](https://github.com/pagermon/pagermon/releases) for PagermonPi support
+[Wiki](https://github.com/pagermon/pagermon/wiki/PagermonPi-Image-For-Raspberry-Pi) for PagermonPi support
 
 ## Support
 
