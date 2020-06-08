@@ -105,7 +105,6 @@ describe('GET /api/messages', () => {
                                 nconf.set('messages:HideCapcode', false);
                                 done();
                         });
-                
         });
         it('should not show capcode in hidecapcode mode if not logged in ', done => {
                 nconf.set('messages:HideCapcode', true);
@@ -125,7 +124,7 @@ describe('GET /api/messages', () => {
                                 res.body.messages[0].should.have.property('source').eql('Client 3');
                                 nconf.set('messages:HideCapcode', false);
                                 done();
-                        });   
+                        });
         });
         it('should 401 if securemode is enabled and not logged in ', done => {
                 nconf.set('messages:apiSecurity', true);
@@ -139,6 +138,5 @@ describe('GET /api/messages', () => {
                                 done();
                                 nconf.set('messages:apiSecurity', false);
                         });
-                
         });
 });

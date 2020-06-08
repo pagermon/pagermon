@@ -1,29 +1,26 @@
 process.env.NODE_ENV = 'test';
 
 const chai = require('chai');
-const moment = require('moment');
 
 const should = chai.should();
 const chaiHttp = require('chai-http');
-
-var datetime = moment().unix();
 
 chai.use(chaiHttp);
 
 const confFile = './config/config.json';
 // load the config file
 const nconf = require('nconf');
-nconf.file({ file: confFile });;
+
+nconf.file({ file: confFile });
 nconf.load();
 
-
-
 const passportStub = require('passport-stub');
+// eslint-disable-next-line vars-on-top
 var server = require('../app');
 const db = require('../knex/knex.js');
 // This needs to be sorted out, use a different config file when testing?
 
-//Force someconfigs back to default
+// Force someconfigs back to default
 nconf.set('messages:HideCapcode', false);
 nconf.set('messages:HideSource', false);
 nconf.set('messages:apiSecurity', false);
