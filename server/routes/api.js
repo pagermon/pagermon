@@ -1342,7 +1342,7 @@ router.route('/user/:id')
             res.status(500).send(err);
           })
       } else {
-        res.status(500).send({ 'status': 'id list contained non-numbers' });
+        res.status(400).send({ 'status': 'error', 'error': 'id list contained non-numbers' });
       }
     } else {
       if (req.body.username && req.body.email && req.body.givenname) {
