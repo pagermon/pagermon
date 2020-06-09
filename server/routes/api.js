@@ -1183,7 +1183,7 @@ router.route('/user')
         logger.main.error(err);
         return next(err);
       })
-  })
+  }) 
   .post(authHelper.isAdmin, function (req, res, next) {
     if (req.body.username && req.body.email && req.body.givenname && req.body.password && req.body.status && req.body.role) {
       var username = req.body.username
@@ -1346,10 +1346,15 @@ router.route('/user/:id')
       }
     } else {
       if (req.body.username && req.body.email && req.body.givenname) {
-        if (id == 'new') {
-          id = null;
-        }
         var password = req.body.newpassword || req.body.password||  null;
+        if (id == 'new') {
+          // Password is a required field if this is a new account check for that
+          if (!req.body.password) {
+            return res.status(400).send({'status': 'error', 'error': 'Error - required field missing' });
+          } else {
+            id = null;
+          }
+        }
         console.time('insert');
         db.from('users')
           .returning('id')
@@ -1380,18 +1385,16 @@ router.route('/user/:id')
           })
           .returning('id')
           .then((result) => {
-            console.log(result)
             console.timeEnd('insert');
-            res.status(200).send({ 'status': 'ok', 'id': result })
+            res.status(200).send({ 'status': 'ok', 'id': result[0] })
           })
           .catch((err) => {
             console.timeEnd('insert');
             logger.main.error(err)
             res.status(500).send(err);
           })
-        logger.main.debug(util.format('%o', req.body || 'request body empty'));
       } else {
-        res.status(400).json({ message: 'Error - required field missing' });
+        res.status(400).send({'status': 'error', 'error': 'Error - required field missing' });
       }
     }
   })

@@ -394,6 +394,214 @@ describe('GET /api/user/:id', () => {
 });
 
 describe('POST /api/user/:id', () => {
+    it('should create a new user when admin', done => {
+        passportStub.login({
+            username: 'adminactive',
+            password: 'changeme',
+            role: 'admin'
+        });
+        chai.request(server)
+            .post('/api/user/new')
+            .send({
+                username: 'idontexist',
+                email: 'idontexist@fake.com',
+                givenname: 'Dude',
+                password: 'changeme',
+                status: 'active',
+                role: 'admin'
+            })
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(200);
+                res.body.status.should.eql('ok')
+                res.body.id.should.eql(5)
+                res.type.should.eql('application/json');
+                done();
+            });
+    });  
+    it('should create a new user when apikey provided', done => {
+        chai.request(server)
+            .post('/api/user/new')
+            .set('apikey', 'reallylongkeythatneedstobechanged')
+            .send({
+                username: 'idontexist',
+                email: 'idontexist@fake.com',
+                givenname: 'Dude',
+                password: 'changeme',
+                status: 'active',
+                role: 'admin'
+            })
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(200);
+                res.body.status.should.eql('ok')
+                res.body.id.should.eql(5)
+                res.type.should.eql('application/json');
+                done();
+            });
+    });  
+    it('should 400 when creating a user without a password', done => {
+        passportStub.login({
+            username: 'adminactive',
+            password: 'changeme',
+            role: 'admin'
+        });
+        chai.request(server)
+            .post('/api/user/new')
+            .send({
+                username: 'idontexist',
+                email: 'idontexist@fake.com',
+                givenname: 'Dude',
+                status: 'active',
+                role: 'admin'
+            })
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(400);
+                res.body.status.should.eql('error')
+                res.body.error.should.eql('Error - required field missing')
+                res.type.should.eql('application/json');
+                done();
+            });
+    });  
+    it('should 400 when creating a user without required properties', done => {
+        passportStub.login({
+            username: 'adminactive',
+            password: 'changeme',
+            role: 'admin'
+        });
+        chai.request(server)
+            .post('/api/user/new')
+            .send({
+                email: 'idontexist@fake.com',
+                givenname: 'Dude',
+                password: 'changeme',
+                status: 'active',
+                role: 'admin'
+            })
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(400);
+                res.body.status.should.eql('error')
+                res.body.error.should.eql('Error - required field missing')
+                res.type.should.eql('application/json');
+                done();
+            });
+    });  
+    it('should update a user when admin', done => {
+        passportStub.login({
+            username: 'adminactive',
+            password: 'changeme',
+            role: 'admin'
+        });
+        chai.request(server)
+            .post('/api/user/2')
+            .send({
+                email: 'none1@none.com',
+                givenname: 'User',
+                username: 'useractive2',
+            })
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(200);
+                res.body.status.should.eql('ok')
+                res.type.should.eql('application/json');
+                done();
+            });
+    });  
+    it('should update a user when apikey provided', done => {
+        chai.request(server)
+            .post('/api/user/2')
+            .set('apikey', 'reallylongkeythatneedstobechanged')
+            .send({
+                email: 'none1@none.com',
+                givenname: 'User',
+                username: 'useractive2',
+            })
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(200);
+                res.body.status.should.eql('ok')
+                res.type.should.eql('application/json');
+                done();
+            });
+    });  
+    it('should update a user including password when admin', done => {
+        passportStub.login({
+            username: 'adminactive',
+            password: 'changeme',
+            role: 'admin'
+        });
+        chai.request(server)
+            .post('/api/user/2')
+            .send({
+                email: 'none1@none.com',
+                givenname: 'User',
+                username: 'useractive2',
+                password: 'changeme'
+            })
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(200);
+                res.body.status.should.eql('ok')
+                res.type.should.eql('application/json');
+                done();
+            });
+    });
+    it('should update a user including password when apikey provided', done => {
+        chai.request(server)
+            .post('/api/user/2')
+            .set('apikey', 'reallylongkeythatneedstobechanged')
+            .send({
+                email: 'none1@none.com',
+                givenname: 'User',
+                username: 'useractive2',
+                password: 'changeme2'
+            })
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(200);
+                res.body.status.should.eql('ok')
+                res.type.should.eql('application/json');
+                done();
+            });
+    });
+    it('should return a 401 when not admin', done => {
+        passportStub.login({
+            username: 'useractive',
+            password: 'changeme',
+            role: 'user'
+        });
+        chai.request(server)
+            .post('/api/user/new')
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(401);
+                res.type.should.eql('application/json');
+                done();
+            });
+    });
+    it('should return a 401 when not logged in', done => {
+        chai.request(server)
+            .post('/api/user/new')
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(401);
+                res.type.should.eql('application/json');
+                done();
+            });
+    });
+    it('should return a 401 when incorrect api key provided', done => {
+        chai.request(server)
+            .post('/api/user/new')
+            .set('apikey', 'shortkeythatdoesntexist')
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(401);
+                res.type.should.eql('application/json');
+                done();
+            });
+    });
 });
 
 describe('DELETE /api/user/:id', () => {
