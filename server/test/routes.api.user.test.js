@@ -566,6 +566,56 @@ describe('POST /api/user/:id', () => {
                 done();
             });
     });
+    it('should delete multiple users if admin', done => {
+        passportStub.login({
+            username: 'adminactive',
+            password: 'changeme',
+            role: 'admin'
+        });
+        chai.request(server)
+            .post('/api/user/deleteMultiple')
+            .send({
+                deleteList: [2, 3]
+            })
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(200);
+                res.body.status.should.eql('ok')
+                res.type.should.eql('application/json');
+                done();
+            });
+    });  
+    it('should delete multiple users if apikey provided', done => {
+        chai.request(server)
+            .post('/api/user/deleteMultiple')
+            .set('apikey', 'reallylongkeythatneedstobechanged')
+            .send({
+                deleteList: [2, 3]
+            })
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(200);
+                res.body.status.should.eql('ok')
+                res.type.should.eql('application/json');
+                done();
+            });
+    });  
+    it('should 400 if provided with invalid deleteList', done => {
+        chai.request(server)
+            .post('/api/user/deleteMultiple')
+            .set('apikey', 'reallylongkeythatneedstobechanged')
+            .send({
+                deleteList: [2, 'useractive']
+            })
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(400);
+                res.body.status.should.eql('error')
+                res.body.error.should.eql('id list contained non-numbers')
+                res.type.should.eql('application/json');
+                done();
+            });
+    });  
     it('should return a 401 when not admin', done => {
         passportStub.login({
             username: 'useractive',

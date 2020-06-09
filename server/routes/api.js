@@ -1331,6 +1331,7 @@ router.route('/user/:id')
       // do delete multiple
       var idList = req.body.deleteList || [0, 0];
       if (!idList.some(isNaN)) {
+        //ADD CHECK TO NOT ALLOW DELETION OF USERID 1
         logger.main.info('Deleting: ' + idList);
         db.from('users')
           .del()
