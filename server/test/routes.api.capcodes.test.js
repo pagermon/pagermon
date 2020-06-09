@@ -279,7 +279,7 @@ describe('DELETE /api/capcodes/:id', () => {
             role: 'admin'
         });
         chai.request(server)
-            .delete('/api/capcode/2')
+            .delete('/api/capcodes/2')
             .end((err, res) => {
                 res.status.should.eql(200);
                 res.body.status.should.eql('ok')
@@ -288,7 +288,7 @@ describe('DELETE /api/capcodes/:id', () => {
     });
     it('should delete a capcode when api key is provided', done => {
         chai.request(server)
-            .delete('/api/capcode/2')
+            .delete('/api/capcodes/2')
             .set('apikey', 'reallylongkeythatneedstobechanged')
             .end((err, res) => {
                 res.status.should.eql(200);
@@ -303,7 +303,7 @@ describe('DELETE /api/capcodes/:id', () => {
             role: 'user'
         });
         chai.request(server)
-            .delete('/api/capcode/2')
+            .delete('/api/capcodes/2')
             .end((err, res) => {
                 should.not.exist(err);
                 res.status.should.eql(401);
@@ -313,7 +313,7 @@ describe('DELETE /api/capcodes/:id', () => {
     });
     it('should return a 401 when not logged in', done => {
         chai.request(server)
-            .delete('/api/capcode/2')
+            .delete('/api/capcodes/2')
             .end((err, res) => {
                 should.not.exist(err);
                 res.status.should.eql(401);
@@ -323,7 +323,7 @@ describe('DELETE /api/capcodes/:id', () => {
     });
     it('should return a 401 when incorrect api key provided', done => {
         chai.request(server)
-            .delete('/api/capcode/2')
+            .delete('/api/capcodes/2')
             .set('apikey', 'shortkeythatdoesntexist')
             .end((err, res) => {
                 should.not.exist(err);
