@@ -115,6 +115,9 @@ describe('GET /api/user', () => {
     });
 });
 
+describe('POST /api/user', () => {
+});
+
 describe('GET /api/user/:id', () => {
     it('should return specific user when logged in as admin', done => {
         passportStub.login({
@@ -248,6 +251,82 @@ describe('GET /api/user/:id', () => {
     it('should return a 401 when incorrect api key provided', done => {
         chai.request(server)
             .get('/api/user/2')
+            .set('apikey', 'shortkeythatdoesntexist')
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(401);
+                res.type.should.eql('application/json');
+                done();
+            });
+    });
+});
+
+describe('POST /api/user/:id', () => {
+});
+
+describe('DELETE /api/user/:id', () => {
+    it('should delete a user when logged in as admin', done => {
+        passportStub.login({
+            username: 'adminactive',
+            password: 'changeme',
+            role: 'admin'
+        });
+        chai.request(server)
+            .delete('/api/user/2')
+            .end((err, res) => {
+                res.status.should.eql(200);
+                res.body.status.should.eql('ok')
+                done();
+            });
+    });
+    it('should delete a user when api key is provided', done => {
+        chai.request(server)
+            .delete('/api/user/2')
+            .set('apikey', 'reallylongkeythatneedstobechanged')
+            .end((err, res) => {
+                res.status.should.eql(200);
+                res.body.status.should.eql('ok')
+                done();
+            });
+    });
+    it('should not allow deleting of user ID 1', done => {
+        chai.request(server)
+            .delete('/api/user/1')
+            .set('apikey', 'reallylongkeythatneedstobechanged')
+            .end((err, res) => {
+                res.status.should.eql(400);
+                res.body.error.should.eql('User ID 1 is protected')
+                done();
+            });
+    });
+    it('should return a 401 when not admin', done => {
+        passportStub.login({
+            username: 'useractive',
+            password: 'changeme',
+            role: 'user'
+        });
+        chai.request(server)
+            .delete('/api/user/2')
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(401);
+                res.type.should.eql('application/json');
+                done();
+            });
+    });
+    it('should return a 401 when not logged in', done => {
+        chai.request(server)
+            .delete('/api/user/2')
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(401);
+                res.type.should.eql('application/json');
+                done();
+            });
+    });
+    it('should return a 401 when incorrect api key provided', done => {
+        chai.request(server)
+            .delete('/api/user/2')
             .set('apikey', 'shortkeythatdoesntexist')
             .end((err, res) => {
                 should.not.exist(err);

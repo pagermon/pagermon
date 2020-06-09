@@ -1405,7 +1405,6 @@ router.route('/user/:id')
           res.status(500).send(err);
           logger.main.error(err)
         })
-      logger.main.debug(util.format('%o', req.body || 'request body empty'));
     } else {
       res.status(400).json({ 'error': 'User ID 1 is protected' });
       logger.main.error('Unable to delete user ID 1')
