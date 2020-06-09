@@ -129,12 +129,19 @@ describe('GET /api/user/:id', () => {
                 res.type.should.eql('application/json');
                 res.body.should.be.a('object');
                 res.body.should.have.property('id')
+                res.body.id.should.eql(2)
                 res.body.should.have.property('givenname')
+                res.body.givenname.should.eql('Active')
                 res.body.should.have.property('surname')
+                res.body.surname.should.eql('User')
                 res.body.should.have.property('username')
+                res.body.username.should.eql('useractive')
                 res.body.should.have.property('email')
+                res.body.email.should.eql('none1@none.com')
                 res.body.should.have.property('role')
+                res.body.role.should.eql('user')
                 res.body.should.have.property('status')
+                res.body.status.should.eql('active')
                 done();
             });
     });
@@ -151,11 +158,17 @@ describe('GET /api/user/:id', () => {
                 res.type.should.eql('application/json');
                 res.body.should.be.a('object');
                 res.body.should.have.property('givenname')
+                res.body.givenname.should.eql('')
                 res.body.should.have.property('surname')
+                res.body.surname.should.eql('')
                 res.body.should.have.property('username')
+                res.body.username.should.eql('')
                 res.body.should.have.property('email')
+                res.body.email.should.eql('')
                 res.body.should.have.property('role')
+                res.body.role.should.eql('user')
                 res.body.should.have.property('status')
+                res.body.status.should.eql('active')
                 done();
             });
     });
@@ -168,12 +181,19 @@ describe('GET /api/user/:id', () => {
                 res.type.should.eql('application/json');
                 res.body.should.be.a('object');
                 res.body.should.have.property('id')
+                res.body.id.should.eql(2)
                 res.body.should.have.property('givenname')
+                res.body.givenname.should.eql('Active')
                 res.body.should.have.property('surname')
+                res.body.surname.should.eql('User')
                 res.body.should.have.property('username')
+                res.body.username.should.eql('useractive')
                 res.body.should.have.property('email')
+                res.body.email.should.eql('none1@none.com')
                 res.body.should.have.property('role')
+                res.body.role.should.eql('user')
                 res.body.should.have.property('status')
+                res.body.status.should.eql('active')
                 done();
             });
     });
@@ -186,11 +206,17 @@ describe('GET /api/user/:id', () => {
                 res.type.should.eql('application/json');
                 res.body.should.be.a('object');
                 res.body.should.have.property('givenname')
+                res.body.givenname.should.eql('')
                 res.body.should.have.property('surname')
+                res.body.surname.should.eql('')
                 res.body.should.have.property('username')
+                res.body.username.should.eql('')
                 res.body.should.have.property('email')
+                res.body.email.should.eql('')
                 res.body.should.have.property('role')
+                res.body.role.should.eql('user')
                 res.body.should.have.property('status')
+                res.body.status.should.eql('active')
                 done();
             });
     });
