@@ -1185,43 +1185,47 @@ router.route('/user')
       })
   })
   .post(authHelper.isAdmin, function (req, res, next) {
-    var username = req.body.username
-    var email = req.body.email
-    db.table('users')
-      .where('username', '=', username)
-      .orWhere('email', '=', email)
-      .first()
-      .then((row) => {
-        if (row) {
-          //add logging
-          res.status(400).send({ 'status': 'error', 'error': 'Username or Email exists' });
-        } else {
-          const salt = bcrypt.genSaltSync();
-          const hash = bcrypt.hashSync(req.body.password, salt);
+    if (req.body.username && req.body.email && req.body.givenname && req.body.password && req.body.status && req.body.role) {
+      var username = req.body.username
+      var email = req.body.email
+      db.table('users')
+        .where('username', '=', username)
+        .orWhere('email', '=', email)
+        .first()
+        .then((row) => {
+          if (row) {
+            //add logging
+            res.status(400).send({ 'status': 'error', 'error': 'Username or Email exists' });
+          } else {
+            const salt = bcrypt.genSaltSync();
+            const hash = bcrypt.hashSync(req.body.password, salt);
 
-          return db('users')
-            .insert({
-              username: req.body.username,
-              password: hash,
-              givenname: req.body.givenname,
-              surname: req.body.surname,
-              email: req.body.email,
-              role: req.body.role,
-              status: req.body.status,
-              lastlogondate: null
-            })
-            .returning('id')
-            .then((response) => {
-              //add logging
-              logger.main.debug('created user id: ' + response)
-              res.status(200).send({ 'status': 'ok' });
-            })
-            .catch((err) => {
-              logger.main.error(err)
-              res.status(500).send({ 'status': 'error' });
-            });
-        }
-      })
+            return db('users')
+              .insert({
+                username: req.body.username,
+                password: hash,
+                givenname: req.body.givenname,
+                surname: req.body.surname,
+                email: req.body.email,
+                role: req.body.role,
+                status: req.body.status,
+                lastlogondate: null
+              })
+              .returning('id')
+              .then((response) => {
+                //add logging
+                logger.main.debug('created user id: ' + response)
+                res.status(200).send({ 'status': 'ok', 'id': response[0] });
+              })
+              .catch((err) => {
+                logger.main.error(err)
+                res.status(500).send({ 'status': 'error' });
+              });
+          }
+        })
+    } else {
+      res.status(400).send({ 'status': 'error', 'error': 'Invalid request body' });
+    }
   });
 
 router.route('/userCheck/username/:id')

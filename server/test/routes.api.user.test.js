@@ -116,6 +116,138 @@ describe('GET /api/user', () => {
 });
 
 describe('POST /api/user', () => {
+    it('should create a new user', done => {
+        passportStub.login({
+            username: 'adminactive',
+            password: 'changeme',
+            role: 'admin'
+        });
+        chai.request(server)
+            .post('/api/user')
+            .send({
+                username: 'idontexist',
+                email: 'idontexist@fake.com',
+                givenname: 'Dude',
+                password: 'changeme',
+                status: 'active',
+                role: 'admin'
+            })
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(200);
+                res.body.status.should.eql('ok')
+                res.body.id.should.eql(5)
+                res.type.should.eql('application/json');
+                done();
+            });
+    });  
+    it('should return a 400 if required fields are missing', done => {
+        passportStub.login({
+            username: 'adminactive',
+            password: 'changeme',
+            role: 'admin'
+        });
+        chai.request(server)
+            .post('/api/user')
+            .send({
+                username: 'idontexist',
+                email: 'idontexist@fake.com',
+            })
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(400);
+                res.body.status.should.eql('error')
+                res.body.error.should.eql('Invalid request body')
+                res.type.should.eql('application/json');
+                done();
+            });
+    });  
+    it('should return a 400 if username is in use', done => {
+        passportStub.login({
+            username: 'adminactive',
+            password: 'changeme',
+            role: 'admin'
+        });
+        chai.request(server)
+            .post('/api/user')
+            .send({
+                username: 'useractive',
+                email: 'idontexist@fake.com',
+                givenname: 'Dude',
+                password: 'changeme',
+                role: 'user',
+                status:'active'
+            })
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(400);
+                res.body.status.should.eql('error')
+                res.body.error.should.eql('Username or Email exists')
+                res.type.should.eql('application/json');
+                done();
+            });
+    });  
+    it('should return a 400 if email is in use', done => {
+        passportStub.login({
+            username: 'adminactive',
+            password: 'changeme',
+            role: 'admin'
+        });
+        chai.request(server)
+            .post('/api/user')
+            .send({
+                username: 'useractive',
+                email: 'idontexist@fake.com',
+                givenname: 'Dude',
+                password: 'changeme',
+                status: 'active',
+                role: 'user'
+            })
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(400);
+                res.body.status.should.eql('error')
+                res.body.error.should.eql('Username or Email exists')
+                res.type.should.eql('application/json');
+                done();
+            });
+    }); 
+    it('should return a 401 when not admin', done => {
+        passportStub.login({
+            username: 'useractive',
+            password: 'changeme',
+            role: 'user'
+        });
+        chai.request(server)
+            .post('/api/user')
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(401);
+                res.type.should.eql('application/json');
+                done();
+            });
+    });
+    it('should return a 401 when not logged in', done => {
+        chai.request(server)
+            .post('/api/user')
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(401);
+                res.type.should.eql('application/json');
+                done();
+            });
+    });
+    it('should return a 401 when incorrect api key provided', done => {
+        chai.request(server)
+            .post('/api/user')
+            .set('apikey', 'shortkeythatdoesntexist')
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(401);
+                res.type.should.eql('application/json');
+                done();
+            });
+    });
 });
 
 describe('GET /api/user/:id', () => {
