@@ -49,6 +49,7 @@ describe('GET /api/messages/id', () => {
                                         .property('message')
                                         .eql('This is a Test Message to Address 1234570');
                                 res.body.should.have.property('source').eql('Client 4');
+                                nconf.set('messages:HideCapcode', false);
                                 done();
                         });
         });
@@ -72,9 +73,9 @@ describe('GET /api/messages/id', () => {
                                         .property('message')
                                         .eql('This is a Test Message to Address 1234570');
                                 res.body[0].should.have.property('source').eql('Client 4');
+                                nconf.set('messages:HideCapcode', false);
                                 done();
                         });
-                nconf.set('messages:HideCapcode', false);
         });
         it('should 401 if securemode is enabled and not logged in ', done => {
                 nconf.set('messages:apiSecurity', true);
@@ -85,6 +86,7 @@ describe('GET /api/messages/id', () => {
                                 should.not.exist(err);
                                 res.status.should.eql(401);
                                 res.type.should.eql('application/json');
+                                nconf.set('messages:apiSecurity', false);
                                 done();
                         });
         });
@@ -106,6 +108,7 @@ describe('GET /api/messages/id', () => {
                                         .property('message')
                                         .eql('This is a Test Message to Address 1234570');
                                 res.body[0].should.have.property('source').eql('Client 4');
+                                nconf.set('messages:apiSecurity', false);
                                 done();
                         });
         });

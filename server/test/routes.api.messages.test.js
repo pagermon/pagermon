@@ -135,6 +135,7 @@ describe('GET /api/messages', () => {
                                 should.not.exist(err);
                                 res.status.should.eql(401);
                                 res.type.should.eql('application/json');
+                                nconf.set('messages:apiSecurity', false);
                                 done();
                         });
         });
@@ -158,6 +159,7 @@ describe('GET /api/messages', () => {
                                         .property('message')
                                         .eql('This is a Test Message to Address 1234569');
                                 res.body.messages[0].should.have.property('source').eql('Client 3');
+                                nconf.set('messages:apiSecurity', false);
                                 done();
                         });
         });
