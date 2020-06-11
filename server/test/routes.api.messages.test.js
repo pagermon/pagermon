@@ -136,7 +136,29 @@ describe('GET /api/messages', () => {
                                 res.status.should.eql(401);
                                 res.type.should.eql('application/json');
                                 done();
-                                nconf.set('messages:apiSecurity', false);
+                        });
+        });
+        it('should 200 if securemode is enabled and logged in ', done => {
+                nconf.set('messages:apiSecurity', true);
+                nconf.save();
+                passportStub.login({
+                        username: 'useractive',
+                        password: 'changeme',
+                });
+                chai.request(server)
+                        .get('/api/messages')
+                        .end((err, res) => {
+                                should.not.exist(err);
+                                res.status.should.eql(200);
+                                res.type.should.eql('application/json');
+                                res.body.should.be.a('object');
+                                res.body.messages[0].should.have.property('id').eql(4);
+                                res.body.messages[0].should.have.property('address').eql('1234569');
+                                res.body.messages[0].should.have
+                                        .property('message')
+                                        .eql('This is a Test Message to Address 1234569');
+                                res.body.messages[0].should.have.property('source').eql('Client 3');
+                                done();
                         });
         });
 });

@@ -76,4 +76,37 @@ describe('GET /api/messages/id', () => {
                         });
                 nconf.set('messages:HideCapcode', false);
         });
+        it('should 401 if securemode is enabled and not logged in ', done => {
+                nconf.set('messages:apiSecurity', true);
+                nconf.save();
+                chai.request(server)
+                        .get('/api/messages/5')
+                        .end((err, res) => {
+                                should.not.exist(err);
+                                res.status.should.eql(401);
+                                res.type.should.eql('application/json');
+                                done();
+                        });
+        });
+        it('should 200 if securemode is enabled and logged in ', done => {
+                nconf.set('messages:apiSecurity', true);
+                nconf.save();
+                passportStub.login({
+                        username: 'useractive',
+                        password: 'changeme',
+                });
+                chai.request(server)
+                        .get('/api/messages/5')
+                        .end((err, res) => {
+                                should.not.exist(err);
+                                res.status.should.eql(200);
+                                res.type.should.eql('application/json');
+                                res.body.should.be.a('array');
+                                res.body[0].should.have
+                                        .property('message')
+                                        .eql('This is a Test Message to Address 1234570');
+                                res.body[0].should.have.property('source').eql('Client 4');
+                                done();
+                        });
+        });
 });
