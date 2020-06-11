@@ -103,6 +103,7 @@ describe('GET /api/messages', () => {
                                         .eql('This is a Test Message to Address 1234569');
                                 res.body.messages[0].should.have.property('source').eql('Client 3');
                                 nconf.set('messages:HideCapcode', false);
+                                nconf.save();
                                 done();
                         });
         });
@@ -136,6 +137,7 @@ describe('GET /api/messages', () => {
                                 res.status.should.eql(401);
                                 res.type.should.eql('application/json');
                                 nconf.set('messages:apiSecurity', false);
+                                nconf.save();
                                 done();
                         });
         });
@@ -160,6 +162,7 @@ describe('GET /api/messages', () => {
                                         .eql('This is a Test Message to Address 1234569');
                                 res.body.messages[0].should.have.property('source').eql('Client 3');
                                 nconf.set('messages:apiSecurity', false);
+                                nconf.save();
                                 done();
                         });
         });
