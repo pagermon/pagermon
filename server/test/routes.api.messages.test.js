@@ -58,6 +58,27 @@ describe('POST /api/messages', () => {
                                 done();
                         });
         });
+        it('should not POST new message with incorrect API key', done => {
+                chai.request(server)
+                        .post('/api/messages')
+                        .set({
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'User-Agent': 'CI-Test',
+                                apikey: 'yeet',
+                        })
+                        .send({
+                                address: '000000',
+                                message: '!@#$%^& (This is a test message. 1a2b3c4d5e6e7f) !@#$%^&',
+                                datetime,
+                                source: 'CI-Test',
+                        })
+                        .end((err, res) => {
+                                should.not.exist(err);
+                                res.status.should.eql(401);
+                                res.type.should.eql('application/json');
+                                done();
+                        });
+        });
 });
 
 describe('GET /api/messages', () => {

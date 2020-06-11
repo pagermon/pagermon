@@ -8,6 +8,7 @@
         "camelcase": 1,
         "no-use-before-define": 0,
         "no-var": 0, // Disable for now! 
+        "import/order": 0,
         "prettier/prettier": [
             "error",
             {

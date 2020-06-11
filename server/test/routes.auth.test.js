@@ -40,8 +40,8 @@ describe('GET /auth/login', () => {
         it('should return the index if a user is logged in', done => {
                 passportStub.login({
                         username: 'useractive',
-                        password: 'changeme'
-                      });
+                        password: 'changeme',
+                });
                 chai.request(server)
                         .get('/auth/login')
                         .redirects(0)
@@ -59,13 +59,13 @@ describe('POST /auth/login', () => {
                 chai.request(server)
                         .post('/auth/login')
                         .send({
-                                username:'useractive',
-                                password: 'changeme'
+                                username: 'useractive',
+                                password: 'changeme',
                         })
                         .end((err, res) => {
                                 should.not.exist(err);
                                 res.status.should.eql(200);
-                                res.body.status.should.eql('ok')
+                                res.body.status.should.eql('ok');
                                 res.body.redirect.should.eql('/');
                                 done();
                         });
@@ -74,13 +74,13 @@ describe('POST /auth/login', () => {
                 chai.request(server)
                         .post('/auth/login')
                         .send({
-                                username:'adminactive',
-                                password: 'changeme'
+                                username: 'adminactive',
+                                password: 'changeme',
                         })
                         .end((err, res) => {
                                 should.not.exist(err);
                                 res.status.should.eql(200);
-                                res.body.status.should.eql('ok')
+                                res.body.status.should.eql('ok');
                                 res.body.redirect.should.eql('/admin');
                                 done();
                         });
@@ -89,14 +89,14 @@ describe('POST /auth/login', () => {
                 chai.request(server)
                         .post('/auth/login')
                         .send({
-                                username:'notarealuser',
-                                password: 'changeme'
+                                username: 'notarealuser',
+                                password: 'changeme',
                         })
                         .end((err, res) => {
                                 should.not.exist(err);
                                 res.status.should.eql(401);
-                                res.body.status.should.eql('failed')
-                                res.body.error.should.eql('Check Details and try again')
+                                res.body.status.should.eql('failed');
+                                res.body.error.should.eql('Check Details and try again');
                                 done();
                         });
         });
@@ -104,14 +104,14 @@ describe('POST /auth/login', () => {
                 chai.request(server)
                         .post('/auth/login')
                         .send({
-                                username:'useractive',
-                                password: 'changeme2'
+                                username: 'useractive',
+                                password: 'changeme2',
                         })
                         .end((err, res) => {
                                 should.not.exist(err);
                                 res.status.should.eql(401);
-                                res.body.status.should.eql('failed')
-                                res.body.error.should.eql('Check Details and try again')
+                                res.body.status.should.eql('failed');
+                                res.body.error.should.eql('Check Details and try again');
                                 done();
                         });
         });
@@ -119,14 +119,14 @@ describe('POST /auth/login', () => {
                 chai.request(server)
                         .post('/auth/login')
                         .send({
-                                username:'admindisabled',
-                                password: 'changeme'
+                                username: 'admindisabled',
+                                password: 'changeme',
                         })
                         .end((err, res) => {
                                 should.not.exist(err);
                                 res.status.should.eql(401);
-                                res.body.status.should.eql('failed')
-                                res.body.error.should.eql('User Disabled')
+                                res.body.status.should.eql('failed');
+                                res.body.error.should.eql('User Disabled');
                                 done();
                         });
         });
@@ -134,25 +134,24 @@ describe('POST /auth/login', () => {
                 chai.request(server)
                         .post('/auth/login')
                         .send({
-                                username:'admindisabled',
-                                password: 'changeme'
+                                username: 'admindisabled',
+                                password: 'changeme',
                         })
                         .then(function() {
                                 chai.request(server)
-                                .post('/auth/login')
-                                .send({
-                                        username:'admindisabled',
-                                        password: 'changeme'
-                                })
-                                .end((err, res) => {
-                                        should.not.exist(err);
-                                        res.status.should.eql(429);
-                                        res.body.status.should.eql('lockedout')
-                                        res.body.error.should.eql('Too many attempts, please try again later')
-                                        done();
-                                });
-                });  
-                        
+                                        .post('/auth/login')
+                                        .send({
+                                                username: 'admindisabled',
+                                                password: 'changeme',
+                                        })
+                                        .end((err, res) => {
+                                                should.not.exist(err);
+                                                res.status.should.eql(429);
+                                                res.body.status.should.eql('lockedout');
+                                                res.body.error.should.eql('Too many attempts, please try again later');
+                                                done();
+                                        });
+                        });
         });
 });
 
@@ -160,14 +159,14 @@ describe('GET /auth/logout', () => {
         it('should log the user out', done => {
                 passportStub.login({
                         username: 'useractive',
-                        password: 'changeme'
-                      });
+                        password: 'changeme',
+                });
                 chai.request(server)
                         .get('/auth/logout')
                         .redirects(0)
                         .end((err, res) => {
                                 should.not.exist(err);
-                                res.should.redirectTo('/')
+                                res.should.redirectTo('/');
                                 done();
                         });
         });
@@ -177,8 +176,8 @@ describe('GET /auth/profile', () => {
         it('should return the profile page if user is logged in', done => {
                 passportStub.login({
                         username: 'useractive',
-                        password: 'changeme'
-                      });
+                        password: 'changeme',
+                });
                 chai.request(server)
                         .get('/auth/profile')
                         .end((err, res) => {
@@ -203,8 +202,8 @@ describe('GET /auth/profile/:id', () => {
         it('should return the information of the logged in user', done => {
                 passportStub.login({
                         username: 'useractive',
-                        password: 'changeme'
-                      });
+                        password: 'changeme',
+                });
                 chai.request(server)
                         .get('/auth/profile/1')
                         .end((err, res) => {
@@ -227,11 +226,11 @@ describe('GET /auth/profile/:id', () => {
         it('should not return the information of other users', done => {
                 passportStub.login({
                         username: 'useractive',
-                        password: 'changeme'
-                      });
+                        password: 'changeme',
+                });
                 chai.request(server)
                         .get('/auth/profile/2')
-                        .send({'user.username': 'adminactive'})
+                        .send({ 'user.username': 'adminactive' })
                         .end((err, res) => {
                                 should.not.exist(err);
                                 res.should.be.json;
@@ -252,7 +251,7 @@ describe('GET /auth/profile/:id', () => {
         it('should not return anything if no user is logged in', done => {
                 chai.request(server)
                         .get('/auth/profile/2')
-                        .send({'user.username': 'adminactive'})
+                        .send({ 'user.username': 'adminactive' })
                         .end((err, res) => {
                                 should.not.exist(err);
                                 res.status.should.eql(401);
@@ -265,56 +264,56 @@ describe('POST /auth/profile/:id', () => {
         it('should save the information of the logged in user', done => {
                 passportStub.login({
                         username: 'useractive',
-                        password: 'changeme'
-                      });
+                        password: 'changeme',
+                });
                 chai.request(server)
                         .post('/auth/profile/1')
                         .send({
                                 username: 'useractive',
                                 givenname: 'User',
                                 surname: 'Active',
-                                email:'none1@none1.com'
+                                email: 'none1@none1.com',
                         })
-                        .end((err, res,) => {
+                        .end((err, res) => {
                                 should.not.exist(err);
                                 res.status.should.eql(200);
-                                res.body.status.should.eql('ok')
-                                res.body.id.should.eql(1)
+                                res.body.status.should.eql('ok');
+                                res.body.id.should.eql(1);
                                 done();
                         });
         });
         it('should not allow saving of other users information', done => {
                 passportStub.login({
                         username: 'useractive',
-                        password: 'changeme'
-                      });
+                        password: 'changeme',
+                });
                 chai.request(server)
                         .post('/auth/profile/1')
                         .send({
                                 username: 'adminactive',
                                 givenname: 'Admin',
                                 surname: 'Active',
-                                email:'none2@none2.com'
+                                email: 'none2@none2.com',
                         })
                         .end((err, res) => {
                                 should.not.exist(err);
                                 res.status.should.eql(401);
-                                res.body.message.should.eql('Please update your own details only')
+                                res.body.message.should.eql('Please update your own details only');
                                 done();
                         });
         });
         it('should not allow saving of invalid information', done => {
                 passportStub.login({
                         username: 'useractive',
-                        password: 'changeme'
-                      });
+                        password: 'changeme',
+                });
                 chai.request(server)
                         .post('/auth/profile/1')
                         .send({
                                 username: 'useractive',
                                 givenname: 'User',
                                 surname: 'Active',
-                                email:null
+                                email: null,
                         })
                         .end((err, res) => {
                                 should.not.exist(err);
@@ -329,7 +328,7 @@ describe('POST /auth/profile/:id', () => {
                                 username: 'adminactive',
                                 givenname: 'Admin',
                                 surname: 'Active',
-                                email:'none2@none2.com'
+                                email: 'none2@none2.com',
                         })
                         .end((err, res) => {
                                 should.not.exist(err);
@@ -341,7 +340,7 @@ describe('POST /auth/profile/:id', () => {
 
 describe('GET /auth/register', () => {
         nconf.set('auth:registration', true);
-        nconf.save();           
+        nconf.save();
         it('should return the registration page if enabled', done => {
                 chai.request(server)
                         .get('/auth/register')
@@ -352,7 +351,7 @@ describe('GET /auth/register', () => {
                                 done();
                         });
         });
-        
+
         it('should return the index if disabled', done => {
                 nconf.set('auth:registration', false);
                 nconf.save();
@@ -368,7 +367,7 @@ describe('GET /auth/register', () => {
         });
 });
 
-describe('POST /auth/register', () => {   
+describe('POST /auth/register', () => {
         it('should register a new user', done => {
                 nconf.set('auth:registration', true);
                 nconf.save();
@@ -469,8 +468,8 @@ describe('GET /auth/reset', () => {
         it('should return the reset page if user is logged in', done => {
                 passportStub.login({
                         username: 'useractive',
-                        password: 'changeme'
-                      });
+                        password: 'changeme',
+                });
                 chai.request(server)
                         .get('/auth/reset')
                         .end((err, res) => {
@@ -486,7 +485,7 @@ describe('GET /auth/reset', () => {
                         .redirects(0)
                         .end((err, res) => {
                                 should.not.exist(err);
-                                res.should.redirectTo('/auth/login')
+                                res.should.redirectTo('/auth/login');
                                 done();
                         });
         });
@@ -495,41 +494,41 @@ describe('GET /auth/reset', () => {
 describe('POST /auth/reset', () => {
         it('should reset the password', done => {
                 passportStub.login({
-                        //hard set the ID as the query on the route doesn't lookup id's. This should be fixed in auth.js
+                        // hard set the ID as the query on the route doesn't lookup id's. This should be fixed in auth.js
                         id: '1',
                         username: 'useractive',
-                        password: 'changeme'
-                      });
+                        password: 'changeme',
+                });
                 chai.request(server)
                         .post('/auth/reset')
                         .send({
-                                password: 'changeme1'
+                                password: 'changeme1',
                         })
                         .end((err, res) => {
                                 should.not.exist(err);
                                 res.status.should.eql(200);
-                                res.body.status.should.eql('ok')
-                                res.body.redirect.should.eql('/')
+                                res.body.status.should.eql('ok');
+                                res.body.redirect.should.eql('/');
                                 done();
                         });
-        });  
+        });
         it('should not accept the same password', done => {
                 passportStub.login({
-                        //hard set the ID as the query on the route doesn't lookup id's. This should be fixed in auth.js
+                        // hard set the ID as the query on the route doesn't lookup id's. This should be fixed in auth.js
                         id: '1',
                         username: 'useractive',
-                        password: '$2a$10$neQ/6P4YwrGxlBeFMJzW4OHxYWGI6Xp23mn/sPFfSDcGORR9jiDYu'
-                      });
+                        password: '$2a$10$neQ/6P4YwrGxlBeFMJzW4OHxYWGI6Xp23mn/sPFfSDcGORR9jiDYu',
+                });
                 chai.request(server)
                         .post('/auth/reset')
                         .send({
-                                password: 'changeme'
+                                password: 'changeme',
                         })
                         .end((err, res) => {
                                 should.not.exist(err);
                                 res.status.should.eql(400);
-                                res.body.status.should.eql('failed')
-                                res.body.error.should.eql('Password Blank or the Same')
+                                res.body.status.should.eql('failed');
+                                res.body.error.should.eql('Password Blank or the Same');
                                 done();
                         });
         });
@@ -543,7 +542,7 @@ describe('GET /auth/userCheck/username/:id', () => {
                                 should.not.exist(err);
                                 res.status.should.eql(200);
                                 res.type.should.eql('application/json');
-                                res.body.username.should.eql('useractive')
+                                res.body.username.should.eql('useractive');
                                 done();
                         });
         });
@@ -568,7 +567,7 @@ describe('GET /auth/userCheck/email/:id', () => {
                                 should.not.exist(err);
                                 res.status.should.eql(200);
                                 res.type.should.eql('application/json');
-                                res.body.email.should.eql('none1@none.com')
+                                res.body.email.should.eql('none1@none.com');
                                 done();
                         });
         });
