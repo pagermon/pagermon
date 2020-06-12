@@ -656,9 +656,126 @@ describe('GET /api/capcodeCheck/:id', () => {
 });
 
 describe('POST /api/capcodeRefresh', () => {
+    it('should perform a capcode refresh when admin' , done => {
+        passportStub.login({
+            username: 'adminactive',
+            password: 'changeme',
+            role: 'admin'
+        });
+        chai.request(server)
+            .post('/api/capcodeRefresh')
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(200);
+                res.body.should.have.property('status').eql('ok')
+                res.type.should.eql('application/json');
+                done();
+            });
+    });
+    it('should perform a capcode refresh when apikey provided' , done => {
+        chai.request(server)
+            .post('/api/capcodeRefresh')
+            .set('apikey', 'reallylongkeythatneedstobechanged')
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(200);
+                res.body.should.have.property('status').eql('ok')
+                res.type.should.eql('application/json');
+                done();
+            });
+    });
+    it('should return a 401 when not admin', done => {
+        passportStub.login({
+            username: 'useractive',
+            password: 'changeme',
+            role: 'user'
+        });
+        chai.request(server)
+            .post('/api/capcodeRefresh')
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(401);
+                res.type.should.eql('application/json');
+                done();
+            });
+    });
+    it('should return a 401 when not logged in', done => {
+        chai.request(server)
+            .post('/api/capcodeRefresh')
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(401);
+                res.type.should.eql('application/json');
+                done();
+            });
+    });
+    it('should return a 401 when incorrect api key provided', done => {
+        chai.request(server)
+            .post('/api/capcodeRefresh')
+            .set('apikey', 'shortkeythatdoesntexist')
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(401);
+                res.type.should.eql('application/json');
+                done();
+            });
+    });
 });
 
 describe('POST /api/capcodeExport', () => {
+    it('should perform a capcode export when admin' , done => {
+        passportStub.login({
+            username: 'adminactive',
+            password: 'changeme',
+            role: 'admin'
+        });
+        chai.request(server)
+            .post('/api/capcodeExport')
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(200);
+                res.body.should.have.property('status').eql('ok')
+                res.body.should.have.property('data')
+                res.type.should.eql('application/json');
+                done();
+            });
+    });
+    it('should return a 401 when not admin', done => {
+        passportStub.login({
+            username: 'useractive',
+            password: 'changeme',
+            role: 'user'
+        });
+        chai.request(server)
+            .post('/api/capcodeExport')
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(401);
+                res.type.should.eql('application/json');
+                done();
+            });
+    });
+    it('should return a 401 when not logged in', done => {
+        chai.request(server)
+            .post('/api/capcodeExport')
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(401);
+                res.type.should.eql('application/json');
+                done();
+            });
+    });
+    it('should return a 401 when incorrect api key provided', done => {
+        chai.request(server)
+            .post('/api/capcodeExport')
+            .set('apikey', 'shortkeythatdoesntexist')
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(401);
+                res.type.should.eql('application/json');
+                done();
+            });
+    });
 });
 
 describe('POST /api/capcodeImport', () => {

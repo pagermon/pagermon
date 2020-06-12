@@ -669,7 +669,8 @@ router.route('/messageSearch')
   });
 
 router.route('/capcodes/init')
-  // Is this even used anymore?
+// DISABLED - UNKNOWN WHAT THIS WAS USED FOR 
+/*  
   .get(authHelper.isAdmin, function (req, res, next) {
     //set current page if specifed as get variable (eg: /?page=2)
     if (typeof req.query.page !== 'undefined') {
@@ -697,7 +698,7 @@ router.route('/capcodes/init')
         return next(err);
       })
   });
-
+*/
 router.route('/capcodes')
   .get(authHelper.isAdmin, function (req, res, next) {
     nconf.load();
@@ -1422,10 +1423,6 @@ router.route('/user/:id')
 router.use([handleError]);
 
 module.exports = router;
-
-function inParam(sql, arr) {
-  return sql.replace('?#', arr.map(() => '?').join(','));
-}
 
 function handleError(err, req, res, next) {
   var output = {
