@@ -8,6 +8,7 @@
 ![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/pagermon/pagermon.svg?label=release&style=plastic)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/pagermon/pagermon.svg?style=plastic)
 ![GitHub contributors](https://img.shields.io/github/contributors/pagermon/pagermon.svg?style=plastic)
+![Node.js CI](https://github.com/pagermon/pagermon/workflows/Node.js%20CI/badge.svg)
 
 PagerMon is an API driven client/server framework for parsing and displaying pager messages from multimon-ng.
 
