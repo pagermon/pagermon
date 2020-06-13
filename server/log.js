@@ -3,11 +3,12 @@ const { format } = winston;
 // const { combine, label, json, cli } = format;
 // load the config file
 var nconf = require('nconf');
-var conf_file = './config/config.json';
-nconf.file({file: conf_file});
+var confFile = './config/config.json';
+nconf.file({file: confFile});
 nconf.load();
 
 var loglevel = nconf.get('global:loglevel');
+
 
 winston.loggers.add('pagermon', {
     format: format.combine(

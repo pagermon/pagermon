@@ -1,7 +1,9 @@
 var bcrypt = require('bcryptjs');
 var nconf = require('nconf');
-var conf_file = './config/config.json';
-nconf.file({ file: conf_file });
+
+var confFile = './config/config.json';
+nconf.file({ file: confFile });
+
 var user = nconf.get('auth:user')
 var pwd = nconf.get('auth:encPass')
 
@@ -45,5 +47,5 @@ exports.up = function(db, Promise) {
 };
 
 exports.down = function(db, Promise) {
-  
+  return db.schema.dropTable('users');
 };

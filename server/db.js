@@ -2,9 +2,9 @@ var fs = require('fs');
 var logger = require('./log');
 var moment = require('moment');
 var nconf = require('nconf');
-var conf_file = './config/config.json';
+var confFile = './config/config.json';
 var db = require('./knex/knex.js');
-nconf.file({file: conf_file});
+nconf.file({file: confFile});
 nconf.load();
 
 // initialize the database if it does not already exist
@@ -39,25 +39,26 @@ function init() {
                 })
             }
         })
-        
-    } 
-    db.migrate.currentVersion().then((result) => {
-        logger.main.info("Current DB version: " + result);
-        logger.main.info('Checking for database upgrades')
-        db.migrate.latest()
-        .then((result) => {
-            if (result[0] === 1) {
-                logger.main.info('Database upgrades complete')
-            } else if (result[0] === 2) {
-                logger.main.info('Database upgrade not required')
-            }
+    }
+    if(process.env.NODE_ENV != 'test') { 
+        db.migrate.currentVersion().then((result) => {
+            logger.main.info("Current DB version: " + result);
+            logger.main.info('Checking for database upgrades')
+            db.migrate.latest()
+            .then((result) => {
+                if (result[0] === 1) {
+                    logger.main.info('Database upgrades complete')
+                } else if (result[0] === 2) {
+                    logger.main.info('Database upgrade not required')
+                }
+            })
+            .catch((err) => {
+                logger.main.error('Error upgrading database:' + err)
+            })
+        }).catch((err) => {
+            logger.main.error('Error retrieving database version' + err)
         })
-        .catch((err) => {
-            logger.main.error('Error upgrading database:' + err)
-        })
-    }).catch((err) => {
-        logger.main.error('Error retrieving database version' + err)
-    })
+    }   
 }
 
 module.exports = {

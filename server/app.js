@@ -1,4 +1,4 @@
-var version = "0.3.9-beta";
+var version = "0.3.10-beta";
 
 var debug = require('debug')('pagermon:server');
 var io = require('@pm2/io').init({
@@ -32,13 +32,13 @@ process.on('SIGINT', function() {
 
 // create config file if it does not exist, and set defaults
 var conf_defaults = require('./config/default.json');
-var conf_file = './config/config.json';
-if( ! fs.existsSync(conf_file) ) {
-    fs.writeFileSync( conf_file, JSON.stringify(conf_defaults,null, 2) );
+var confFile = './config/config.json';
+if( ! fs.existsSync(confFile) ) {
+    fs.writeFileSync( confFile, JSON.stringify(conf_defaults,null, 2) );
 }
 // load the config file
 var nconf = require('nconf');
-    nconf.file({file: conf_file});
+    nconf.file({file: confFile});
     nconf.load();
 
 //Load current theme
@@ -226,6 +226,14 @@ if (dbtype == 'mysql') {
       logger.main.debug('CRON: Alias Refresh not Required, Skipping.')
     }
   }, null, true);
+}
+
+//Disable all logging for tests
+if(process.env.NODE_ENV === 'test') { 
+  logger.main.silent = true
+  logger.auth.silent = true
+  logger.db.silent = true
+  logger.http.silent = true
 }
 
 module.exports = app;

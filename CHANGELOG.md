@@ -4,6 +4,7 @@
 * Add user-agent strings for webhook plugins #416 @DanrwAU
 * Cleanup redundant code in db.js #417 @DanrwAU
 * Add Multi-User support, moves all authentication to be DB backed. #411 @DanrwAU
+* Add Unit testing #420 @DanrwAU @marshyonline
 
 # 0.3.9 - 2020-05-13
  

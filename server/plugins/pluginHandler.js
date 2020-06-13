@@ -3,8 +3,8 @@ var _ = require('underscore');
 var async = require('async');
 var nconf = require('nconf');
 var util = require('util');
-var conf_file = './config/config.json';
-nconf.file({file: conf_file});
+var confFile = './config/config.json';
+nconf.file({file: confFile});
 nconf.load();
 var logger = require('../log');
 
