@@ -1,4 +1,4 @@
-﻿# 0.3.10 - Unreleased
+﻿# 0.3.10 - 2020-06-24
 
 * Downgrade discord.js package to fix crashes #415 @DanrwAU
 * Add user-agent strings for webhook plugins #416 @DanrwAU
