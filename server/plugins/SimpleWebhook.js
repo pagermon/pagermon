@@ -21,6 +21,9 @@ function run(trigger, scope, data, config, callback) {
     logger.main.debug('SimpleWebhook: Sending to ' + config.URL + ': ' + JSON.stringify(message));
 
     axios.post(config.URL, message, {
+      headers: {
+        'User-Agent': 'Pagermon - Simple Webhook Plugin'
+      },
       timeout: 5000, // Timeout 5s
     }).then(res => {
       logger.main.info('SimpleWebhook: Message Sent');

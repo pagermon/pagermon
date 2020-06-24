@@ -15,15 +15,15 @@
 // create config file if it does not exist, and set defaults
 var fs = require('fs');
 var conf_defaults = require('./config/default.json');
-var conf_file = './config/config.json';
-if( ! fs.existsSync(conf_file) ) {
-    fs.writeFileSync( conf_file, JSON.stringify(conf_defaults,null, 2) );
-    console.log('created config file - set your api key in '+conf_file);
+var confFile = './config/config.json';
+if( ! fs.existsSync(confFile) ) {
+    fs.writeFileSync( confFile, JSON.stringify(conf_defaults,null, 2) );
+    console.log('created config file - set your api key in '+confFile);
     return;
 }
 // load the config file
 var nconf = require('nconf');
-    nconf.file({file: conf_file});
+    nconf.file({file: confFile});
     nconf.load();
 
 var hostname = nconf.get('hostname');

@@ -1,5 +1,5 @@
 var nconf = require('nconf');
-var conf_file = './config/config.json';
+var confFile = './config/config.json';
 var dbtype = nconf.get('database:type')
 
 exports.up = function(db, Promise) {
