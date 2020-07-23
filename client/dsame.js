@@ -110,7 +110,7 @@ function readable_message(ORG = "WXR", EEE = "RWT", PSSCCC = [], TTTT = "0030", 
         MSG += [`${county}${punc} `];
         idx += 1;
     }
-    MSG += ["("+LLLLLLLL+")"];
+    MSG += ["("+LLLLLLLL.trim()+")"];
     
     return MSG; // Give back the formatted message 
 }
