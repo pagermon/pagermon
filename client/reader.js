@@ -59,8 +59,7 @@ const rl = readline.createInterface({
 });
 
 var frag = {};
-
-var SAME = require('./dsame.js');
+var SAME = require('./dsame.js'); //Import SAME EAS decode functions
 rl.on('line', (line) => {
   //console.log(`Received: ${line.trim()}`);
   var time = moment().format("YYYY-MM-DD HH:mm:ss");
@@ -136,11 +135,11 @@ rl.on('line', (line) => {
       }
     }
   } else if (line.match(/EAS[:|]/)) {
-     var tmessage = SAME.decode(line.match(/Z.*[ZCZC ]/)[0]);
-      console.log(tmessage)
-      address = tmessage[1]
-      message =  tmessage[0]
-      trimMessage = tmessage[0]
+     var decodedMeassage = SAME.decode(line.match(/Z.*[ZCZC ]/)[0]); // Returns a list with [ Message, address ]
+      // Addresses are the following schema LLLL-ORG so for the exaple following the address is "KOAX-WXR" :  ZCZC-WXR-TOR-031109+0015-3650000-KOAX/NWS -
+      address = decodedMeassage[1] 
+      message = true
+      trimMessage = decodedMeassage[0]
       datetime = moment().unix();
    }else {
     address = '';
