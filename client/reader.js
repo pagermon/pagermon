@@ -137,10 +137,16 @@ rl.on('line', (line) => {
   } else if (line.match(/EAS[:|]/)) {
      var decodedMeassage = SAME.decode(line); // Returns a list with [ Message, address ]
       // Addresses are the following schema LLLL-ORG so for the exaple following the address is "KOAX-WXR" :  ZCZC-WXR-TOR-031109+0015-3650000-KOAX/NWS -
-      address = decodedMeassage[1] 
-      message = decodedMeassage
-      trimMessage = decodedMeassage[0]
-      datetime = moment().unix();
+      if (decodedMeassage) {
+          address = decodedMeassage[1]
+          message = decodedMeassage
+          trimMessage = decodedMeassage[0]
+          datetime = moment().unix();
+      } else {
+          address = '';
+          message = false;
+          trimMessage = '';
+      }
    }else {
     address = '';
     message = false;
