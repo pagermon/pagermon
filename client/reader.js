@@ -140,7 +140,7 @@ rl.on('line', (line) => {
       console.log(tmessage)
       address = tmessage[1]
       message =  tmessage[0]
-      trimMessage =  tmessage[0]
+      trimMessage = tmessage[0]
       datetime = moment().unix();
    }else {
     address = '';
@@ -164,7 +164,7 @@ rl.on('line', (line) => {
   } else {
     console.log(colors.red(time+': ')+colors.grey(line));
   }
-  
+
 }).on('close', () => {
   console.log('Input died!');
 });
