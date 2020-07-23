@@ -126,7 +126,7 @@ function same_decode(same) {
     PSSCCC_list = S1.split("-").slice(3);
     [TTTT, JJJHHMM, LLLLLLLL] = S2.split("-", 3);
     LLLLLLLL = LLLLLLLL.replace("-", "");
-    LLLLLLLL = LLLLLLLL.trim()
+    LLLLLLLL.trim()
     [STATION, TYPE] = LLLLLLLL.split("/");
     
     //Validate each PSSCCC or FIPS code, Also see if US or CA
