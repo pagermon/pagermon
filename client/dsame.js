@@ -120,48 +120,53 @@ function same_decode(same) {
     // Remove the EAS: if not killed prior
     same = same.replace("EAS: ", "").toUpperCase().replace(" ", "");
 
-    // Break apart the message according to ZCZC-ORG-EEE-PSSCCC+TTTT-JJJHHMM-TTTTTTT-
-    [S1, S2] = same.split("+");
-    [ZCZC, ORG, EEE] = S1.split("-").slice(0, 3);
-    PSSCCC_list = S1.split("-").slice(3);
-    [TTTT, JJJHHMM, LLLLLLLL] = S2.split("-", 3);
-    LLLLLLLL = LLLLLLLL.replace("-", "");
-    LLLLLLLL = LLLLLLLL.replace(/\s+/g, '');
-    try {
-        [STATION, TYPE] = LLLLLLLL.split("/");
-    } catch (e) {
-        STATION = LLLLLLLL;
-        TYPE = null;
-    }
+    if (same != "NNNN") {
 
-    //Validate each PSSCCC or FIPS code, Also see if US or CA
-    US_bad_list = [];
-    CA_bad_list = [];
-    for (var code in PSSCCC_list) {
+        // Break apart the message according to ZCZC-ORG-EEE-PSSCCC+TTTT-JJJHHMM-TTTTTTT-
+        [S1, S2] = same.split("+");
+        [ZCZC, ORG, EEE] = S1.split("-").slice(0, 3);
+        PSSCCC_list = S1.split("-").slice(3);
+        [TTTT, JJJHHMM, LLLLLLLL] = S2.split("-", 3);
+        LLLLLLLL = LLLLLLLL.replace("-", "");
+        LLLLLLLL = LLLLLLLL.replace(/\s+/g, '');
         try {
-            if ((code.slice(3) === "000")) {
-                county = SAME_DEFS.US_SAME_AREA[code.slice(1, 3)];
-            } else {
-                county = SAME_DEFS.US_SAME_CODE[code.slice(1)];
+            [STATION, TYPE] = LLLLLLLL.split("/");
+        } catch (e) {
+            STATION = LLLLLLLL;
+            TYPE = null;
+        }
+
+        //Validate each PSSCCC or FIPS code, Also see if US or CA
+        US_bad_list = [];
+        CA_bad_list = [];
+        for (var code in PSSCCC_list) {
+            try {
+                if ((code.slice(3) === "000")) {
+                    county = SAME_DEFS.US_SAME_AREA[code.slice(1, 3)];
+                } else {
+                    county = SAME_DEFS.US_SAME_CODE[code.slice(1)];
+                }
+            } catch (e) {
+                US_bad_list.append(code);
             }
-        } catch (e) {
-           US_bad_list.append(code);
+            try {
+                county = SAME_DEFS.CA_SAME_CODE[code.slice(1)];
+            } catch (e) {
+                CA_bad_list.append(code);
+            }
         }
-        try {
-            county = SAME_DEFS.CA_SAME_CODE[code.slice(1)];
-        } catch (e) {
-            CA_bad_list.append(code);
-        }
-    }
 
-    //Remove any bad PSSCCC and Proced to format message
-    COUNTRY = ((US_bad_list.length > CA_bad_list.length) ? "CA" : "US");
-    bad_list = ((COUNTRY === "US") ? US_bad_list : CA_bad_list);
-    for (var code in bad_list) {
-        PSSCCC_list.remove(code);
+        //Remove any bad PSSCCC and Proced to format message
+        COUNTRY = ((US_bad_list.length > CA_bad_list.length) ? "CA" : "US");
+        bad_list = ((COUNTRY === "US") ? US_bad_list : CA_bad_list);
+        for (var code in bad_list) {
+            PSSCCC_list.remove(code);
+        }
+        PSSCCC_list.sort();
+        return [readable_message(ORG, EEE, PSSCCC_list, TTTT, JJJHHMM, STATION, TYPE, LLLLLLLL, COUNTRY), STATION + "-" + ORG];
+    } else {
+        return false
     }
-    PSSCCC_list.sort();
-    return [readable_message(ORG, EEE, PSSCCC_list, TTTT, JJJHHMM, STATION, TYPE, LLLLLLLL, COUNTRY), STATION + "-" + ORG];
 }
 
 module.exports = {
