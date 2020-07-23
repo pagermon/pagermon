@@ -60,6 +60,7 @@ const rl = readline.createInterface({
 
 var frag = {};
 
+var SAME = require('./dsame.js');
 rl.on('line', (line) => {
   //console.log(`Received: ${line.trim()}`);
   var time = moment().format("YYYY-MM-DD HH:mm:ss");
@@ -134,7 +135,14 @@ rl.on('line', (line) => {
         trimMessage = message;
       }
     }
-  } else {
+  } else if (line.match(/EAS[:|]/)) {
+     var tmessage = SAME.decode(line.match(/Z.*[ZCZC ]/)[0]);
+      console.log(tmessage)
+      address = tmessage[1]
+      message =  tmessage[0]
+      trimMessage =  tmessage[0]
+      datetime = moment().unix();
+   }else {
     address = '';
     message = false;
     trimMessage = '';
