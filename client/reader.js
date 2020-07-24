@@ -169,7 +169,6 @@ rl.on('line', (line) => {
   } else {
     console.log(colors.red(time+': ')+colors.grey(line));
   }
-
 }).on('close', () => {
   console.log('Input died!');
 });
