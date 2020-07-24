@@ -138,9 +138,9 @@ rl.on('line', (line) => {
      var decodedMeassage = SAME.decode(line); // Returns a list with [ Message, address ]
       // Addresses are the following schema LLLL-ORG so for the exaple following the address is "KOAX-WXR" :  ZCZC-WXR-TOR-031109+0015-3650000-KOAX/NWS -
       if (decodedMeassage) {
-          address = decodedMeassage[1]
-          message = decodedMeassage
-          trimMessage = decodedMeassage[0]
+          address = decodedMeassage["LLLL-ORG"]
+          message = decodedMeassage["MESSAGE"]
+          trimMessage = decodedMeassage["MESSAGE"]
           datetime = moment().unix(); //just get current time
       } else {
           address = '';
