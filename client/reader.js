@@ -59,7 +59,7 @@ const rl = readline.createInterface({
 });
 
 var frag = {};
-var SAME = require('./dsame.js'); //Import SAME EAS decode functions
+var SAME = require('jsame'); //Import jSAME EAS decode 
 rl.on('line', (line) => {
   //console.log(`Received: ${line.trim()}`);
   var time = moment().format("YYYY-MM-DD HH:mm:ss");
@@ -141,7 +141,7 @@ rl.on('line', (line) => {
           address = decodedMeassage[1]
           message = decodedMeassage
           trimMessage = decodedMeassage[0]
-          datetime = moment().unix();
+          datetime = moment().unix(); //just get current time
       } else {
           address = '';
           message = false;
