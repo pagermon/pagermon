@@ -59,7 +59,7 @@ const rl = readline.createInterface({
 });
 
 var frag = {};
-
+var SAME = require('jsame'); //Import jSAME EAS decode 
 rl.on('line', (line) => {
   //console.log(`Received: ${line.trim()}`);
   var time = moment().format("YYYY-MM-DD HH:mm:ss");
@@ -134,7 +134,20 @@ rl.on('line', (line) => {
         trimMessage = message;
       }
     }
-  } else {
+  } else if (line.match(/EAS[:|]/)) {
+     var decodedMeassage = SAME.decode(line); // Returns a list with [ Message, address ]
+      // Addresses are the following schema LLLL-ORG so for the exaple following the address is "KOAX-WXR" :  ZCZC-WXR-TOR-031109+0015-3650000-KOAX/NWS -
+      if (decodedMeassage) {
+          address = decodedMeassage["LLLL-ORG"]
+          message = decodedMeassage["MESSAGE"]
+          trimMessage = decodedMeassage["MESSAGE"]
+          datetime = moment().unix(); //just get current time
+      } else {
+          address = '';
+          message = false;
+          trimMessage = '';
+      }
+   }else {
     address = '';
     message = false;
     trimMessage = '';
@@ -156,7 +169,6 @@ rl.on('line', (line) => {
   } else {
     console.log(colors.red(time+': ')+colors.grey(line));
   }
-  
 }).on('close', () => {
   console.log('Input died!');
 });
