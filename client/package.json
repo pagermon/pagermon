@@ -13,7 +13,7 @@
     "request": "^2.81.0",
     "request-promise-native": "^1.0.4",
     "total.js": "^3.2.3",
-    "jsame": "^0.1.2"
+    "@maxwelldps/jsame@0.1.4": "^0.1.2"
   },
   "devDependencies": {},
   "scripts": {
