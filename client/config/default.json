@@ -4,7 +4,7 @@
   "identifier": "TEST",
   "sendFunctionCode": false,
   "useTimestamp": true,
-  "EAS_Exclude_Events": [], // Exclude spefic events ie 'RWT' for requred weekly test. Code examples here https://github.com/MaxwellDPS/jsame/blob/master/README.md
-  "EAS_Include_FIPS": [], // Can be for conty or state ie '031109' or '031000' for US FIPS add a 0 at the front https://www.nrcs.usda.gov/wps/portal/nrcs/detail/national/home/?cid=nrcs143_013697 
+  "EAS_Exclude_Events": [], // Exclude spefic events ie 'RWT' for requred weekly test. 
+  "EAS_Include_FIPS": [], // Can be for conty or state ie '031109' or '031000' for US FIPS add a 0 at the front
   "EAS_sendType": true // Appends Event type indicator to address, usefull for alerting based on Watch/Warnings
 }
