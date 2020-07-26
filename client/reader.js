@@ -31,6 +31,9 @@ var apikey = nconf.get('apikey');
 var identifier = nconf.get('identifier');
 var sendFunctionCode = nconf.get('sendFunctionCode') || false;
 var useTimestamp = nconf.get('useTimestamp') || true;
+var EAS_Exclude_Events = nconf.get('EAS_Exclude_Events');
+var EAS_Exclude_Events = nconf.get('EAS_Include_FIPS');
+var EAS_sendType = nconf.get('useTimestamp') || true;
 
 //Check if hostname is in a valid format - currently only removes trailing slash - possibly expand to validate the whole URI? 
 if(hostname.substr(-1) === '/') {
