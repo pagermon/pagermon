@@ -59,7 +59,7 @@ const rl = readline.createInterface({
 });
 
 var frag = {};
-var SAME = require('maxwelldps/jsame'); //Import jSAME EAS decode 
+var SAME = require('@maxwelldps/jsame'); //Import jSAME EAS decode 
 rl.on('line', (line) => {
   //console.log(`Received: ${line.trim()}`);
   var time = moment().format("YYYY-MM-DD HH:mm:ss");
