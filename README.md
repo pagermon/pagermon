@@ -263,11 +263,17 @@ Edit config.json with your favorite editor
 
 
 **apikey:**  This is the API key generate on the Pagermon Server http://serverip/admin/settings
+
 **hostname:** The host name or IP of the Pagermon server (If you run Pagermon Server and Client on same PC then you can put this as http://127.0.0.1:3000
+
 **identifier:** This will show up in the source column on the server web page good for when you have multiple sources and want to know which one the pager message is coming from
+
 **excludeEvents:** Allows a list of [Events](https://github.com/MaxwellDPS/jsame#event-codes) to exclude ie `["RWT","RMT","SVA"]`
+
 **includeFIPS:** Allows you to filter on a list of FIPS to alert on ie `["031109", "031000"]`
+
 **addressAddType:** Will append the event code to the address so `KOAX-WXR` would become KOAX-WXR-W for `ZCZC-WXR-TOR-031109+0015-3650000-KOAX/NWS -` **true** or **false**
+
 
 ## PagermonPi - Raspberry Pi Image
 Check out our Raspberry Pi Image for Pi3 & Pi4 which has Pagermon pre-loaded on it.
