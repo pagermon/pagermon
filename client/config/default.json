@@ -4,7 +4,9 @@
   "identifier": "TEST",
   "sendFunctionCode": false,
   "useTimestamp": true,
-  "EAS_Exclude_Events": [],
-  "EAS_Include_FIPS": [],
-  "EAS_sendType": true
+  "EAS": {
+    "ExcludeEvents": [],
+    "IncludeFIPS": [],
+    "AddressAddType": true
+  }
 }
