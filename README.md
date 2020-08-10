@@ -226,6 +226,7 @@ To install the Prerequisites run
 #### Installing Pagermon Client
 Run the following commands from Terminal:
 ```
+git clone https://github.com/pagermon/pagermon.git
 cd pagermon/client
 npm install
 ```
