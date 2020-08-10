@@ -5,8 +5,8 @@
   "sendFunctionCode": false,
   "useTimestamp": true,
   "EAS": {
-    "ExcludeEvents": [],
-    "IncludeFIPS": [],
-    "AddressAddType": true
+    "excludeEvents": [],
+    "includeFIPS": [],
+    "addressAddType": true
   }
 }
