@@ -226,7 +226,7 @@ Run the following commands from Terminal:
 cd pagermon/client
 npm install
 ```
-edit `reader.sh` and edit frequency and rtl_device number
+edit `reader.sh` and edit frequency and rtl_device number, Edit Multimon-ng command
 ```Bash
 rtl_fm -d 0 -E dc -F 0 -A fast -f 148.5875M -s22050 - |
 multimon-ng -q -b1 -c -a POCSAG512 -f alpha -t raw /dev/stdin |
@@ -235,6 +235,17 @@ node reader.js
 `-d 0` - change this to your rtl_device number using rtl_test
 
 `-f 148.5875M` - change this to the frequency you are decoding
+
+#### Multimon-ng Command examples
+##### POCSAG
+> multimon-ng -q -b1 -c -a POCSAG512 -f alpha -t raw /dev/stdin
+
+##### FLEX
+>  multimon-ng -a FLEX -t raw /dev/stdin
+
+##### EAS
+> multimon-ng -a EAS -t raw /dev/stdin
+
 
 #### Configuring Pagermon Client
 Before running Pagermon Client you have to configure it to send the decoded info to the pagermon server.
