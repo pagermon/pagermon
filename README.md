@@ -272,7 +272,7 @@ Edit config.json with your favorite editor
 
 ```
 
-##### Pager Options
+#### Pager Options
 
 **apikey:**  This is the API key generate on the Pagermon Server http://serverip/admin/settings
 
@@ -284,7 +284,7 @@ Edit config.json with your favorite editor
 
 **useTimestamp:** This will use the time in the message **true** or **false**
 
-##### EAS Options
+#### EAS Options
 **excludeEvents:** Allows a list of [Events](https://github.com/MaxwellDPS/jsame#event-codes) to exclude ie `["RWT","RMT","SVA"]`
 
 **includeFIPS:** Allows you to filter on a list of FIPS to alert on ie `["031109", "031000"]`
