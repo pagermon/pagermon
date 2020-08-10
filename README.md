@@ -215,10 +215,13 @@ See [additional parameters](https://github.com/SloCompTech/docker-baseimage).
 These programs/libraries are required for Pagermon Client to work
 
 * [RTL-SDR](https://www.rtl-sdr.com/rtl-sdr-quick-start-guide/) - RTL-SDR tools/libraries to access RTL-SDR dongle
-* RTL-SDR dongle - You can get these from Ebay, Amazon or other stores (Has to have RTL2832U chip)
-* nodejs - JavaScript Programming Language (Only if installing separate from server)
-* npm - Javascript Package Manager (Only if installing separate from server)
-* Git Client - Github.com client for getting source code (Only if installing separate from server)
+* [RTL-SDR dongle](https://www.rtl-sdr.com/buy-rtl-sdr-dvb-t-dongles/)  - You can get these from Ebay, Amazon or other stores (Has to have RTL2832U chip)
+* [nodejs](https://nodejs.org/en/) - JavaScript Programming Language (Only if installing separate from server)
+* [npm](https://www.npmjs.com/) - Javascript Package Manager (Only if installing separate from server)
+* [Git Client](https://git-scm.com/) - Github.com client for getting source code (Only if installing separate from server) 
+
+To install the Prerequisites run
+`sudo apt install nodejs npm git rtl-sdr`
 
 #### Installing Pagermon Client
 Run the following commands from Terminal:
@@ -250,7 +253,7 @@ node reader.js
 #### Configuring Pagermon Client
 Before running Pagermon Client you have to configure it to send the decoded info to the pagermon server.
 
-copy default.json to config.json using cp default.json config.json
+copy default.json to config.json 
 ```
 cp config/default.json config/config.json 
 ```
