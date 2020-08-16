@@ -1,5 +1,6 @@
 ﻿# 0.3.XX - TBD
 * Added EAS support, Just run multimon-ng -a EAS #432 @maxwelldps
+* Added EAS FIltering Based on FIPS and EVENT and moved [jsame to git](https://github.com/MaxwellDPS/jsame/packages/329242) And updated jSAME to 0.1.9
 
 # 0.3.10 - 2020-06-24
 

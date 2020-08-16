@@ -13,7 +13,7 @@
 # -q		   : ssshhhh
 # -b1		   : blocks a lot of false decodes, set to b0 if you still get some
 # -c 		   : I forget what this does
-# -a POCSAG512 : set to the protocol you're decoding: POCSAG512, POCSAG1200, POCSAG2400, FLEX, EAS
+# -a POCSAG512 : set to the protocol you're decoding
 # -f alpha 	   : omit if you want non-alphanumeric pages
 # -t raw 	   : tells multimon that you're coming from rtl_fm's pipe
 # /dev/stdin   : the place where all the studs come from
