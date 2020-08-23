@@ -114,7 +114,8 @@ const pocsagHandler = function(lineObj) {
     address: lineObj.line.match(/POCSAG(\d+): Address:(.*?)Function/)[2].trim(),
   };
   if (sendFunctionCode) {
-    message.address += lineObj.line.match(/POCSAG(\d+): Address:(.*?)Function: (\d)/)[3];
+    message.functionCode = lineObj.line.match(/POCSAG(\d+): Address:(.*?)Function: (\d)/)[3]
+    message.address += message.functionCode;
   }
   if (lineObj.line.indexOf('Alpha:') > -1) {
     message.type = 'Alphanumeric';
