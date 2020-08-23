@@ -90,7 +90,7 @@ rl.on('line', (line) => {
     let message = messages.shift();
     if (message.address.length > 2 && message.message) {
       message.address = padDigits(message.address,7);
-      console.log(colors.red(message.datetime+': ')+colors.yellow(message.protocol+'- '+message.address+': ')+colors.white(message.message));
+      console.log(colors.red(message.time+': ')+colors.yellow(message.protocol+' - '+message.address+': ')+colors.grey({message}));
       // now send the message
       const form = {
         ...message,
@@ -110,9 +110,12 @@ rl.on('line', (line) => {
 //PROTOCOL HANDLING
 const pocsagHandler = function(lineObj) {
   let message = {
-    protocol: 'Pocsag',
+    protocol: 'POCSAG',
     address: lineObj.line.match(/POCSAG(\d+): Address:(.*?)Function/)[2].trim(),
+    datetime: lineObj.datetime,
+    time: lineObj.time,
   };
+
   if (sendFunctionCode) {
     message.functionCode = lineObj.line.match(/POCSAG(\d+): Address:(.*?)Function: (\d)/)[3]
     message.address += message.functionCode;
@@ -137,14 +140,14 @@ const pocsagHandler = function(lineObj) {
             ...message,
             datetime: moment(timeString).unix(),
             message: message.message.replace(/\d+-\d+-\d+ \d{2}:\d{2}:\d{2}/, '')
-          }
+          };
         }
       }
     }
     //TODO: Do we need this part? Multimon has a charset function since a year or so, so the error that this fixed should not occur anymore
-    message.message = message.replace(/<[A-Za-z]{3}>/g,'').replace(/Ä/g,'[').replace(/Ü/g,']').trim();
+    message.message = message.message.replace(/<[A-Za-z]{3}>/g,'').replace(/Ä/g,'[').replace(/Ü/g,']').trim();
   }
-  else if (lineObj.indexOf('Numeric:') > -1) {
+  else if (lineObj.line.indexOf('Numeric:') > -1) {
     message = {
       ...message,
       message: lineObj.line.match(/Numeric:(.*?)$/)[1].trim()
@@ -164,7 +167,9 @@ const flexHandler = function(lineObj) {
   let messages = [];
   let tempMessage = {
     protocol: 'FLEX',
-    addressString: lineObj.line.match(/FLEX[:|] ?.*?[\[|]([\d ]*)[\]| ]/)[1].trim()
+    addressString: lineObj.line.match(/FLEX[:|] ?.*?[\[|]([\d ]*)[\]| ]/)[1].trim(),
+    datetime: lineObj.datetime,
+    time: lineObj.time
   }
 
   if (useTimestamp) {
