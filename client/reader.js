@@ -180,6 +180,7 @@ const flexHandler = function(lineObj) {
       }
     }
   }
+  tempMessage.message = lineObj.line.match(/FLEX[:|].*[|\[][0-9 ]*[|\]] ?...[ |](.+)/)[1].trim();
 
   if (lineObj.line.match( /([ |]ALN[ |]|[ |]GPN[ |]|[ |]NUM[ |])/ )) {
     if (lineObj.line.match( /[ |][0-9]{4}\/[0-9]\/F\/.[ |]/ )) {
