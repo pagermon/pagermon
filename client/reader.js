@@ -144,7 +144,7 @@ const pocsagHandler = function(lineObj) {
         }
       }
     }
-    message.message = message.message.replace(/<(ETX|EOT)>.*/g,'').replace(/<(CR|LF)>(<LF>)?/,'\r\n').trim();
+    message.message = message.message.replace(/<(ETX|EOT)>.*/g,'').replace(/<(CR)>/,'\r').replace(/<(LF)>/,'\n').trim();
     //TODO: Do we need this part? Multimon has a charset function since a year or so, so the error that this fixed should not occur anymore
     message.message = message.message.replace(/Ä/g,'[').replace(/Ü/g,']');
   }
