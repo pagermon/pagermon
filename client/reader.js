@@ -144,16 +144,16 @@ const pocsagHandler = function(lineObj) {
         }
       }
     }
-    message.message = message.message.replace(/<EOT>.*/g,'');
+    message.message = message.message.replace(/<(ETX|EOT)>.*/g,'').replace(/<(CR|LF)>(<LF>)?/,'\r\n').trim();
     //TODO: Do we need this part? Multimon has a charset function since a year or so, so the error that this fixed should not occur anymore
-    message.message = message.message.replace(/Ä/g,'[').replace(/Ü/g,']').trim();
+    message.message = message.message.replace(/Ä/g,'[').replace(/Ü/g,']');
   }
   else if (lineObj.line.indexOf('Numeric:') > -1) {
     message = {
       ...message,
       message: lineObj.line.match(/Numeric:(.*?)$/)[1].trim()
     }
-    message.message = message.message.replace(/<EOT>.*/g,'');
+    message.message = message.message.replace(/<(ETX|EOT)>.*/g,'').trim();
     //TODO: Do we need this part? Multimon has a charset function since a year or so, so the error that this fixed should not occur anymore
     message.message = message.message.replace(/Ä/g,'[').replace(/Ü/g,']');
   }
