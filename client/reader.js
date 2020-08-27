@@ -121,8 +121,11 @@ const pocsagHandler = function(lineObj) {
     message.address += message.functionCode;
   }
   if (lineObj.line.indexOf('Alpha:') > -1) {
-    message.type = 'Alphanumeric';
-    message.message = lineObj.line.match(/Alpha:(.*?)$/)[1].trim();
+    message = {
+      ... message,
+      type: 'Alphanumeric',
+      message: lineObj.line.match(/Alpha:(.*?)$/)[1].trim()
+    };
     if (useTimestamp) {
       if (message.message.match(/\d{2} \w+ \d{4} \d{2}:\d{2}:\d{2}/)) {
         let timeString = message.message.match(/\d+ \w+ \d+ \d{2}:\d{2}:\d{2}/)[0];
@@ -151,6 +154,7 @@ const pocsagHandler = function(lineObj) {
   else if (lineObj.line.indexOf('Numeric:') > -1) {
     message = {
       ...message,
+      type: 'Numeric',
       message: lineObj.line.match(/Numeric:(.*?)$/)[1].trim()
     }
     message.message = message.message.replace(/<(ETX|EOT)>.*/g,'').trim();
@@ -193,12 +197,20 @@ const flexHandler = function(lineObj) {
   if (lineObj.line.match( /([ |]ALN[ |]|[ |]GPN[ |]|[ |]NUM[ |])/ )) {
     if (lineObj.line.match( /[ |][0-9]{4}\/[0-9]\/F\/.[ |]/ )) {
       // message is fragmented, hold onto it for next line
-      tempMessage.message = lineObj.line.match(/FLEX[:|].*[|\[][0-9 ]*[|\]] ?...[ |](.+)/)[1].trim();
+      tempMessage = {
+        ...tempMessage,
+        message: lineObj.line.match(/FLEX[:|].*[|\[][0-9 ]*[|\]] ?...[ |](.+)/)[1].trim(),
+        fragment: true
+      }
       frags[tempMessage.addressString] = tempMessage;
     }
     else if (lineObj.line.match( /[ |][0-9]{4}\/[0-9]\/C\/.[ |]/ )) {
       // message is a completion of the last fragmented message
-      tempMessage.message = frags[tempMessage.addressString]+tempMessage.message;
+      tempMessage = {
+        ...tempMessage,
+        message: frags[tempMessage.addressString]+tempMessage.message,
+        fragmentComplete: true
+      };
       delete frags[tempMessage.addressString];
     } /* Todo: Not needed, since redundant with part below. Maybe keep for future use.
     else if (lineObj.line.match( /[ |][0-9]{4}\/[0-9]\/K\/.[ |]/ )) {
@@ -214,6 +226,9 @@ const flexHandler = function(lineObj) {
   }
 
   let addresses = tempMessage.addressString.split(' ');
+  if (addresses.length() > 1) {
+    tempMessage.groupedMessage = true;
+  }
   delete tempMessage.addressString;
   addresses.forEach((address) => {
     messages.push({
