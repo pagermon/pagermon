@@ -116,8 +116,8 @@ const pocsagHandler = function(lineObj) {
     time: lineObj.time,
   };
 
+  message.functionCode = lineObj.line.match(/POCSAG(\d+): Address:(.*?)Function: (\d)/)[3]
   if (sendFunctionCode) {
-    message.functionCode = lineObj.line.match(/POCSAG(\d+): Address:(.*?)Function: (\d)/)[3]
     message.address += message.functionCode;
   }
   if (lineObj.line.indexOf('Alpha:') > -1) {
@@ -144,7 +144,7 @@ const pocsagHandler = function(lineObj) {
         }
       }
     }
-    message.message = message.message.replace(/<(ETX|EOT)>.*/g,'').replace(/<(CR|LF)>(<LF>)?/,'\r\n').trim();
+    message.message = message.message.replace(/<(ETX|EOT)>.*/g,'').replace(/<(CR)>/g,'\r').replace(/<(LF)>/g,'\n').trim();
     //TODO: Do we need this part? Multimon has a charset function since a year or so, so the error that this fixed should not occur anymore
     message.message = message.message.replace(/Ä/g,'[').replace(/Ü/g,']');
   }
