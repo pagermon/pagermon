@@ -21,7 +21,7 @@ The UI is built around a Node/Express/Angular/Bootstrap stack, while the client 
 
 * Capcode aliasing with colors and [FontAwesome](https://fontawesome.io/icons/) icons
 * API driven extensible architecture
-* Single user, multiple API keys
+* Multi-user support
 * SQLite or MySQL database backing
 * Configurable via UI
 * Pagination and searching
@@ -48,8 +48,6 @@ The UI is built around a Node/Express/Angular/Bootstrap stack, while the client 
 
 ### Planned Features
 
-* Multi-user support
-* Postgres + MariaDB Support
 * Horizontal scaling
 * Enhanced message filtering
 * Bootstrap 4 + Angular 2 support
@@ -71,7 +69,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-* [nodejs](https://nodejs.org/)
+* [nodejs](https://nodejs.org/) 12.x or higher
 * sqlite3
 * Probably some other stuff
 
