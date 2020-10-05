@@ -38,7 +38,7 @@ The UI is built around a Node/Express/Angular/Bootstrap stack, while the client 
     * [Telegram](https://telegram.org/) near realtime cloud based multi-device messaging
     * [Discord](https://discordapp.com/) near realtime cloud based messaging service
     * [Gotify](https://gotify.net/) Self-Hosted messaging service
-    * [Twitter](www.twitter.com)
+    * [Twitter](https://www.twitter.com/)
     * [Microsoft Teams](https://products.office.com/en-us/microsoft-teams/group-chat-software) Team colaboration platform
     * [Slack](https://slack.com/) Team colabortation platform
     * SMTP Email Support for conventional SMTP email notifications 
