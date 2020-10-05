@@ -53,7 +53,6 @@ The UI is built around a Node/Express/Angular/Bootstrap stack, while the client 
 * Bootstrap 4 + Angular 2 support
 * Enhanced alias control
 * Graphing
-* Non-sucky documentation
 
 ### Screenshots
 
