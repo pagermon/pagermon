@@ -226,7 +226,7 @@ const flexHandler = function(lineObj) {
   }
 
   let addresses = tempMessage.addressString.split(' ');
-  if (addresses.length() > 1) {
+  if (addresses.length > 1) {
     tempMessage.groupedMessage = true;
   }
   delete tempMessage.addressString;
