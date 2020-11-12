@@ -1,0 +1,115 @@
+<div class="row" style="padding-top: 11px;">
+</div>
+<div ng-if="loading" class="loading"><i class="fa fa-spinner fa-spin"></i></div>
+<div class="alert {{alertMessage.type}} alert-dismissable alert-fixed fade in" ng-if="alertMessage.show">
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="alertMessage.show = false">&times;</button>
+  <strong>{{alertMessage.text}}</strong>
+</div>
+<div class="row" style="padding-top: 10px;">
+    <div class="col-xs-12">
+      <h4 style="padding-left: 15px;"><a href="/admin/">Admin</a></h4>
+      <hr />
+
+      <div class="col-md-6 col-lg-12 col-12">
+        <div class="row">
+            <div class="fw-admin-mobile admin-buttons" style="display:inline-block;padding: 5px;">
+              <a href="/admin/aliases">
+                <div class="card mb-4 progress-banner">
+                    <div class="card-body justify-content-between d-flex flex-row align-items-center">
+                      <div>
+                        <p class="text-white">Aliases</p>
+                        <p class="admin-button-sub text-white">Manage capcode aliases</p>
+                    </div>
+                      <div>
+                          <i class="fa fa-fw fa-address-card fa-3x pull-left" style="color:#E8563F"> </i>
+                        </div>
+                    </div>
+                </div>
+              </a>
+            </div>
+
+            <div class="fw-admin-mobile admin-buttons" style="display:inline-block;padding: 5px;">
+              <a href=""></a>
+                <div class="card mb-4 progress-banner">
+                    <div class="card-body justify-content-between d-flex flex-row align-items-center">
+                      <div>
+                        <p class="text-white text-muted">Messages</p>
+                        <p class="admin-button-sub text-white text-muted">View/delete messages</p>
+                    </div>
+                      <div>
+                          <i class="fa fa-fw fa-inbox fa-3x pull-left" style="color:#E8563F"> </i>
+                        </div>
+                    </div>
+                </div>
+              </a>
+            </div>
+            <div class="fw-admin-mobile admin-buttons" style="display:inline-block;padding: 5px;">
+              <a href=""></a>
+                <div class="card mb-4 progress-banner">
+                    <div class="card-body justify-content-between d-flex flex-row align-items-center">
+                      <div>
+                        <p class="text-white text-muted">Logs</p>
+                        <p class="admin-button-sub text-white text-muted">View log files</p>
+                    </div>
+                      <div>
+                          <i class="fa fa-fw fa-book fa-3x pull-left" style="color:#E8563F"> </i>
+                        </div>
+                    </div>
+                </div>
+              </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-12 col-12">
+      <div class="row">
+          <div class="fw-admin-mobile admin-buttons" style="display:inline-block;padding: 5px;">
+            <a href="/admin/settings">
+              <div class="card mb-4 progress-banner">
+                  <div class="card-body justify-content-between d-flex flex-row align-items-center">
+                    <div>
+                      <p class="text-white">Settings</p>
+                      <p class="admin-button-sub text-white">Configure system settings</p>
+                  </div>
+                    <div>
+                        <i class="fa fa-fw fa-cogs fa-3x pull-left" style="color:#E8563F"> </i>
+                      </div>
+                  </div>
+              </div>
+            </a>
+          </div>
+
+          <div class="fw-admin-mobile admin-buttons" style="display:inline-block;padding: 5px;">
+            <a href="/admin/reset">
+              <div class="card mb-4 progress-banner">
+                  <div class="card-body justify-content-between d-flex flex-row align-items-center">
+                    <div>
+                      <p class="text-white">Reset Password</p>
+                      <p class="admin-button-sub text-white">Change the admin user password</p>
+                  </div>
+                    <div>
+                        <i class="fa fa-fw fa-key fa-3x pull-left" style="color:#E8563F"> </i>
+                      </div>
+                  </div>
+              </div>
+            </a>
+          </div>
+          <div class="fw-admin-mobile admin-buttons" style="display:inline-block;padding: 5px;">
+            <a href="https://github.com/pagermon/pagermon#support">
+              <div class="card mb-4 progress-banner">
+                  <div class="card-body justify-content-between d-flex flex-row align-items-center">
+                    <div>
+                      <p class="text-white">Help</p>
+                      <p class="admin-button-sub text-white">Documentation and support</p>
+                  </div>
+                    <div>
+                        <i class="fa fa-fw fa-life-ring fa-3x pull-left" style="color:#E8563F"> </i>
+                      </div>
+                  </div>
+              </div>
+            </a>
+          </div>
+      </div>
+  </div>    
+</div>
+</div>  
