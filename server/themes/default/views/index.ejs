@@ -87,10 +87,10 @@
                 </span>
                 </div>
             </th>
-            <% if (!hidesource || login) { %>
+            <% if (!hidesource || (login && user.role == 'admin')) { %>
               <th class="noMobile noSmall" style="text-align: center;">Src</th>
             <% } %>
-            <% if (!hidecapcode || login) { %>
+            <% if (!hidecapcode || (login && user.role == 'admin')) { %>
               <th class="noMobile" style="text-align: center;">Capcode</th>
             <% } %>
             <th class="noMobile noSmall"></th>
@@ -105,12 +105,12 @@
           <tr ng-repeat="message in messages | filter: search">
             <td class="shrink noMobile noSmall">{{message.date}}</td>
             <td class="shrink">{{message.timestamp}}</td>
-            <% if (!hidesource || login) { %>
+            <% if (!hidesource || (login && user.role == 'admin')) { %>
               <td class="shrink noMobile noSmall clickable-td" uib-popover-template="'templates/popover.html'" popover-append-to-body=true ng-click="popoverEl = 'source'" popover-trigger="'outsideClick'" style="background-color: {{message.color || 'grey'}}; text-align: center;">
                 <span class="small" style="color: white; font-family: monospace;"><strong>{{message.source}}</strong></span>
               </td>
             <% } %>
-            <% if (!hidecapcode || login) { %>
+            <% if (!hidecapcode || (login && user.role == 'admin')) { %>
               <td class="shrink noMobile noSmall clickable-td" uib-popover-template="'templates/popover.html'" popover-append-to-body=true ng-click="popoverEl = 'address'" popover-trigger="'outsideClick'" style="background-color: {{message.color || 'grey'}}; text-align: center;">
                 <span class="small" style="color: white; font-family: monospace;"><strong>{{message.address}}</strong></span>
               </td>
@@ -158,18 +158,6 @@
         </div>
       </div>
     </div>
-    <% if (apisecurity) { %>
-      <% if (!login) { %>
-        <div class="row">
-          <div class="col-sm-8 col-sm-offset-2" style="text-align: center; vertical-align: middle;">
-            <h2>Secure Mode Enabled</h2>
-            <h4>Please <a href="/login">sign in</a> to view messages</h4>
-              <p>If you believe you reached this message by error, <a href="https://github.com/pagermon/pagermon/issues" target="_blank">log an issue.</a></p>
-            </div>
-          </div>
-        </div>
-      <% } %>
-    <% } %>
     <% if (searchLocation === 'bottom' || typeof searchLocation == 'undefined') { %>
       <div class="row">
         <div class="col-xs-offset-1 col-xs-10">
@@ -295,6 +283,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
       // I hate ejs
       <% if(typeof user != 'undefined'){ %>
         $scope.user="<%=user%>";
+        $scope.role="<%=user.role%>"
       <% }else{ %>
         $scope.user="";
       <% } %>
@@ -308,7 +297,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
   //for some reason, socket opens both sockets, so the adminSocket is required to be closed after opening to prevent leaking data
   <% if (!apisecurity) { %>
     <% if (hidecapcode) { %>
-      <% if (login) { %>
+      <% if ((login && user.role == 'admin')) { %>
         var socketMode = adminSocket
         adminSocket.open();
       <% } else { %>
@@ -318,7 +307,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
         <% } %>
     <%} else { %>
       <% if (pdwmode) { %>
-        <% if (login) { %>
+        <% if ((login && user.role == 'admin')) { %>
           var socketMode = adminSocket
           adminSocket.open();
         <% } else { %>
@@ -333,10 +322,14 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
       <% } %>
     <% } %>	
   <% } else { %>
-    <% if (login) { %>
+    <% if ((login && user.role == 'admin')) { %>
       var socketMode = adminSocket
       adminSocket.open();
-      <% } else { %>
+    <% } else if (login) { %>
+      var socketMode = socket
+      socket.open();
+      adminSocket.close()
+    <% } else { %>
       var socketMode = socket
       socket.close();
       adminSocket.close();
@@ -346,7 +339,7 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
     socketMode.on('messagePost', function(message) {
         // Send Browser Notifications  
     <% if (apisecurity) { %>
-        <% if (login) { %>
+      <% if (login) { %>
         if ($scope.notificationEnabled == 'true') {
         if (!message.agency) {
           //Not showing messages for things that we don't know
@@ -604,19 +597,20 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
       });
       
     }])
+    
     // Routes
     .config(['$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider) {
-      $routeProvider
-        .when('/', {
-          templateUrl: '/messages.html',
-          controller: 'MessageController'
-        })
-        .when('/:page', {
-          templateUrl: '/messages.html',
-          controller: 'MessageController'
-       });
-      $locationProvider.html5Mode({ enabled: true, requireBase: false, rewriteLinks: false});
-    }]);
+    $routeProvider
+      .when('/', {
+        templateUrl: '/messages.html',
+        controller: 'MessageController'
+      })
+      .when('/:page', {
+        templateUrl: '/messages.html',
+        controller: 'MessageController'
+      })
+    $locationProvider.html5Mode({ enabled: true, requireBase: false, rewriteLinks: false });
+  }]);
 
 function notify(notifyTitle,notifyMessage) {
     if (!("Notification" in window)) {

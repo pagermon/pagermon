@@ -91,6 +91,6 @@ client/config/backup.json
 .idea
 server/sessions
 
-client/samples/testymctest.sh
+#coverage
+server/coverage/
 
-.vscode
