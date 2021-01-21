@@ -3,11 +3,12 @@ const { format } = winston;
 // const { combine, label, json, cli } = format;
 // load the config file
 var nconf = require('nconf');
-var conf_file = './config/config.json';
-nconf.file({file: conf_file});
+var confFile = './config/config.json';
+nconf.file({file: confFile});
 nconf.load();
 
 var loglevel = nconf.get('global:loglevel');
+
 
 winston.loggers.add('pagermon', {
     format: format.combine(
@@ -83,10 +84,36 @@ winston.loggers.add('db', {
     ]
 });
 
+winston.loggers.add('auth', {
+    format: format.combine(
+        format.colorize(),
+        format.label({ label: '[auth]' }),
+        format.timestamp({format:"YYYY-MM-DD HH:mm:ss"}),
+        format.prettyPrint(),
+        format.printf(
+            info => `${info.label}  ${info.timestamp}  ${info.level} : ${info.message}`
+        )
+    ),
+    transports: [
+        new winston.transports.File({
+            level: loglevel,
+            filename: './logs/auth.log',
+            handleExceptions: true,
+            maxsize: 10485760,
+            maxFiles: 5
+        }),
+        new winston.transports.Console({
+            level: loglevel,
+            handleExceptions: true
+        })
+    ]
+});
+
 module.exports = {
     main: winston.loggers.get('pagermon'),
     http: winston.loggers.get('http'),
-    db: winston.loggers.get('db')
+    db: winston.loggers.get('db'),
+    auth: winston.loggers.get('auth')
 }
 module.exports.http.stream = {
     write: function(message, encoding){

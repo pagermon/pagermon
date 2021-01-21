@@ -1,4 +1,12 @@
-﻿# 0.3.9 - 2020-05-13
+﻿# 0.3.10 - 2020-06-24
+
+* Downgrade discord.js package to fix crashes #415 @DanrwAU
+* Add user-agent strings for webhook plugins #416 @DanrwAU
+* Cleanup redundant code in db.js #417 @DanrwAU
+* Add Multi-User support, moves all authentication to be DB backed. #411 @DanrwAU
+* Add Unit testing #420 @DanrwAU @marshyonline
+
+# 0.3.9 - 2020-05-13
  
  * Add fix allowing for greater than 100KB CSV files #397 @DanrwAU
  * Remove errant packages that shouldn't have made the release #398 @DanrwAU

@@ -8,6 +8,8 @@
 ![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/pagermon/pagermon.svg?label=release&style=plastic)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/pagermon/pagermon.svg?style=plastic)
 ![GitHub contributors](https://img.shields.io/github/contributors/pagermon/pagermon.svg?style=plastic)
+![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/pagermon/pagermon/Node.js%20CI/master?label=build%20master)
+![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/pagermon/pagermon/Node.js%20CI/develop?label=build%20develop)
 
 PagerMon is an API driven client/server framework for parsing and displaying pager messages from multimon-ng.
 
@@ -202,6 +204,14 @@ docker-compose up -d
 See [additional parameters](https://github.com/SloCompTech/docker-baseimage).
 
 **Tip:** You probably want to setup docker log rotation before, more can be found [here](https://success.docker.com/article/how-to-setup-log-rotation-post-installation).
+
+## PagermonPi - Raspberry Pi Image
+Check out our Raspberry Pi Image for Pi3 & Pi4 which has Pagermon pre-loaded on it.
+
+Check out the following links:
+
+[Releases](https://github.com/pagermon/pagermon/releases) for the latest version
+[Wiki](https://github.com/pagermon/pagermon/wiki/PagermonPi-Image-For-Raspberry-Pi) for PagermonPi support
 
 ## Support
 

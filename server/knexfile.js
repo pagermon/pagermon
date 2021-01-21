@@ -1,5 +1,5 @@
 var nconf = require('nconf');
-var conf_file = './config/config.json';
+var confFile = './config/config.json';
 var logger = require('./log');
 var loglevel = nconf.get('global:loglevel');
 
@@ -21,6 +21,9 @@ var dbconfig = {
       tableName: 'knex_migrations',
       directory: __dirname + '/knex/migrations'
     },
+    seeds: {
+      directory: __dirname + '/knex/seeds'
+    },
     log: {
       warn(message) {
         logger.db.info(JSON.stringify(message))
@@ -36,8 +39,9 @@ var dbconfig = {
       },
     }
 }
-
-if (dbtype == 'sqlite3') {
+if(process.env.NODE_ENV === 'test') {
+  dbconfig.connection.filename = './test/messages.db'
+}else if (dbtype == 'sqlite3') {
   dbconfig.connection.filename = nconf.get('database:file');
 } else if (dbtype == 'mysql') {
   dbconfig.connection.host = nconf.get('database:server');
@@ -53,6 +57,7 @@ if (dbtype == 'sqlite3') {
 
 //this is required because of the silly way knex migrations handle environments 
 module.exports = Object.assign({}, dbconfig, {
+  test: dbconfig,
   development: dbconfig,
   staging: dbconfig,
   production: dbconfig,

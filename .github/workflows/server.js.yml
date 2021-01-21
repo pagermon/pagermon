@@ -1,0 +1,21 @@
+name: Node.js CI 
+
+on:
+  push:
+    branches: [ master, develop ]
+  pull_request:
+    branches: [ develop, master ]
+
+jobs:
+  Run_Tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js 12.16.x
+      uses: actions/setup-node@v1
+      with:
+        node-version: '12.16.x'
+    - run: npm install
+      working-directory: ./server
+    - run: npm test
+      working-directory: ./server
