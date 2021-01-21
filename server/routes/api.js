@@ -555,6 +555,7 @@ router.route('/messageSearch')
     var query;
     var agency;
     var address;
+    var alias;
     // dodgy handling for unexpected results
     if (typeof req.query.q !== 'undefined') {
       query = req.query.q;
@@ -565,6 +566,9 @@ router.route('/messageSearch')
     if (typeof req.query.address !== 'undefined') {
       address = req.query.address;
     } else { address = ''; }
+    if (typeof req.query.alias !== 'undefined') {
+      alias = req.query.alias;
+    } else { alias = ''; }
 
     // set select commands based on query type
 
@@ -601,7 +605,9 @@ router.route('/messageSearch')
           if (agency != '')
             qb.whereIn('messages.alias_id', function (qb2) {
               qb2.select('id').from('capcodes').where('agency', agency).where('ignore', 0);
-            })
+          })
+          if (alias != '')
+            qb.where('alias.id',alias);
         }
       }).orderBy('messages.timestamp', 'desc')
       .then((rows) => {
