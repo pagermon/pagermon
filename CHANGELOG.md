@@ -1,9 +1,10 @@
 ﻿# 0.3.XX - TBD
 * Added EAS support, Just run multimon-ng -a EAS #432 @maxwelldps
-* Added EAS FIltering Based on FIPS and EVENT and moved [jsame to git](https://github.com/MaxwellDPS/jsame/packages/329242) And updated jSAME to 0.1.9
+* Added EAS FIltering Based on FIPS and EVENT and moved [jsame to git](https://github.com/MaxwellDPS/jsame/packages/329242) And updated jSAME to 0.1.9 #435 @MaxwellDPS
 * Fix to PDW Python ingestion script time format #439 @jjeffhendryx
 * Fix Gotify Plugin URL construction #445 @stubbers
-* Fix textAngular.css not being called in header.ejs @DingosGotMyBaby
+* Fix textAngular.css not being called in header.ejs #449 @DingosGotMyBaby
+* Fix Alias Column on iPhoneX devices #450 @DanrwAU
 
 # 0.3.10 - 2020-06-24
 

@@ -139,12 +139,12 @@
               </span>
               <strong style="vertical-align: middle;"></strong>
             </td>
-            <td class="shrink noMobile noSmall clickable-td" ng-if="user"
+            <td class="shrink noMobile clickable-td" ng-if="user"
                 uib-popover-template="'templates/popover.html'" popover-append-to-body=true
                 ng-click="popoverEl = 'alias'" popover-trigger="'outsideClick'">
               <span style="color: Maroon;">{{message.alias || 'Unknown'}}</span>
             </td>
-            <td class="shrink noMobile noSmall" ng-if="!user">
+            <td class="shrink noMobile" ng-if="!user">
               <span>{{message.alias || ''}}</span>
             </td>
             <td class="expand">
