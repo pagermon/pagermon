@@ -5,7 +5,7 @@
 * Fix Gotify Plugin URL construction #445 @stubbers
 * Fix textAngular.css not being called in header.ejs #449 @DingosGotMyBaby
 * Fix Alias Column on iPhoneX devices #450 @DanrwAU
-* Fix Broken Alias Search #453 @marshyonline
+
 
 # 0.3.10 - 2020-06-24
 
