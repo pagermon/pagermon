@@ -607,7 +607,7 @@ router.route('/messageSearch')
               qb2.select('id').from('capcodes').where('agency', agency).where('ignore', 0);
           })
           if (alias != '')
-            qb.where('alias.id',alias);
+            qb.where('alias_id',alias);
         }
       }).orderBy('messages.timestamp', 'desc')
       .then((rows) => {
