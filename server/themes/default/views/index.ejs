@@ -570,6 +570,28 @@
               $scope.htmlEntities = function (str) {
                 return String(str).replace(/&/g, '&amp;').replace(/</g, ' ').replace(/>/g, ' ').replace(/"/g, '&quot;');
               }
+
+              $scope.padDigits = function (number, digits) {
+                return Array(Math.max(digits - String(number).length + 1, 0)).join(0) + number;
+              }
+
+              $scope.setCookie = function (cookie, value) {
+                var expireDate = new Date();
+                expireDate.setDate(expireDate.getDate() + 30);
+                $cookies.put(cookie, value, { 'expires': expireDate });
+                $scope.updateData($scope.init.currentPage);
+              };
+
+              $scope.toggleNotifications = function () {
+                if ($scope.notificationEnabled == 'true') {
+                  $scope.setCookie('notificationEnabled', 'false');
+                } else {
+                  $scope.setCookie('notificationEnabled', 'true');
+                  Notification.requestPermission(function (permission) {
+                    if (!('permission' in Notification)) {
+                      Notification.permission = permission;
+                }
+
             });
           }
       };
