@@ -112,7 +112,7 @@ router.route('/messages')
           var rowCount
 
           db.from('messages')
-            .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore')
+            .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', 'CASE WHEN NOT capcodes.address = messages.address THEN 1 ELSE 0 END as wildcard')
             .modify(function (queryBuilder) {
               if (pdwMode) {
                 if (adminShow && req.isAuthenticated() && req.user.role == 'admin') {
@@ -489,7 +489,7 @@ router.route('/messages/:id')
     var id = req.params.id;
 
     db.from('messages')
-      .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore')
+      .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', 'CASE WHEN NOT capcodes.address = messages.address THEN 1 ELSE 0 END as wildcard')
       .leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id')
       .where('messages.id', id)
       .then((row) => {
@@ -574,7 +574,7 @@ router.route('/messageSearch')
 
     var data = []
     console.time('sql')
-    db.select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore')
+    db.select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', 'CASE WHEN NOT capcodes.address = messages.address THEN 1 ELSE 0 END as wildcard')
       .modify(function (qb) {
         if (dbtype == 'sqlite3' && query != '') {
           qb.from('messages_search_index')
