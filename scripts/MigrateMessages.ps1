@@ -4,6 +4,8 @@
     Migrate messages from a pagermon Sqlite database to another pagermon server instance.
 .DESCRIPTION
     This script reads the pagermon messages from an sqlite database and sends them to a pagermon server instance.
+    Script can be run multiple times from the same db.
+    Journal file is used to keep track of which messages were migrated.
 .NOTES
     This script does not migrate configuration, users, etc.
 #>
