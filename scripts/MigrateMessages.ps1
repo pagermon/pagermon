@@ -60,7 +60,7 @@ function New-PagerMonMessage {
         [UriBuilder]$Uri,
         [string]$apikey
     )
-    #"https://pagermon.kyledoestech.com:443/api/messages" #http://www.example.com:3000/api/messages
+
     $Uri.Path = "/api/messages"
     $data = @{
         address  = $message.Address
