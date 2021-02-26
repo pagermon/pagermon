@@ -48,8 +48,8 @@ FROM messages
 ORDER BY Id Desc
 limit 1
 "@
-$DbConnection = New-SQLiteConnection -DataSource $DbPath
-$maxRows = Invoke-SqliteQuery -SQLiteConnection $DbConnection -Query $GetHighestId
+$DbConnection = New-SQLiteConnection -DataSource $DbPath -ErrorAction Stop
+$maxRows = Invoke-SqliteQuery -SQLiteConnection $DbConnection -Query $GetHighestId -ErrorAction Stop
 
 function New-PagerMonMessage {
     #send a message to pagermon.
@@ -81,6 +81,9 @@ function resumeFrom ($indexPath) {
 #endregion
 
 $indexPath = "$PSScriptRoot\index.txt"
+if (! (Test-Path -Path $indexPath)) {
+    $null | Out-File -FilePath $indexPath
+}
 
 for ($i = resumeFrom $indexPath; $i -lt $maxRows.Id + 1; $i++) {
     Write-Progress -Activity "Inserting Message" -Status "Message $i of $($maxRows.id) $($i / $maxRows.Id * 100)% Complete: " -PercentComplete ($i / $maxRows.Id * 100)
@@ -94,6 +97,9 @@ for ($i = resumeFrom $indexPath; $i -lt $maxRows.Id + 1; $i++) {
     where Id = $i
 "@
     [message]$message = Invoke-SqliteQuery -SQLiteConnection $DbConnection -Query $query
+    if (($i -eq 0) -and ($null -eq $message)) {
+        continue
+    }
     #crap retry logic, written to deal with a crappy internet connection and a server that dies under too much load.
     if ($message) {
         $response = New-PagerMonMessage -Uri $Uri -ApiKey $ApiKey -Message $message
