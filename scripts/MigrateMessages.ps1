@@ -44,14 +44,6 @@ class message {
         $this.Alias_Id = $input.Alias_Id
     }
 }
-$GetHighestId = @"
-SELECT Id
-FROM messages
-ORDER BY Id Desc
-limit 1
-"@
-$DbConnection = New-SQLiteConnection -DataSource $DbPath -ErrorAction Stop
-$maxRows = Invoke-SqliteQuery -SQLiteConnection $DbConnection -Query $GetHighestId -ErrorAction Stop
 
 function New-PagerMonMessage {
     #send a message to pagermon.
@@ -81,6 +73,15 @@ function resumeFrom ($indexPath) {
     Write-Output $output
 }
 #endregion
+
+$GetHighestId = @"
+SELECT Id
+FROM messages
+ORDER BY Id Desc
+limit 1
+"@
+$DbConnection = New-SQLiteConnection -DataSource $DbPath -ErrorAction Stop
+$maxRows = Invoke-SqliteQuery -SQLiteConnection $DbConnection -Query $GetHighestId -ErrorAction Stop
 
 $indexPath = "$PSScriptRoot\index.txt"
 if (! (Test-Path -Path $indexPath)) {
