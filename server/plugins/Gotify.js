@@ -1,5 +1,4 @@
 const axios = require('axios').default;
-const path = require('path');
 var logger = require('../log');
 
 function run(trigger, scope, data, config, callback) {
@@ -16,7 +15,7 @@ function run(trigger, scope, data, config, callback) {
       url = `https://${url}`; // Add https:// if not present
     if (config.port && !isNaN(config.port)) 
       url = `${url}:${parseInt(config.port, 10)}`; // Add port to the end
-    url = path.join(url, 'message'); // Append /message to URL
+    url = `${url}:/message`; // Append /message to URL
 
     logger.main.debug('Gotify: Sending to ' + url + ': ' + JSON.stringify(message));
 
