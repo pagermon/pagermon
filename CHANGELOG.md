@@ -1,4 +1,4 @@
-﻿# 0.3.XX - TBD
+﻿# 0.3.11 - TBD
 * Added EAS support, Just run multimon-ng -a EAS #432 @maxwelldps
 * Added EAS FIltering Based on FIPS and EVENT and moved [jsame to git](https://github.com/MaxwellDPS/jsame/packages/329242) And updated jSAME to 0.1.9 #435 @MaxwellDPS
 * Fix to PDW Python ingestion script time format #439 @jjeffhendryx
@@ -8,6 +8,7 @@
 * Fix Index breaking bug in #412 #452 @DanrwAU
 * Fix Broken Alias Search #453 @marshyonline
 * Fix Twitter trunication at 280 chars #461 @maxwelldps
+* Fixed Typo's #465 @geelongmicrosoldering
 
 # 0.3.10 - 2020-06-24
 
