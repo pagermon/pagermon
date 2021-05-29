@@ -12,6 +12,9 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
                 Reset: $resource('/auth/reset/', null, {
                     'post': { method: 'POST', isArray: false }
                 }),
+                Forgot: $resource('/auth/forgot/', null, {
+                    'post': { method: 'POST', isArray: false }
+                }),
                 UserDetail: $resource('/api/user/:id', { id: '@id' }, {
                     'post': { method: 'POST', isArray: false }
                 }),
@@ -177,6 +180,34 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         };
     }])
 
+    .controller('ForgotController', ['$scope', '$routeParams', 'Api', '$uibModal', '$filter', '$location', '$timeout', '$window', function ($scope, $routeParams, Api, $uibModal, $filter, $location, $timeout, $window) {
+        $scope.forgotMessage = {};
+        $scope.forgotSubmit = function () {
+            $scope.loading = false
+            var vars = { 'user': $scope.user };
+
+            Api.Forgot.post(null, vars).$promise.then(function (response) {
+                console.log(response);
+                $scope.loading = false;
+                if (response.status == 'ok') {
+                    $window.location.href = response.redirect
+                } else {
+                    $scope.forgotMessage.text = 'Failed to reset password: ' + response.data.error;
+                    $scope.forgotMessage.type = 'alert-danger';
+                    $scope.forgotMessage.show = true;
+                    $timeout(function () { $scope.forgotMessage.show = false; }, 20000);
+                }
+            }, function (response) {
+                console.log(response);
+                $scope.forgotMessage.text = 'Failed to reset password: ' + response.data.error;
+                $scope.forgotMessage.type = 'alert-danger';
+                $scope.forgotMessage.show = true;
+                $timeout(function () { $scope.forgotMessage.show = false; }, 20000);
+                $scope.loading = false;
+            });
+        };
+    }])
+
     .controller('ProfileController', ['$scope', '$routeParams', 'Api', '$uibModal', '$filter', '$location', '$timeout', function ($scope, $routeParams, Api, $uibModal, $filter, $location, $timeout) {
         $scope.alertMessage = {};
         $scope.loading = true;
@@ -239,6 +270,10 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
             .when('/reset', {
                 templateUrl: '/templates/auth/reset.html',
                 controller: 'ResetController'
+            })
+            .when('/forgot', {
+                templateUrl: '/templates/auth/forgot.html',
+                controller: 'ForgotController'
             });
         $httpProvider.defaults.headers.delete = { "Content-Type": "application/json;charset=utf-8" };
         $httpProvider.interceptors.push(function ($q, $location) {

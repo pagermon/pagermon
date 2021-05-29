@@ -126,13 +126,15 @@ router.route('/login')
                 })(req, res, next);
         });
 
-router.route('/logout').get(authHelper.isLoggedIn, function(req, res) {
+router.route('/logout')
+        .get(authHelper.isLoggedIn, function(req, res) {
         req.logout();
         res.redirect('/');
         logger.auth.debug(`Successful Logout ${req.user.username}`);
 });
 
-router.route('/profile/').get(authHelper.isLoggedIn, function(req, res) {
+router.route('/profile/')
+        .get(authHelper.isLoggedIn, function(req, res) {
         res.render('auth', {
                 pageTitle: 'User',
         });
@@ -288,42 +290,37 @@ router.route('/reset')
                 if (req.user) {
                         return res.render('auth', {
                                 title: 'User - Reset Password',
-                                message: req.flash('loginMessage'),
+                                message: req.flash('resetMessage'),
                                 username: user,
                         });
                 } else {
                 res.redirect('/auth/login');
                 }
         })
-        .post(authHelper.isLoggedIn, function(req, res) {
-                const { password } = req.body;
-                // bcrypt function
-                if (password.length && !authHelper.comparePass(password, req.user.password)) {
-                        const salt = bcrypt.genSaltSync();
-                        const hash = bcrypt.hashSync(req.body.password, salt);
-                        const { id } = req.user;
-                        //need to update this query to select the user first then update. 
-                        db.from('users')
-                                .returning('id')
-                                .where('id', '=', id)
-                                .update({
-                                        password: hash,
-                                })
-                                .then(() => {
-                                        res.status(200).send({ status: 'ok', redirect: '/' });
-                                        logger.auth.debug(`${req.user.username} Password Reset Successfully`);
-                                })
-                                .catch(err => {
-                                        res.status(500).send({ status: 'failed', error: 'Failed to update password' });
-                                        logger.auth.error(`${req.user.username} error resetting password${err}`);
-                                        console.log(err)
-                                });
-                } else {
-                        res.status(400).send({ status: 'failed', error: 'Password Blank or the Same' });
+
+router.route('/forgot')
+        .get(function(req, res) {
+                let user = '';
+                if (typeof req.username !== 'undefined') {
+                        user = req.username;
                 }
+                if (!req.user) {
+                        return res.render('auth', {
+                                title: 'User - Forgot Password',
+                                message: req.flash('forgotMessage'),
+                        });
+                } else {
+                res.redirect('/');
+                }
+        })
+        .post(function(req, res) {
+                const token = ((crypto.randomBytes)(20)).toString('hex');
+                const user = req.body.username
+
         });
 
-router.route('/userCheck/username/:id').get(bruteforcedupe.prevent, function(req, res, next) {
+router.route('/userCheck/username/:id')
+        .get(bruteforcedupe.prevent, function(req, res, next) {
         const { id } = req.params;
         db.from('users')
                 .select('username')
@@ -353,7 +350,8 @@ router.route('/userCheck/username/:id').get(bruteforcedupe.prevent, function(req
                 });
 });
 
-router.route('/userCheck/email/:id').get(bruteforcedupe.prevent, function(req, res, next) {
+router.route('/userCheck/email/:id')
+        .get(bruteforcedupe.prevent, function(req, res, next) {
         const { id } = req.params;
         db.from('users')
                 .select('email')
