@@ -199,8 +199,9 @@ app.use(function(err, req, res, next) {
 // Add cronjob to automatically refresh aliases
 var dbtype = nconf.get('database:type')
 if (dbtype == 'mysql') {
+  var cronartime = nconf.get('database:aliasRefreshInterval');
   var aliasRefreshJob = require('cron').CronJob;
-  new aliasRefreshJob('0 5,35 * * * *', function() {
+  new aliasRefreshJob(cronartime, function() {
     var refreshRequired = nconf.get('database:aliasRefreshRequired')
     logger.main.debug('CRON: Running Cronjob AliasRefresh')
     if (refreshRequired == 1) {
