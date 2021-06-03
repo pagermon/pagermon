@@ -202,7 +202,7 @@ if (dbtype == 'mysql') {
   // Get CRON from config
   var cronartime = nconf.get('database:aliasRefreshInterval');
   //If value is falsy (undefined, empty, null etc), set as default
-  if (!cronartime){cronartime = "0 5,35 * * * *"}
+  if (!cronartime){cronartime = "0 5,35 * * * *";}
   var aliasRefreshJob = require('cron').CronJob;
   new aliasRefreshJob(cronartime, function() {
     var refreshRequired = nconf.get('database:aliasRefreshRequired')
