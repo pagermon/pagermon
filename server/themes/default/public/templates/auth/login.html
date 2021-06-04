@@ -10,17 +10,24 @@
     <div class="col-xs-12">
         <h4 style="padding-left: 15px;">Login</h4>
         <hr />
-        <div class="col-xs-12 col-md-offset-2 col-md-8">
             <form ng-submit="loginSubmit()" name="login">
-                <div class="form-group">
-                    <label for="user.username" class="control-label">Username</label>
-                        <input class="form-control" type="text" name="user.username" ng-model="user.username" required>
+                <div class="col-xs-12 col-md-offset-2 col-md-8">
+                    <div class="form-group">
+                        <label for="user.username" class="control-label">Username</label>
+                            <input class="form-control" type="text" name="user.username" ng-model="user.username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="user.password" class="control-label">Password</label>
+                            <input class="form-control" type="password" name="user.password" ng-model="user.password" required>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <button type="submit" class="btn btn-warning btn-lg pull-left">Login  <i class="fa fa-check-circle"></i></button> 
+                            <!--The below is a terrible solution to a problem that should never have existed. Try putting the anchor inside the button i dare you-->
+                            <a href="/auth/forgot"><button class="btn btn-danger btn-lg pull-right" role="button">Forgot  <i class="fa fa-support"></i></button></a>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="user.password" class="control-label">Password</label>
-                        <input class="form-control" type="password" name="user.password" ng-model="user.password" required>
-                </div>
-                <button type="submit" class="btn btn-warning btn-lg">Login</button>
             </form>
         </div>
     </div>
