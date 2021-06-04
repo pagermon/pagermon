@@ -149,7 +149,7 @@
             <div class="form-group" ng-if="settings.database.type == 'mysql'">
               <label for="database.aliasRefreshInterval" class="col-xs-4 col-sm-3 control-label">Alias Refresh CRON</label>
               <div class="col-xs-8 col-sm-9">
-              <input type="text" class="form-control" name="database.aliasRefreshInterval" ng-model="settings.database.aliasRefreshInterval" required>
+              <input type="text" class="form-control" name="database.aliasRefreshInterval" ng-model="settings.database.aliasRefreshInterval">
               <span id="helpBlock" class="help-block"><strong>Advanced Users</strong> - The cron timing for Automatic Alias Refresh. See <a href="https://www.npmjs.com/package/node-cron#cron-syntax" target="_blank">Cron Syntax</a>.<br />Default = "0 5,35 * * * *" (The 5th and 35th minute of every hour)</span>
               </div>
             </div> 
