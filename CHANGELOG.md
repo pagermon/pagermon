@@ -9,6 +9,7 @@
 * Fix Broken Alias Search #453 @marshyonline
 * Fix Twitter trunication at 280 chars #461 @maxwelldps
 * Fixed Typo's #465 @geelongmicrosoldering
+* Fix layout when message contains long word #474 @geelongmicrosoldering
 
 # 0.3.10 - 2020-06-24
 
