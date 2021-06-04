@@ -297,6 +297,32 @@ router.route('/reset')
                 res.redirect('/auth/login');
                 }
         })
+        .post(authHelper.isLoggedIn, function(req, res) {
+                const { password } = req.body;
+                // bcrypt function
+                if (password.length && !authHelper.comparePass(password, req.user.password)) {
+                        const salt = bcrypt.genSaltSync();
+                        const hash = bcrypt.hashSync(req.body.password, salt);
+                        const { id } = req.user;
+                        //need to update this query to select the user first then update. 
+                        db.from('users')
+                                .returning('id')
+                                .where('id', '=', id)
+                                .update({
+                                        password: hash,
+                                })
+                                .then(() => {
+                                        res.status(200).send({ status: 'ok', redirect: '/' });
+                                        logger.auth.debug(`${req.user.username} Password Reset Successfully`);
+                                })
+                                .catch(err => {
+                                        res.status(500).send({ status: 'failed', error: 'Failed to update password' });
+                                        logger.auth.error(`${req.user.username} error resetting password${err}`);
+                                });
+                } else {
+                        res.status(400).send({ status: 'failed', error: 'Password Blank or the Same' });
+                }
+        });
 
 router.route('/forgot')
         .get(function(req, res) {
@@ -315,7 +341,35 @@ router.route('/forgot')
         })
         .post(function(req, res) {
                 const token = ((crypto.randomBytes)(20)).toString('hex');
-                const user = req.body.username
+                const timestamp = Date.now() + 3600000
+
+                return db('users')
+                                .where('email', '=', req.body.username)
+                                .orWhere()
+                                .select('id')
+                                .then(row => { 
+                                        if (row.length > 1) {
+                                                logger.auth.error(`${req.body.username} multiple users found with email address${err}`);
+                                                res.status(400).json({ error: 'too many users' });
+                                        } else {
+                                                db.from('users')
+                                                .returning('id')
+                                                .where('id', '=', id)
+                                                .update({
+                                                        resetPasswordToken: token,
+                                                        resetPasswordExpires = timestamp
+                                                })
+                                                .then(() => {
+                                                        res.status(200).send({ status: 'ok', redirect: '/' });
+                                                        logger.auth.debug(`${req.body.username} Forgot Password Sent`);
+                                                })
+                                                .catch(err => {
+                                                        res.status(500).send({ status: 'failed', error: 'Failed to send reset email' });
+                                                        logger.auth.error(`${req.body.username} failed to send reset email${err}`);
+                                                });   
+                                        }
+                                })
+                                
 
         });
 
