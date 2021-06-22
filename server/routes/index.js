@@ -1,61 +1,40 @@
+var confFile = './config/config.json';
 var express = require('express');
 var router = express.Router();
-var passport = require('passport');
-require('../config/passport')(passport); // pass passport for configuration
+var nconf = require('nconf');
+
+nconf.file({ file: confFile });
+nconf.load();
+
+const passport = require('../auth/local');
 
 router.use(function (req, res, next) {
-  res.locals.login = req.isAuthenticated();
-  res.locals.user = req.user || '';
-  next();
+    res.locals.login = req.isAuthenticated();
+    res.locals.user = req.user || false;
+    res.locals.register = nconf.get('auth:registration')
+    res.locals.hidecapcode = nconf.get('messages:HideCapcode');
+    res.locals.pdwmode = nconf.get('messages:pdwMode');
+    res.locals.hidesource = nconf.get('messages:HideSource');
+    res.locals.apisecurity = nconf.get('messages:apiSecurity');
+    res.locals.iconsize = nconf.get('messages:iconsize');
+    res.locals.gaEnable = nconf.get('monitoring:gaEnable');
+    res.locals.gaTrackingCode = nconf.get('monitoring:gaTrackingCode');
+    res.locals.frontPopupEnable = nconf.get('global:frontPopupEnable');
+    res.locals.frontPopupTitle = nconf.get('global:frontPopupTitle');
+    res.locals.frontPopupContent = nconf.get('global:frontPopupContent');
+    res.locals.searchLocation = nconf.get('global:searchLocation');
+    res.locals.monitorName = nconf.get("global:monitorName");
+    next();
 });
 
-router.route('/login')
-    .get(function(req, res, next) {
-        var user = '';
-        if (typeof req.user != 'undefined') {
-            user = req.user;
-        }
-       res.render('login', { 
-           title: 'PagerMon - Login',
-           message: req.flash('loginMessage'),
-           user: user
-       }); 
-    })
-    // process the login form
-    .post(passport.authenticate('local-login', {
-        successRedirect : '/admin', // redirect to the secure profile section
-        failureRedirect : '/login', // redirect back to the signup page if there is an error
-        failureFlash : true // allow flash messages
-    }));
-    
-router.route('/logout')
-    .get(function(req, res, next) {
-        req.logout();
-        res.redirect('/');
-    });
-
-router.get('/testLogin', isLoggedIn, function(req, res) {
-        console.log(req.user);
-        res.render('index', {
-            user : req.user, // get the user out of session and pass to template
-            title: 'PagerMon'
-        });
-    });
-    
 /* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'PagerMon' });
+router.get('/', function (req, res, next) {
+    if (nconf.get('messages:apiSecurity') && !req.isAuthenticated()) {
+        req.flash('loginMessage', 'You need to be logged in to access this page');
+        res.redirect('/auth/login');
+    }
+
+    res.render('index', { pageTitle: 'Home' });
 });
 
 module.exports = router;
-
-// route middleware to make sure a user is logged in
-function isLoggedIn(req, res, next) {
-
-    // if user is authenticated in the session, carry on 
-    if (req.isAuthenticated())
-        return next();
-
-    // if they aren't redirect them to the home page
-    res.redirect('/login');
-}
