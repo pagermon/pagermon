@@ -1,4 +1,15 @@
 # [PagerMon](https://hrng.io/)
+![Discord](https://img.shields.io/discord/533900375066017812.svg?style=plastic)
+![GitHub issues](https://img.shields.io/github/issues-raw/pagermon/pagermon.svg?style=plastic)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/pagermon/pagermon.svg?style=plastic)
+![GitHub](https://img.shields.io/github/license/pagermon/pagermon.svg?style=plastic)
+![GitHub stars](https://img.shields.io/github/stars/pagermon/pagermon.svg?style=plastic)
+![GitHub forks](https://img.shields.io/github/forks/pagermon/pagermon.svg?style=plastic)
+![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/pagermon/pagermon.svg?label=release&style=plastic)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/pagermon/pagermon.svg?style=plastic)
+![GitHub contributors](https://img.shields.io/github/contributors/pagermon/pagermon.svg?style=plastic)
+![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/pagermon/pagermon/Node.js%20CI/master?label=build%20master)
+![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/pagermon/pagermon/Node.js%20CI/develop?label=build%20develop)
 
 PagerMon is an API driven client/server framework for parsing and displaying pager messages from multimon-ng.
 
@@ -11,7 +22,7 @@ The UI is built around a Node/Express/Angular/Bootstrap stack, while the client 
 * Capcode aliasing with colors and [FontAwesome](https://fontawesome.io/icons/) icons
 * API driven extensible architecture
 * Single user, multiple API keys
-* SQLite database backing
+* SQLite or MySQL database backing
 * Configurable via UI
 * Pagination and searching
 * Filtering by capcode or agency
@@ -19,20 +30,31 @@ The UI is built around a Node/Express/Angular/Bootstrap stack, while the client 
 * Keyword highlighting
 * WebSockets support - messages are delivered to clients in near realtime
 * Pretty HTML5
-* Native browner notifications
-* [Pushover](https://pushover.net/) Integration - near realtime muti-device notification service
+* Native browser notifications
+* Plugin Support - Current Plugins:
+    * [Pushover](https://pushover.net/) near realtime muti-device notification service
+    * [Prowl](https://prowlapp.com) near realtime iOS notification service with Apple Watch support
+    * [Telegram](https://telegram.org/) near realtime cloud based multi-device messaging
+    * [Discord](https://discordapp.com/) near realtime cloud based messaging service
+    * [Gotify](https://gotify.net/) Self-Hosted messaging service
+    * [Twitter](www.twitter.com)
+    * [Microsoft Teams](https://products.office.com/en-us/microsoft-teams/group-chat-software) Team colaboration platform
+    * [Slack](https://slack.com/) Team colabortation platform
+    * SMTP Email Support for conventional SMTP email notifications 
+    * Regex Filters - Filter incoming messages via regex
+    * Regex Replace - Modify incoming messages via regex
+    * Message Repeat - Repeat incoming messages to another pagermon server
 * May or may not contain cute puppies
 
 ### Planned Features
 
 * Multi-user support
-* Other database support (MongoDB and DynamoDB planned)
+* Postgres + MariaDB Support
 * Horizontal scaling
 * Enhanced message filtering
 * Bootstrap 4 + Angular 2 support
 * Enhanced alias control
 * Graphing
-* Push notifications
 * Non-sucky documentation
 
 ### Screenshots
@@ -60,15 +82,19 @@ These instructions will get you a copy of the project up and running on your loc
 
 ## Running the server
 
+### Local setup
+
 1) Copy server/process-default.json to server/process.json and modify according to your environment
 2) Launch the app from the Terminal:
+
 ```
     $ sudo apt-get install npm sqlite3
     $ npm install npm@latest -g
     $ npm install pm2 -g
-    $ npm install 
+    $ cd server
+    $ npm install
     $ export NODE_ENV=production
-    $ pm2 start server/process.json
+    $ pm2 start process.json
 ```
 3) To start on boot, let pm2 handle it:
 ```
@@ -84,17 +110,134 @@ These instructions will get you a copy of the project up and running on your loc
 6) Head to /admin, change your password, and generate some API keys
 6) Grab your API keys and drop them in the PagerMon client, then you're good to go!
 
+Alternatively a production ready setup guide is available here
+https://github.com/pagermon/pagermon/wiki/Tutorial---Production-Ready-Ubuntu,-PM2,-Nginx-Reverse-Proxy,-Let's-Encrypt-SSL,-Pagermon-server
+
+### Docker
+
+#### Manual build
+
+You can use image already built for you or you can build it yourself:
+
+``` bash
+# For PC
+docker build -t pagermon/pagermon .
+
+# For Raspberry Pi
+docker build -t pagermon/pagermon:latest-armhf -f Dockerfile.armhf .
+```
+
+#### Running
+
+``` bash
+docker create \
+  --name=pagermon \
+  -e APP_NAME=pagermon \
+  -p 3000:3000 \
+  -e TZ=Europe/London \
+  -v </path/to/config-mount>:/config \
+  --restart unless-stopped \
+  pagermon/pagermon:<VERSION>
+docker start pagermon
+```
+
+### docker-compose
+
+``` yaml
+version: "2"
+services:
+  pagermon:
+    #build: ./server # To build localy
+    image: pagermon/pagermon:<VERSION>
+    container_name: pagermon
+    environment:
+      - APP_NAME=pagermon
+      - PUID=1000 # Not required since node user inside docker has UID 1000
+      - PGID=1000 # Not required since node user inside docker has GID 1000
+      - TZ=Europe/London
+    ports:
+      - "3000:3000"
+    volumes:
+      - </path/to/config-mount>:/config
+    restart: unless-stopped
+```
+
+Then run:
+
+``` bash
+# Building with compose file
+docker-compose build
+
+# Running from compose file in foreground
+docker-compose up
+
+# Running from compose file in background
+docker-compose up -d
+```
+
+#### Parameters
+
+|Parameter|Function|
+|:-------:|:-------|
+| `-e APP_NAME=<name>` | Application name |
+| `-e HOSTNAME=<hostname>` | Hostname |
+| `-e USE_COOKIE_HOST=true` | Use cookie host. |
+| `-e NO_CHOWN=true`| Disable fixing permissions. |
+| `-e PUID=1000` | for UserID |
+| `-e PGID=1000` | for GroupID |
+| `-e SKIP_APP=true` | Don't start app, useful for development. |
+| `-e TZ=Europe/London` | Specify a timezone to use eg. Europe/London. |
+| `-v <path>:/config` | Mount config diretory, so config persist during container restarts (option 1) |
+| `-v <volumename>:/config` | Create named volume for config diretory, so config persist during container restarts (option 2)|
+| `-v /config` | Create unnamed volume for config diretory, so config persist during container restarts (option 3)|
+| `-p 3000:3000` | Expose container port |
+
+**Note:**
+
+- Configuration is stored in `/config` inside container and it is owned by *node* user with UID/GID 1000. To fix config directory ownership use `-e PUID=<UID>` and `-e PGID=<GID>`. (Here are database and config file stored)
+- The local port `3000` will be forwarded to the docker container to port `3000` (by `-p 3000:3000`)
+- In case you would like to follow the logfile, run `docker logs -f pagermon` (by `--name pagermon`)
+- To shutdown and remove the container (if using compose), run `docker-compose down`
+- If you make changes to the app for testing, you will need to re-build the image, run `docker-compose down && docker-compose up --build`
+- To run on *Raspberry Pi* use **armhf** variant (add `-armhf` at the end of version), but **be aware** that OracleDB does not work there.
+
+See [additional parameters](https://github.com/SloCompTech/docker-baseimage).
+
+**Tip:** You probably want to setup docker log rotation before, more can be found [here](https://success.docker.com/article/how-to-setup-log-rotation-post-installation).
+
+## PagermonPi - Raspberry Pi Image
+Check out our Raspberry Pi Image for Pi3 & Pi4 which has Pagermon pre-loaded on it.
+
+Check out the following links:
+
+[Releases](https://github.com/pagermon/pagermon/releases) for the latest version
+[Wiki](https://github.com/pagermon/pagermon/wiki/PagermonPi-Image-For-Raspberry-Pi) for PagermonPi support
+
+## Support
+
+General PagerMon support can be requested in the #support channel of the PagerMon discord server.
+
+[Click Here](https://discord.gg/3VK7gSD) to join
+
+Bugs and Feature requests can be logged via the GitHub issues page. 
+
 ## Contributing
 
-All are welcome to contribute.
+All are welcome to contribute. Contributors should submit a pull request with the requested changes.
+
+CHANGELOG.md is to be updated on each pull request.
+
+If a pull request is the first pull request since a [release](https://github.com/pagermon/pagermon/releases), then the version number should be bumped in `CHANGELOG.md`, `server/app.js`, and `server/package.json`.
+
+If a database schema change is required, this must be done using KnexJS Migration files. **Insert Instructions for this here**
 
 ## Versioning
 
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/davidmckenzie/pagermon/tags). 
+We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/pagermon/pagermon/tags).
 
 ## Authors
 
-See the list of [contributors](https://github.com/davidmckenzie/pagermon/contributors) who participated in this project.
+See the list of [contributors](https://github.com/pagermon/pagermon/contributors) who participated in this project.
 
 ## License
 

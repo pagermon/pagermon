@@ -1,17 +1,24 @@
 {
   "global": {
     "loglevel": "debug",
-    "sessionSecret": "1DVETLX8VE007RYQN9TN9Z00"
+    "sessionSecret": "1DVETLX8VE007RYQN9TN9Z00",
+    "frontPopupEnable": false,
+    "frontPopupTitle": "",
+    "frontPopupContent": "",
+    "searchLocation": "bottom",
+    "theme": "default",
+    "monitorName": "PagerMon"
   },
   "database": {
     "file": "./messages.db",
-    "type": "sqlite"
+    "type": "sqlite3"
   },
   "messages": {
     "maxLimit": 120,
     "defaultLimit": 20,
     "duplicateFiltering": true,
     "duplicateLimit": 10,
+    "duplicateTime": 60,
     "rotationEnabled": true,
     "rotateDays": 7,
     "rotateKeep": 4,
@@ -26,10 +33,14 @@
         "replace": ""
       }
     ],
-    "pdwMode": false
+    "pdwMode": false,
+    "adminShow": false,
+    "HideCapcode": false,
+    "HideSource": false,
+    "apiSecurity": false
   },
   "auth": {
-    "type": "local",
+    "registration": false,
     "user": "admin",
     "encPass": "$2a$08$De/aXnQkZIEbQ9p8J22tHuzLltqIbsAxE2CGgRMPLaaIwwHmVrpsu",
     "keys": [
@@ -44,11 +55,11 @@
       }
     ]
   },
-  "pushover":{
-    "pushenable": false,
-    "pushAPIKEY":  "",
-    "pushgroup":   "",
-    "pushSound": "pushover",
-    "pushPriority": "0"
-  }
+  "monitoring": {
+    "azureEnable": false,
+    "azureKey": "",
+    "gaEnable": false,
+    "gaTrackingCode": ""
+  },
+  "plugins": {}
 }
