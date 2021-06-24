@@ -1,4 +1,8 @@
-﻿# 0.3.10 - 2020-06-24
+﻿# 0.3.11 - 2021-06-24
+
+* Change includes to HTTPS to support [CORS-RFC1918](https://wicg.github.io/private-network-access/)
+
+# 0.3.10 - 2020-06-24
 
 * Downgrade discord.js package to fix crashes #415 @DanrwAU
 * Add user-agent strings for webhook plugins #416 @DanrwAU
