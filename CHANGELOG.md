@@ -1,4 +1,4 @@
-# TBD
+# 0.3.11a - 2021-12-30
 * updated jSAME to 0.2.3 and moved to NPM from github #484 @MaxwellDPS
 
 # 0.3.11 - 2021-05-21
