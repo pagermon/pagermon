@@ -41,6 +41,12 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1.2.0
+        
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1.6.0
+        
       - name: Check out the repo
         uses: actions/checkout@v2
       
@@ -61,5 +67,6 @@ jobs:
         with:
           file: server/Dockerfile.armhf
           context: ./server
+          platforms: linux/arm/v7
           push: true
           tags: ${{ steps.meta.outputs.tags }}-armhf
