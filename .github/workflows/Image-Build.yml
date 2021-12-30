@@ -35,3 +35,11 @@ jobs:
           context: ./server
           push: true
           tags: ${{ steps.meta.outputs.tags }}
+
+      - name: Build and push Docker image - ARMHF
+        uses: docker/build-push-action@v2
+        with:
+          file: server/Dockerfile.armhf
+          context: ./server
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}-armhf
