@@ -1,4 +1,7 @@
-﻿# 0.3.11 - 2021-05-21
+# 0.3.11a - 2021-12-30
+* updated jSAME to 0.2.3 and moved to NPM from github #484 @MaxwellDPS
+
+# 0.3.11 - 2021-05-21
 * Added EAS support, Just run multimon-ng -a EAS #432 @maxwelldps
 * Added EAS FIltering Based on FIPS and EVENT and moved [jsame to git](https://github.com/MaxwellDPS/jsame/packages/329242) And updated jSAME to 0.1.9 #435 @MaxwellDPS
 * Fix to PDW Python ingestion script time format #439 @jjeffhendryx
