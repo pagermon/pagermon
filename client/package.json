@@ -4,8 +4,8 @@
   "description": "",
   "main": "reader.js",
   "dependencies": {
-    "colors": "^1.1.2",
-    "csv-parse": "^1.2.0",
+    "colors": "1.4.0",
+    "csv-parse": "4.4.6",
     "http": "0.0.0",
     "moment": "^2.18.1",
     "nconf": "^0.8.4",
