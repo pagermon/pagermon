@@ -41,10 +41,7 @@ if(hostname.substr(-1) === '/') {
   var uri = hostname+'/api/messages'
 }
 
-var http = require('http');
-var request = require('request');
-require('request').debug = true;
-var rp = require('request-promise-native');
+const axios = require('axios').default;
 var moment = require('moment');
 
 var colors = require('colors/safe');
@@ -179,17 +176,14 @@ rl.on('line', (line) => {
 });
 
 var sendPage = function(message,retries) {
-  var options = {
-    method: 'POST',
-    uri: uri,
+  axios.post(uri, message, {
     headers: {
       'X-Requested-With': 'XMLHttpRequest',
       'User-Agent': 'PagerMon reader.js',
       apikey: apikey
     },
-    form: message
-  };
-  rp(options)
+    timeout: 5000, // Timeout 5s
+  })
   .then(function (body) {
     // console.log(colors.success('Message delivered. ID: '+body)); 
   })
