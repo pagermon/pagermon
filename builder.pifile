@@ -1,0 +1,33 @@
+#Latest Raspios Lite as of 12/01/2021 - https://www.raspberrypi.com/software/operating-systems/
+FROM https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2021-11-08/2021-10-30-raspios-bullseye-armhf-lite.zip
+
+PUMP 200M
+# Enable SSH
+RUN touch /boot/ssh
+
+#Build Deps
+
+RUN <<EOF
+  apt-get update
+  apk add --no-cache --virtual .build-dependencies \
+        autoconf \
+        automake \
+        build-base \
+        cmake \
+        gcc \
+        g++ \
+        make \
+        musl-dev \
+        sqlite \
+        python3  
+EOF
+
+#Copy in Repo
+COPY . /home/pi/pagermon/
+
+RUN <<EOF
+  cd /home/pi/pagermon/server
+  npm install
+  cd /home/pi/pagermon/client
+  npm install
+EOF
