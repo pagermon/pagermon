@@ -9,7 +9,7 @@ jobs:
         uses: actions/checkout@v1
         with:
           submodules: recursive
-      - name: Build Pagermon_Pi Image
-        uses: Natur40/pimod@master
+      - name: Run PIMOD
+        uses: Nature40/pimod@v0.4.4
         with:
           pifile: builder.pifile
