@@ -1,8 +1,11 @@
-name: Build Raspberry Pi Image
-on: push
+name: Build + Upload Raspberry Pi Image to release
+on:
+  release:
+    types:
+      - created
 
 jobs:
-  build:
+  Build_Image:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -13,3 +16,12 @@ jobs:
         uses: Nature40/pimod@v0.4.4
         with:
           pifile: builder.pifile
+      - name: Compress Image
+        uses: edgarrc/action-7z@v1
+        with:
+          args: 7z a -t7z -mx=9 pagermon_pi.7z /tmp/pagermon_pi.img
+      - name: Upload Asset to Release
+        uses: shogo82148/actions-upload-release-asset@v1.5.0
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: pagermon_pi.7z
