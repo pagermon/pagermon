@@ -1,0 +1,15 @@
+name: Build Raspberry Pi Image
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v1
+        with:
+          submodules: recursive
+      - name: Build Pagermon_Pi Image
+        uses: Natur40/pimod@master
+        with:
+          pifile: builder.pifile
