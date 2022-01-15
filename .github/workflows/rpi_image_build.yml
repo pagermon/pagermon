@@ -17,11 +17,13 @@ jobs:
         with:
           pifile: builder.pifile
       - name: Compress Image
-        uses: edgarrc/action-7z@v1
-        with:
-          args: 7z a -t7z -mx=9 pagermon_pi.7z /tmp/pagermon_pi.img
+        run: |
+          wget https://raw.githubusercontent.com/Drewsif/PiShrink/master/pishrink.sh
+          chmod +x pishrink.sh
+          sudo ./pishrink.sh -vzap /tmp/pagermon-pi.img
       - name: Upload Asset to Release
-        uses: shogo82148/actions-upload-release-asset@v1.5.0
+        uses: alexellis/upload-assets@0.3.0
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: pagermon_pi.7z
+          asset_paths: '["/tmp/pagermon-pi.img.gz"]'
