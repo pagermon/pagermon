@@ -1,0 +1,29 @@
+name: Build + Upload Raspberry Pi Image to release
+on:
+  release:
+    types:
+      - created
+
+jobs:
+  Build_Image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v1
+        with:
+          submodules: recursive
+      - name: Run PIMOD
+        uses: Nature40/pimod@v0.4.4
+        with:
+          pifile: builder.pifile
+      - name: Compress Image
+        run: |
+          wget https://raw.githubusercontent.com/Drewsif/PiShrink/master/pishrink.sh
+          chmod +x pishrink.sh
+          sudo ./pishrink.sh -vzap /tmp/pagermon-pi.img
+      - name: Upload Asset to Release
+        uses: alexellis/upload-assets@0.3.0
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          asset_paths: '["/tmp/pagermon-pi.img.gz"]'

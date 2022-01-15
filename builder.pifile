@@ -1,0 +1,70 @@
+#Latest Raspios Lite as of 12/01/2021 - https://www.raspberrypi.com/software/operating-systems/
+FROM https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2021-11-08/2021-10-30-raspios-bullseye-armhf-lite.zip
+TO /tmp/pagermon-pi.img
+
+PUMP 1024M
+# Enable SSH
+RUN touch /boot/ssh
+
+#Update
+RUN apt-get update
+RUN apt-get upgrade -y
+
+#Build Deps
+RUN apt-get install build-essential -y
+RUN apt install -y sqlite \
+        python3 \
+        git \
+        vim \
+        htop \
+        curl \
+        wget \
+        unzip \
+        rtl-sdr
+
+#Copy in Repo
+INSTALL . /home/pi/pagermon/
+
+#CHOWN pi
+RUN chown -R pi:pi /home/pi/pagermon
+
+#Install Nodejs 12.x
+RUN curl -fsSL https://deb.nodesource.com/setup_12.x | sudo -E bash -
+RUN apt-get install -y nodejs npm
+
+#Install Multimon-ng
+RUN bash -c "apt install -y cmake && \
+    cd /tmp && \
+    git clone https://github.com/EliasOenal/multimon-ng.git && \
+    cd multimon-ng && \
+    git checkout 1.1.9 && \
+    mkdir build && \
+    cd build && \
+    cmake .. && \
+    make && \
+    sudo make install && \
+    rm -rf /tmp/multimon-ng"
+
+#Becuase if we dont, its broken - NPM likes to use ssh?
+RUN bash -c "mkdir /root/.ssh && touch /root/.ssh/known_hosts && chmod 600 /root/.ssh/known_hosts"
+RUN bash -c "mkdir /home/pi/.ssh && touch /home/pi/.ssh/known_hosts && chown pi:pi /home/pi/.ssh/known_hosts && chmod 600 /home/pi/.ssh/known_hosts"
+RUN bash -c "ssh-keyscan -t rsa github.com >> /root/.ssh/known_hosts"
+RUN bash -c "ssh-keyscan -t rsa github.com >> /home/pi/.ssh/known_hosts"
+
+
+#Setup Server
+RUN sudo -u pi sed -i 's/"oracledb"\s*:\s*".*"\s*,//' /home/pi/pagermon/server/package.json
+RUN bash -c "cd /home/pi/pagermon/server && \
+    npm install --target_arch=arm --target_platform=linux && \
+    npm install npm@latest -g --target_arch=arm --target_platform=linux && \
+    npm install pm2@latest -g --target_arch=arm --target_platform=linux && \
+    sudo -u pi cp process-default.json process.json && \
+    sudo -u pi sed -i 's:/home/ubuntu/workspace/server:/home/pi/pagermon/server:g' /home/pi/pagermon/server/process.json && \
+    export NODE_ENV=production && \
+    sudo -u pi pm2 start process.json && \
+    sleep 10 && \
+    sudo -u pi pm2 stop pagermon"
+
+#Setup Client
+RUN bash -c "cd /home/pi/pagermon/client && \
+    sudo -u pi npm install --target_arch=arm --target_platform=linux"

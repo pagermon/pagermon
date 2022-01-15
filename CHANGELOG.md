@@ -1,3 +1,9 @@
+# 0.3.11d - 2022-01-13
+* Fix Pagermon Pi Image Building @marshyonline (Special thanks to Wade A for his help debuging issues with Raspbery Pi's)
+
+# 0.3.11b/c - 2021-12-30
+* Fix Docker Image Building @marshyonline
+
 # 0.3.11a - 2021-12-30
 * updated jSAME to 0.2.3 and moved to NPM from github #484 @MaxwellDPS
 
