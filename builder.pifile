@@ -37,7 +37,7 @@ RUN bash -c "apt install -y cmake && \
     cd /tmp && \
     git clone https://github.com/EliasOenal/multimon-ng.git && \
     cd multimon-ng && \
-    git checkout 1.1.9 && \
+    git checkout 1.1.7 && \
     mkdir build && \
     cd build && \
     cmake .. && \

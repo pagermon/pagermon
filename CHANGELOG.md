@@ -1,3 +1,6 @@
+# 0.3.11e - 2022-01-19
+* [HOTFIX ] Downgrade installed version of multimon-ng @marshyonline
+
 # 0.3.11d - 2022-01-13
 * Fix Pagermon Pi Image Building @marshyonline (Special thanks to Wade A for his help debuging issues with Raspbery Pi's)
 
