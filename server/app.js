@@ -206,7 +206,7 @@ if (dbtype == 'mysql') {
   //If value is falsy (undefined, empty, null etc), set as default
   if (!cronartime){cronartime = "0 5,35 * * * *";}
   //Check value isn't garbage, if it is set to default
-  if (!cronvalidate.isValidCron(cronartime)) {
+  if (!cronvalidate.isValidCron(cronartime,{ seconds: true })) {
     logger.main.warn('CRON: Invalid CRON configuration in config file. Defaulting to: "0 5,35 * * * *" ')
     cronartime = "0 5,35 * * * *";
   } 
