@@ -85,6 +85,18 @@
 		            <span id="helpBlock" class="help-block">Modal Content</span>
               </div>
             </div>
+            <div class="form-group">
+              <label for="global.SpecificAliasRefresh" class="col-xs-4 col-sm-3 control-label">Refresh Specific Alias</label>
+              <div class="col-xs-8 col-sm-9">
+              <div class="checkbox">
+                <label>
+                <input type="checkbox" name="global.SpecificAliasRefresh" ng-model="settings.global.SpecificAliasRefresh">
+                Refresh all messages for a specific Alias, when the Alias is saved. 
+		<span id="helpBlock" class="help-block">This mitigates the need for an Alias Refresh every time an alias is saved, but does not effect <b>_</b> wildcard alias.</span>
+                </label>
+              </div>
+              </div>
+            </div>
 
             <h5>Database</h5>
             <div class="form-group">
