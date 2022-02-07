@@ -942,9 +942,36 @@ router.route('/capcodes/:id')
                   console.timeEnd('updateMap');
                 })
             } else {
-              if (!updateRequired || updateRequired == 0) {
-                nconf.set('database:aliasRefreshRequired', 1);
-                nconf.save();
+              //Check if we can refresh just this specific alias
+              var specificRefresh = nconf.get('global:SpecificAliasRefresh');
+              if (specificRefresh && /^\d+$/.test(req.body.address)) {
+                //Refresh this specific Alias
+                console.time('updateMap');
+                db('messages').update('alias_id', function () {
+                  this.select('id')
+                    .from('capcodes')
+                    .where(db.ref('messages.address'), 'like', db.ref('capcodes.address'))
+                    .modify(function (queryBuilder) {
+                      if (dbtype == 'oracledb')
+                        queryBuilder.orderByRaw(`REPLACE("address", '_', '%') DESC`);
+                      else
+                        queryBuilder.orderByRaw(`REPLACE(address, '_', '%') DESC`)
+                  })
+                  .limit(1)
+                })
+                .where(db.ref('messages.address'), '=', req.body.address)
+                .catch((err) => {
+                  logger.main.error(err);
+                })
+                .finally(() => {
+                  console.timeEnd('updateMap');
+                })
+              } else {
+                //We cannot update this specific Alias, so inform of required Alias Refresh
+                if (!updateRequired || updateRequired == 0) {
+                  nconf.set('database:aliasRefreshRequired', 1);
+                  nconf.save();
+                }
               }
             }
             res.status(200).send({ 'status': 'ok', 'id': result })
