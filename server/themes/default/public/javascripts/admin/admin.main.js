@@ -1,4 +1,4 @@
-angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'ui.bootstrap', 'color.picker', 'ui.validate', 'textAngular', 'ngFileSaver'])
+angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'ui.bootstrap', 'color.picker', 'ui.validate', 'textAngular', 'ngFileSaver', 'angular-sortable-view'])
     // Service
     .factory('Api', ['$resource',
      function($resource) {
