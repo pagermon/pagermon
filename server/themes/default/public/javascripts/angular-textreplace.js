@@ -16,10 +16,14 @@ angular.module('angular-highlight', []).directive('highlight', function() {
 		
 		var rReplacer = function(match, item) {
 			var resultObject = arrSearch(match, scope.replacement);
-			if (resultObject.highlight)
+			if (resultObject.highlight == "replace") {
+				var thisRex = new RegExp(resultObject.match)
+				var html = match.replace(thisRex,resultObject.replace);
+			} else if (resultObject.highlight) {
 				var html = '<a href="/?q='+match+'" data-toggle="popover" class="'+attrs.highlightClass+'" title="'+resultObject.replace+'" onmouseenter="$(this).tooltip(\'show\')">'+match+'</a>';
-			else
+			} else {
 				var html = '<a href="/?q='+match+'" data-toggle="popover" title="'+resultObject.replace+'" onmouseenter="$(this).tooltip(\'show\')">'+match+'</a>';
+			}
 			return html;
 		};
 		var rTokenize = function(keywords) {
