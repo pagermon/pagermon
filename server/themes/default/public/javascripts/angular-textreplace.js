@@ -16,10 +16,18 @@ angular.module('angular-highlight', []).directive('highlight', function() {
 		
 		var rReplacer = function(match, item) {
 			var resultObject = arrSearch(match, scope.replacement);
-			if (resultObject.highlight == "replace") {
+			
+			//Fix issue with undefined variables, mostly from migrated configs.
+			if (typeof resultObject.highlight !== 'undefined') {
+				var thisMode = resultObject.highlight;
+			} else {
+				var thisMode = false;
+			}
+
+			if (thisMode == "replace") {
 				var thisRex = new RegExp(resultObject.match)
 				var html = match.replace(thisRex,resultObject.replace);
-			} else if (resultObject.highlight) {
+			} else if (thisMode) {
 				var html = '<a href="/?q='+match+'" data-toggle="popover" class="'+attrs.highlightClass+'" title="'+resultObject.replace+'" onmouseenter="$(this).tooltip(\'show\')">'+match+'</a>';
 			} else {
 				var html = '<a href="/?q='+match+'" data-toggle="popover" title="'+resultObject.replace+'" onmouseenter="$(this).tooltip(\'show\')">'+match+'</a>';
