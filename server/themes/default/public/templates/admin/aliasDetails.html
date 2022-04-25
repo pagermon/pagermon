@@ -67,7 +67,10 @@
                       <i class="fa fa-{{alias.icon || 'question'}} fa-stack-1x fa-inverse"></i>
                     </span>
                   </span>
-                  <input id="aliasIcon" class="form-control" style="width: calc(100% - 100px);" type="text" name="alias.icon" ng-model="alias.icon" required><button type="button" class="btn btn-primary" style="width:90px;margin-left:10px;" data-toggle="modal" data-target=".faHelperModal">PICK</button>
+                  <input id="aliasIcon" class="form-control" type="text" name="alias.icon" ng-model="alias.icon" required>
+                  <span class="input-group-addon">
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target=".faHelperModal">PICK</button>
+                  </span>
                 </div>
               <span id="helpBlock" class="help-block">Fontawesome icon to display with the alias.</span>
               </div>
