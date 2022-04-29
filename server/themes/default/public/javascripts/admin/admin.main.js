@@ -893,6 +893,8 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
       Api.Settings.get(null, function(results) {
         if (!results.settings.messages.replaceText)
           results.settings.messages.replaceText = [{}];
+        if (!results.settings.aliases)
+          results.settings.aliases = [{}];
         if (!results.settings.aliases.templates)
           results.settings.aliases.templates = [{}];
         if (!results.settings.auth.keys)
