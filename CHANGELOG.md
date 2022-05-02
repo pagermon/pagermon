@@ -1,5 +1,6 @@
 # 0.3.12 - TBD
 * Refresh alias automatically when single capcode alias is updated @geelongmicrosoldering
+* Added Alias Description Helpers - Alias Template, FontAwesome @geelongmicrosoldering
 
 # 0.3.11e - 2022-01-19
 * [HOTFIX ] Downgrade installed version of multimon-ng @marshyonline
