@@ -1,3 +1,6 @@
+# 0.3.x - 2022-06-13
+* Added support for non-standard ports when connecting to mysql databases @MitchDrage
+
 # 0.3.11e - 2022-01-19
 * [HOTFIX ] Downgrade installed version of multimon-ng @marshyonline
 
