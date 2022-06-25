@@ -74,10 +74,7 @@ var db = require('./knex/knex.js');
 dbinit.init({ logger, db, config: nconf });
 
 // routes
-var index = require('./routes/index');
-var admin = require('./routes/admin');
-var api = require('./routes/api');
-var auth = require('./routes/auth');
+const routes = require('./routes/newIndex');
 
 var port = normalizePort(process.env.PORT || '3000');
 var app = express();
@@ -164,12 +161,14 @@ app.use(function(req, res, next) {
   next();
 });
 
+// Import and add routes
+const routes = require('./routes/index');
 
-app.use('/', index);
-app.use('/admin', admin);
-app.use('/post', api);
-app.use('/api', api);
-app.use('/auth', auth);
+app.use('/', routes.indexRoute);
+app.use('/admin', routes.adminRoute);
+app.use('/post', routes.apiRoute);
+app.use('/api', routes.apiRoute);
+app.use('/auth', routes.authRoute);
 
 
 // catch 404 and forward to error handler
