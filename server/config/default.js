@@ -30,6 +30,7 @@ const defaultConfig = {
                 HideCapcode: false,
                 HideSource: false,
                 apiSecurity: false,
+                replaceText: [],
         },
         auth: {
                 registration: false,
