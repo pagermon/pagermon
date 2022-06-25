@@ -1,5 +1,7 @@
 const version = '0.3.11-beta';
 
+const config = require('./config');
+
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const compression = require('compression');
@@ -9,7 +11,6 @@ const dbinit = require('./db');
 const express = require('express');
 const favicon = require('serve-favicon');
 const flash = require('connect-flash');
-const fs = require('fs');
 const http = require('http');
 const logger = require('./log');
 const passport = require('./auth/local');
@@ -33,16 +34,6 @@ process.on('SIGINT', function() {
         console.log('\nGracefully shutting down from SIGINT (Ctrl-C)');
         process.exit(1);
 });
-
-// TODO: move to migrations tool
-// create config file if it does not exist, and set defaults
-const configurationDefault = require('./config/default.json');
-
-const configurationFile = './config/config.json';
-if (!fs.existsSync(configurationFile)) {
-        fs.writeFileSync(configurationFile, JSON.stringify(configurationDefault, null, 2));
-}
-const config = require('./config');
 
 // Load current theme
 let theme = config.get('global:theme');

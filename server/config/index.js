@@ -1,13 +1,12 @@
 const nconf = require('nconf');
 
 const configurationFile = './config/config.json';
+const defaults = require('./default');
 
 nconf.argv()
         .env()
         .file({ file: configurationFile })
-        .defaults({
-                PORT: 3000,
-        });
+        .defaults(defaults);
 nconf.load();
 
 module.exports = nconf;
