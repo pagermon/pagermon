@@ -71,7 +71,7 @@ var dbinit = require('./db');
     dbinit.init();
 var db = require('./knex/knex.js');
 
-var passport = require('./auth/local');
+dbinit.init({ logger, db, config: nconf });
 
 // routes
 var index = require('./routes/index');
