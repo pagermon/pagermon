@@ -1,7 +1,24 @@
-var version = "0.3.11-beta";
+const version = '0.3.11-beta';
 
-var debug = require('debug')('pagermon:server');
-var io = require('@pm2/io').init({
+const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
+const compression = require('compression');
+const debug = require('debug')('pagermon:server');
+const db = require('./knex/knex.js');
+const dbinit = require('./db');
+const express = require('express');
+const favicon = require('serve-favicon');
+const flash = require('connect-flash');
+const fs = require('fs');
+const http = require('http');
+const logger = require('./log');
+const passport = require('./auth/local');
+const path = require('path');
+const session = require('express-session');
+const SQLiteStore = require('connect-sqlite3')(session);
+
+// TODO: variable io is never used, but later overwritten by socket.io
+/* var io = require('@pm2/io').init({
     http          : true, // HTTP routes logging (default: true)
     ignore_routes : [/socket\.io/, /notFound/], // Ignore http routes with this pattern (Default: [])
     errors        : true, // Exceptions logging (default: true)
@@ -10,73 +27,57 @@ var io = require('@pm2/io').init({
     ports         : true,  // Shows which ports your app is listening on (default: false)
     transactions  : true
 });
-var http = require('http');
-var compression = require('compression');
-var express = require('express');
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('./log');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-var fs = require('fs');
-var session = require('express-session');
-var request = require('request');
-var SQLiteStore = require('connect-sqlite3')(session);
-var flash    = require('connect-flash');
-const passport = require('./auth/local');
-
+ */
 
 process.on('SIGINT', function() {
-    console.log( "\nGracefully shutting down from SIGINT (Ctrl-C)" );
-    process.exit(1);
+        console.log('\nGracefully shutting down from SIGINT (Ctrl-C)');
+        process.exit(1);
 });
 
+// TODO: move to migrations tool
 // create config file if it does not exist, and set defaults
-var conf_defaults = require('./config/default.json');
-var confFile = './config/config.json';
-if( ! fs.existsSync(confFile) ) {
-    fs.writeFileSync( confFile, JSON.stringify(conf_defaults,null, 2) );
-}
-// load the config file
-var nconf = require('nconf');
-    nconf.file({file: confFile});
-    nconf.load();
+const configurationDefault = require('./config/default.json');
 
-//Load current theme
-var theme = nconf.get('global:theme')
-// set the theme if none found, for backwards compatibility
+const configurationFile = './config/config.json';
+if (!fs.existsSync(configurationFile)) {
+        fs.writeFileSync(configurationFile, JSON.stringify(configurationDefault, null, 2));
+}
+const config = require('./config');
+
+// Load current theme
+let theme = config.get('global:theme');
+// TODO: set the theme if none found, for backwards compatibility
 if (!theme) {
-  nconf.set('global:theme', "default");
-  nconf.save();
-  var theme = nconf.get('global:theme')
+        config.set('global:theme', 'default');
+        config.save();
+        theme = config.get('global:theme');
 }
 
-//Enable Azure Monitoring if enabled
-var azureEnable = nconf.get('monitoring:azureEnable')
-var azureKey = nconf.get('monitoring:azureKey')
-if (azureEnable) {
-  logger.main.debug('Starting Azure Application Insights')
-  const appInsights = require('applicationinsights');
-  appInsights.setup(azureKey)
-             .setAutoDependencyCorrelation(true)
-             .setAutoCollectRequests(true)
-             .setAutoCollectPerformance(true)
-             .setAutoCollectExceptions(true)
-             .setAutoCollectDependencies(true)
-             .setAutoCollectConsole(true)
-             .setUseDiskRetryCaching(true)
-             .start();
+// TODO: extract to seperate component
+// Enable Azure Monitoring if enabled
+
+if (config.get('monitoring:azureEnable')) {
+        const azureKey = config.get('monitoring:azureKey');
+        logger.main.debug('Starting Azure Application Insights');
+        // eslint-disable-next-line global-require
+        const appInsights = require('applicationinsights');
+
+        appInsights
+                .setup(azureKey)
+                .setAutoDependencyCorrelation(true)
+                .setAutoCollectRequests(true)
+                .setAutoCollectPerformance(true)
+                .setAutoCollectExceptions(true)
+                .setAutoCollectDependencies(true)
+                .setAutoCollectConsole(true)
+                .setUseDiskRetryCaching(true)
+                .start();
 }
 
-var dbinit = require('./db');
-var db = require('./knex/knex.js');
+dbinit.init({ logger, db, config });
 
-dbinit.init({ logger, db, config: nconf });
+const port = normalizePort(config.get('PORT'));
 
-// routes
-const routes = require('./routes/newIndex');
-
-var port = normalizePort(process.env.PORT || '3000');
 var app = express();
     app.set('port', port);
     // view engine setup
@@ -125,7 +126,7 @@ app.use(function(req,res,next){
 });
 
 // session secret is controlled by config
-var secret = nconf.get('global:sessionSecret');
+var secret = config.get('global:sessionSecret');
 // compress all responses
 app.use(compression());
 app.use(require("morgan")("combined", { "stream": logger.http.stream }));
@@ -157,7 +158,7 @@ app.use(express.static(path.join(__dirname,'themes',theme, 'public')));
 app.use('/node_modules', express.static(path.join(__dirname, 'node_modules')));
 app.use(function(req, res, next) {
   res.locals.version = version;
-  res.locals.loglevel = nconf.get('global:loglevel') || 'info';
+  res.locals.loglevel = config.get('global:loglevel') || 'info';
   next();
 });
 
@@ -180,15 +181,15 @@ app.use(function(req, res, next) {
 
 // error handler
 app.use(function(err, req, res, next) {
-  var title = nconf.get('global:monitorName') || 'PagerMon';
+  var title = config.get('global:monitorName') || 'PagerMon';
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
   //these 3 have to be here to stop the error handler shitting up the logs with undefined references when it receives a 500 error ... nfi why
   res.locals.login = req.isAuthenticated();
-  res.locals.gaEnable = nconf.get('monitoring:gaEnable');
-  res.locals.monitorName = nconf.get("global:monitorName");
-  res.locals.register = nconf.get('auth:registration')
+  res.locals.gaEnable = config.get('monitoring:gaEnable');
+  res.locals.monitorName = config.get("global:monitorName");
+  res.locals.register = config.get('auth:registration')
 
   // render the error page
   res.status(err.status || 500);
@@ -196,11 +197,11 @@ app.use(function(err, req, res, next) {
 });
 
 // Add cronjob to automatically refresh aliases
-var dbtype = nconf.get('database:type')
+var dbtype = config.get('database:type')
 if (dbtype == 'mysql') {
   var aliasRefreshJob = require('cron').CronJob;
   new aliasRefreshJob('0 5,35 * * * *', function() {
-    var refreshRequired = nconf.get('database:aliasRefreshRequired')
+    var refreshRequired = config.get('database:aliasRefreshRequired')
     logger.main.debug('CRON: Running Cronjob AliasRefresh')
     if (refreshRequired == 1) {
       console.time('updateMap');
@@ -213,8 +214,8 @@ if (dbtype == 'mysql') {
       })
       .then((result) => {
           console.timeEnd('updateMap');
-          nconf.set('database:aliasRefreshRequired', 0);
-          nconf.save();
+          config.set('database:aliasRefreshRequired', 0);
+          config.save();
           logger.main.info('CRON: Alias Refresh Successful')
       })
       .catch((err) => {
