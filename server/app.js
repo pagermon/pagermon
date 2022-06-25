@@ -23,6 +23,7 @@ var session = require('express-session');
 var request = require('request');
 var SQLiteStore = require('connect-sqlite3')(session);
 var flash    = require('connect-flash');
+const passport = require('./auth/local');
 
 
 process.on('SIGINT', function() {
@@ -68,7 +69,6 @@ if (azureEnable) {
 }
 
 var dbinit = require('./db');
-    dbinit.init();
 var db = require('./knex/knex.js');
 
 dbinit.init({ logger, db, config: nconf });
