@@ -161,6 +161,15 @@ a:hover, a:focus {
     right:50px;
     width: 225px;
 }
+@media (max-width: 767px) {
+    .btn-group-vertical {
+        text-align: start!important;
+        position: relative!important;
+        bottom:0px!important; 
+        right:0px!important;
+        width: 100%!important;
+    }
+}
 
 #buttons-capcodes {
     text-align: center;
