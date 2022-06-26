@@ -1,22 +1,17 @@
+const authHelper = require('../middleware/authhelper');
+const bcrypt = require('bcryptjs');
+const BruteKnex = require('brute-knex');
+const config = require('../config');
+const db = require('../knex/knex.js');
 const express = require('express');
+const ExpressBrute = require('express-brute');
+const logger = require('../log');
+const moment = require('moment');
+const passport = require('../auth/local');
 
 const router = express.Router();
-const bcrypt = require('bcryptjs');
-const moment = require('moment');
-const nconf = require('nconf');
-
-const confFile = './config/config.json';
-nconf.file({ file: confFile });
-nconf.load();
 
 // Brute force protection for public dupe checking routes
-const ExpressBrute = require('express-brute');
-const BruteKnex = require('brute-knex');
-
-const db = require('../knex/knex.js');
-const logger = require('../log');
-const passport = require('../auth/local');
-const authHelper = require('../middleware/authhelper')
 
 const store = new BruteKnex({
         createTable: true,
@@ -25,7 +20,10 @@ const store = new BruteKnex({
 });
 
 const lockoutCallback = function(req, res, next, nextValidRequestDate) {
-        res.status(429).send({ status: 'lockedout', error: 'Too many attempts, please try again later' });
+        res.status(429).send({
+                status: 'lockedout',
+                error: 'Too many attempts, please try again later',
+        });
         logger.auth.info(`Lockout: ${req.ip} Next Valid: ${nextValidRequestDate}`);
 };
 
@@ -48,6 +46,7 @@ const bruteforcelogin = new ExpressBrute(store, {
 router.route('/login')
         .get(function(req, res) {
                 if (!req.isAuthenticated()) {
+                        // TODO: user is never used.
                         let user = '';
                         if (typeof req.username !== 'undefined') {
                                 user = req.username;
@@ -62,11 +61,14 @@ router.route('/login')
         .post(bruteforcelogin.prevent, function(req, res, next) {
                 passport.authenticate('login-user', (err, user) => {
                         if (err) {
-                                //this is commented out as it seems to fire when a user is disabled?! even tho the below functions still run
-                                //res.status(500).send({ status: 'failed', error: 'An Error Occured' });
+                                // this is commented out as it seems to fire when a user is disabled?! even tho the below functions still run
+                                // res.status(500).send({ status: 'failed', error: 'An Error Occured' });
                                 logger.auth.error(err);
                         } else if (!user) {
-                                res.status(401).send({ status: 'failed', error: 'Check Details and try again' });
+                                res.status(401).send({
+                                        status: 'failed',
+                                        error: 'Check Details and try again',
+                                });
                                 logger.auth.debug(`Login Failed: ${req.body.username}`);
                         } else if (user) {
                                 if (user.status !== 'disabled') {
@@ -119,7 +121,10 @@ router.route('/login')
                                                 }
                                         });
                                 } else {
-                                        res.status(401).send({ status: 'failed', error: 'User Disabled' });
+                                        res.status(401).send({
+                                                status: 'failed',
+                                                error: 'User Disabled',
+                                        });
                                         logger.auth.debug(`User Disabled${req.user.username}`);
                                 }
                         }
@@ -150,7 +155,10 @@ router.route('/profile/:id')
                                         res.status(200);
                                         res.json(rowsend);
                                 } else {
-                                        res.status(500).json({ status: 'failed', error: '' });
+                                        res.status(500).json({
+                                                status: 'failed',
+                                                error: '',
+                                        });
                                         logger.auth.error('failed to select user');
                                 }
                         })
@@ -179,7 +187,10 @@ router.route('/profile/:id')
                                 })
                                 .then(result => {
                                         console.timeEnd('insert');
-                                        res.status(200).send({ status: 'ok', id: result });
+                                        res.status(200).send({
+                                                status: 'ok',
+                                                id: result,
+                                        });
                                 })
                                 .catch(err => {
                                         console.timeEnd('insert');
@@ -187,14 +198,16 @@ router.route('/profile/:id')
                                         res.status(400).send(err);
                                 });
                 } else {
-                        res.status(401).json({ message: 'Please update your own details only' });
+                        res.status(401).json({
+                                message: 'Please update your own details only',
+                        });
                         logger.auth.error('Possible attempt to compromise security POST:/auth/profile');
                 }
         });
 
 router.route('/register')
         .get(function(req, res) {
-                const reg = nconf.get('auth:registration');
+                const reg = config.get('auth:registration');
                 if (reg) {
                         res.render('auth', {
                                 title: 'Registration',
@@ -205,7 +218,7 @@ router.route('/register')
                 }
         })
         .post(function(req, res, next) {
-                const reg = nconf.get('auth:registration');
+                const reg = config.get('auth:registration');
                 if (reg) {
                         const salt = bcrypt.genSaltSync();
                         const hash = bcrypt.hashSync(req.body.password, salt);
@@ -219,7 +232,9 @@ router.route('/register')
                                                 logger.auth.error(
                                                         `Duplicate registration via API${JSON.stringify(row)}`
                                                 );
-                                                res.status(401).json({ error: 'access denied' });
+                                                res.status(401).json({
+                                                        error: 'access denied',
+                                                });
                                         } else {
                                                 return db('users')
                                                         .insert({
@@ -235,21 +250,24 @@ router.route('/register')
                                                         .then(() => {
                                                                 passport.authenticate('login-user', (err, user) => {
                                                                         if (user) {
-                                                                                req.logIn(user, function(err) {
-                                                                                        if (err) {
+                                                                                req.logIn(user, function(error) {
+                                                                                        if (error) {
                                                                                                 res.status(500).json({
                                                                                                         status:
                                                                                                                 'failed',
-                                                                                                        error: err,
+                                                                                                        error,
                                                                                                         redirect:
                                                                                                                 '/auth/register',
                                                                                                 });
-                                                                                                logger.auth.error(err);
+                                                                                                logger.auth.error(
+                                                                                                        error
+                                                                                                );
                                                                                         } else {
                                                                                                 res.status(200).json({
                                                                                                         status: 'ok',
                                                                                                         redirect: '/',
                                                                                                 });
+
                                                                                                 logger.auth.info(
                                                                                                         `Created Account: ${user}`
                                                                                                 );
@@ -291,9 +309,8 @@ router.route('/reset')
                                 message: req.flash('loginMessage'),
                                 username: user,
                         });
-                } else {
-                res.redirect('/auth/login');
                 }
+                res.redirect('/auth/login');
         })
         .post(authHelper.isLoggedIn, function(req, res) {
                 const { password } = req.body;
@@ -302,7 +319,7 @@ router.route('/reset')
                         const salt = bcrypt.genSaltSync();
                         const hash = bcrypt.hashSync(req.body.password, salt);
                         const { id } = req.user;
-                        //need to update this query to select the user first then update. 
+                        // need to update this query to select the user first then update.
                         db.from('users')
                                 .returning('id')
                                 .where('id', '=', id)
@@ -310,16 +327,25 @@ router.route('/reset')
                                         password: hash,
                                 })
                                 .then(() => {
-                                        res.status(200).send({ status: 'ok', redirect: '/' });
+                                        res.status(200).send({
+                                                status: 'ok',
+                                                redirect: '/',
+                                        });
                                         logger.auth.debug(`${req.user.username} Password Reset Successfully`);
                                 })
                                 .catch(err => {
-                                        res.status(500).send({ status: 'failed', error: 'Failed to update password' });
+                                        res.status(500).send({
+                                                status: 'failed',
+                                                error: 'Failed to update password',
+                                        });
                                         logger.auth.error(`${req.user.username} error resetting password${err}`);
-                                        console.log(err)
+                                        console.log(err);
                                 });
                 } else {
-                        res.status(400).send({ status: 'failed', error: 'Password Blank or the Same' });
+                        res.status(400).send({
+                                status: 'failed',
+                                error: 'Password Blank or the Same',
+                        });
                 }
         });
 
@@ -384,4 +410,3 @@ router.route('/userCheck/email/:id').get(bruteforcedupe.prevent, function(req, r
 });
 
 module.exports = router;
-
