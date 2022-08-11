@@ -67,6 +67,8 @@ if (azureEnable) {
              .start();
 }
 
+checkForDbDriver(nconf.get('database:type'));
+
 var dbinit = require('./db');
     dbinit.init();
 var db = require('./knex/knex.js');
@@ -277,6 +279,54 @@ function onError(error) {
       throw error;
   }
 }
+
+function checkForDbDriver(driver) {
+  switch (driver) {
+    /* eslint-disable import/no-extraneous-dependencies, global-require */
+    case 'sqlite3': {
+      try {
+        require('sqlite3');
+      } catch (e) {
+        logger.main.error(`Selected database type is sqlite3, but npm package sqlite3 was not installed.`);
+        logger.main.error(
+          `Please run npm i sqlite3 to install or refer to https://www.npmjs.com/package/sqlite3 for reference`
+        );
+        process.exit(1);
+      }
+      break;
+    }
+    case 'mysql': {
+      try {
+        require('knex');
+      } catch (e) {
+        logger.main.error(`Selected database type is mysql, but npm package knex was not installed.`);
+        logger.main.error(
+          `Please run npm i knex to install or refer to https://www.npmjs.com/package/knex for reference`
+        );
+        process.exit(1);
+      }
+      break;
+    }
+    case 'oracledb': {
+      try {
+        require('oracledb');
+      } catch (e) {
+        logger.main.error(`Selected database type is oracledb, but npm package oracledb was not installed.`);
+        logger.main.error(
+          `Please run npm i oracledb to install or refer to https://www.npmjs.com/package/oracledb for reference`
+        );
+        process.exit(1);
+      }
+      break;
+    }
+    default: {
+      logger.main.error(`No database type was specified.`);
+      process.exit(1);
+    }
+  }
+  /* eslint-enable import/no-extraneous-dependencies, global-require */
+}
+
 
 function onListening() {
   var addr = server.address();
