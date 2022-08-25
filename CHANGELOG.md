@@ -1,4 +1,6 @@
-# 0.3.x - 2022-06-13
+# 0.3.12 - TBD
+* Refresh alias automatically when single capcode alias is updated @geelongmicrosoldering
+* Fix CSS Layout of Buttons on mobile devices #513 @geelongmicrosoldering
 * Added support for non-standard ports when connecting to mysql databases @MitchDrage
 
 # 0.3.11e - 2022-01-19
