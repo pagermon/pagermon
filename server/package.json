@@ -47,7 +47,6 @@
     "node-prowl": "latest",
     "node-uuid": "^1.4.8",
     "nodemailer": "latest",
-    "oracledb": "^4.2.0",
     "passport": "^0.3.2",
     "passport-local": "^1.0.0",
     "passport-localapikey-update": "^0.5.0",
@@ -55,7 +54,6 @@
     "serve-favicon": "~2.4.2",
     "slack": "latest",
     "socket.io": "^2.0.2",
-    "sqlite3": "~4.0.2",
     "systemjs": "^0.20.13",
     "telegram-bot-api": "^1.2.2",
     "twit": "latest",
@@ -84,5 +82,9 @@
     "nyc": "^15.1.0",
     "passport-stub": "^1.1.1",
     "prettier": "^1.16.4"
+  },
+  "optionalDependencies": {
+    "oracledb": "^4.2.0",
+    "sqlite3": "~4.0.2"
   }
 }
