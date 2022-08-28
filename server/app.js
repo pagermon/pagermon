@@ -50,6 +50,15 @@ if (!theme) {
   var theme = nconf.get('global:theme')
 }
 
+var dbtype = nconf.get('database:type');
+// Set the database port if none found, for backwards compatibility
+if (dbtype == 'pg' || dbtype == 'mysql' || dbtype == 'mssql') {
+	if (!nconf.get('database:port')){
+		nconf.set('database:port', 3306);
+		nconf.save();
+	}
+}
+
 //Enable Azure Monitoring if enabled
 var azureEnable = nconf.get('monitoring:azureEnable')
 var azureKey = nconf.get('monitoring:azureKey')
