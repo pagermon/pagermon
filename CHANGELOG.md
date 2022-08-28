@@ -1,6 +1,7 @@
 # 0.3.12 - TBD
 * Refresh alias automatically when single capcode alias is updated @geelongmicrosoldering
 * Fix CSS Layout of Buttons on mobile devices #513 @geelongmicrosoldering
+* Added support for non-standard ports when connecting to mysql databases @MitchDrage
 
 # 0.3.11e - 2022-01-19
 * [HOTFIX ] Downgrade installed version of multimon-ng @marshyonline

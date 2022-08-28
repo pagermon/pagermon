@@ -45,6 +45,7 @@ if(process.env.NODE_ENV === 'test') {
   dbconfig.connection.filename = nconf.get('database:file');
 } else if (dbtype == 'mysql') {
   dbconfig.connection.host = nconf.get('database:server');
+  dbconfig.connection.port = nconf.get('database:port');
   dbconfig.connection.user = nconf.get('database:username');
   dbconfig.connection.password = nconf.get('database:password');
   dbconfig.connection.database = nconf.get('database:database');
