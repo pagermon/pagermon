@@ -12,7 +12,7 @@ function run(trigger, scope, data, config, callback) {
     return callback();
   }
 
-  const keys = _.map(pConf.group.split(/(,|;)/g), key => {
+  const keys = _.map(pConf.group.split(/[;,]/), key => {
     key.trim();
   }).join(',');
 

@@ -20,7 +20,7 @@ function run(trigger, scope, data, config, callback) {
   }
 
   // Split chat IDs by comma or semicolon, trim whitespace, make array of it.
-  const chatIds = _.map(tConf.chat.split(/(,|;)/g), chatId => chatId.trim());
+  const chatIds = _.map(tConf.chat.split(/[;,]/), chatId => chatId.trim());
 
   // Notification formatted in Markdown for pretty notifications
   const notificationText = `*${data.agency} - ${data.alias}*\nMessage: ${data.message}`;
