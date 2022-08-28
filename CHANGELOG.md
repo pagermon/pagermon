@@ -31,7 +31,6 @@
 * Fix layout when message contains long word #474 @geelongmicrosoldering
 * Improved wildcard feature #458 @eopo
 
-
 # 0.3.10 - 2020-06-24
 
 * Downgrade discord.js package to fix crashes #415 @DanrwAU
