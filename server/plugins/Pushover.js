@@ -19,19 +19,11 @@ function run(trigger, scope, data, config, callback) {
 
   const keys = _.chain(pConf.group.split(/[;,]/))
     .map(key => key.trim())
-    .filter(entry => {
-      try {
-        return entry?.length();
-      } catch (e) {
-        return false;
-      }
-    })
-    .join(',');
+    .filter(entry => entry?.length);
 
   logger.main.debug(`User keys: ${keys}`);
 
   const p = new Push({
-    user: keys,
     token: config.pushAPIKEY,
   });
 
@@ -56,17 +48,23 @@ function run(trigger, scope, data, config, callback) {
     msg.expire = 240;
     logger.main.info('SENDING EMERGENCY PUSH NOTIFICATION');
   }
-  try {
-    p.send(msg, function(err, result) {
-      if (err) {
-        logger.main.error(`Pushover:${err}`);
-      }
-      logger.main.debug(`Pushover:${result}`);
-      callback();
-    });
-  } catch (e) {
-    logger.main.error(`error: ${e.message}`);
-  }
+
+  keys.forEach(key => {
+    const tempMsg = msg;
+    tempMsg.user = key;
+    try {
+      p.send(tempMsg, function(err, result) {
+        if (err) {
+          logger.main.error(`Pushover:${err}`);
+        }
+        logger.main.debug(`Pushover:${result}`);
+      });
+    } catch (e) {
+      logger.main.error(`Failed to send message to user ${key}. Error: ${e.message}`);
+    }
+  });
+
+  callback();
 }
 
 module.exports = {
