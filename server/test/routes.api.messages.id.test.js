@@ -123,14 +123,12 @@ describe('DELETE /api/messages/id', () => {
     
     // Send a DELETE request to the endpoint
     chai.request(server)
-      .delete('/api/messages/5')
-      .end((err, res) => {
-        should.not.exist(err);
-        res.status.should.eql(200);
-        res.type.should.eql('application/json');
-        res.body.should.be.a('object');
-        res.body.should.have.property('success').eql(true);
-
+         .delete('/api/messages/5')
+            .end((err, res) => {
+                res.status.should.eql(200);
+                res.body.status.should.eql('ok')
+                done();
+         });
         // Verify that the message was actually deleted
         chai.request(server)
           .get('/api/messages/5')
