@@ -153,7 +153,7 @@ describe('DELETE /api/messages/id', () => {
       });
   });
   
-  it('should return a 403 error if the user does not have permission to delete messages', done => {
+  it('should return a 401 error if the user does not have permission to delete messages', done => {
     // Log in as a user without permission to delete messages
     passportStub.login({
       username: 'normaluser',
@@ -165,7 +165,7 @@ describe('DELETE /api/messages/id', () => {
       .delete('/api/messages/5')
       .end((err, res) => {
         should.not.exist(err);
-        res.status.should.eql(403);
+        res.status.should.eql(401);
         res.type.should.eql('application/json');
         done();
       });
