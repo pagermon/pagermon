@@ -147,9 +147,15 @@
             <td class="shrink noMobile" ng-if="!user">
               <span>{{message.alias || ''}}</span>
             </td>
-            <td class="expand">
-              <div highlight="message.message" replacement="init.replaceText" class="pagerMessage"></div>
-            </td>
+            <% if (login && user.role == 'admin') { %>
+              <td class="expand" uib-popover-template="'templates/popover.html'" popover-append-to-body=true ng-click="popoverEl = 'message'" popover-trigger="'outsideClick'">
+                <div highlight="message.message" replacement="init.replaceText" class="pagerMessage"></div>
+              </td>
+            <% } else { %>
+              <td class="expand">
+                <div highlight="message.message" replacement="init.replaceText" class="pagerMessage"></div>
+              </td>
+          <% } %>
         </tbody>
       </table>
     </div>
