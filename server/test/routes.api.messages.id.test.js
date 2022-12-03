@@ -113,3 +113,61 @@ describe('GET /api/messages/id', () => {
                         });
         });
 });
+describe('DELETE /api/messages/id', () => {
+  it('should delete the specified message if the user is logged in and has permission', done => {
+    // Log in as a user with permission to delete messages
+    passportStub.login({
+      username: 'adminuser',
+      password: 'changeme'
+    });
+    
+    // Send a DELETE request to the endpoint
+    chai.request(server)
+      .delete('/api/messages/5')
+      .end((err, res) => {
+        should.not.exist(err);
+        res.status.should.eql(200);
+        res.type.should.eql('application/json');
+        res.body.should.be.a('object');
+        res.body.should.have.property('success').eql(true);
+
+        // Verify that the message was actually deleted
+        chai.request(server)
+          .get('/api/messages/5')
+          .end((getErr, getRes) => {
+            getRes.status.should.eql(404);
+            done();
+          });
+      });
+  });
+  
+  it('should return a 401 error if the user is not logged in', done => {
+    // Send a DELETE request to the endpoint without logging in
+    chai.request(server)
+      .delete('/api/messages/5')
+      .end((err, res) => {
+        should.not.exist(err);
+        res.status.should.eql(401);
+        res.type.should.eql('application/json');
+        done();
+      });
+  });
+  
+  it('should return a 403 error if the user does not have permission to delete messages', done => {
+    // Log in as a user without permission to delete messages
+    passportStub.login({
+      username: 'normaluser',
+      password: 'changeme'
+    });
+    
+    // Send a DELETE request to the endpoint
+    chai.request(server)
+      .delete('/api/messages/5')
+      .end((err, res) => {
+        should.not.exist(err);
+        res.status.should.eql(403);
+        res.type.should.eql('application/json');
+        done();
+      });
+  });
+});
