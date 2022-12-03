@@ -522,7 +522,20 @@ router.route('/messages/:id')
       .catch((err) => {
         res.status(500).send(err);
       })
-  });
+  })
+  .delete(authHelper.isAdmin, function (req, res, next) {
+    var id = req.params.id;
+
+    db.from('messages')
+      .where('messages.id', id)
+      .del()
+      .then(() => {
+        res.status(200).send('Message successfully deleted');
+      })
+      .catch((err) => {
+        res.status(500).send(err);
+      })
+   });
 
 router.route('/messageSearch')
   .get(authHelper.isLoggedInMessages, function (req, res, next) {
