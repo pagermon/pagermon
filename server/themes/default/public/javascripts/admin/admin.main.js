@@ -25,6 +25,9 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         AliasImport: $resource('/api/capcodeImport', null, {
           'post': { method:'POST', isArray: false }
         }),
+        Messages: $resource('/api/messages/:id', {id: '@id'}, {
+        'delete': { method: 'DELETE', isArray: false}
+        }),
         Users: $resource('/api/user', null, {
         }),
         UserDetail: $resource('/api/user/:id', {id: '@id'}, {
@@ -313,7 +316,21 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         }
       };
     }])
-
+    .controller('MessageController', ['$scope', 'Api', function ($scope, Api) {
+      // Retrieve the list of messages from the server
+      Api.Messages.query(null, function(results) {
+        $scope.messages = results;
+      });
+      // Delete a message with the given id
+      $scope.deleteMessage = function(id) {
+        Api.Messages.delete({id: id}, function() {
+          // Remove the message from the list of messages
+          $scope.messages = $scope.messages.filter(function(message) {
+            return message.id !== id;
+          });
+        });
+      }
+    }]);
     .controller('UserController', ['$scope', '$routeParams', 'Api', '$uibModal', '$filter', '$location', '$timeout', 'FileSaver', function ($scope, $routeParams, Api, $uibModal, $filter, $location, $timeout, FileSaver) {
       $scope.loading = true;
       $scope.alertMessage = {};
