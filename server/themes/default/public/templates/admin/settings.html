@@ -85,6 +85,18 @@
 		            <span id="helpBlock" class="help-block">Modal Content</span>
               </div>
             </div>
+            <div class="form-group">
+              <label for="global.SpecificAliasRefresh" class="col-xs-4 col-sm-3 control-label">Refresh Specific Alias</label>
+              <div class="col-xs-8 col-sm-9">
+              <div class="checkbox">
+                <label>
+                <input type="checkbox" name="global.SpecificAliasRefresh" ng-model="settings.global.SpecificAliasRefresh">
+                Refresh all messages for a specific Alias, when the Alias is saved. 
+		<span id="helpBlock" class="help-block">This mitigates the need for an Alias Refresh every time an alias is saved, but does not effect <b>_</b> wildcard alias.</span>
+                </label>
+              </div>
+              </div>
+            </div>
 
             <h5>Database</h5>
             <div class="form-group">
@@ -118,6 +130,13 @@
               <div class="col-xs-8 col-sm-9">
               <input type="text" class="form-control" name="database.server" ng-model="settings.database.server" required>
               <span id="helpBlock" class="help-block">Database Server Address</span>
+              </div>
+            </div>
+            <div class="form-group" ng-if="settings.database.type == 'pg' || settings.database.type == 'mysql' || settings.database.type == 'mssql'">
+              <label for="database.port" class="col-xs-4 col-sm-3 control-label">Database Port</label>
+              <div class="col-xs-8 col-sm-9">
+              <input type="text" class="form-control" name="database.port" ng-model="settings.database.port" required>
+              <span id="helpBlock" class="help-block">Database Server Port (default is 3306)</span>
               </div>
             </div>
             <div class="form-group" ng-if="settings.database.type == 'pg' || settings.database.type == 'mysql' || settings.database.type == 'mssql'">
@@ -331,6 +350,57 @@
                     <td></td>
                     <td>
                       <input type="button" class="btn btn-success btn-sm addnew pull-right" ng-click="addMatch()" value="&plus;">
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              </div>
+            </div>
+
+            <div class="row">
+            <label class="col-xs-4 col-sm-3 control-label">Alias Templates</label>
+            <div class="col-xs-8 col-sm-9">
+            <span id="helpBlock" class="help-block">Templates Available when editing/creating an Alias. Use these to speed up alias creation</span>
+            </div>
+            </div>
+            <div class="form-group">
+              <div class="col-sm-11 col-sm-offset-1">
+              <table class="table table-striped table-condensed">
+                <thead>
+                  <tr>
+                    <th width="1%"></th>
+                    <th width="25%">Name</th>
+                    <th width="25%">Agency</th>
+                    <th width="25%">Icon</th>
+                    <th width="23%">Color</th>
+                    <th width="1%">Filter</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="template in settings.aliases.templates track by $index">
+                    <td style="text-align: center; vertical-align: middle;">
+                      <input type="checkbox" ng-model="template.selected"/></td>
+                    <td>
+                      <input type="text" class="form-control" placeholder="Template Name" ng-model="template.name" required></td>
+                    <td>
+                      <input type="text" class="form-control" placeholder="Template Agency" ng-model="template.agency" required></td>
+                    <td>
+                      <input type="text" class="form-control" placeholder="Template Icon" ng-model="template.icon" required></td>
+                    <td>
+                      <input type="text" class="form-control" placeholder="Template Color" ng-model="template.color" required></td>
+                    <td style="text-align: center; vertical-align: middle;">
+                      <input type="checkbox" ng-model="template.filter"/></td>
+                  </tr>
+                  <tr>
+                    <td style="text-align: left;">
+                      <input ng-disabled="!templateSelected()" type="button" class="btn btn-sm btn-danger" ng-click="removeTemplate()" value="&times;">
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>
+                      <input type="button" class="btn btn-success btn-sm addnew pull-right" ng-click="addTemplate()" value="&plus;">
                     </td>
                   </tr>
                 </tbody>

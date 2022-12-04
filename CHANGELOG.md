@@ -1,3 +1,12 @@
+
+# 0.3.12 - TBD
+* Refresh alias automatically when single capcode alias is updated @geelongmicrosoldering
+* Added Alias Description Helpers - Alias Template, FontAwesome #514 @geelongmicrosoldering
+* Fix CSS Layout of Buttons on mobile devices #513 @geelongmicrosoldering
+* Added support for non-standard ports when connecting to mysql databases @MitchDrage
+* Change includes to HTTPS to support [CORS-RFC1918](https://wicg.github.io/private-network-access/) @e-bits
+* Added support for multi-target push notifications in Pushover, Telegram and Prowl @eopo
+
 # 0.3.11e - 2022-01-19
 * [HOTFIX ] Downgrade installed version of multimon-ng @marshyonline
 

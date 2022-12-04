@@ -94,3 +94,5 @@ server/sessions
 #coverage
 server/coverage/
 
+# macOS Spotlight
+**/.DS_Store
