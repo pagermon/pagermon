@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node ./bin/www",
     "test": "nyc --reporter=lcov mocha --exit -t 60000",
+    "test-text": "nyc mocha --exit -t 60000",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
