@@ -302,9 +302,13 @@
             </div>
             
             <div class="row">
-            <label class="col-xs-4 col-sm-3 control-label">Text Matching</label>
+            <label class="col-xs-4 col-sm-3 control-label">Text/Regex Matching</label>
             <div class="col-xs-8 col-sm-9">
-            <span id="helpBlock" class="help-block">Highlights or labels text. If Label is present, then it will be displayed as a tooltip when hovering over the matched text. Text Match field can be regex.</span>
+            <span id="helpBlock" class="help-block">Highlights, Labels, or Replaces text/regex match.<br />
+              In <strong>Label</strong> mode, the text is not highlighted, but tooltips are visible when hovering over matched text (if a label is present).<br />
+              In <strong>Highlight</strong> mode, the text is highlighted, and tooltips are visible when hovering over matched text (if a label is present).<br />
+              In <strong>Replace</strong> Mode, the replacement can be text, or a regex replacement consisting of groups (eg: &#x3C;a href=&#x22;?q=$1&#x22;&#x3E;$2&#x3C;/a&#x3E;)<br />
+              <strong style="color:black;">Note: Reordering rows may help when you have many complex regex replacements.</strong></span>
             </div>
             </div>
             <div class="form-group">
@@ -313,21 +317,29 @@
                 <thead>
                   <tr>
                     <th width="1%"></th>
-                    <th width="25%">Text Match</th>
-                    <th width="1%">Highlight</th>
-                    <th width="99%">Label</th>
+                    <th width="44%">Text/Regex Match</th>
+                    <th width="10%">Mode</th>
+                    <th width="44%">Label/Regex Replace</th>
+                    <th width="1%"></th>
                   </tr>
                 </thead>
-                <tbody>
-                  <tr ng-repeat="text in settings.messages.replaceText track by $index">
+                <tbody sv-root sv-part="settings.messages.replaceText" class="textMatchTable">
+                  <tr ng-repeat="text in settings.messages.replaceText track by $index" sv-element="{containment:'.textMatchTable'}">
                     <td style="text-align: center; vertical-align: middle;">
                       <input type="checkbox" ng-model="text.selected"/></td>
                     <td>
-                      <input type="text" class="form-control" placeholder="Text Match" ng-model="text.match" required></td>
+                      <input type="text" class="form-control" placeholder="Text/Regex Match" ng-model="text.match" required></td>
                     <td style="text-align: center; vertical-align: middle;">
-                      <input type="checkbox" ng-model="text.highlight"/></td>
+                      <select class="form-control" ng-model="text.highlight">
+                        <option value="">Label</option>
+                        <option value="true">Highlight</option>
+                        <option value="replace">Replace</option>
+                      </select>
+                    </td>
                     <td>
-                      <input type="text" class="form-control" placeholder="Text Replace" ng-model="text.replace" ></td>
+                      <input type="text" class="form-control" placeholder="Label/Regex Replacement" ng-model="text.replace" ></td>
+                     <td style="font-size: 13pt;cursor:move;text-align: center; vertical-align: middle;" title="Drag to reorder" sv-handle>
+                      <i class="fas fa-bars"></i></td>
                   </tr>
                   <tr>
                     <td style="text-align: left;">
