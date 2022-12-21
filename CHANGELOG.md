@@ -1,5 +1,6 @@
 
 # 0.3.12 - TBD
+* Make mysql cron adjustable from settings #473 @geelongmicrosoldering
 * Refresh alias automatically when single capcode alias is updated @geelongmicrosoldering
 * Added Alias Description Helpers - Alias Template, FontAwesome #514 @geelongmicrosoldering
 * Fix CSS Layout of Buttons on mobile devices #513 @geelongmicrosoldering
