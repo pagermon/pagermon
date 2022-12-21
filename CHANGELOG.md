@@ -4,9 +4,9 @@
 * Added support for multi-target push notifications in Pushover, Telegram and Prowl #531 @eopo
 * Fix failing dependencies #530 @eopo
 * Added support for non-standard ports when connecting to mysql databases #520 @MitchDrage
-* * Added Alias Description Helpers - Alias Template, FontAwesome #514 @geelongmicrosoldering
+* Added Alias Description Helpers - Alias Template, FontAwesome #514 @geelongmicrosoldering
 * Fix CSS Layout of Buttons on mobile devices #513 @geelongmicrosoldering
-* * Better Regex/Text Matching #510 @geelongmicrosoldering
+* Better Regex/Text Matching #510 @geelongmicrosoldering
 * Refresh alias automatically when single capcode alias is updated #499 @geelongmicrosoldering
 * Change includes to HTTPS to support [CORS-RFC1918](https://wicg.github.io/private-network-access/) #477 @e-bits
 * Make mysql cron adjustable from settings #473 @geelongmicrosoldering
