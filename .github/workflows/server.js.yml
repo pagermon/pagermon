@@ -17,5 +17,5 @@ jobs:
         node-version: '12.16.x'
     - run: npm install
       working-directory: ./server
-    - run: npm test-text
+    - run: npm test
       working-directory: ./server
