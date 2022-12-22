@@ -1,3 +1,77 @@
+<!-- FontAwesome Helper Modal -->
+<style>.faHelperBlock{display:inline-block;text-align:center;width:60px;padding:10px 0;height:60px;border-radius:10px;cursor:pointer}.faHelperBlock:hover{background-color:#ffffe0}.faHelperIcon{font-size:24pt}</style>
+<div class="modal fade faHelperModal" tabindex="-1" role="dialog" aria-labelledby="faHelperModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" style="">
+    <div class="modal-content">
+      <div class="modal-header" style="padding: 5px 15px;border-bottom: 1px solid #dddddd;">
+        <span style="font-size:20px;" class="modal-title">Select Alias Icon:</span>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="padding: 5px;">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <div class="input-group">
+          <span class="input-group-addon"><i class="glyphicon glyphicon-filter"></i></span>
+          <input id="faSearch" type="text" class="form-control" name="faSearch" placeholder="Filter" ng-model="faSearch">
+        </div>
+      </div>
+      <div class="modal-body" style="overflow-y: auto;height: calc(100vh - 215px);" id="faHelperBody">
+	    <div ng-repeat="faIcon in faIcons | filter: faSearch" class="faHelperBlock" title="{{faIcon}}" onclick="setFaIcon(this);" onmouseover="showFaName(this);" onmouseleave="document.getElementById('faPreview').innerText = '';" data-dismiss="modal"><i class="faHelperIcon fas fa-{{faIcon}}"></i></div>
+      </div>
+      <div class="modal-footer">
+		<span id="faPreview" style="font-size:16px;padding-right: 15px;" class="modal-title"></span>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Alias Template Modal -->
+<style>.aliasTemplateBlock{display:inline-block;text-align:center;width:60px;padding:10px 0;height:60px;border-radius:10px;cursor:pointer}.aliasTemplateBlock:hover{background-color:#ffffe0}.aliasTemplateIcon{font-size:24pt}</style>
+<div class="modal fade aliasTemplateModal" tabindex="-1" role="dialog" aria-labelledby="aliasTemplateModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable" style="">
+    <div class="modal-content">
+      <div class="modal-header" style="padding: 5px 15px;border-bottom: 1px solid #dddddd;">
+        <span style="font-size:20px;" class="modal-title">Select Alias Template:</span>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="padding: 5px;">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <div class="input-group">
+          <span class="input-group-addon"><i class="glyphicon glyphicon-filter"></i></span>
+          <input id="search" type="text" class="form-control" name="search" placeholder="Filter" ng-model="search">
+        </div>
+      </div>
+      <div class="modal-body" style="overflow-y: auto;height: calc(100vh - 215px);padding-top: 0px;" id="aliasTemplateBody">
+		  <table class="table table-condensed table-hover table-striped valign">
+			<thead class="thead-default">
+			  <tr>
+				<th style="text-align: center;">Color</th>
+				<th style="text-align: center;">Icon</th>
+				<th style="text-align: center;">Agency</th>
+				<th style="text-align: center;">Filter</th>
+				<th style="text-align: center;">Name</th>
+			  </tr>
+			</thead>
+			<tbody>
+			  <tr ng-repeat="template in settings.aliases.templates | filter: search track by $index">
+				<td class="shrink clickable-td" onclick="setAliasTemplate(this);" data-dismiss="modal" style="background-color: {{template.color || 'transparent'}};">
+				  <span style="color: {{ template.color ? 'white' : 'black' }};"><strong>{{template.color}}</strong></span>
+				<td class="shrink clickable-td" onclick="setAliasTemplate(this);" data-dismiss="modal">
+				  <span ng-if="template.icon" class="fa-stack fa-lg fa-fw" style="color: {{template.color || 'transparent'}};">
+					<i class="fa fa-circle fa-stack-2x"></i>
+					<i class="fa fa-{{template.icon}} fa-stack-1x fa-inverse"></i>
+				  </span>
+				  <span style="vertical-align: middle;">{{template.icon}}</span>
+				</td>
+				<td class="shrink clickable-td" onclick="setAliasTemplate(this);" data-dismiss="modal"><strong>{{template.agency || ''}}</strong></td>
+				<td class="shrink clickable-td" onclick="setAliasTemplate(this);" data-dismiss="modal"><i ng-if="!template.filter" class="fa fa-circle text-success"></i><i ng-if="template.filter" class="fa fa-exclamation-circle text-danger"></i></td>
+				<td class="expand clickable-td" onclick="setAliasTemplate(this);" data-dismiss="modal" style="color: Maroon;">{{template.name}}</td>
+			</tbody>
+		  </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 <div class="row" style="padding-top: 11px;">
 </div>
 <div ng-if="loading" class="loading"><i class="fa fa-spinner fa-spin"></i></div>
@@ -34,7 +108,12 @@
             <div class="form-group" ng-class="!alias.agency ? 'has-error' : 'has-success'">
               <label for="alias.agency" class="col-xs-4 col-sm-3 control-label">Agency</label>
               <div class="col-xs-8 col-sm-9">
-              <input class="form-control" type="text" name="alias.agency" ng-model="alias.agency" required>
+                <div class="input-group">
+                  <input class="form-control" type="text" name="alias.agency" id="aliasAgency" ng-model="alias.agency" required>
+                  <span class="input-group-addon">
+                    <button type="button" class="btn btn-default" data-toggle="modal" data-target=".aliasTemplateModal">TEMPLATES</button>
+                  </span>
+                </div>
               <span id="helpBlock" class="help-block">Agency or a high level group for aliases.</span>
               </div>
             </div>
@@ -48,9 +127,12 @@
                       <i class="fa fa-{{alias.icon || 'question'}} fa-stack-1x fa-inverse"></i>
                     </span>
                   </span>
-                  <input class="form-control" type="text" name="alias.icon" ng-model="alias.icon" required>
+                  <input id="aliasIcon" class="form-control" type="text" name="alias.icon" ng-model="alias.icon" required>
+                  <span class="input-group-addon">
+                    <button type="button" class="btn btn-default" data-toggle="modal" data-target=".faHelperModal">PICK</button>
+                  </span>
                 </div>
-              <span id="helpBlock" class="help-block">Fontawesome icon to display with the alias. <a href="https://fontawesome.com/icons?d=gallery&m=free" target="_blank">Available icons.</a></span>
+              <span id="helpBlock" class="help-block">Fontawesome icon to display with the alias.</span>
               </div>
             </div>
             <div class="form-group">
@@ -64,7 +146,7 @@
             <div class="form-group" ng-class="!alias.alias ? 'has-error' : 'has-success'">
               <label for="alias.alias" class="col-xs-4 col-sm-3 control-label">Alias</label>
               <div class="col-xs-8 col-sm-9">
-              <input class="form-control" type="text" name="alias.alias" ng-model="alias.alias" required>
+              <input class="form-control" type="text" name="alias.alias" id="aliasName" ng-model="alias.alias" required>
               <span id="helpBlock" class="help-block">Text description of the alias.</span>
               </div>
             </div>
@@ -73,7 +155,7 @@
               <div class="col-xs-8 col-sm-9">
               <div class="checkbox">
                 <label>
-                <input type="checkbox" name="alias.ignore" ng-model="alias.ignore" ng-true-value="1" ng-false-value="0">
+                <input type="checkbox" name="alias.ignore" id="aliasFilter" ng-model="alias.ignore" ng-true-value="1" ng-false-value="0">
                 Ignore messages matching this alias.
                 </label>
                 <span id="helpBlock" class="help-block">New messages that come in matching this alias are not stored in the database, but existing messages will not be deleted.</span>
@@ -127,3 +209,37 @@
     <button ng-if="aliasRefreshRequired == 1" type="button" ng-click="aliasRefresh();" class="btn btn-warning">Refresh Aliases</button>
     <button ng-if="!isNew" type="button" ng-click="newButton('new');" class="btn btn-success">Add New</button>
 </div>
+<script>
+  //FontAwesome Helper Set Function
+  function setFaIcon(element){
+    var iconName = angular.element(element).scope().faIcon;
+    document.getElementById('aliasIcon').value = iconName;
+    angular.element(document.getElementById('aliasIcon')).triggerHandler('change');
+  }
+
+  //FontAwesome Helper Preview Function
+  function showFaName(element){
+    document.getElementById('faPreview').innerText = angular.element(element).scope().faIcon;
+  }
+
+  //Alias Template Set Function
+  function setAliasTemplate(element){
+    var thisTemplate = angular.element(element).scope().template;
+    document.getElementById('aliasAgency').value = thisTemplate.agency;
+    angular.element(document.getElementById('aliasAgency')).triggerHandler('change');
+    document.getElementById('aliasIcon').value = thisTemplate.icon;
+    angular.element(document.getElementById('aliasIcon')).triggerHandler('change');
+	
+    document.querySelector('.color-picker-input').value = thisTemplate.color;
+    angular.element(document.querySelector('.color-picker-input')).triggerHandler('change');
+	
+    if(thisTemplate.filter){
+      document.getElementById('aliasFilter').checked = true;
+      angular.element(document.getElementById('aliasFilter')).scope().alias.ignore = 1;
+    } else {
+      document.getElementById('aliasFilter').checked = false;
+      angular.element(document.getElementById('aliasFilter')).scope().alias.ignore = 0;
+    }
+    angular.element(document.getElementById('aliasFilter')).triggerHandler('change');
+  }
+</script>

@@ -1,11 +1,12 @@
 {
   "name": "pagermon",
-  "version": "0.3.11-beta",
+  "version": "0.3.12-beta",
   "private": true,
   "license": "Unlicense",
   "scripts": {
     "start": "node ./bin/www",
     "test": "nyc --reporter=lcov mocha --exit -t 60000",
+    "test-text": "nyc mocha --exit -t 60000",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
@@ -17,7 +18,7 @@
     "angular-uuid": "0.0.4",
     "angularjs-color-picker": "^3.3.0",
     "applicationinsights": "^1.4.1",
-    "axios": "^0.19.2",
+    "axios": ">=0.21.2",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.17.2",
     "brute-knex": "^4.0.0",
@@ -29,6 +30,7 @@
     "cookie-parser": "~1.4.3",
     "core-js": "^2.4.1",
     "cron": "^1.7.0",
+    "cron-validator": "^1.2.1",
     "debug": "~2.6.3",
     "discord.js": "^11.6.4",
     "ejs": "~2.5.6",
@@ -43,11 +45,10 @@
     "moment": "^2.26.0",
     "morgan": "~1.9.1",
     "mysql": "^2.16.0",
-    "nconf": "^0.8.4",
+    "nconf": ">=0.11.4",
     "node-prowl": "latest",
     "node-uuid": "^1.4.8",
     "nodemailer": "latest",
-    "oracledb": "^4.2.0",
     "passport": "^0.3.2",
     "passport-local": "^1.0.0",
     "passport-localapikey-update": "^0.5.0",
@@ -55,7 +56,6 @@
     "serve-favicon": "~2.4.2",
     "slack": "latest",
     "socket.io": "^2.0.2",
-    "sqlite3": "~4.0.2",
     "systemjs": "^0.20.13",
     "telegram-bot-api": "^1.2.2",
     "twit": "latest",
@@ -84,5 +84,9 @@
     "nyc": "^15.1.0",
     "passport-stub": "^1.1.1",
     "prettier": "^1.16.4"
+  },
+  "optionalDependencies": {
+    "oracledb": "^4.2.0",
+    "sqlite3": "~4.0.2"
   }
 }

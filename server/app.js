@@ -1,4 +1,4 @@
-var version = "0.3.11-beta";
+var version = "0.3.12-beta";
 
 var debug = require('debug')('pagermon:server');
 var io = require('@pm2/io').init({
@@ -23,6 +23,7 @@ var session = require('express-session');
 var request = require('request');
 var SQLiteStore = require('connect-sqlite3')(session);
 var flash    = require('connect-flash');
+
 
 
 process.on('SIGINT', function() {
@@ -50,6 +51,15 @@ if (!theme) {
   var theme = nconf.get('global:theme')
 }
 
+var dbtype = nconf.get('database:type');
+// Set the database port if none found, for backwards compatibility
+if (dbtype == 'pg' || dbtype == 'mysql' || dbtype == 'mssql') {
+	if (!nconf.get('database:port')){
+		nconf.set('database:port', 3306);
+		nconf.save();
+	}
+}
+
 //Enable Azure Monitoring if enabled
 var azureEnable = nconf.get('monitoring:azureEnable')
 var azureKey = nconf.get('monitoring:azureKey')
@@ -66,6 +76,8 @@ if (azureEnable) {
              .setUseDiskRetryCaching(true)
              .start();
 }
+
+checkForDbDriver(nconf.get('database:type'));
 
 var dbinit = require('./db');
     dbinit.init();
@@ -199,8 +211,18 @@ app.use(function(err, req, res, next) {
 // Add cronjob to automatically refresh aliases
 var dbtype = nconf.get('database:type')
 if (dbtype == 'mysql') {
+  const cronvalidate = require('cron-validator');
+  // Get CRON from config
+  var cronartime = nconf.get('database:aliasRefreshInterval');
+  //If value is falsy (undefined, empty, null etc), set as default
+  if (!cronartime){cronartime = "0 5,35 * * * *";}
+  //Check value isn't garbage, if it is set to default
+  if (!cronvalidate.isValidCron(cronartime,{ seconds: true })) {
+    logger.main.warn('CRON: Invalid CRON configuration in config file. Defaulting to: "0 5,35 * * * *" ')
+    cronartime = "0 5,35 * * * *";
+  } 
   var aliasRefreshJob = require('cron').CronJob;
-  new aliasRefreshJob('0 5,35 * * * *', function() {
+  new aliasRefreshJob(cronartime, function() {
     var refreshRequired = nconf.get('database:aliasRefreshRequired')
     logger.main.debug('CRON: Running Cronjob AliasRefresh')
     if (refreshRequired == 1) {
@@ -277,6 +299,54 @@ function onError(error) {
       throw error;
   }
 }
+
+function checkForDbDriver(driver) {
+  switch (driver) {
+    /* eslint-disable import/no-extraneous-dependencies, global-require */
+    case 'sqlite3': {
+      try {
+        require('sqlite3');
+      } catch (e) {
+        logger.main.error(`Selected database type is sqlite3, but npm package sqlite3 was not installed.`);
+        logger.main.error(
+          `Please run npm i sqlite3 to install or refer to https://www.npmjs.com/package/sqlite3 for reference`
+        );
+        process.exit(1);
+      }
+      break;
+    }
+    case 'mysql': {
+      try {
+        require('knex');
+      } catch (e) {
+        logger.main.error(`Selected database type is mysql, but npm package knex was not installed.`);
+        logger.main.error(
+          `Please run npm i knex to install or refer to https://www.npmjs.com/package/knex for reference`
+        );
+        process.exit(1);
+      }
+      break;
+    }
+    case 'oracledb': {
+      try {
+        require('oracledb');
+      } catch (e) {
+        logger.main.error(`Selected database type is oracledb, but npm package oracledb was not installed.`);
+        logger.main.error(
+          `Please run npm i oracledb to install or refer to https://www.npmjs.com/package/oracledb for reference`
+        );
+        process.exit(1);
+      }
+      break;
+    }
+    default: {
+      logger.main.error(`No database type was specified.`);
+      process.exit(1);
+    }
+  }
+  /* eslint-enable import/no-extraneous-dependencies, global-require */
+}
+
 
 function onListening() {
   var addr = server.address();

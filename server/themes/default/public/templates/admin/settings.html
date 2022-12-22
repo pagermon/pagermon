@@ -85,8 +85,20 @@
 		            <span id="helpBlock" class="help-block">Modal Content</span>
               </div>
             </div>
+            <div class="form-group">
+              <label for="global.SpecificAliasRefresh" class="col-xs-4 col-sm-3 control-label">Refresh Specific Alias</label>
+              <div class="col-xs-8 col-sm-9">
+              <div class="checkbox">
+                <label>
+                <input type="checkbox" name="global.SpecificAliasRefresh" ng-model="settings.global.SpecificAliasRefresh">
+                Refresh all messages for a specific Alias, when the Alias is saved. 
+		<span id="helpBlock" class="help-block">This mitigates the need for an Alias Refresh every time an alias is saved, but does not effect <b>_</b> wildcard alias.</span>
+                </label>
+              </div>
+              </div>
+            </div>
 
-            <h5>Database</h5>
+            <h5>Database</h5><span class="text-warning">These settings require restart to take effect.</span>
             <div class="form-group">
               <label for="database.type" class="col-xs-4 col-sm-3 control-label">Type</label>
               <div class="col-xs-8 col-sm-9">
@@ -121,6 +133,13 @@
               </div>
             </div>
             <div class="form-group" ng-if="settings.database.type == 'pg' || settings.database.type == 'mysql' || settings.database.type == 'mssql'">
+              <label for="database.port" class="col-xs-4 col-sm-3 control-label">Database Port</label>
+              <div class="col-xs-8 col-sm-9">
+              <input type="text" class="form-control" name="database.port" ng-model="settings.database.port" required>
+              <span id="helpBlock" class="help-block">Database Server Port (default is 3306)</span>
+              </div>
+            </div>
+            <div class="form-group" ng-if="settings.database.type == 'pg' || settings.database.type == 'mysql' || settings.database.type == 'mssql'">
               <label for="database.database" class="col-xs-4 col-sm-3 control-label">Database Name</label>
               <div class="col-xs-8 col-sm-9">
               <input type="text" class="form-control" name="database.database" ng-model="settings.database.database" required>
@@ -146,7 +165,13 @@
                 <span id="helpBlock" class="help-block">Database Password</span>
                 </div>
             </div> 
-            
+            <div class="form-group" ng-if="settings.database.type == 'mysql'">
+              <label for="database.aliasRefreshInterval" class="col-xs-4 col-sm-3 control-label">Alias Refresh CRON</label>
+              <div class="col-xs-8 col-sm-9">
+              <input type="text" class="form-control" name="database.aliasRefreshInterval" ng-model="settings.database.aliasRefreshInterval">
+              <span id="helpBlock" class="help-block"><strong>Advanced Users</strong> - The cron timing for Automatic Alias Refresh. See <a href="https://www.npmjs.com/package/node-cron#cron-syntax" target="_blank">Cron Syntax</a>.<br />Default = "0 5,35 * * * *" (The 5th and 35th minute of every hour)</span>
+              </div>
+            </div> 
             <fieldset disabled>
             <div class="form-group">
               <div class="col-xs-8 col-xs-offset-2 col-sm-9 col-sm-offset-3">
@@ -283,9 +308,13 @@
             </div>
             
             <div class="row">
-            <label class="col-xs-4 col-sm-3 control-label">Text Matching</label>
+            <label class="col-xs-4 col-sm-3 control-label">Text/Regex Matching</label>
             <div class="col-xs-8 col-sm-9">
-            <span id="helpBlock" class="help-block">Highlights or labels text. If Label is present, then it will be displayed as a tooltip when hovering over the matched text. Text Match field can be regex.</span>
+            <span id="helpBlock" class="help-block">Highlights, Labels, or Replaces text/regex match.<br />
+              In <strong>Label</strong> mode, the text is not highlighted, but tooltips are visible when hovering over matched text (if a label is present).<br />
+              In <strong>Highlight</strong> mode, the text is highlighted, and tooltips are visible when hovering over matched text (if a label is present).<br />
+              In <strong>Replace</strong> Mode, the replacement can be text, or a regex replacement consisting of groups (eg: &#x3C;a href=&#x22;?q=$1&#x22;&#x3E;$2&#x3C;/a&#x3E;)<br />
+              <strong style="color:black;">Note: Reordering rows may help when you have many complex regex replacements.</strong></span>
             </div>
             </div>
             <div class="form-group">
@@ -294,21 +323,29 @@
                 <thead>
                   <tr>
                     <th width="1%"></th>
-                    <th width="25%">Text Match</th>
-                    <th width="1%">Highlight</th>
-                    <th width="99%">Label</th>
+                    <th width="44%">Text/Regex Match</th>
+                    <th width="10%">Mode</th>
+                    <th width="44%">Label/Regex Replace</th>
+                    <th width="1%"></th>
                   </tr>
                 </thead>
-                <tbody>
-                  <tr ng-repeat="text in settings.messages.replaceText track by $index">
+                <tbody sv-root sv-part="settings.messages.replaceText" class="textMatchTable">
+                  <tr ng-repeat="text in settings.messages.replaceText track by $index" sv-element="{containment:'.textMatchTable'}">
                     <td style="text-align: center; vertical-align: middle;">
                       <input type="checkbox" ng-model="text.selected"/></td>
                     <td>
-                      <input type="text" class="form-control" placeholder="Text Match" ng-model="text.match" required></td>
+                      <input type="text" class="form-control" placeholder="Text/Regex Match" ng-model="text.match" required></td>
                     <td style="text-align: center; vertical-align: middle;">
-                      <input type="checkbox" ng-model="text.highlight"/></td>
+                      <select class="form-control" ng-model="text.highlight">
+                        <option value="">Label</option>
+                        <option value="true">Highlight</option>
+                        <option value="replace">Replace</option>
+                      </select>
+                    </td>
                     <td>
-                      <input type="text" class="form-control" placeholder="Text Replace" ng-model="text.replace" ></td>
+                      <input type="text" class="form-control" placeholder="Label/Regex Replacement" ng-model="text.replace" ></td>
+                     <td style="font-size: 13pt;cursor:move;text-align: center; vertical-align: middle;" title="Drag to reorder" sv-handle>
+                      <i class="fas fa-bars"></i></td>
                   </tr>
                   <tr>
                     <td style="text-align: left;">
@@ -319,6 +356,57 @@
                     <td></td>
                     <td>
                       <input type="button" class="btn btn-success btn-sm addnew pull-right" ng-click="addMatch()" value="&plus;">
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              </div>
+            </div>
+
+            <div class="row">
+            <label class="col-xs-4 col-sm-3 control-label">Alias Templates</label>
+            <div class="col-xs-8 col-sm-9">
+            <span id="helpBlock" class="help-block">Templates Available when editing/creating an Alias. Use these to speed up alias creation. Filter checkbox automatically checks the "Filter Alias" setting for the Alias</span>
+            </div>
+            </div>
+            <div class="form-group">
+              <div class="col-sm-11 col-sm-offset-1">
+              <table class="table table-striped table-condensed">
+                <thead>
+                  <tr>
+                    <th width="1%"></th>
+                    <th width="25%">Name</th>
+                    <th width="25%">Agency</th>
+                    <th width="25%">Icon</th>
+                    <th width="23%">Color</th>
+                    <th width="1%">Filter</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="template in settings.aliases.templates track by $index">
+                    <td style="text-align: center; vertical-align: middle;">
+                      <input type="checkbox" ng-model="template.selected"/></td>
+                    <td>
+                      <input type="text" class="form-control" placeholder="Template Name" ng-model="template.name" ng-required="template.agency || template.icon || template.color"></td>
+                    <td>
+                      <input type="text" class="form-control" placeholder="Template Agency" ng-model="template.agency" ng-required="template.name || template.icon || template.color"></td>
+                    <td>
+                      <input type="text" class="form-control" placeholder="Template Icon" ng-model="template.icon" ng-required="template.agency || template.name || template.color"></td>
+                    <td>
+                      <input type="text" class="form-control" placeholder="Template Color" ng-model="template.color" ng-required="template.agency || template.icon || template.name"></td>
+                    <td style="text-align: center; vertical-align: middle;">
+                      <input type="checkbox" ng-model="template.filter"/></td>
+                  </tr>
+                  <tr>
+                    <td style="text-align: left;">
+                      <input ng-disabled="!templateSelected()" type="button" class="btn btn-sm btn-danger" ng-click="removeTemplate()" value="&times;">
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>
+                      <input type="button" class="btn btn-success btn-sm addnew pull-right" ng-click="addTemplate()" value="&plus;">
                     </td>
                   </tr>
                 </tbody>
