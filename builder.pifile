@@ -1,5 +1,5 @@
-#Latest Raspios Lite as of 12/01/2021 - https://www.raspberrypi.com/software/operating-systems/
-FROM https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2021-11-08/2021-10-30-raspios-bullseye-armhf-lite.zip
+#Latest Raspios Lite as of 23/12/2022 - https://www.raspberrypi.com/software/operating-systems/
+FROM https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2022-09-26/2022-09-22-raspios-bullseye-armhf-lite.img.xz
 TO /tmp/pagermon-pi.img
 
 PUMP 1024M
@@ -28,8 +28,8 @@ INSTALL . /home/pi/pagermon/
 #CHOWN pi
 RUN chown -R pi:pi /home/pi/pagermon
 
-#Install Nodejs 12.x
-RUN curl -fsSL https://deb.nodesource.com/setup_12.x | sudo -E bash -
+#Install Nodejs 14.x
+RUN curl -fsSL https://deb.nodesource.com/setup_14.x | sudo -E bash -
 RUN apt-get install -y nodejs npm
 
 #Install Multimon-ng
