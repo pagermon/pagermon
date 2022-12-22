@@ -366,7 +366,7 @@
             <div class="row">
             <label class="col-xs-4 col-sm-3 control-label">Alias Templates</label>
             <div class="col-xs-8 col-sm-9">
-            <span id="helpBlock" class="help-block">Templates Available when editing/creating an Alias. Use these to speed up alias creation</span>
+            <span id="helpBlock" class="help-block">Templates Available when editing/creating an Alias. Use these to speed up alias creation. Filter checkbox automatically checks the "Filter Alias" setting for the Alias</span>
             </div>
             </div>
             <div class="form-group">
@@ -387,13 +387,13 @@
                     <td style="text-align: center; vertical-align: middle;">
                       <input type="checkbox" ng-model="template.selected"/></td>
                     <td>
-                      <input type="text" class="form-control" placeholder="Template Name" ng-model="template.name" required></td>
+                      <input type="text" class="form-control" placeholder="Template Name" ng-model="template.name" ng-required="template.agency || template.icon || template.color"></td>
                     <td>
-                      <input type="text" class="form-control" placeholder="Template Agency" ng-model="template.agency" required></td>
+                      <input type="text" class="form-control" placeholder="Template Agency" ng-model="template.agency" ng-required="template.name || template.icon || template.color"></td>
                     <td>
-                      <input type="text" class="form-control" placeholder="Template Icon" ng-model="template.icon" required></td>
+                      <input type="text" class="form-control" placeholder="Template Icon" ng-model="template.icon" ng-required="template.agency || template.name || template.color"></td>
                     <td>
-                      <input type="text" class="form-control" placeholder="Template Color" ng-model="template.color" required></td>
+                      <input type="text" class="form-control" placeholder="Template Color" ng-model="template.color" ng-required="template.agency || template.icon || template.name"></td>
                     <td style="text-align: center; vertical-align: middle;">
                       <input type="checkbox" ng-model="template.filter"/></td>
                   </tr>
