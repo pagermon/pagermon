@@ -1,6 +1,6 @@
 {
   "name": "pagermon",
-  "version": "0.3.12-beta",
+  "version": "0.3.12a-beta",
   "private": true,
   "license": "Unlicense",
   "scripts": {
@@ -18,7 +18,7 @@
     "angular-uuid": "0.0.4",
     "angularjs-color-picker": "^3.3.0",
     "applicationinsights": "^1.4.1",
-    "axios": ">=0.21.2",
+    "axios": "^0.19.2",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.17.2",
     "brute-knex": "^4.0.0",
@@ -45,7 +45,7 @@
     "moment": "^2.26.0",
     "morgan": "~1.9.1",
     "mysql": "^2.16.0",
-    "nconf": ">=0.11.4",
+    "nconf": "^0.8.4",
     "node-prowl": "latest",
     "node-uuid": "^1.4.8",
     "nodemailer": "latest",
@@ -56,6 +56,7 @@
     "serve-favicon": "~2.4.2",
     "slack": "latest",
     "socket.io": "^2.0.2",
+    "sqlite3": "~4.0.2",
     "systemjs": "^0.20.13",
     "telegram-bot-api": "^1.2.2",
     "twit": "latest",
@@ -86,7 +87,6 @@
     "prettier": "^1.16.4"
   },
   "optionalDependencies": {
-    "oracledb": "^4.2.0",
-    "sqlite3": "~4.0.2"
+    "oracledb": "^4.2.0"
   }
 }
