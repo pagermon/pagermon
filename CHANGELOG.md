@@ -1,4 +1,6 @@
-
+# 0.3.12a - 2022-12-23
+* Revert #531 due to ongoing issues with crashes and 500 errors. @Danrw
+ 
 # 0.3.12 - 2022-12-23
 * Add .DS_Store to gitignore for mac users #532 @eopo
 * Added support for multi-target push notifications in Pushover, Telegram and Prowl #531 @eopo
