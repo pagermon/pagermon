@@ -11,12 +11,6 @@
             "description": "Application key supplied by Pushover.",
             "type": "text",
             "required": true
-        },
-        {
-            "name": "useTimestamp",
-            "label": "Use Message Timestamp",
-            "description": "Wether the messages stored timestamp of reception should be displayed on the users's device, or if it should fall back to the time of the API call to pushover",
-            "type": "checkbox"
         }
     ],
     "aliasConfig": [ 
@@ -43,7 +37,7 @@
         {
             "name": "group",
             "label": "User/Group Key",
-            "description": "Pushover destination for messages. You can provide multiple user or group keys by seperating them per comma or semicolon.",
+            "description": "Pushover destination for messages",
             "type": "text",
             "required": true
         },

@@ -1,46 +1,50 @@
-const Prowl = require('node-prowl');
-const logger = require('../log');
-const _ = require('underscore');
+var Prowl = require('node-prowl');
+var logger = require('../log');
 
 function run(trigger, scope, data, config, callback) {
-  const pConf = data.pluginconf.Prowl;
-  if (!pConf || !pConf?.enable) return callback();
+    var pConf = data.pluginconf.Prowl;
+    if (pConf && pConf.enable) {
+        //ensure key has been entered before trying to push
+        if (pConf.group == 0 || pConf.group == '0' || !pConf.group) {
+          logger.main.error('Prowl: ' + data.address + ' No User/Group key set. Please enter User/Group Key.');
+            callback();
+          } else {
+            var prowl =  new Prowl(pConf.group);
 
-  // ensure key has been entered before trying to push
-  if (pConf.group === 0 || pConf.group === '0' || !pConf.group) {
-    logger.main.error(`Prowl: No User/Group key set. Please enter User/Group Key.`);
-    return callback();
-  }
+            var payload = {};
+            
+            if (pConf.url) {
+              payload.url = pConf.url;
+            }
 
-  const keys = _.map(pConf.group.split(/[;,]/), key => {
-    key.trim();
-  }).join(',');
+            if (pConf.priority) {
+              payload.priority = pConf.priority.value;
+            }
 
-  const prowl = new Prowl(keys);
+            if (pConf.providerkey) {
+              payload.providerkey = pConf.providerkey;
+            }
 
-  const payload = {
-    url: pConf?.url?.value,
-    priority: pConf?.priority?.value,
-    providerkey: pConf?.providerkey?.value,
-  };
+            var event = data.agency+' - '+data.alias;
+            payload.description = data.message + ' \nTime: '+ new Date().toLocaleString();
 
-  const event = `${data.agency} - ${data.alias}`;
-  payload.description = `${data.message} \nTime: ${new Date().toLocaleString()}`;
+            if (pConf.priority == 2 || pConf.priority == '2') {
+              //emergency message
+              logger.main.info("SENDING EMERGENCY MESSAGE: PROWL");
+            }
 
-  if (pConf.priority === 2 || pConf.priority === '2') {
-    // emergency message
-    logger.main.info('SENDING EMERGENCY MESSAGE: PROWL');
-  }
-
-  prowl.push(event, config.application, payload, function(err, remaining) {
-    if (err) {
-      logger.main.error(`Prowl:${err}`);
+            prowl.push(event, config.application, payload, function (err, remaining) {
+              if (err) { logger.main.error('Prowl:' + err); }
+              logger.main.debug('Prowl: Message sent. ' + remaining + ' messages remaining for this hour.');
+              callback();
+            });
+          }
+    } else {
+        callback();
     }
-    logger.main.debug(`Prowl: Message sent. ${remaining} messages remaining for this hour.`);
-    callback();
-  });
+
 }
 
 module.exports = {
-  run,
+    run: run
 };

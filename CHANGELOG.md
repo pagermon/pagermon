@@ -1,4 +1,6 @@
-
+# 0.3.12a - 2022-12-23
+* Revert #531 due to ongoing issues with crashes and 500 errors. @Danrw
+ 
 # 0.3.12 - 2022-12-23
 * Add .DS_Store to gitignore for mac users #532 @eopo
 * Added support for multi-target push notifications in Pushover, Telegram and Prowl #531 @eopo
@@ -10,6 +12,8 @@
 * Refresh alias automatically when single capcode alias is updated #499 @geelongmicrosoldering
 * Change includes to HTTPS to support [CORS-RFC1918](https://wicg.github.io/private-network-access/) #477 @e-bits
 * Make mysql cron adjustable from settings #473 @geelongmicrosoldering
+* Added support for non-standard ports when connecting to mysql databases @MitchDrage
+* Change includes to HTTPS to support [CORS-RFC1918](https://wicg.github.io/private-network-access/) @e-bits
 
 # 0.3.11e - 2022-01-19
 * [HOTFIX ] Downgrade installed version of multimon-ng @marshyonline
