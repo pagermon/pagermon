@@ -6,7 +6,8 @@ PUMP 1024M
 # Enable SSH
 RUN touch /boot/ssh
 # Setup User
-RUN bash -c "echo 'pi:$6$XAM.kphpK2.MXGVY$28t.7rFwgnuKOeRq8cNH8HjM4shubvQQp3dpcN0F2zvM/lT2BguI2m8PSnQM/s2B4gM.ytGraxC1dIy2pXFPp.' > /boot/userconf.txt"
+RUN bash -c 'echo "pi:$6$XAM.kphpK2.MXGVY$28t.7rFwgnuKOeRq8cNH8HjM4shubvQQp3dpcN0F2zvM/lT2BguI2m8PSnQM/s2B4gM.ytGraxC1dIy2pXFPp." > /boot/userconf.txt'
+
 
 #Update
 RUN apt-get update
