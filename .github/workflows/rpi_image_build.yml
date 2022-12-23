@@ -1,6 +1,8 @@
 name: Build + Upload Raspberry Pi Image to release
 on:
-  workflow_dispatch:
+  push:
+    tags:
+      - 'v*.*.*-rc*'
   release:
     types:
       - created
