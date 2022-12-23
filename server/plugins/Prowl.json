@@ -44,7 +44,7 @@
         {
             "name": "group",
             "label": "User/Group API Key",
-            "description": "Prowl destination for messages. You can enter mulitple keys seperated by comma or semicolon.",
+            "description": "Prowl destination for messages",
             "type": "text",
             "required": true
         },

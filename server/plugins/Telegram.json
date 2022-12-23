@@ -23,7 +23,7 @@
         {
             "name": "chat",
             "label": "Chat ID",
-            "description": "Telegram chat ID to send to. You can input multiple chats seperated by comma or semicolon.",
+            "description": "Telegram chat ID to send to",
             "type": "text",
             "required": true
         }
