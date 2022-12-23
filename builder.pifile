@@ -5,6 +5,8 @@ TO /tmp/pagermon-pi.img
 PUMP 1024M
 # Enable SSH
 RUN touch /boot/ssh
+# Setup User
+RUN bash -c "echo 'pi:$6$XAM.kphpK2.MXGVY$28t.7rFwgnuKOeRq8cNH8HjM4shubvQQp3dpcN0F2zvM/lT2BguI2m8PSnQM/s2B4gM.ytGraxC1dIy2pXFPp.' > /boot/userconf.txt"
 
 #Update
 RUN apt-get update
@@ -29,8 +31,16 @@ INSTALL . /home/pi/pagermon/
 RUN chown -R pi:pi /home/pi/pagermon
 
 #Install Nodejs 14.x
-RUN curl -fsSL https://deb.nodesource.com/setup_14.x | sudo -E bash -
-RUN apt-get install -y nodejs npm
+#RUN curl -fsSL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+
+RUN bash -c "echo 'deb https://deb.nodesource.com/node_14.x bullseye main' > /etc/apt/sources.list.d/nodesource.list"
+RUN bash -c "echo 'deb-src https://deb.nodesource.com/node_14.x bullseye main' >> /etc/apt/sources.list.d/nodesource.list"
+RUN bash -c "curl -s https://deb.nodesource.com/gpgkey/nodesource.gpg.key | gpg --dearmor | tee /usr/share/keyrings/nodesource.gpg >/dev/null"
+RUN bash -c "apt-key add /usr/share/keyrings/nodesource.gpg"
+
+RUN bash -c "apt-get update"
+RUN bash -c "apt-get install -y nodejs"
+RUN bash -c "node -v"
 
 #Install Multimon-ng
 RUN bash -c "apt install -y cmake && \
@@ -51,13 +61,12 @@ RUN bash -c "mkdir /home/pi/.ssh && touch /home/pi/.ssh/known_hosts && chown pi:
 RUN bash -c "ssh-keyscan -t rsa github.com >> /root/.ssh/known_hosts"
 RUN bash -c "ssh-keyscan -t rsa github.com >> /home/pi/.ssh/known_hosts"
 
-
 #Setup Server
-RUN sudo -u pi sed -i 's/"oracledb"\s*:\s*".*"\s*,//' /home/pi/pagermon/server/package.json
 RUN bash -c "cd /home/pi/pagermon/server && \
-    npm install --target_arch=arm --target_platform=linux && \
     npm install npm@latest -g --target_arch=arm --target_platform=linux && \
     npm install pm2@latest -g --target_arch=arm --target_platform=linux && \
+    npm install --target_arch=arm --target_platform=linux && \
+    npm install sqlite3 --target_arch=arm --target_platform=linux && \
     sudo -u pi cp process-default.json process.json && \
     sudo -u pi sed -i 's:/home/ubuntu/workspace/server:/home/pi/pagermon/server:g' /home/pi/pagermon/server/process.json && \
     export NODE_ENV=production && \
