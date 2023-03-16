@@ -1,3 +1,6 @@
+# 0.3.12b - 2023-03-16
+* Fix [ERR_HTTP_HEADERS_SENT] error in /api route by combining res.status and res.send @nic-hanna
+
 # 0.3.12a - 2022-12-23
 * Revert #531 due to ongoing issues with crashes and 500 errors. @Danrw
  
