@@ -1,6 +1,6 @@
-# 0.3.12b - 2023-05-12
-* Added a new Plugin [Meshtastics LoRaA PI](https://github.com/pagermon/pagermon/blob/master/server/plugins/MeshtasticsLoRaAPI.js) utilising the Meshtastic [Python CLI](https://meshtastic.org/docs/software/python/cli)
-* Added ability for Telegram Plugin to receive multiple chat/group IDs
+# Unreleased - 2023-05-15
+* Added a new Plugin [Meshtastics LoRaA PI](https://github.com/pagermon/pagermon/blob/master/server/plugins/MeshtasticsLoRaAPI.js) utilising the Meshtastic [Python CLI](https://meshtastic.org/docs/software/python/cli) #556 @AlphaO4
+* Added ability for Telegram Plugin to receive multiple chat/group IDs #556 @AlphaO4
 
 # 0.3.12a - 2022-12-23
 * Revert #531 due to ongoing issues with crashes and 500 errors. @Danrw
