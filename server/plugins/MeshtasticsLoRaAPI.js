@@ -18,7 +18,8 @@ function run(trigger, scope, data, config, callback) {
 
 
     // Build the command string
-    const command = `/home/pi/.local/bin/meshtastic --sendtext "${data.message}"  --ch-index ${data.pluginconf.MeshtasticsLoRaAPI.channelID}`;
+    // This will currently only work on Linux/Unix based machines.
+    const command = `~/.local/bin/meshtastic --sendtext "${data.message}"  --ch-index ${data.pluginconf.MeshtasticsLoRaAPI.channelID}`;
     
     // Execute the command using child_process.exec
     exec(command, (error, stdout, stderr) => {
