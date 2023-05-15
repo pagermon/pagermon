@@ -1,6 +1,6 @@
 {
     "name": "MeshtasticsLoRaAPI",
-    "description": "Integration for LoRa, utilising the provided HTTP API. <br>For it to work, you need to specify a chatURL file once on the Host. <br>To do this run: 'meshtastic --set-url https://meshtastic.com/o/thegivenurl  ' on the sender as well as the reciever. ",
+    "description": "Integration for Meshtastic's LoRa, utilising the provided HTTP API. <br>You need to have the <a href=https://meshtastic.org/docs/development/python/>Meshtastic Python CLI</a> installed for this to work. <br>For it to work, you need to specify a chatURL file once on the Host. <br>To do this run: 'meshtastic --set-url https://meshtastic.com/o/thegivenurl  ' on the sender as well as the reciever. ",
     "disable": false,
     "trigger": "message",
     "scope": "after",
