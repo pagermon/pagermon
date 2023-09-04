@@ -1,3 +1,6 @@
+# 0.3.13 - 2023-09-04
+* Add Config option to fix FA icon's no longer loading. @marshyonline
+
 # 0.3.12a - 2022-12-23
 * Revert #531 due to ongoing issues with crashes and 500 errors. @Danrw
  
