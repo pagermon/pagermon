@@ -7,7 +7,8 @@
     "frontPopupContent": "",
     "searchLocation": "bottom",
     "theme": "default",
-    "monitorName": "PagerMon"
+    "monitorName": "PagerMon",
+    "faKey": "changeme"
   },
   "database": {
     "file": "./messages.db",
