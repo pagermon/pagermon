@@ -17,8 +17,8 @@ function run (trigger, scope, data, config, callback) {
         } else {
             let url = config.globalServer + '/' + ntfyConf.topic
             let headers = {}
-            if (config.Authentication) {
-                let auth = "Basic " + encodeBase64(config.serverUsername + ":" + config.serverPassword)
+            if (config.authentication) {
+                let auth = "Basic " + Buffer.from(config.serverUsername + ':' + config.serverPassword, 'utf8').toString('base64');
                 headers.Authorization = auth
             }
             if (ntfyConf.icon) {
