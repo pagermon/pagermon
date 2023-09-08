@@ -40,7 +40,7 @@ function run (trigger, scope, data, config, callback) {
                                 // The request was made and the server responded with a status code
                                 // that falls out of the range of 2xx
                                 logger.main.error('Ntfy.Sh: Headers: ' + JSON.stringify(error.response.headers));
-                                logger.main.error('Ntfy.Sh: Data: ' + error.response.data);
+                                logger.main.error('Ntfy.Sh: Data: ' + JSON.stringify(error.response.data));
                                 logger.main.error('Ntfy.Sh: Status Code: ' + error.response.status);
                               } else if (error.request) {
                                 // The request was made but no response was received
