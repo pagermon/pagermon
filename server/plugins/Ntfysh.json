@@ -1,0 +1,79 @@
+{
+    "name": "Ntfysh",
+    "description": "Push notifications with Ntfy.sh",
+    "disable": false,
+    "trigger": "message",
+    "scope": "after",
+    "config": [ 
+        {
+            "name": "globalServer",
+            "label": "Ntfy.sh Server URL",
+            "description": "Specify a Ntfy.sh Server URL to use for all Aliases",
+            "type": "text",
+            "required": true
+        },
+        {
+            "name": "authentication",
+            "label": "Enable Authentication",
+            "description": "Enable Authentication Globally",
+            "type": "checkbox"
+        },
+        {
+            "name": "serverUsername",
+            "label": "Ntfy.sh Server Username",
+            "description": "Specify a Ntfy.sh Server username if required",
+            "type": "text",
+            "required": false
+        },
+        {
+            "name": "serverPassword",
+            "label": "Ntfy.sh Password",
+            "description": "Specify a Ntfy.sh Server password if required",
+            "type": "password",
+            "required": false
+        }
+    ],
+    "aliasConfig": [ 
+        {
+            "name": "enable",
+            "label": "Enable Notifications",
+            "description": "Enable sending Ntfy.sh notifications for this alias",
+            "type": "checkbox"
+        },
+        {
+            "name": "topic",
+            "label": "Topic",
+            "description": "Set the destination Topic name",
+            "type": "text",
+            "required": true
+        },
+        {
+            "name": "priority",
+            "label": "Priority",
+            "description": "Set the priority of the message",
+            "type": "select",
+            "options": [
+                {"value": "1", "text": "Min Priority"},
+                {"value": "2", "text": "Low Priority"},
+                {"value": "3", "text": "Default Priority"},
+                {"value": "4", "text": "High Priority"},
+                {"value": "5", "text": "Max Priority"}
+            ],
+            "required": true
+        },
+        {
+            "name": "icon",
+            "label": "Icon",
+            "description": "Set a custom icon to be displayed See Ntfy.sh help docs for required format https://docs.Ntfy.sh/publish/#icons",
+            "type": "text",
+            "required": false
+        },
+        {
+            "name": "tag",
+            "label": "Tag",
+            "description": "Set a tag to be displayed See Ntfy.sh help docs for required format https://docs.Ntfy.sh/publish/#tags-emojis",
+            "type": "text",
+            "required": false
+        }
+    ]
+}
