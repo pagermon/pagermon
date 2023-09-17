@@ -1,3 +1,6 @@
+# TBA
+* Add Ntfy.sh Plugin #570 @Danrw
+
 # 0.3.13 - 2023-09-04
 * Add Config option to fix FA icon's no longer loading. @marshyonline
 
