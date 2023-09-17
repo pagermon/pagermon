@@ -1,5 +1,5 @@
-# 0.3.13 - TBA
-* Fix non matching messages when filtering alias #543
+# TBA
+* Fix non matching messages when filtering alias #543 @geelongmicrosoldering
 
 # 0.3.12a - 2022-12-23
 * Revert #531 due to ongoing issues with crashes and 500 errors. @Danrw
