@@ -11,14 +11,20 @@ function run (trigger, scope, data, config, callback) {
         } else if (ntfyConf.topic == 0 || ntfyConf.topic == '0' || !ntfyConf.topic) {
             logger.main.error('Ntfy.Sh: ' + data.address + ' No Topic Set');
             callback();
-        } else if ((config.authentication) && ((config.serverUsername == 0 || config.serverUsername == '0' || !config.serverUsername) || (config.serverPassword == 0 || config.serverPassword == '0' || !config.serverPassword))) {
-            logger.main.error('Ntfy.Sh: ' + data.address + ' Authentication enabled and username or password not set');
+        } else if ((config.authentication === 'username') && ((config.serverUsername == 0 || config.serverUsername == '0' || !config.serverUsername) || (config.serverPassword == 0 || config.serverPassword == '0' || !config.serverPassword))) {
+            logger.main.error('Ntfy.Sh: ' + data.address + ' Username Authentication enabled and username or password not set');
+            callback();
+        } else if ((config.authentication === 'apikey') && (config.serverPassword == 0 || config.serverPassword == '0' || !config.serverPassword)) {
+            logger.main.error('Ntfy.Sh: ' + data.address + ' API Authentication enabled and password not set');
             callback();
         } else {
             let url = config.globalServer + '/' + ntfyConf.topic
             let headers = {}
-            if (config.authentication) {
+            if (config.authentication === 'username') {
                 let auth = "Basic " + Buffer.from(config.serverUsername + ':' + config.serverPassword, 'utf8').toString('base64');
+                headers.Authorization = auth
+            } else if (config.authentication === 'apikey') {
+                let auth = "Bearer " + ' ' + config.serverPassword
                 headers.Authorization = auth
             }
             if (ntfyConf.icon) {

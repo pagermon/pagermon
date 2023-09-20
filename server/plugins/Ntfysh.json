@@ -16,19 +16,25 @@
             "name": "authentication",
             "label": "Enable Authentication",
             "description": "Enable Authentication Globally",
-            "type": "checkbox"
+            "type": "select",
+            "options": [
+                {"value": "disabled", "text": "Disabled"},
+                {"value": "username", "text": "Username/Password"},
+                {"value": "apikey", "text": "API Key"}
+            ],
+            "required": true
         },
         {
             "name": "serverUsername",
             "label": "Ntfy.sh Server Username",
-            "description": "Specify a Ntfy.sh Server username if required",
+            "description": "Specify a Ntfy.sh Server username. Not required for API Key or Disabled auth modes",
             "type": "text",
             "required": false
         },
         {
             "name": "serverPassword",
-            "label": "Ntfy.sh Password",
-            "description": "Specify a Ntfy.sh Server password if required",
+            "label": "Ntfy.sh Password/API Key",
+            "description": "Specify a Ntfy.sh Server password or API Key if required",
             "type": "password",
             "required": false
         }
