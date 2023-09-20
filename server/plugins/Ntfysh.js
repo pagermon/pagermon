@@ -1,5 +1,4 @@
 const axios = require('axios').default;
-const { encodeBase64 } = require('bcryptjs');
 var logger = require('../log');
 
 function run (trigger, scope, data, config, callback) {
