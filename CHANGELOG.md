@@ -1,4 +1,4 @@
-# 0.3.12b - 2023-03-16
+# TBA
 * Fix [ERR_HTTP_HEADERS_SENT] error in /api route by combining res.status and res.send @nic-hanna
 
 # 0.3.12a - 2022-12-23
