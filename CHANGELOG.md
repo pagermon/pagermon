@@ -1,4 +1,5 @@
 # TBA
+* Update Readme #552 @eopo
 * Add Ntfy.sh Plugin #570 @Danrw
 * Fix [ERR_HTTP_HEADERS_SENT] error in /api route by combining res.status and res.send #549 @nic-hanna
 
