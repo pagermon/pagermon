@@ -1,5 +1,6 @@
 # TBA
 * Add Ntfy.sh Plugin #570 @Danrw
+* Fix [ERR_HTTP_HEADERS_SENT] error in /api route by combining res.status and res.send #549 @nic-hanna
 
 # 0.3.13 - 2023-09-04
 * Add Config option to fix FA icon's no longer loading. @marshyonline
