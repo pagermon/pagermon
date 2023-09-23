@@ -102,7 +102,7 @@ var app = express();
 
 
 var server = http.createServer(app);
-var io = require('socket.io').listen(server);
+var io = require('socket.io')(server);
     server.listen(port);
     server.on('error', onError);
     server.on('listening', onListening);

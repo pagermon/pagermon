@@ -326,12 +326,12 @@ router.route('/messages')
                         // emit the full message
                         var msgId;
                         if (Array.isArray(result)) {
-                          msgId = result[0];
+                          msgId = result[0].id;
                         } else {
-                          msgId = result;
+                          msgId = result.id;
                         }
                         logger.main.debug(result);
-
+                        
                         if (dbtype == 'oracledb') {
                           // oracle requires update of search index after insert, can't be trigger for some reason
                           db.raw(`BEGIN CTX_DDL.SYNC_INDEX('search_idx'); END;`)

@@ -55,7 +55,7 @@
     "pushover-notifications": "latest",
     "serve-favicon": "~2.4.2",
     "slack": "latest",
-    "socket.io": "^2.0.2",
+    "socket.io": "^4.7.2",
     "sqlite3": "^5.1.6",
     "systemjs": "^0.20.13",
     "telegram-bot-api": "^1.2.2",
