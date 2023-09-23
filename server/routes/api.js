@@ -331,7 +331,7 @@ router.route('/messages')
                           msgId = result.id;
                         }
                         logger.main.debug(result);
-                        
+
                         if (dbtype == 'oracledb') {
                           // oracle requires update of search index after insert, can't be trigger for some reason
                           db.raw(`BEGIN CTX_DDL.SYNC_INDEX('search_idx'); END;`)
@@ -447,7 +447,7 @@ router.route('/messages')
                                 }
                               });
                             }
-                            res.status(200).send('' + result);
+                            res.status(200).send('' + msgId);
                           })
                           .catch((err) => {
                             res.status(500).send(err);
@@ -1249,7 +1249,7 @@ router.route('/user')
               .then((response) => {
                 //add logging
                 logger.main.debug('created user id: ' + response)
-                res.status(200).send({ 'status': 'ok', 'id': response[0] });
+                res.status(200).send({ 'status': 'ok', 'id': response[0].id });
               })
               .catch((err) => {
                 logger.main.error(err)
@@ -1421,7 +1421,7 @@ router.route('/user/:id')
           .returning('id')
           .then((result) => {
             console.timeEnd('insert');
-            res.status(200).send({ 'status': 'ok', 'id': result[0] })
+            res.status(200).send({ 'status': 'ok', 'id': result[0].id })
           })
           .catch((err) => {
             console.timeEnd('insert');
