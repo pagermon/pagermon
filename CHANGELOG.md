@@ -1,4 +1,5 @@
 # TBA
+* Fix non matching messages when filtering alias #543 @geelongmicrosoldering
 * Fix [ERR_HTTP_HEADERS_SENT] error in /api route by combining res.status and res.send @nic-hanna
 
 # 0.3.13 - 2023-09-04

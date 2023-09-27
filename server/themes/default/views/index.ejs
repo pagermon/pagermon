@@ -375,7 +375,7 @@
             message.timestamp = datetime.format("HH:mm");
           //  result.padAddress = $scope.padDigits(result.address,7);
           //  result.aliasMatch = result['MAX(capcodes.address)'];
-            if ($routeParams.q || $routeParams.agency || $routeParams.address) {
+            if ($routeParams.q || $routeParams.agency || $routeParams.alias || $routeParams.address) {
               if ($routeParams.q) {
                 var patt = new RegExp($routeParams.q, 'i');
                 if (patt.test(message.message) || patt.test(message.agency) || patt.test(message.address) || patt.test(message.alias) || patt.test(message.source)) {
@@ -390,9 +390,16 @@
                   $scope.messages.pop();
                 }
               }
+              if ($routeParams.alias) {
+                var patt = new RegExp($routeParams.alias, 'i');
+                if (patt.test(message.alias_id)) {
+                  $scope.messages.unshift(message);
+                  $scope.messages.pop();
+                }
+              }
               if ($routeParams.address) {
                 var patt = new RegExp($routeParams.address, 'i');
-                if (patt.test(message.address) || patt.test(message.alias) || patt.test(message.source)) {
+                if (patt.test(message.address) || patt.test(message.source)) {
                   $scope.messages.unshift(message);
                   $scope.messages.pop();
                 }
