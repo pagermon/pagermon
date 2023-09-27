@@ -200,14 +200,12 @@ router.route('/messages')
             var timeFind = _.find(matches, function (msg) { return msg.timestamp > timeDiff; });
             if (timeFind) {
               logger.main.info(util.format('Ignoring duplicate: %o', data.message));
-              res.status(200);
-              return res.send('Ignoring duplicate');
+              return res.status(200).send('Ignoring duplicate');
             }
           } else {
             // if no dupeTime then just end the search now, we have matches
             logger.main.info(util.format('Ignoring duplicate: %o', data.message));
-            res.status(200);
-            return res.send('Ignoring duplicate');
+            return res.status(200).send('Ignoring duplicate');
           }
         }
         // no matches, maintain the array
@@ -240,8 +238,7 @@ router.route('/messages')
         }
         if (data.pluginData.ignore) {
           // stop processing
-          res.status(200);
-          return res.send('Ignoring filtered');
+          return res.status(200).send('Ignoring filtered');
         }
         var address = data.address || '0000000';
         var message = data.message || 'null';
@@ -295,8 +292,7 @@ router.route('/messages')
           .then((row) => {
             if (row.length > 0 && filterDupes) {
               logger.main.info(util.format('Ignoring duplicate: %o', message));
-              res.status(200);
-              res.send('Ignoring duplicate');
+              res.status(200).send('Ignoring duplicate');
             } else {
               db.from('capcodes')
                 .select('id', 'ignore')
@@ -477,8 +473,7 @@ router.route('/messages')
                         logger.main.error(err)
                       })
                   } else {
-                    res.status(200);
-                    res.send('Ignoring filtered');
+                    res.status(200).send('Ignoring filtered');
                   }
                 })
                 .catch((err) => {
@@ -787,8 +782,7 @@ router.route('/capcodes')
         })
         .returning('id')
         .then((result) => {
-          res.status(200);
-          res.send('' + result);
+          res.status(200).send('' + result);
           if (!updateRequired || updateRequired == 0) {
             nconf.set('database:aliasRefreshRequired', 1);
             nconf.save();
@@ -813,8 +807,7 @@ router.route('/capcodes/agency')
         res.json(rows);
       })
       .catch((err) => {
-        res.status(500);
-        res.send(err);
+        res.status(500).send(err);
       })
   });
 
