@@ -22,7 +22,6 @@
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.17.2",
     "brute-knex": "^4.0.0",
-    "chai-http": "^4.3.0",
     "colornames": "latest",
     "compression": "^1.6.2",
     "connect-flash": "^0.1.1",
@@ -41,7 +40,6 @@
     "express-session": "^1.15.3",
     "json-2-csv": "^3.6.2",
     "knex": "^2.5.1",
-    "mocha": "^10.2.0",
     "moment": "^2.26.0",
     "morgan": "~1.9.1",
     "mysql": "^2.16.0",
@@ -71,7 +69,8 @@
   },
   "devDependencies": {
     "babel-eslint": "^9.0.0",
-    "chai": "^4.2.0",
+    "chai": "^4.3.9",
+    "chai-http": "^4.4.0",
     "eslint": "^5.14.1",
     "eslint-config-airbnb": "^17.1.0",
     "eslint-config-prettier": "^4.1.0",
@@ -82,6 +81,7 @@
     "eslint-plugin-prettier": "^3.0.1",
     "eslint-plugin-react": "^7.12.4",
     "eslint-plugin-react-hooks": "^1.3.0",
+    "mocha": "^10.2.0",
     "nyc": "^15.1.0",
     "passport-stub": "^1.1.1",
     "prettier": "^1.16.4"

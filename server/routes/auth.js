@@ -181,7 +181,6 @@ router.route('/profile/:id')
                                 })
                                 .then(result => {
                                         console.timeEnd('insert');
-                                        console.log(JSON.stringify(result))
                                         res.status(200).send({ status: 'ok', id: result[0].id });
                                 })
                                 .catch(err => {
