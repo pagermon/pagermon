@@ -1,4 +1,5 @@
 # TBA
+* Standardize code datetime and timestamp variables to timestamp and add backwards compatibility #553 @eopo
 * Fix non matching messages when filtering alias #543 @geelongmicrosoldering
 * Fix [ERR_HTTP_HEADERS_SENT] error in /api route by combining res.status and res.send @nic-hanna
 
