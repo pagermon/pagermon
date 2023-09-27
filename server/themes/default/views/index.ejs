@@ -104,7 +104,7 @@
         <tbody>
           <tr ng-repeat="message in messages | filter: search">
             <td class="shrink noMobile noSmall">{{message.date}}</td>
-            <td class="shrink">{{message.timestamp}}</td>
+            <td class="shrink">{{message.time}}</td>
             <% if (!hidesource || (login && user.role == 'admin')) { %>
               <td class="shrink noMobile noSmall clickable-td" uib-popover-template="'templates/popover.html'" popover-append-to-body=true ng-click="popoverEl = 'source'" popover-trigger="'outsideClick'" style="background-color: {{message.color || 'grey'}}; text-align: center;">
                 <span class="small" style="color: white; font-family: monospace;"><strong>{{message.source}}</strong></span>
@@ -370,12 +370,12 @@
           // only bother getting the new message if we're on page 1
           if ($scope.init.currentPage === 1) {
             console.log('New Message ID: '+message.id + ' currentPage: '+$scope.init.currentPage);
-            var datetime = moment.unix(message.timestamp);
-            message.date = datetime.format("YYYY-MM-DD");
-            message.timestamp = datetime.format("HH:mm");
+            var timestamp = moment.unix(message.timestamp);
+            message.date = timestamp.format("YYYY-MM-DD");
+            message.time = timestamp.format("HH:mm");
           //  result.padAddress = $scope.padDigits(result.address,7);
           //  result.aliasMatch = result['MAX(capcodes.address)'];
-            if ($routeParams.q || $routeParams.agency || $routeParams.address) {
+            if ($routeParams.q || $routeParams.agency || $routeParams.alias || $routeParams.address) {
               if ($routeParams.q) {
                 var patt = new RegExp($routeParams.q, 'i');
                 if (patt.test(message.message) || patt.test(message.agency) || patt.test(message.address) || patt.test(message.alias) || patt.test(message.source)) {
@@ -390,9 +390,16 @@
                   $scope.messages.pop();
                 }
               }
+              if ($routeParams.alias) {
+                var patt = new RegExp($routeParams.alias, 'i');
+                if (patt.test(message.alias_id)) {
+                  $scope.messages.unshift(message);
+                  $scope.messages.pop();
+                }
+              }
               if ($routeParams.address) {
                 var patt = new RegExp($routeParams.address, 'i');
-                if (patt.test(message.address) || patt.test(message.alias) || patt.test(message.source)) {
+                if (patt.test(message.address) || patt.test(message.source)) {
                   $scope.messages.unshift(message);
                   $scope.messages.pop();
                 }
@@ -494,9 +501,9 @@
                     results.init.pages = pages;
                     $scope.init = results.init;
                     angular.forEach(results.messages, function (result) {
-                      var datetime = moment.unix(result.timestamp);
-                      result.date = datetime.format("YYYY-MM-DD");
-                      result.timestamp = datetime.format("HH:mm");
+                      var timestamp = moment.unix(result.timestamp);
+                      result.date = timestamp.format("YYYY-MM-DD");
+                      result.time = timestamp.format("HH:mm");
                       result.message = $scope.htmlEntities(result.message);
                       //  result.padAddress = $scope.padDigits(result.address,7);
                       //    result.aliasMatch = result['MAX(capcodes.address)'];
@@ -536,9 +543,9 @@
                     results.init.pages = pages;
                     $scope.init = results.init;
                     angular.forEach(results.messages, function (result) {
-                      var datetime = moment.unix(result.timestamp);
-                      result.date = datetime.format("YYYY-MM-DD");
-                      result.timestamp = datetime.format("HH:mm");
+                      var timestamp = moment.unix(result.timestamp);
+                      result.date = timestamp.format("YYYY-MM-DD");
+                      result.time = timestamp.format("HH:mm");
                       result.message = $scope.htmlEntities(result.message);
                       //  result.padAddress = $scope.padDigits(result.address,7);
                       //  result.aliasMatch = result['MAX(capcodes.address)'];

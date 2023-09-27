@@ -1,6 +1,12 @@
-# Unreleased - 2023-05-15
+# TBA
 * Added a new Plugin [Meshtastics LoRaA PI](https://github.com/pagermon/pagermon/blob/master/server/plugins/MeshtasticsLoRaAPI.js) utilising the Meshtastic [Python CLI](https://meshtastic.org/docs/software/python/cli) #556 @AlphaO4
 * Added ability for Telegram Plugin to receive multiple chat/group IDs #556 @AlphaO4
+* Standardize code datetime and timestamp variables to timestamp and add backwards compatibility #553 @eopo
+* Fix non matching messages when filtering alias #543 @geelongmicrosoldering
+* Fix [ERR_HTTP_HEADERS_SENT] error in /api route by combining res.status and res.send @nic-hanna
+
+# 0.3.13 - 2023-09-04
+* Add Config option to fix FA icon's no longer loading. @marshyonline
 
 # 0.3.12a - 2022-12-23
 * Revert #531 due to ongoing issues with crashes and 500 errors. @Danrw

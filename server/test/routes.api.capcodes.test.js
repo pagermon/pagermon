@@ -6,8 +6,6 @@ const moment = require('moment');
 const should = chai.should();
 const chaiHttp = require('chai-http');
 
-const datetime = moment().unix();
-
 chai.use(chaiHttp);
 
 const confFile = './config/config.json';
