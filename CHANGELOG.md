@@ -4,7 +4,7 @@
 * Standardize code datetime and timestamp variables to timestamp and add backwards compatibility #553 @eopo
 * Fix non matching messages when filtering alias #543 @geelongmicrosoldering
 * Fix [ERR_HTTP_HEADERS_SENT] error in /api route by combining res.status and res.send @nic-hanna
-* Revert to FontAwesome 4 to fix performance issues. @Danrw
+* Revert to FontAwesome 4 to fix performance issues. #574 @Danrw
 
 # 0.3.13 - 2023-09-04
 * Add Config option to fix FA icon's no longer loading. @marshyonline
