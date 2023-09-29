@@ -2,12 +2,15 @@ var nconf = require('nconf');
 var confFile = './config/config.json';
 var dbtype = nconf.get('database:type');
 
-exports.up = function(db, Promise) {
+exports.up = function(db) {
   if (dbtype == 'oracledb') {
     return db.schema.hasTable('messages').then(function(exists) {
       if (!exists) {
         return db.schema.createTable('messages', table => {
-          table.charset('utf8');
+          if (dbtype == 'mysql') {
+            table.charset('utf8');
+            table.collate('utf8_general_ci');
+          }
           table.collate('utf8_general_ci');
           table.increments('id').primary().unique().notNullable();
           table.string('address', [255]).notNullable();
@@ -32,11 +35,13 @@ exports.up = function(db, Promise) {
       }
     })
   } else {
-    return Promise.resolve('Not Required')
+    return new Promise ((resolve, rejects) => {
+      resolve('Not Required')
+   })
   }
 }
 
-exports.down = function(db, Promise) {
+exports.down = function(db) {
   
 };
 

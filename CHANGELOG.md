@@ -1,7 +1,9 @@
 # TBA
 * Update Readme #552 @eopo
 * Add Ntfy.sh Plugin #570 @Danrw
-* Fix [ERR_HTTP_HEADERS_SENT] error in /api route by combining res.status and res.send #549 @nic-hanna
+* Standardize code datetime and timestamp variables to timestamp and add backwards compatibility #553 @eopo
+* Fix non matching messages when filtering alias #543 @geelongmicrosoldering
+* Fix [ERR_HTTP_HEADERS_SENT] error in /api route by combining res.status and res.send @nic-hanna
 
 # 0.3.13 - 2023-09-04
 * Add Config option to fix FA icon's no longer loading. @marshyonline

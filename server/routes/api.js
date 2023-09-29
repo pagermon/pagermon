@@ -130,6 +130,8 @@ router.route('/messages')
             .then(rows => {
               rowCount = rows.length
               for (row of rows) {
+                row.datetime = row.timestamp // Copy timestamp to datetime  for backwards compatibilty
+
                 //outRow = JSON.parse(newrow);
                 if (HideCapcode) {
                   if (!req.isAuthenticated() || (req.isAuthenticated() && req.user.role == 'user')) {
@@ -138,6 +140,7 @@ router.route('/messages')
                       "message": row.message,
                       "source": row.source,
                       "timestamp": row.timestamp,
+                      "datetime": row.datetime,
                       "alias_id": row.alias_id,
                       "alias": row.alias,
                       "agency": row.agency,
@@ -185,14 +188,16 @@ router.route('/messages')
 
       if (filterDupes) {
         // this is a bad solution and tech debt that will bite us in the ass if we ever go HA, but that's a problem for future me and that guy's a dick
-        var datetime = data.datetime || 1;
-        var timeDiff = datetime - dupeTime;
+
+        var timestamp = data.timestamp || data.datetime || 1;
+
+        var timeDiff = timestamp - dupeTime;
         // if duplicate filtering is enabled, we want to populate the message buffer and check for duplicates within the limits
         var matches = _.where(msgBuffer, { message: data.message, address: data.address });
         if (matches.length > 0) {
           if (dupeTime != 0) {
             // search the matching messages and see if any match the time constrain
-            var timeFind = _.find(matches, function (msg) { return msg.datetime > timeDiff; });
+            var timeFind = _.find(matches, function (msg) { return msg.timestamp > timeDiff; });
             if (timeFind) {
               logger.main.info(util.format('Ignoring duplicate: %o', data.message));
               return res.status(200).send('Ignoring duplicate');
@@ -211,8 +216,16 @@ router.route('/messages')
         if (msgBuffer.length > dupeArrayLimit) {
           msgBuffer.shift();
         }
-        msgBuffer.push({ message: data.message, datetime: data.datetime, address: data.address });
+        msgBuffer.push(_.pick(data,['message', 'timestamp', 'address']));
       }
+
+        if (data.timestamp)
+          var timestamp = data.timestamp;
+        else if (data.datetime) {
+          logger.main.warn(`An incoming message from ${data.source || 'an unknown source' } contains the timestamp as field 'datetime'. Update the message source to use the variable 'timestamp' instead!`);
+          var timestamp = data.datetime;
+        } else 
+          var timestamp = 1;
 
       // send data to pluginHandler before proceeding
       logger.main.debug('beforeMessage start');
@@ -229,8 +242,7 @@ router.route('/messages')
         }
         var address = data.address || '0000000';
         var message = data.message || 'null';
-        var datetime = data.datetime || 1;
-        var timeDiff = datetime - dupeTime;
+        var timeDiff = timestamp - dupeTime;
         var source = data.source || 'UNK';
         db.from('messages')
           .select('*')
@@ -316,15 +328,15 @@ router.route('/messages')
                   }
 
                   if (insert == true) {
-                    var insertmsg = { address: address, message: message, timestamp: datetime, source: source, alias_id: alias_id }
+                    var insertmsg = { address, message, timestamp, source, alias_id }
                     db('messages').insert(insertmsg).returning('id')
                       .then((result) => {
                         // emit the full message
                         var msgId;
                         if (Array.isArray(result)) {
-                          msgId = result[0];
+                          msgId = result[0].id;
                         } else {
-                          msgId = result;
+                          msgId = result.id;
                         }
                         logger.main.debug(result);
 
@@ -352,6 +364,9 @@ router.route('/messages')
                               // send data to pluginHandler after processing
                               row.pluginData = data.pluginData;
 
+                              // Copy timestamp to datetime for backwards compatibility.
+                              row.datetime = row.timestamp;
+
                               if (row.pluginconf) {
                                 row.pluginconf = parseJSON(row.pluginconf);
                               } else {
@@ -376,6 +391,7 @@ router.route('/messages')
                                           "message": row.message,
                                           "source": row.source,
                                           "timestamp": row.timestamp,
+                                          "datetime": row.timestamp, // Copy timestamp to datetime for backwards compatibility
                                           "alias_id": row.alias_id,
                                           "alias": row.alias,
                                           "agency": row.agency,
@@ -394,6 +410,7 @@ router.route('/messages')
                                           "message": row.message,
                                           "source": row.source,
                                           "timestamp": row.timestamp,
+                                          "datetime": row.timestamp, // Copy timestamp to datetime for backwards compatibility
                                           "alias_id": row.alias_id,
                                           "alias": row.alias,
                                           "agency": row.agency,
@@ -411,6 +428,7 @@ router.route('/messages')
                                       "message": row.message,
                                       "source": row.source,
                                       "timestamp": row.timestamp,
+                                      "datetime": row.timestamp, // Copy timestamp to datetime for backwards compatibility
                                       "alias_id": row.alias_id,
                                       "alias": row.alias,
                                       "agency": row.agency,
@@ -443,7 +461,7 @@ router.route('/messages')
                                 }
                               });
                             }
-                            res.status(200).send('' + result);
+                            res.status(200).send('' + msgId);
                           })
                           .catch((err) => {
                             res.status(500).send(err);
@@ -494,6 +512,7 @@ router.route('/messages/:id')
               "id": row[0].id,
               "message": row[0].message,
               "source": row[0].source,
+              "datetime": row[0].timestamp, // Add datetime for backwards compatibility
               "timestamp": row[0].timestamp,
               "alias_id": row[0].alias_id,
               "alias": row[0].alias,
@@ -608,12 +627,14 @@ router.route('/messageSearch')
       .then((rows) => {
         if (rows) {
           for (row of rows) {
+            row.datetime = row.timestamp // Copy timestamp to datetime for backwards compatibility
             if (HideCapcode) {
               if (!req.isAuthenticated() || (req.isAuthenticated() && req.user.role == 'user')) {
                 row = {
                   "id": row.id,
                   "message": row.message,
                   "source": row.source,
+                  "datetime": row.datetime,
                   "timestamp": row.timestamp,
                   "alias_id": row.alias_id,
                   "alias": row.alias,
@@ -1242,7 +1263,7 @@ router.route('/user')
               .then((response) => {
                 //add logging
                 logger.main.debug('created user id: ' + response)
-                res.status(200).send({ 'status': 'ok', 'id': response[0] });
+                res.status(200).send({ 'status': 'ok', 'id': response[0].id });
               })
               .catch((err) => {
                 logger.main.error(err)
@@ -1414,7 +1435,7 @@ router.route('/user/:id')
           .returning('id')
           .then((result) => {
             console.timeEnd('insert');
-            res.status(200).send({ 'status': 'ok', 'id': result[0] })
+            res.status(200).send({ 'status': 'ok', 'id': result[0].id })
           })
           .catch((err) => {
             console.timeEnd('insert');
