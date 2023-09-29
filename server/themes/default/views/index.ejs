@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html ng-app=app lang="en">
-<% include global/header.ejs %>
+<%- include ('global/header') -%>
 <!-- Inlined and minified below <script src="/javascripts/angular-textreplace.js"></script>-->
 <script>angular.module("angular-highlight",[]).directive("highlight",function(){return{link:function(e,t,h){h.highlightClass||(h.highlightClass="angular-highlight");var l=function(t,l){var a=function(e,t){for(var h=0;h<t.length;h++){var l=new RegExp(t[h].match,"gi");if(e.search(l)>-1)return t[h]}}(t,e.replacement);if("replace"==a.highlight)var r=new RegExp(a.match),i=t.replace(r,a.replace);else i=a.highlight?'<a href="/?q='+t+'" data-toggle="popover" class="'+h.highlightClass+'" title="'+a.replace+'" onmouseenter="$(this).tooltip(\'show\')">'+t+"</a>":'<a href="/?q='+t+'" data-toggle="popover" title="'+a.replace+'" onmouseenter="$(this).tooltip(\'show\')">'+t+"</a>";return i};e.$watch("replacement",function(){if(!e.replacement||""==e.replacement)return t.html(e.highlight),!1;var h=function(e){var t,h=e.length,l=[];for(t=0;t<h;t++)l.push(e[t].match.replace(new RegExp("^ | $","g"),""));return l}(e.replacement),a=new RegExp(h.join("|"),"gmi"),r=e.highlight.replace(a,l);t.html(r)})},replace:!1,scope:{highlight:"=",replacement:"="}}});</script>
 <base href="/">
@@ -40,7 +40,7 @@
 
 <body id="home-body">
 
-<% include global/menu.ejs %>
+<%- include ('global/menu.ejs') -%>
 
 <div id="content" class="container-fluid" ng-cloak>
 
@@ -179,7 +179,7 @@
         </div>
       </div>
     <% } %>
-    <% include global/pagination.ejs %>
+    <%- include ('global/pagination') -%>
 
   </div>
   </script>
@@ -658,4 +658,4 @@ function notify(notifyTitle,notifyMessage) {
 
 </div>
 
-<% include global/footer.ejs %>
+<%- include ('global/footer') -%>

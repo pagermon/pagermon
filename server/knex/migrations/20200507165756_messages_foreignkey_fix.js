@@ -1,7 +1,7 @@
 var nconf = require('nconf');
 var confFile = './config/config.json';
 var dbtype = nconf.get('database:type')
-exports.up = function (db, Promise) {
+exports.up = function (db) {
     if (dbtype == 'mysql') {
         return db.schema.table('messages', function (table) {
             table.dropForeign('alias_id')
@@ -22,10 +22,12 @@ exports.up = function (db, Promise) {
                     })
         })
     } else {
-        return Promise.resolve('Not Required')
+        return new Promise ((resolve, rejects) => {
+            resolve('Not Required')
+         })
     }
 };
 
-exports.down = function (knex, Promise) {
+exports.down = function (db) {
 
 };

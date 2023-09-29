@@ -334,9 +334,9 @@ router.route('/messages')
                         // emit the full message
                         var msgId;
                         if (Array.isArray(result)) {
-                          msgId = result[0];
+                          msgId = result[0].id;
                         } else {
-                          msgId = result;
+                          msgId = result.id;
                         }
                         logger.main.debug(result);
 
@@ -461,7 +461,7 @@ router.route('/messages')
                                 }
                               });
                             }
-                            res.status(200).send('' + result);
+                            res.status(200).send('' + msgId);
                           })
                           .catch((err) => {
                             res.status(500).send(err);
@@ -1263,7 +1263,7 @@ router.route('/user')
               .then((response) => {
                 //add logging
                 logger.main.debug('created user id: ' + response)
-                res.status(200).send({ 'status': 'ok', 'id': response[0] });
+                res.status(200).send({ 'status': 'ok', 'id': response[0].id });
               })
               .catch((err) => {
                 logger.main.error(err)
@@ -1435,7 +1435,7 @@ router.route('/user/:id')
           .returning('id')
           .then((result) => {
             console.timeEnd('insert');
-            res.status(200).send({ 'status': 'ok', 'id': result[0] })
+            res.status(200).send({ 'status': 'ok', 'id': result[0].id })
           })
           .catch((err) => {
             console.timeEnd('insert');
