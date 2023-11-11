@@ -88,7 +88,7 @@ These instructions will get you a copy of the project up and running on your loc
 ```
     $ sudo apt-get install npm sqlite3
     $ npm install npm@latest -g
-    $ npm install pm2 -g
+    $ npm install pm2@latest -g ; pm2 update
     $ cd server
     $ npm install
     $ export NODE_ENV=production
