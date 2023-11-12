@@ -42,6 +42,7 @@
     "knex": "^2.5.1",
     "moment": "^2.26.0",
     "morgan": "~1.9.1",
+    "mqtt": "^4.3.7",
     "mysql": "^2.16.0",
     "nconf": "^0.12.0",
     "node-prowl": "latest",
