@@ -19,6 +19,12 @@
             "type": "text"
         },
         {
+            "name": "retainBaseTopic",
+            "label": "Retain messages",
+            "description": "Enable the retain flag on base topic messages. This is prefered when using with home assistant as otherwise messages will be unknown after a restart",
+            "type": "checkbox"
+        },
+        {
             "name": "username",
             "label": "Username",
             "description": "MQTT server authentication user",
@@ -31,10 +37,10 @@
             "type": "password"
         },
         {
-        "name": "homeAssistant",
-        "label": "Home Assistant integration",
-        "description": "Enable Home Assistant integration with mqtt discovery",
-        "type": "checkbox"
+            "name": "enableHomeAssistant",
+            "label": "Home Assistant integration",
+            "description": "Enable Home Assistant integration with MQTT discovery",
+            "type": "checkbox"
         },
         {
             "name": "discoveryTopic",
