@@ -5,6 +5,7 @@
 * Fix non matching messages when filtering alias #543 @geelongmicrosoldering
 * Fix [ERR_HTTP_HEADERS_SENT] error in /api route by combining res.status and res.send @nic-hanna
 * Revert to FontAwesome 4 to fix performance issues. #574 @Danrw
+* Add option to map function codes to a string in client #585 @ChoffaH
 
 # 0.3.13 - 2023-09-04
 * Add Config option to fix FA icon's no longer loading. @marshyonline
