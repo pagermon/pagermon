@@ -1,0 +1,60 @@
+{
+    "name": "MQTT",
+    "description": "Send messages to an MQTT server",
+    "disable": false,
+    "trigger": "message",
+    "scope": "after",
+    "config": [
+        {
+            "name": "URL",
+            "label": "MQTT server URL",
+            "description": "MQTT server URL (use mqtts:// for SSL/TLS connection)",
+            "type": "text",
+            "required": true
+        },
+        {
+            "name": "baseTopic",
+            "label": "MQTT base topic",
+            "description": "MQTT base topic for PagerMon MQTT messages (defaults to \"pagermon\")",
+            "type": "text"
+        },
+        {
+            "name": "retainBaseTopic",
+            "label": "Retain messages",
+            "description": "Enable the retain flag on base topic messages. This is prefered when using with home assistant as otherwise messages will be unknown after a restart",
+            "type": "checkbox"
+        },
+        {
+            "name": "username",
+            "label": "Username",
+            "description": "MQTT server authentication user",
+            "type": "text"
+        },
+        {
+            "name": "password",
+            "label": "Password",
+            "description": "MQTT server authentication password",
+            "type": "password"
+        },
+        {
+            "name": "enableHomeAssistant",
+            "label": "Home Assistant integration",
+            "description": "Enable Home Assistant integration with MQTT discovery",
+            "type": "checkbox"
+        },
+        {
+            "name": "discoveryTopic",
+            "label": "Homeassistant discovery topic",
+            "description": "Homeassistant discovery topic (defaults to \"homeassistant\")",
+            "type": "text"
+        }
+    ],
+    "aliasConfig": [ 
+        {
+            "name": "enable",
+            "label": "Enable",
+            "description": "Enable sending messages that match this alias via MQTT",
+            "type": "checkbox"
+        }
+    ]
+}
