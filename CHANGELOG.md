@@ -6,6 +6,8 @@
 * Fix [ERR_HTTP_HEADERS_SENT] error in /api route by combining res.status and res.send @nic-hanna
 * Revert to FontAwesome 4 to fix performance issues. #574 @Danrw
 * Add MQTT Plugin #584 @ChoffaH
+* Hide Capcode in Small Screen mode Hide Capcode in Small Screen mode #583 @bullseye555
+  
 
 # 0.3.13 - 2023-09-04
 * Add Config option to fix FA icon's no longer loading. @marshyonline
