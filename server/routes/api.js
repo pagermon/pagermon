@@ -621,7 +621,7 @@ router.route('/messageSearch')
               qb2.select('id').from('capcodes').where('agency', agency).where('ignore', 0);
           })
           if (alias != '') {
-            if (alias === -1) 
+            if (alias === '-1') 
               qb.whereNull('messages.alias_id');
             else
               qb.where('messages.alias_id',alias);
