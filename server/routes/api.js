@@ -752,31 +752,31 @@ router.route('/capcodes')
       var color = req.body.color || 'black';
       var icon = req.body.icon || 'question';
       var ignore = req.body.ignore || 0;
-      var pluginconf = JSON.stringify(req.body.pluginconf) || "{}";
+      var pluginconf = JSON.stringify(vaccumPluginConf(req.body.pluginconf)) || "{}";
       db.from('capcodes')
         .where('id', '=', id)
         .modify(function (queryBuilder) {
           if (id == null) {
             queryBuilder.insert({
-              id: id,
-              address: address,
-              alias: alias,
-              agency: agency,
-              color: color,
-              icon: icon,
-              ignore: ignore,
-              pluginconf: pluginconf
+              id,
+              address,
+              alias,
+              agency,
+              color,
+              icon,
+              ignore,
+              pluginconf
             })
           } else {
             queryBuilder.update({
-              id: id,
-              address: address,
-              alias: alias,
-              agency: agency,
-              color: color,
-              icon: icon,
-              ignore: ignore,
-              pluginconf: pluginconf
+              id,
+              address,
+              alias,
+              agency,
+              color,
+              icon,
+              ignore,
+              pluginconf
             })
           }
         })
@@ -900,7 +900,7 @@ router.route('/capcodes/:id')
         var color = req.body.color || 'black';
         var icon = req.body.icon || 'question';
         var ignore = req.body.ignore || 0;
-        var pluginconf = JSON.stringify(req.body.pluginconf) || "{}";
+        var pluginconf = JSON.stringify(vaccumPluginConf(req.body.pluginconf)) || "{}";
         var updateAlias = req.body.updateAlias || 0;
 
         console.time('insert');
@@ -910,25 +910,25 @@ router.route('/capcodes/:id')
           .modify(function (queryBuilder) {
             if (id == null) {
               queryBuilder.insert({
-                id: id,
-                address: address,
-                alias: alias,
-                agency: agency,
-                color: color,
-                icon: icon,
-                ignore: ignore,
-                pluginconf: pluginconf
+                id,
+                address,
+                alias,
+                agency,
+                color,
+                icon,
+                ignore,
+                pluginconf
               })
             } else {
               queryBuilder.update({
-                id: id,
-                address: address,
-                alias: alias,
-                agency: agency,
-                color: color,
-                icon: icon,
-                ignore: ignore,
-                pluginconf: pluginconf
+                id,
+                address,
+                alias,
+                agency,
+                color,
+                icon,
+                ignore,
+                pluginconf
               })
             }
           })
@@ -1134,7 +1134,7 @@ router.route('/capcodeImport')
             var color = capcode.color || 'black';
             var icon = capcode.icon || 'question';
             var ignore = capcode.ignore || 0;
-            var pluginconf = JSON.stringify(capcode.pluginconf) || "{}";
+            var pluginconf = JSON.stringify(vaccumPluginConf(capcode.pluginconf)) || "{}";
             await db('capcodes')
               .returning('id')
               .where('address', '=', address)
@@ -1145,13 +1145,13 @@ router.route('/capcodeImport')
                   return db('capcodes')
                     .where('id', '=', rows.id)
                     .update({
-                      address: address,
-                      alias: alias,
-                      agency: agency,
-                      color: color,
-                      icon: icon,
-                      ignore: ignore,
-                      pluginconf: pluginconf
+                      address,
+                      alias,
+                      agency,
+                      color,
+                      icon,
+                      ignore,
+                      pluginconf
                     })
                     .then((result) => {
                       importresults.push({
@@ -1164,20 +1164,20 @@ router.route('/capcodeImport')
                       importresults.push({
                         address: address,
                         alias: alias,
-                        result: 'failed' + err
+                        result: 'failed ' + err
                       })
                     })
                 } else {
                   //Create new alias if one didn't get returned.
                   return db('capcodes').insert({
                     id: null,
-                    address: address,
-                    alias: alias,
-                    agency: agency,
-                    color: color,
-                    icon: icon,
-                    ignore: ignore,
-                    pluginconf: pluginconf
+                    address,
+                    alias,
+                    agency,
+                    color,
+                    icon,
+                    ignore,
+                    pluginconf
                   })
                     .then((result) => {
                       importresults.push({
@@ -1491,4 +1491,11 @@ function parseJSON(json) {
     // ignore errors
   }
   return parsed;
+}
+
+function vaccumPluginConf(pconf) {
+  const cleaned = _.pickBy(pconf, p => {
+      return Object.keys(p).length > 0
+  })
+  return cleaned;
 }
