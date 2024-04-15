@@ -5,6 +5,7 @@ var basicAuth = require('express-basic-auth');
 var bcrypt = require('bcryptjs');
 var util = require('util');
 var _ = require('underscore');
+const {pickBy} = require('lodash');
 var pluginHandler = require('../plugins/pluginHandler');
 var logger = require('../log');
 var db = require('../knex/knex.js');
@@ -1499,7 +1500,7 @@ function parseJSON(json) {
  * @returns A sanitized version of the plugin configuration object holding only plugins with values set
  */
 function vaccumPluginConf(pconf) {
-  const cleaned = _.pickBy(pconf, p => {
+  const cleaned = pickBy(pconf, p => {
       return Object.keys(p).length > 0
   })
   return cleaned;
