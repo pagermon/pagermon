@@ -63,17 +63,17 @@ describe('GET /api/messageSearch', () => {
         });
         it('should return result for existing alias', (done) => {
                 chai.request(server)
-                        .get('/api/messageSearch?alias=1')
+                        .get('/api/messageSearch?alias=2')
                         .end((err, res) => {
                                 should.not.exist(err);
                                 res.status.should.eql(200);
                                 res.type.should.eql('application/json');
                                 res.body.should.be.a('object');
-                                res.body.messages[0].should.have.property('id').eql(0);
-                                res.body.messages[0].should.have.property('address').eql('1234567');
+                                res.body.messages[0].should.have.property('id').eql(3);
+                                res.body.messages[0].should.have.property('address').eql('1234569');
                                 res.body.messages[0].should.have
                                         .property('message')
-                                        .eql('This is a Test Message to Address 1234567');
+                                        .eql('This is a Test Message to Address 1234569');
                                 res.body.messages[0].should.have.property('source').eql('Client 1');
                                 done();
                         });
