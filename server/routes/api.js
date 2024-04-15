@@ -378,87 +378,32 @@ router.route('/messages')
                                 logger.main.debug('afterMessage done');
                                 // remove the pluginconf object before firing socket message
                                 delete row.pluginconf;
-                                //begin socket handling - this is the most horrible block of spaghetti code i've seen in my life and i hate myself for being involved in it
-                                if (HideCapcode) {
-                                  if (pdwMode) {
-                                    if (adminShow) {
-                                      //If PDWMode on and AdminShow is on send always
-                                      req.io.of('adminio').emit('messagePost', row);
-                                      if (row.alias_id != null) {
-                                        // send to normal user as well if not null alias_id
-                                        rowuser = {
-                                          "id": row.id,
-                                          "message": row.message,
-                                          "source": row.source,
-                                          "timestamp": row.timestamp,
-                                          "datetime": row.timestamp, // Copy timestamp to datetime for backwards compatibility
-                                          "alias_id": row.alias_id,
-                                          "alias": row.alias,
-                                          "agency": row.agency,
-                                          "icon": row.icon,
-                                          "color": row.color,
-                                          "ignore": row.ignore
-                                        };
-                                        req.io.emit('messagePost', rowuser);
-                                      }
-                                    } else {
-                                      // if AdminShow not on only send if not null alias_id
-                                      if (row.alias_id != null) {
-                                        req.io.of('adminio').emit('messagePost', row);
-                                        rowuser = {
-                                          "id": row.id,
-                                          "message": row.message,
-                                          "source": row.source,
-                                          "timestamp": row.timestamp,
-                                          "datetime": row.timestamp, // Copy timestamp to datetime for backwards compatibility
-                                          "alias_id": row.alias_id,
-                                          "alias": row.alias,
-                                          "agency": row.agency,
-                                          "icon": row.icon,
-                                          "color": row.color,
-                                          "ignore": row.ignore
-                                        };
-                                        req.io.emit('messagePost', rowuser);
-                                      }
-                                    }
+                                const fields = ['id','message','source','timestamp','datetime','alias_id','alias','agency','icon','color','ignore']
+                                if (!HideCapcode) fields.push('address') // Show address, when hideCapcode is off.
+                                const rowUser = _.pick(row, fields)
+                                console.log(`Row cleaned for user: ${JSON.stringify(rowUser)}`)
+
+                                /*
+                                  If:
+                                  - The admin has no alias
+                                  - And pdw mode is on
+                                  -> Do not send to users
+                                  -> If
+                                    - AdminShow is on
+                                    -> Do send to admins though
+                                */
+                                if (pdwMode) {
+                                  if (row.alias_id === null) {
+                                    if (adminShow) req.io.to('admin').emit('messagePost', row)
                                   } else {
-                                    req.io.of('adminio').emit('messagePost', row);
-                                    rowuser = {
-                                      "id": row.id,
-                                      "message": row.message,
-                                      "source": row.source,
-                                      "timestamp": row.timestamp,
-                                      "datetime": row.timestamp, // Copy timestamp to datetime for backwards compatibility
-                                      "alias_id": row.alias_id,
-                                      "alias": row.alias,
-                                      "agency": row.agency,
-                                      "icon": row.icon,
-                                      "color": row.color,
-                                      "ignore": row.ignore
-                                    };
-                                    req.io.emit('messagePost', rowuser);
-                                  }
-                                } else {
-                                  if (pdwMode) {
-                                    if (adminShow) {
-                                      //If PDWMode on and AdminShow is on send always
-                                      req.io.of('adminio').emit('messagePost', row);
-                                      if (row.alias_id != null) {
-                                        // send to normal user as well if not null alias_id
-                                        req.io.emit('messagePost', row);
-                                      }
-                                    } else {
-                                      // if AdminShow not on only send if not null alias_id
-                                      if (row.alias_id != null) {
-                                        req.io.of('adminio').emit('messagePost', row);
-                                        req.io.emit('messagePost', row);
-                                      }
-                                    }
-                                  } else {
-                                    req.io.of('adminio').emit('messagePost', row);
-                                    req.io.emit('messagePost', row);
-                                  }
+                                    req.io.to('admin').emit('messagePost',row);
+                                    req.io.to('user').to('anonymous').emit('messagePost',rowUser);
                                 }
+                                } else {
+                                  req.io.to('admin').emit('messagePost',row);
+                                  req.io.to('user').to('anonymous').emit('messagePost',rowUser);
+                                }
+
                               });
                             }
                             res.status(200).send('' + msgId);
