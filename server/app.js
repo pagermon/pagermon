@@ -126,23 +126,6 @@ io.sockets.on('connection', function (socket) {
     socket.removeAllListeners();
     const userGroup = socket.request?.user?.role || 'anonymous';
     socket.join(userGroup);
-    logger.main.debug(`client with role ${userGroup} connect to normal socket`);
-//    socket.on('echo', function (data) {
-//        io.sockets.emit('message', data);
-//        console.log('message', data);
-//    });
-});
-//Admin Socket
-var adminio = io.of('/adminio');
-adminio.on('connection', function(socket) {
-    socket.removeAllListeners();
-    const userGroup = socket.request?.user?.role || 'anonymous';
-    socket.join(userGroup);
-    logger.main.debug(`client with role ${userGroup} connect to admin socket`);
-//    adminio.on('echo', function (data) {
-//        adminio.emit('message', data);
-//        console.log('message', data);
-//    });
 });
 
 app.use(favicon(path.join(__dirname,'themes',theme, 'public', 'favicon.ico')));
