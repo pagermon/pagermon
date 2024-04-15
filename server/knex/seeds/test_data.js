@@ -98,8 +98,8 @@ exports.seed = function (db, Promise) {
                         db('messages').insert({
                                 address: '1234572',
                                 message: 'This is a Test Message to non-stored Address 1234572',
-                                source: 'Client 4',
-                                timestamp: '1529494321',
+                                source: 'Client 5',
+                                timestamp: '1529494322',
                         })
                 )
                 .then(() => db('users').del())

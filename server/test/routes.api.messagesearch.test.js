@@ -63,18 +63,19 @@ describe('GET /api/messageSearch', () => {
         });
         it('should return result for existing alias', (done) => {
                 chai.request(server)
-                        .get('/api/messageSearch?alias=2')
+                        .get('/api/messageSearch?alias=1')
                         .end((err, res) => {
                                 should.not.exist(err);
                                 res.status.should.eql(200);
                                 res.type.should.eql('application/json');
                                 res.body.should.be.a('object');
-                                res.body.messages[0].should.have.property('id').eql(3);
-                                res.body.messages[0].should.have.property('address').eql('1234569');
+                                res.body.messages[0].should.have.property('id').eql(1);
+                                res.body.messages[0].should.have.property('address').eql('1234567');
                                 res.body.messages[0].should.have
                                         .property('message')
-                                        .eql('This is a Test Message to Address 1234569');
-                                res.body.messages[0].should.have.property('source').eql('Client 1');
+                                        .eql('This is another Test Message to Address 1234567');
+                                res.body.messages[0].should.have.property('source').eql('Client 2');
+                                res.body.messages.length.should.eql(2);
                                 done();
                         });
         });
@@ -86,12 +87,11 @@ describe('GET /api/messageSearch', () => {
                                 res.status.should.eql(200);
                                 res.type.should.eql('application/json');
                                 res.body.should.be.a('object');
-                                res.body.messages[0].should.have.property('id').eql(6);
                                 res.body.messages[0].should.have.property('address').eql('1234572');
                                 res.body.messages[0].should.have
                                         .property('message')
                                         .eql('This is a Test Message to non-stored Address 1234572');
-                                res.body.messages[0].should.have.property('source').eql('Client 4');
+                                res.body.messages[0].should.have.property('source').eql('Client 5');
                                 done();
                         });
         });
