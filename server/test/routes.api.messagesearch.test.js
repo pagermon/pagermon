@@ -70,7 +70,7 @@ describe('GET /api/messageSearch', () => {
                                 res.type.should.eql('application/json');
                                 res.body.should.be.a('object');
                                 res.body.messages.length.should.eq(2);
-                                res.body.messages[0].should.have.property('id').eql(1);
+                                res.body.messages[0].should.have.property('id').eql(2);
                                 res.body.messages[0].should.have.property('address').eql('1234567');
                                 res.body.messages[0].should.have
                                         .property('message')
