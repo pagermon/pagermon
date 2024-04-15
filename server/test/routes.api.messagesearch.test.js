@@ -63,7 +63,7 @@ describe('GET /api/messageSearch', () => {
         });
         it('should return result for existing alias', (done) => {
                 chai.request(server)
-                        .get('/api/messageSearch?alias=0')
+                        .get('/api/messageSearch?alias=1')
                         .end((err, res) => {
                                 should.not.exist(err);
                                 res.status.should.eql(200);
@@ -92,6 +92,18 @@ describe('GET /api/messageSearch', () => {
                                         .property('message')
                                         .eql('This is a Test Message to non-stored Address 1234572');
                                 res.body.messages[0].should.have.property('source').eql('Client 4');
+                                done();
+                        });
+        });
+        it('should not return result for alias with no messages', (done) => {
+                chai.request(server)
+                        .get('/api/messageSearch?alias=4')
+                        .end((err, res) => {
+                                should.not.exist(err);
+                                res.status.should.eql(200);
+                                res.type.should.eql('application/json');
+                                res.body.should.be.a('object');
+                                should.not.exist(res.body.messages[0]);
                                 done();
                         });
         });

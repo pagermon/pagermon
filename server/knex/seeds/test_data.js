@@ -44,6 +44,16 @@ exports.seed = function (db, Promise) {
                         })
                 )
                 .then(() =>
+                        db('capcodes').insert({
+                                address: '12345790',
+                                alias: 'Capcode with no messages',
+                                agency: 'EMPTY',
+                                icon: '',
+                                color: '',
+                                ignore: '1',
+                        })
+                )
+                .then(() =>
                         // Inserts seed entries one by one in series
                         db('messages').insert({
                                 address: '1234567',
