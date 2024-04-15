@@ -381,7 +381,6 @@ router.route('/messages')
                                 const fields = ['id','message','source','timestamp','datetime','alias_id','alias','agency','icon','color','ignore']
                                 if (!HideCapcode) fields.push('address') // Show address, when hideCapcode is off.
                                 const rowUser = _.pick(row, fields)
-                                console.log(`Row cleaned for user: ${JSON.stringify(rowUser)}`)
 
                                 /*
                                   If:
