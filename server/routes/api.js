@@ -1493,6 +1493,11 @@ function parseJSON(json) {
   return parsed;
 }
 
+/**
+ * Removes all empty objects from a plugin configuration
+ * @param {Object} pconf An object containing a key for each Plugin, holding it's configuration
+ * @returns A sanitized version of the plugin configuration object holding only plugins with values set
+ */
 function vaccumPluginConf(pconf) {
   const cleaned = _.pickBy(pconf, p => {
       return Object.keys(p).length > 0

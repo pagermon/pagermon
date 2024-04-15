@@ -7,6 +7,7 @@
 * Revert to FontAwesome 4 to fix performance issues. #574 @Danrw
 * Add MQTT Plugin #584 @ChoffaH
 * Hide Capcode in Small Screen mode Hide Capcode in Small Screen mode #583 @bullseye555
+* Clean up Plugin configuration for aliasses #596 @eopo
   
 
 # 0.3.13 - 2023-09-04
