@@ -290,8 +290,10 @@
         }
        <% } %>
       
-      
-    
+          function addMessage(message) {
+            const length = $scope.messages.unshift(message);
+            if (length > $scope.init.limit ) $scope.messages.pop();
+          }
           // only bother getting the new message if we're on page 1
           if ($scope.init.currentPage === 1) {
             console.log('New Message ID: '+message.id + ' currentPage: '+$scope.init.currentPage);
@@ -304,34 +306,30 @@
               if ($routeParams.q) {
                 var patt = new RegExp($routeParams.q, 'i');
                 if (patt.test(message.message) || patt.test(message.agency) || patt.test(message.address) || patt.test(message.alias) || patt.test(message.source)) {
-                  $scope.messages.unshift(message);
-                  $scope.messages.pop();
+                  addMessage(message);
                 }
               }
               if ($routeParams.agency) {
                 var patt = new RegExp($routeParams.agency, 'i');
                 if (patt.test(message.agency)) {
                   $scope.messages.unshift(message);
-                  $scope.messages.pop();
+                  addMessage(message);
                 }
               }
               if ($routeParams.alias) {
                 var patt = new RegExp($routeParams.alias, 'i');
                 if (patt.test(message.alias_id)) {
-                  $scope.messages.unshift(message);
-                  $scope.messages.pop();
+                  addMessage(message);
                 }
               }
               if ($routeParams.address) {
                 var patt = new RegExp($routeParams.address, 'i');
                 if (patt.test(message.address) || patt.test(message.source)) {
-                  $scope.messages.unshift(message);
-                  $scope.messages.pop();
+                  addMessage(message);
                 }
               }
                     } else {
-                      $scope.messages.unshift(message);
-                      $scope.messages.pop();
+                      addMessage(message);
                     }
                   }
                 });
