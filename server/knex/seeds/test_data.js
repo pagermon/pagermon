@@ -7,35 +7,48 @@ exports.seed = function(db, Promise) {
         address: '1234567',
         message: 'This is a Test Message to Address 1234567',
         source: 'Client 1',
-        timestamp: '1529487722'
+        timestamp: '1529487722',
+        alias_id: 1,
       });
     }).then(function () {
       return db('messages').insert({
         address: '1234567',
         message: 'This is another Test Message to Address 1234567',
         source: 'Client 2',
-        timestamp: '1529488007'
+        timestamp: '1529488007',
+        alias_id: 1,
       });
     }).then(function () {
       return db('messages').insert({
         address: '1234568',
         message: 'This is a Test Message to Address 1234568',
         source: 'Client 1',
-        timestamp: '1529489509'
+        timestamp: '1529489509',
+        alias_id: 2,
       });
     }).then(function () {
       return db('messages').insert({
         address: '1234569',
         message: 'This is a Test Message to Address 1234569',
         source: 'Client 3',
-        timestamp: '1529495672'
+        timestamp: '1529495672',
+        alias_id: 3,
       });
     }).then(function () {
       return db('messages').insert({
         address: '1234570',
         message: 'This is a Test Message to Address 1234570',
         source: 'Client 4',
-        timestamp: '1529494321'
+        timestamp: '1529494321',
+        alias_id: 4,
+      });
+    }).then(function () {
+      return db('messages').insert({
+        address: '1234571',
+        message: 'This is a Test Message to Address 1234571, that should be hidden to unauthorized users',
+        source: 'Client 4',
+        timestamp: '1529494321',
+        alias_id: 5,
       });
     }).then(function () {
       return db('capcodes').del()
@@ -47,6 +60,7 @@ exports.seed = function(db, Promise) {
         icon: 'fire',
         color: 'red',
         ignore: '0',
+        onlyShowLoggedIn: false,
       });
     }).then(function () {
       return db('capcodes').insert({
@@ -56,6 +70,7 @@ exports.seed = function(db, Promise) {
         icon: 'ambulance',
         color: 'green',
         ignore: '0',
+        onlyShowLoggedIn: false,
       });
     }).then(function () {
       return db('capcodes').insert({
@@ -65,6 +80,7 @@ exports.seed = function(db, Promise) {
         icon: 'gavel',
         color: 'blue',
         ignore: '0',
+        onlyShowLoggedIn: false,
       });
     }).then(function () {
       return db('capcodes').insert({
@@ -74,6 +90,17 @@ exports.seed = function(db, Promise) {
         icon: '',
         color: '',
         ignore: '1',
+        onlyShowLoggedIn: false,
+      });
+    }).then(function () {
+      return db('capcodes').insert({
+        address: '1234571',
+        alias: 'Hidden Capcode',
+        agency: 'HIDE',
+        icon: '',
+        color: '',
+        ignore: '0',
+        onlyShowLoggedIn: true,
       });
     }).then(function () {
       return db('users').del()

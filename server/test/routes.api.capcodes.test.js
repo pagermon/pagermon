@@ -49,7 +49,7 @@ describe('GET /api/capcodes', () => {
                 res.body[0].should.have.property('color')
                 res.body[0].should.have.property('pluginconf')
                 res.body[0].should.have.property('ignore')
-                res.body.length.should.eql(4)
+                res.body.length.should.eql(5)
                 done();
             });
     });
@@ -70,7 +70,7 @@ describe('GET /api/capcodes', () => {
                 res.body[0].should.have.property('color')
                 res.body[0].should.have.property('pluginconf')
                 res.body[0].should.have.property('ignore')
-                res.body.length.should.eql(4)
+                res.body.length.should.eql(5)
                 done();
             });
     });
@@ -347,7 +347,7 @@ describe('GET /api/capcodes/agency', () => {
                 res.type.should.eql('application/json');
                 res.body.should.be.a('array');
                 res.body[0].should.have.property('agency')
-                res.body.length.should.eql(4)
+                res.body.length.should.eql(5)
                 done();
             });
     });
@@ -361,7 +361,7 @@ describe('GET /api/capcodes/agency', () => {
                 res.type.should.eql('application/json');
                 res.body.should.be.a('array');
                 res.body[0].should.have.property('agency')
-                res.body.length.should.eql(4)
+                res.body.length.should.eql(5)
                 done();
             });
     });
