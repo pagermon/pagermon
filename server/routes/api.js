@@ -620,8 +620,12 @@ router.route('/messageSearch')
             qb.whereIn('messages.alias_id', function (qb2) {
               qb2.select('id').from('capcodes').where('agency', agency).where('ignore', 0);
           })
-          if (alias != '')
-            qb.where('messages.alias_id',alias);
+          if (alias != '') {
+            if (alias === '-1') 
+              qb.whereNull('messages.alias_id');
+            else
+              qb.where('messages.alias_id',alias);
+          }
         }
       }).orderBy('messages.timestamp', 'desc')
       .then((rows) => {
