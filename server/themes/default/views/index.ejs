@@ -97,7 +97,7 @@
             <th class="noMobile noSmall"></th>
             <th style="text-align: center;">Message
               <span ng-if="filter || hasQuery" class="pull-left" style="vertical-align: middle; padding-right: 10px;">
-                  <strong>Filter:</strong> <a ng-href="/" style="margin-bottom: 3px;" class="btn btn-primary btn-xs">{{filter || origQuery}} <i class="fa fa-fw fa-times"></i></a>
+                  <strong>Filter:</strong> <a ng-href="/" style="margin-bottom: 3px;" class="btn btn-primary btn-xs">{{ filterString || origQuery}} <i class="fa fa-fw fa-times"></i></a>
               </span></th>
           </tr>
         </thead>
@@ -224,39 +224,6 @@
               };
             })
 
-
-            .factory('adminSocket', function ($rootScope) {
-
-              var adminSocket = io('/adminio', {transports: ['websocket'], upgrade: false});
-              return {
-                open: function () {
-                  adminSocket = io('/adminio', {transports: ['websocket'], upgrade: false});
-                  adminSocket.open();
-                },
-                on: function (eventName, callback) {
-                  adminSocket.on(eventName, function () {
-                    var args = arguments;
-                    $rootScope.$apply(function () {
-                      callback.apply(adminSocket, args);
-                    });
-                  });
-                },
-                emit: function (eventName, data, callback) {
-                  adminSocket.emit(eventName, data, function () {
-                    var args = arguments;
-                    $rootScope.$apply(function () {
-                      if (callback) {
-                        callback.apply(adminSocket, args);
-                      }
-                    });
-                  })
-                },
-                close: function () {
-                  adminSocket.close();
-                }
-              };
-            })
-
             .factory('Api', ['$resource',
               function ($resource) {
                 return {
@@ -284,7 +251,7 @@
     
     // Controller
     // TODO: optimise this whole section, consider popping this entire controller out to a separate file
-    .controller('MessageController', ['$scope', '$routeParams', 'Api', 'socket', 'adminSocket', '$cookies', '$location', '$window', function ($scope, $routeParams, Api, socket, adminSocket, $cookies, $location, $window) {
+    .controller('MessageController', ['$scope', '$routeParams', 'Api', 'socket', '$cookies', '$location', '$window', function ($scope, $routeParams, Api, socket, $cookies, $location, $window) {
       // I hate ejs
       <% if(typeof user != 'undefined'){ %>
         $scope.user="<%=user%>";
@@ -295,52 +262,10 @@
       // get new message on socket event
       $scope.$on('$viewContentLoaded', function() {
       
-    // register a new socket when scope changes and set Socket Typle
-
-  //Manage the sockets
-  //This is messy as hell, but it works
-  //for some reason, socket opens both sockets, so the adminSocket is required to be closed after opening to prevent leaking data
-  <% if (!apisecurity) { %>
-    <% if (hidecapcode) { %>
-      <% if ((login && user.role == 'admin')) { %>
-        var socketMode = adminSocket
-        adminSocket.open();
-      <% } else { %>
-        var socketMode = socket
-        socket.open();
-        adminSocket.close()
-        <% } %>
-    <%} else { %>
-      <% if (pdwmode) { %>
-        <% if ((login && user.role == 'admin')) { %>
-          var socketMode = adminSocket
-          adminSocket.open();
-        <% } else { %>
-          var socketMode = socket
-          socket.open();
-          adminSocket.close()
-        <% } %>
-      <% } else { %>
-        var socketMode = socket
-        socket.open();
-        adminSocket.close()
-      <% } %>
-    <% } %>	
-  <% } else { %>
-    <% if ((login && user.role == 'admin')) { %>
-      var socketMode = adminSocket
-      adminSocket.open();
-    <% } else if (login) { %>
-      var socketMode = socket
-      socket.open();
-      adminSocket.close()
-    <% } else { %>
-      var socketMode = socket
-      socket.close();
-      adminSocket.close();
-      <% } %>
-  <% } %>
-  
+    // Register Socket
+    var socketMode = socket;
+    socket.open();
+    
     socketMode.on('messagePost', function(message) {
         // Send Browser Notifications  
     <% if (apisecurity) { %>
@@ -365,8 +290,10 @@
         }
        <% } %>
       
-      
-    
+          function addMessage(message) {
+            const length = $scope.messages.unshift(message);
+            if (length > $scope.init.limit ) $scope.messages.pop();
+          }
           // only bother getting the new message if we're on page 1
           if ($scope.init.currentPage === 1) {
             console.log('New Message ID: '+message.id + ' currentPage: '+$scope.init.currentPage);
@@ -377,36 +304,36 @@
           //  result.aliasMatch = result['MAX(capcodes.address)'];
             if ($routeParams.q || $routeParams.agency || $routeParams.alias || $routeParams.address) {
               if ($routeParams.q) {
+                console.log(`Param q is ${$routeParams.q}, checking message, agency, address and source`);
                 var patt = new RegExp($routeParams.q, 'i');
-                if (patt.test(message.message) || patt.test(message.agency) || patt.test(message.address) || patt.test(message.alias) || patt.test(message.source)) {
-                  $scope.messages.unshift(message);
-                  $scope.messages.pop();
+                if (patt.test(message.message) || patt.test(message.agency) || patt.test(message.address) || patt.test(message.source)) {
+                  addMessage(message);
                 }
               }
               if ($routeParams.agency) {
+                console.log(`Param agency is ${$routeParams.agency}, checking agency againt ${message.agency}`);
                 var patt = new RegExp($routeParams.agency, 'i');
                 if (patt.test(message.agency)) {
                   $scope.messages.unshift(message);
-                  $scope.messages.pop();
+                  addMessage(message);
                 }
               }
               if ($routeParams.alias) {
-                var patt = new RegExp($routeParams.alias, 'i');
-                if (patt.test(message.alias_id)) {
-                  $scope.messages.unshift(message);
-                  $scope.messages.pop();
+                console.log(`Param alias is ${$routeParams.alias_id}, checking alias against ${message.alias_id}`);
+                // We explicitly do want type casting here!
+                if (message.alias_id == $routeParams.alias) {
+                  addMessage(message);
                 }
               }
               if ($routeParams.address) {
+                console.log(`Param address is ${$routeParams.address}, checking address against ${message.address}`);
                 var patt = new RegExp($routeParams.address, 'i');
                 if (patt.test(message.address) || patt.test(message.source)) {
-                  $scope.messages.unshift(message);
-                  $scope.messages.pop();
+                  addMessage(message);
                 }
               }
                     } else {
-                      $scope.messages.unshift(message);
-                      $scope.messages.pop();
+                      addMessage(message);
                     }
                   }
                 });
@@ -442,14 +369,22 @@
                 }
 
                 if ($routeParams.agency || $routeParams.address || $routeParams.alias) {
+                  const activeFilters = []
                   $scope.filter = $routeParams.agency || $routeParams.address || $routeParams.alias;
                   $scope.hasQuery = true;
-                  if ($routeParams.agency)
+                  if ($routeParams.agency){
+                    activeFilters.push(`Agency: ${$routeParams.agency}`)
                     queryObj.agency = $routeParams.agency;
-                  if ($routeParams.address)
+                  }
+                  if ($routeParams.address){
+                    activeFilters.push(`Address: ${$routeParams.address}`)
                     queryObj.address = $routeParams.address;
-                  if ($routeParams.alias)
+                  }
+                  if ($routeParams.alias){
+                    activeFilters.push(`Alias: ${$routeParams.alias}`)
                     queryObj.alias = $routeParams.alias;
+                  }
+                  $scope.filterString = activeFilters.join(' & ');
                 }
 
                 if (page) {

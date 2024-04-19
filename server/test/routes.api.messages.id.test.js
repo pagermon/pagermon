@@ -79,7 +79,7 @@ describe('GET /api/messages/id', () => {
         });
         it('should not return message for onlyShowLoggedIn alias if not logged in ', done => {
                 chai.request(server)
-                        .get('/api/messages/6')
+                        .get('/api/messages/7')
                         .end((err, res) => {
                                 should.not.exist(err);
                                 res.status.should.eql(200);
@@ -97,13 +97,13 @@ describe('GET /api/messages/id', () => {
                         password: 'changeme',
                 });
                 chai.request(server)
-                        .get('/api/messages/6')
+                        .get('/api/messages/7')
                         .end((err, res) => {
                                 should.not.exist(err);
                                 res.status.should.eql(200);
                                 res.type.should.eql('application/json');
                                 res.body.should.be.a('array');
-                                res.body[0].should.have.property('id').eql(6);
+                                res.body[0].should.have.property('id').eql(7);
                                 res.body[0].should.have.property('address').eql('1234571');
                                 res.body[0].should.have
                                         .property('message')
