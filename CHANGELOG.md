@@ -10,6 +10,7 @@
 * Add filtering for messages without alias #594 @eopo
 * Add dockerignore file #595 @eopo
 * Clean up Plugin configuration for aliasses #596 @eopo
+* Improve everything around sockets #597 @eopo
   
 # 0.3.13 - 2023-09-04
 * Add Config option to fix FA icon's no longer loading. @marshyonline
