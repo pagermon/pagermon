@@ -97,7 +97,7 @@
             <th class="noMobile noSmall"></th>
             <th style="text-align: center;">Message
               <span ng-if="filter || hasQuery" class="pull-left" style="vertical-align: middle; padding-right: 10px;">
-                  <strong>Filter:</strong> <a ng-href="/" style="margin-bottom: 3px;" class="btn btn-primary btn-xs">{{filter || origQuery}} <i class="fa fa-fw fa-times"></i></a>
+                  <strong>Filter:</strong> <a ng-href="/" style="margin-bottom: 3px;" class="btn btn-primary btn-xs">{{ filterString || origQuery}} <i class="fa fa-fw fa-times"></i></a>
               </span></th>
           </tr>
         </thead>
@@ -369,14 +369,22 @@
                 }
 
                 if ($routeParams.agency || $routeParams.address || $routeParams.alias) {
+                  const activeFilters = []
                   $scope.filter = $routeParams.agency || $routeParams.address || $routeParams.alias;
                   $scope.hasQuery = true;
-                  if ($routeParams.agency)
+                  if ($routeParams.agency){
+                    activeFilters.push(`Agency: ${$routeParams.agency}`)
                     queryObj.agency = $routeParams.agency;
-                  if ($routeParams.address)
+                  }
+                  if ($routeParams.address){
+                    activeFilters.push(`Address: ${$routeParams.address}`)
                     queryObj.address = $routeParams.address;
-                  if ($routeParams.alias)
+                  }
+                  if ($routeParams.alias){
+                    activeFilters.push(`Alias: ${$routeParams.alias}`)
                     queryObj.alias = $routeParams.alias;
+                  }
+                  $scope.filterString = activeFilters.join(' & ');
                 }
 
                 if (page) {
