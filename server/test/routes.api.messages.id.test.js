@@ -37,18 +37,18 @@ describe('GET /api/messages/id', () => {
                 nconf.set('messages:HideCapcode', true);
                 nconf.save();
                 chai.request(server)
-                        .get('/api/messages/5')
+                        .get('/api/messages/4')
                         .end((err, res) => {
                                 should.not.exist(err);
                                 res.status.should.eql(200);
                                 res.type.should.eql('application/json');
                                 res.body.should.be.a('object');
-                                res.body.should.have.property('id').eql(5);
+                                res.body.should.have.property('id').eql(4);
                                 res.body.should.not.have.property('address');
                                 res.body.should.have
                                         .property('message')
-                                        .eql('This is a Test Message to Address 1234570');
-                                res.body.should.have.property('source').eql('Client 4');
+                                        .eql('This is a Test Message to Address 1234569');
+                                res.body.should.have.property('source').eql('Client 3');
                                 nconf.set('messages:HideCapcode', false);
                                 done();
                         });
