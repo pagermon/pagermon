@@ -1,4 +1,4 @@
-exports.seed = function (db, Promise) {
+exports.seed = function(db, Promise) {
         // Deletes ALL existing entries
         return db('messages')
                 .del() // Deletes ALL existing entries
@@ -11,6 +11,7 @@ exports.seed = function (db, Promise) {
                                 icon: 'fire',
                                 color: 'red',
                                 ignore: '0',
+                                onlyShowLoggedIn: false,
                         })
                 )
                 .then(() =>
@@ -21,6 +22,7 @@ exports.seed = function (db, Promise) {
                                 icon: 'ambulance',
                                 color: 'green',
                                 ignore: '0',
+                                onlyShowLoggedIn: false,
                         })
                 )
                 .then(() =>
@@ -31,6 +33,7 @@ exports.seed = function (db, Promise) {
                                 icon: 'gavel',
                                 color: 'blue',
                                 ignore: '0',
+                                onlyShowLoggedIn: false,
                         })
                 )
                 .then(() =>
@@ -41,6 +44,7 @@ exports.seed = function (db, Promise) {
                                 icon: '',
                                 color: '',
                                 ignore: '1',
+                                onlyShowLoggedIn: false,
                         })
                 )
                 .then(() =>
@@ -51,6 +55,18 @@ exports.seed = function (db, Promise) {
                                 icon: '',
                                 color: '',
                                 ignore: '0',
+                                onlyShowLoggedIn: false,
+                        })
+                )
+                .then(() =>
+                        db('capcodes').insert({
+                                address: '1234571',
+                                alias: 'Hidden Capcode',
+                                agency: 'HIDE',
+                                icon: '',
+                                color: '',
+                                ignore: '0',
+                                onlyShowLoggedIn: true,
                         })
                 )
                 .then(() =>
@@ -60,7 +76,7 @@ exports.seed = function (db, Promise) {
                                 message: 'This is a Test Message to Address 1234567',
                                 source: 'Client 1',
                                 timestamp: '1529487722',
-                                alias_id: '1'
+                                alias_id: '1',
                         })
                 )
                 .then(() =>
@@ -69,7 +85,7 @@ exports.seed = function (db, Promise) {
                                 message: 'This is another Test Message to Address 1234567',
                                 source: 'Client 2',
                                 timestamp: '1529488007',
-                                alias_id: '1'
+                                alias_id: '1',
                         })
                 )
                 .then(() =>
@@ -78,7 +94,7 @@ exports.seed = function (db, Promise) {
                                 message: 'This is a Test Message to Address 1234568',
                                 source: 'Client 1',
                                 timestamp: '1529489509',
-                                alias_id: '2'
+                                alias_id: '2',
                         })
                 )
                 .then(() =>
@@ -87,7 +103,7 @@ exports.seed = function (db, Promise) {
                                 message: 'This is a Test Message to Address 1234569',
                                 source: 'Client 3',
                                 timestamp: '1529495672',
-                                alias_id: '3'
+                                alias_id: '3',
                         })
                 )
                 .then(() =>
@@ -96,7 +112,7 @@ exports.seed = function (db, Promise) {
                                 message: 'This is a Test Message to Address 1234570',
                                 source: 'Client 4',
                                 timestamp: '1529494321',
-                                alias_id: '4'
+                                alias_id: '4',
                         })
                 )
                 .then(() =>
@@ -105,7 +121,17 @@ exports.seed = function (db, Promise) {
                                 message: 'This is a Test Message to non-stored Address 1234572',
                                 source: 'Client 5',
                                 timestamp: '1529494322',
-                                alias_id: undefined
+                                alias_id: undefined,
+                        })
+                )
+                .then(() =>
+                        db('messages').insert({
+                                address: '1234571',
+                                message:
+                                        'This is a Test Message to Address 1234571, that should be hidden to unauthorized users',
+                                source: 'Client 4',
+                                timestamp: '1529494321',
+                                alias_id: 6,
                         })
                 )
                 .then(() => db('users').del())
