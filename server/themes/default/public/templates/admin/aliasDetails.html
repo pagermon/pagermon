@@ -162,6 +162,18 @@
               </div>
               </div>
             </div>
+            <div class="form-group" ng-class="{'has-warning':alias.ignore == 1}">
+              <label for="alias.onlyShowLoggedIn" class="col-xs-4 col-sm-3 control-label">Hide Alias</label>
+              <div class="col-xs-8 col-sm-9">
+              <div class="checkbox">
+                <label>
+                <input type="checkbox" name="alias.onlyShowLoggedIn" id="aliasHide" ng-model="alias.onlyShowLoggedIn" ng-true-value="1" ng-false-value="0">
+                Show only for logged-in users
+                </label>
+                <span id="helpBlock" class="help-block">Messages for that alias will only be shown to users that are logged in and will be hidden for everyone else.</span>
+              </div>
+              </div>
+            </div>
 
 
             <h4>Plugins</h4>

@@ -28,88 +28,88 @@ beforeEach(() => db.migrate.rollback().then(() => db.migrate.latest().then(() =>
 afterEach(() => db.migrate.rollback().then(() => passportStub.logout()));
 
 describe('GET /api/capcodes', () => {
-        it('should return all capcodes when logged in as admin', (done) => {
-                passportStub.login({
-                        username: 'adminactive',
-                        password: 'changeme',
-                        role: 'admin',
-                });
-                chai.request(server)
-                        .get('/api/capcodes')
-                        .end((err, res) => {
-                                should.not.exist(err);
-                                res.status.should.eql(200);
-                                res.type.should.eql('application/json');
-                                res.body.should.be.a('array');
-                                res.body[0].should.have.property('id');
-                                res.body[0].should.have.property('address');
-                                res.body[0].should.have.property('alias');
-                                res.body[0].should.have.property('agency');
-                                res.body[0].should.have.property('icon');
-                                res.body[0].should.have.property('color');
-                                res.body[0].should.have.property('pluginconf');
-                                res.body[0].should.have.property('ignore');
-                                res.body.length.should.eql(5);
-                                done();
-                        });
+    it('should return all capcodes when logged in as admin', done => {
+        passportStub.login({
+            username: 'adminactive',
+            password: 'changeme',
+            role: 'admin'
         });
-        it('should return all capcodes when api key provided', (done) => {
-                chai.request(server)
-                        .get('/api/capcodes')
-                        .set('apikey', 'reallylongkeythatneedstobechanged')
-                        .end((err, res) => {
-                                should.not.exist(err);
-                                res.status.should.eql(200);
-                                res.type.should.eql('application/json');
-                                res.body.should.be.a('array');
-                                res.body[0].should.have.property('id');
-                                res.body[0].should.have.property('address');
-                                res.body[0].should.have.property('alias');
-                                res.body[0].should.have.property('agency');
-                                res.body[0].should.have.property('icon');
-                                res.body[0].should.have.property('color');
-                                res.body[0].should.have.property('pluginconf');
-                                res.body[0].should.have.property('ignore');
-                                res.body.length.should.eql(5);
-                                done();
-                        });
+        chai.request(server)
+            .get('/api/capcodes')
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(200);
+                res.type.should.eql('application/json');
+                res.body.should.be.a('array');
+                res.body[0].should.have.property('id')
+                res.body[0].should.have.property('address')
+                res.body[0].should.have.property('alias')
+                res.body[0].should.have.property('agency')
+                res.body[0].should.have.property('icon')
+                res.body[0].should.have.property('color')
+                res.body[0].should.have.property('pluginconf')
+                res.body[0].should.have.property('ignore')
+                res.body.length.should.eql(6)
+                done();
+            });
+    });
+    it('should return all capcodes when api key provided', done => {
+        chai.request(server)
+            .get('/api/capcodes')
+            .set('apikey', 'reallylongkeythatneedstobechanged')
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(200);
+                res.type.should.eql('application/json');
+                res.body.should.be.a('array');
+                res.body[0].should.have.property('id')
+                res.body[0].should.have.property('address')
+                res.body[0].should.have.property('alias')
+                res.body[0].should.have.property('agency')
+                res.body[0].should.have.property('icon')
+                res.body[0].should.have.property('color')
+                res.body[0].should.have.property('pluginconf')
+                res.body[0].should.have.property('ignore')
+                res.body.length.should.eql(6)
+                done();
+            });
+    });
+    it('should return a 401 when not admin', done => {
+        passportStub.login({
+            username: 'useractive',
+            password: 'changeme',
+            role: 'user'
         });
-        it('should return a 401 when not admin', (done) => {
-                passportStub.login({
-                        username: 'useractive',
-                        password: 'changeme',
-                        role: 'user',
-                });
-                chai.request(server)
-                        .get('/api/capcodes')
-                        .end((err, res) => {
-                                should.not.exist(err);
-                                res.status.should.eql(401);
-                                res.type.should.eql('application/json');
-                                done();
-                        });
-        });
-        it('should return a 401 when not logged in', (done) => {
-                chai.request(server)
-                        .get('/api/capcodes')
-                        .end((err, res) => {
-                                should.not.exist(err);
-                                res.status.should.eql(401);
-                                res.type.should.eql('application/json');
-                                done();
-                        });
-        });
-        it('should return a 401 when incorrect api key provided', (done) => {
-                chai.request(server)
-                        .get('/api/capcodes')
-                        .set('apikey', 'shortkeythatdoesntexist')
-                        .end((err, res) => {
-                                should.not.exist(err);
-                                res.status.should.eql(401);
-                                res.type.should.eql('application/json');
-                                done();
-                        });
-        });
+        chai.request(server)
+            .get('/api/capcodes')
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(401);
+                res.type.should.eql('application/json');
+                done();
+            });
+    });
+    it('should return a 401 when not logged in', done => {
+        chai.request(server)
+            .get('/api/capcodes')
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(401);
+                res.type.should.eql('application/json');
+                done();
+            });
+    });
+    it('should return a 401 when incorrect api key provided', done => {
+        chai.request(server)
+            .get('/api/capcodes')
+            .set('apikey', 'shortkeythatdoesntexist')
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(401);
+                res.type.should.eql('application/json');
+                done();
+            });
+    });
 });
 
 describe('POST /api/capcodes', () => {});
@@ -331,74 +331,74 @@ describe('DELETE /api/capcodes/:id', () => {
 });
 
 describe('GET /api/capcodes/agency', () => {
-        it('should return all agencies when logged in as admin', (done) => {
-                passportStub.login({
-                        username: 'adminactive',
-                        password: 'changeme',
-                        role: 'admin',
-                });
-                chai.request(server)
-                        .get('/api/capcodes/agency')
-                        .end((err, res) => {
-                                should.not.exist(err);
-                                res.status.should.eql(200);
-                                res.type.should.eql('application/json');
-                                res.body.should.be.a('array');
-                                res.body[0].should.have.property('agency');
-                                res.body.length.should.eql(5);
-                                done();
-                        });
+    it('should return all agencies when logged in as admin', done => {
+        passportStub.login({
+            username: 'adminactive',
+            password: 'changeme',
+            role: 'admin',
         });
-        it('should return all capcodes when api key provided', (done) => {
-                chai.request(server)
-                        .get('/api/capcodes/agency')
-                        .set('apikey', 'reallylongkeythatneedstobechanged')
-                        .end((err, res) => {
-                                should.not.exist(err);
-                                res.status.should.eql(200);
-                                res.type.should.eql('application/json');
-                                res.body.should.be.a('array');
-                                res.body[0].should.have.property('agency');
-                                res.body.length.should.eql(5);
-                                done();
-                        });
+        chai.request(server)
+            .get('/api/capcodes/agency')
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(200);
+                res.type.should.eql('application/json');
+                res.body.should.be.a('array');
+                res.body[0].should.have.property('agency')
+                res.body.length.should.eql(6)
+                done();
+            });
+    });
+    it('should return all capcodes when api key provided', done => {
+        chai.request(server)
+            .get('/api/capcodes/agency')
+            .set('apikey', 'reallylongkeythatneedstobechanged')
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(200);
+                res.type.should.eql('application/json');
+                res.body.should.be.a('array');
+                res.body[0].should.have.property('agency')
+                res.body.length.should.eql(6)
+                done();
+            });
+    });
+    it('should return a 401 when not admin', done => {
+        passportStub.login({
+            username: 'useractive',
+            password: 'changeme',
+            role: 'user'
         });
-        it('should return a 401 when not admin', (done) => {
-                passportStub.login({
-                        username: 'useractive',
-                        password: 'changeme',
-                        role: 'user',
-                });
-                chai.request(server)
-                        .get('/api/capcodes/agency')
-                        .end((err, res) => {
-                                should.not.exist(err);
-                                res.status.should.eql(401);
-                                res.type.should.eql('application/json');
-                                done();
-                        });
-        });
-        it('should return a 401 when not logged in', (done) => {
-                chai.request(server)
-                        .get('/api/capcodes/agency')
-                        .end((err, res) => {
-                                should.not.exist(err);
-                                res.status.should.eql(401);
-                                res.type.should.eql('application/json');
-                                done();
-                        });
-        });
-        it('should return a 401 when incorrect api key provided', (done) => {
-                chai.request(server)
-                        .get('/api/capcodes/agency')
-                        .set('apikey', 'shortkeythatdoesntexist')
-                        .end((err, res) => {
-                                should.not.exist(err);
-                                res.status.should.eql(401);
-                                res.type.should.eql('application/json');
-                                done();
-                        });
-        });
+        chai.request(server)
+            .get('/api/capcodes/agency')
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(401);
+                res.type.should.eql('application/json');
+                done();
+            });
+    });
+    it('should return a 401 when not logged in', done => {
+        chai.request(server)
+            .get('/api/capcodes/agency')
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(401);
+                res.type.should.eql('application/json');
+                done();
+            });
+    });
+    it('should return a 401 when incorrect api key provided', done => {
+        chai.request(server)
+            .get('/api/capcodes/agency')
+            .set('apikey', 'shortkeythatdoesntexist')
+            .end((err, res) => {
+                should.not.exist(err);
+                res.status.should.eql(401);
+                res.type.should.eql('application/json');
+                done();
+            });
+    });
 });
 
 describe('GET /api/capcodes/agency/:id', () => {

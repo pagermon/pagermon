@@ -83,6 +83,7 @@ router.route('/messages')
       var subquery = db.from('capcodes').where('ignore', '=', 1).select('id')
     }
     db.from('messages').where(function () {
+      if( !req.isAuthenticated) this.where('capcodes.onlyShowLoggedIn',false);
       if (pdwMode) {
         if (adminShow && req.isAuthenticated() && req.user.role == 'admin') {
           this.from('messages').where('alias_id', 'not in', subquery).orWhereNull('alias_id')
@@ -115,6 +116,7 @@ router.route('/messages')
           db.from('messages')
             .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', db.raw('CASE WHEN NOT capcodes.address = messages.address THEN 1 ELSE 0 END as wildcard'))
             .modify(function (queryBuilder) {
+              if (!req.isAuthenticated()) queryBuilder.where('capcodes.onlyShowLoggedIn',false);
               if (pdwMode) {
                 if (adminShow && req.isAuthenticated() && req.user.role == 'admin') {
                   queryBuilder.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id').where('capcodes.ignore', 0).orWhereNull('capcodes.ignore')
@@ -354,7 +356,7 @@ router.route('/messages')
                         }
 
                         db.from('messages')
-                          .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', 'capcodes.pluginconf')
+                          .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', 'capcodes.pluginconf', 'capcodes.onlyShowLoggedIn')
                           .modify(function (queryBuilder) {
                             queryBuilder.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id')
                           })
@@ -397,11 +399,13 @@ router.route('/messages')
                                     if (adminShow) req.io.to('admin').emit('messagePost', row)
                                   } else {
                                     req.io.to('admin').emit('messagePost',row);
-                                    req.io.to('user').to('anonymous').emit('messagePost',rowUser);
+                                    req.io.to('user').emit('messagePost',rowUser);
+                                    if(!row.onlyShowLoggedIn) req.io.to('anonymous').emit('messagePost',rowUser);
                                 }
                                 } else {
                                   req.io.to('admin').emit('messagePost',row);
-                                  req.io.to('user').to('anonymous').emit('messagePost',rowUser);
+                                  req.io.to('user').emit('messagePost',rowUser);
+                                  if(!row.onlyShowLoggedIn) req.io.to('anonymous').emit('messagePost',rowUser);
                                 }
 
                               });
@@ -450,7 +454,13 @@ router.route('/messages/:id')
       .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', db.raw('CASE WHEN NOT capcodes.address = messages.address THEN 1 ELSE 0 END as wildcard'))
       .leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id')
       .where('messages.id', id)
+      .modify(qb => {
+        if (!req.isAuthenticated()) qb.where('capcodes.onlyShowLoggedIn', false);
+      })
       .then((row) => {
+        if (row.length === 0) {
+          return res.status(200).json({});
+        }
         if (HideCapcode) {
           if (!req.isAuthenticated() || (req.isAuthenticated() && req.user.role == 'user')) {
             row = {
@@ -479,6 +489,7 @@ router.route('/messages/:id')
         }
       })
       .catch((err) => {
+        console.log(err);
         res.status(500).send(err);
       })
   });
@@ -701,7 +712,8 @@ router.route('/capcodes')
       var color = req.body.color || 'black';
       var icon = req.body.icon || 'question';
       var ignore = req.body.ignore || 0;
-      var pluginconf = JSON.stringify(vaccumPluginConf(req.body.pluginconf)) || "{}";
+      const pluginconf = JSON.stringify(vaccumPluginConf(req.body.pluginconf)) || "{}";
+      const onlyShowLoggedIn = req.body.onlyShowLoggedIn || false;
       db.from('capcodes')
         .where('id', '=', id)
         .modify(function (queryBuilder) {
@@ -714,7 +726,8 @@ router.route('/capcodes')
               color,
               icon,
               ignore,
-              pluginconf
+              pluginconf,
+              onlyShowLoggedIn,
             })
           } else {
             queryBuilder.update({
@@ -725,7 +738,8 @@ router.route('/capcodes')
               color,
               icon,
               ignore,
-              pluginconf
+              pluginconf,
+              onlyShowLoggedIn,
             })
           }
         })
@@ -787,7 +801,8 @@ router.route('/capcodes/:id')
       "icon": "question",
       "color": "black",
       "ignore": 0,
-      "pluginconf": {}
+      "pluginconf": {},
+      "onlyShowLoggedIn": false,
     };
     if (id == 'new') {
       res.status(200);
@@ -851,6 +866,7 @@ router.route('/capcodes/:id')
         var ignore = req.body.ignore || 0;
         var pluginconf = JSON.stringify(vaccumPluginConf(req.body.pluginconf)) || "{}";
         var updateAlias = req.body.updateAlias || 0;
+        const onlyShowLoggedIn = req.body.onlyShowLoggedIn || 0;
 
         console.time('insert');
         db.from('capcodes')
@@ -866,7 +882,8 @@ router.route('/capcodes/:id')
                 color,
                 icon,
                 ignore,
-                pluginconf
+                pluginconf,
+                onlyShowLoggedIn
               })
             } else {
               queryBuilder.update({
@@ -877,7 +894,8 @@ router.route('/capcodes/:id')
                 color,
                 icon,
                 ignore,
-                pluginconf
+                pluginconf,
+                onlyShowLoggedIn
               })
             }
           })
@@ -993,7 +1011,8 @@ router.route('/capcodeCheck/:id')
             "icon": "question",
             "color": "black",
             "ignore": 0,
-            "pluginconf": {}
+            "pluginconf": {},
+            "onlyShowLoggedIn": 0
           };
           res.status(200);
           res.json(row);
@@ -1083,7 +1102,8 @@ router.route('/capcodeImport')
             var color = capcode.color || 'black';
             var icon = capcode.icon || 'question';
             var ignore = capcode.ignore || 0;
-            var pluginconf = JSON.stringify(vaccumPluginConf(capcode.pluginconf)) || "{}";
+            const  pluginconf = JSON.stringify(vaccumPluginConf(capcode.pluginconf)) || "{}";
+            const onlyShowLoggedIn = capcode.onlyShowLoggedIn || false;
             await db('capcodes')
               .returning('id')
               .where('address', '=', address)
@@ -1100,7 +1120,8 @@ router.route('/capcodeImport')
                       color,
                       icon,
                       ignore,
-                      pluginconf
+                      pluginconf,
+                      onlyShowLoggedIn,
                     })
                     .then((result) => {
                       importresults.push({
@@ -1126,7 +1147,8 @@ router.route('/capcodeImport')
                     color,
                     icon,
                     ignore,
-                    pluginconf
+                    pluginconf,
+                    onlyShowLoggedIn,
                   })
                     .then((result) => {
                       importresults.push({
