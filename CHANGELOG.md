@@ -12,6 +12,7 @@
 * Clean up Plugin configuration for aliasses #596 @eopo
 * Improve everything around sockets #597 @eopo
 * Show filter criteria in message view #598 @eopo
+* introduces showing 'Alias: None' when searching for messages without alias. #601 @eopo
 
   
 # 0.3.13 - 2023-09-04
