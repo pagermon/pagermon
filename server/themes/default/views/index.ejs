@@ -381,7 +381,10 @@
                     queryObj.address = $routeParams.address;
                   }
                   if ($routeParams.alias){
-                    activeFilters.push(`Alias: ${$routeParams.alias}`)
+                    if ($routeParams.alias === '-1')
+                      activeFilters.push(`Alias: None`)
+                    else 
+                      activeFilters.push(`Alias: ${$routeParams.alias}`)
                     queryObj.alias = $routeParams.alias;
                   }
                   $scope.filterString = activeFilters.join(' & ');
