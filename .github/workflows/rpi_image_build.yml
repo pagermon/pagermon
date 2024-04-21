@@ -16,7 +16,7 @@ jobs:
         with:
           submodules: recursive
       - name: Run PIMOD
-        uses: Nature40/pimod@v0.4.4
+        uses: Nature40/pimod@v0.6.0
         with:
           pifile: builder.pifile
       - name: Compress Image
