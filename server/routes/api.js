@@ -330,18 +330,12 @@ router.route('/messages')
                     alias_id = data.pluginData.aliasId;
                   }
 
-                  if (insert == true) {
+                  if (insert === true) {
                     var insertmsg = { address, message, timestamp, source, alias_id }
-                    db('messages').insert(insertmsg).returning('id')
+                    db('messages').insert(insertmsg)
                       .then((result) => {
                         // emit the full message
-                        var msgId;
-                        if (Array.isArray(result)) {
-                          msgId = result[0].id;
-                        } else {
-                          msgId = result.id;
-                        }
-                        logger.main.debug(result);
+                        const msgId = Object.keys(result[0]).includes('id') ? result[0].id : result[0];
 
                         if (dbtype == 'oracledb') {
                           // oracle requires update of search index after insert, can't be trigger for some reason
