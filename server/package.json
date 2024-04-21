@@ -52,7 +52,6 @@
     "passport-local": "^1.0.0",
     "passport-localapikey-update": "^0.5.0",
     "pushover-notifications": "latest",
-    "request": "^2.88.2",
     "serve-favicon": "~2.4.2",
     "slack": "latest",
     "socket.io": "^4.7.2",
