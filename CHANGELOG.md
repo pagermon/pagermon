@@ -14,6 +14,7 @@
 * Show filter criteria in message view #598 @eopo
 * Add a new feature to hide aliasses from public #599 @eopo
 * introduces showing 'Alias: None' when searching for messages without alias. #601 @eopo
+* Fix MsgInsert issues #603 @eopo 
 
 # 0.3.13 - 2023-09-04
 * Add Config option to fix FA icon's no longer loading. @marshyonline
