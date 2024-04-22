@@ -20,7 +20,6 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var fs = require('fs');
 var session = require('express-session');
-var request = require('request');
 var SQLiteStore = require('connect-sqlite3')(session);
 var flash    = require('connect-flash');
 
