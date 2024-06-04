@@ -11,7 +11,6 @@
 ![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/pagermon/pagermon/server.js.yml?branch=master&label=Build%20master)
 ![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/pagermon/pagermon/server.js.yml?branch=develop&label=Build%20develop)
 
-
 PagerMon is an API driven client/server framework for parsing and displaying pager messages from multimon-ng.
 
 It is built around POCSAG messages, but should easily support other message types as required.

@@ -1,5 +1,5 @@
 #Latest Raspios Lite as of 23/12/2022 - https://www.raspberrypi.com/software/operating-systems/
-FROM https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2022-09-26/2022-09-22-raspios-bullseye-armhf-lite.img.xz
+FROM https://downloads.raspberrypi.com/raspios_lite_armhf/images/raspios_lite_armhf-2024-03-15/2024-03-15-raspios-bookworm-armhf-lite.img.xz
 TO /tmp/pagermon-pi.img
 
 PUMP 1024M
@@ -30,17 +30,13 @@ INSTALL . /home/pi/pagermon/
 #CHOWN pi
 RUN chown -R pi:pi /home/pi/pagermon
 
-#Install Nodejs 14.x
-#RUN curl -fsSL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+#Install NVM
+RUN bash -c "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash"
 
-RUN bash -c "echo 'deb https://deb.nodesource.com/node_14.x bullseye main' > /etc/apt/sources.list.d/nodesource.list"
-RUN bash -c "echo 'deb-src https://deb.nodesource.com/node_14.x bullseye main' >> /etc/apt/sources.list.d/nodesource.list"
-RUN bash -c "curl -s https://deb.nodesource.com/gpgkey/nodesource.gpg.key | gpg --dearmor | tee /usr/share/keyrings/nodesource.gpg >/dev/null"
-RUN bash -c "apt-key add /usr/share/keyrings/nodesource.gpg"
-
-RUN bash -c "apt-get update"
-RUN bash -c "apt-get install -y nodejs"
+#Install Node20
+RUN bash -c "nvm install 20"
 RUN bash -c "node -v"
+RUN bash -c "npm -v"
 
 #Install Multimon-ng
 RUN bash -c "apt install -y cmake && \

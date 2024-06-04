@@ -1,4 +1,4 @@
-# TBA
+# 0.4.0 - 2023-06-04
 * Update Readme #552 @eopo
 * Add Ntfy.sh Plugin #570 @Danrw
 * Standardize code datetime and timestamp variables to timestamp and add backwards compatibility #553 @eopo
@@ -15,6 +15,8 @@
 * Add a new feature to hide aliasses from public #599 @eopo
 * introduces showing 'Alias: None' when searching for messages without alias. #601 @eopo
 * Fix MsgInsert issues #603 @eopo 
+* Fix PiBuilder @marshy #604
+
 
 # 0.3.13 - 2023-09-04
 * Add Config option to fix FA icon's no longer loading. @marshyonline
