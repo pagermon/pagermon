@@ -5,6 +5,7 @@ var basicAuth = require('express-basic-auth');
 var bcrypt = require('bcryptjs');
 var util = require('util');
 var _ = require('underscore');
+const {pickBy} = require('lodash');
 var pluginHandler = require('../plugins/pluginHandler');
 var logger = require('../log');
 var db = require('../knex/knex.js');
@@ -82,6 +83,7 @@ router.route('/messages')
       var subquery = db.from('capcodes').where('ignore', '=', 1).select('id')
     }
     db.from('messages').where(function () {
+      if( !req.isAuthenticated) this.where('capcodes.onlyShowLoggedIn',false);
       if (pdwMode) {
         if (adminShow && req.isAuthenticated() && req.user.role == 'admin') {
           this.from('messages').where('alias_id', 'not in', subquery).orWhereNull('alias_id')
@@ -114,6 +116,7 @@ router.route('/messages')
           db.from('messages')
             .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', db.raw('CASE WHEN NOT capcodes.address = messages.address THEN 1 ELSE 0 END as wildcard'))
             .modify(function (queryBuilder) {
+              if (!req.isAuthenticated()) queryBuilder.where('capcodes.onlyShowLoggedIn',false);
               if (pdwMode) {
                 if (adminShow && req.isAuthenticated() && req.user.role == 'admin') {
                   queryBuilder.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id').where('capcodes.ignore', 0).orWhereNull('capcodes.ignore')
@@ -130,6 +133,8 @@ router.route('/messages')
             .then(rows => {
               rowCount = rows.length
               for (row of rows) {
+                row.datetime = row.timestamp // Copy timestamp to datetime  for backwards compatibilty
+
                 //outRow = JSON.parse(newrow);
                 if (HideCapcode) {
                   if (!req.isAuthenticated() || (req.isAuthenticated() && req.user.role == 'user')) {
@@ -138,6 +143,7 @@ router.route('/messages')
                       "message": row.message,
                       "source": row.source,
                       "timestamp": row.timestamp,
+                      "datetime": row.datetime,
                       "alias_id": row.alias_id,
                       "alias": row.alias,
                       "agency": row.agency,
@@ -185,24 +191,24 @@ router.route('/messages')
 
       if (filterDupes) {
         // this is a bad solution and tech debt that will bite us in the ass if we ever go HA, but that's a problem for future me and that guy's a dick
-        var datetime = data.datetime || 1;
-        var timeDiff = datetime - dupeTime;
+
+        var timestamp = data.timestamp || data.datetime || 1;
+
+        var timeDiff = timestamp - dupeTime;
         // if duplicate filtering is enabled, we want to populate the message buffer and check for duplicates within the limits
         var matches = _.where(msgBuffer, { message: data.message, address: data.address });
         if (matches.length > 0) {
           if (dupeTime != 0) {
             // search the matching messages and see if any match the time constrain
-            var timeFind = _.find(matches, function (msg) { return msg.datetime > timeDiff; });
+            var timeFind = _.find(matches, function (msg) { return msg.timestamp > timeDiff; });
             if (timeFind) {
               logger.main.info(util.format('Ignoring duplicate: %o', data.message));
-              res.status(200);
-              return res.send('Ignoring duplicate');
+              return res.status(200).send('Ignoring duplicate');
             }
           } else {
             // if no dupeTime then just end the search now, we have matches
             logger.main.info(util.format('Ignoring duplicate: %o', data.message));
-            res.status(200);
-            return res.send('Ignoring duplicate');
+            return res.status(200).send('Ignoring duplicate');
           }
         }
         // no matches, maintain the array
@@ -213,8 +219,16 @@ router.route('/messages')
         if (msgBuffer.length > dupeArrayLimit) {
           msgBuffer.shift();
         }
-        msgBuffer.push({ message: data.message, datetime: data.datetime, address: data.address });
+        msgBuffer.push(_.pick(data,['message', 'timestamp', 'address']));
       }
+
+        if (data.timestamp)
+          var timestamp = data.timestamp;
+        else if (data.datetime) {
+          logger.main.warn(`An incoming message from ${data.source || 'an unknown source' } contains the timestamp as field 'datetime'. Update the message source to use the variable 'timestamp' instead!`);
+          var timestamp = data.datetime;
+        } else 
+          var timestamp = 1;
 
       // send data to pluginHandler before proceeding
       logger.main.debug('beforeMessage start');
@@ -227,13 +241,11 @@ router.route('/messages')
         }
         if (data.pluginData.ignore) {
           // stop processing
-          res.status(200);
-          return res.send('Ignoring filtered');
+          return res.status(200).send('Ignoring filtered');
         }
         var address = data.address || '0000000';
         var message = data.message || 'null';
-        var datetime = data.datetime || 1;
-        var timeDiff = datetime - dupeTime;
+        var timeDiff = timestamp - dupeTime;
         var source = data.source || 'UNK';
         db.from('messages')
           .select('*')
@@ -283,8 +295,7 @@ router.route('/messages')
           .then((row) => {
             if (row.length > 0 && filterDupes) {
               logger.main.info(util.format('Ignoring duplicate: %o', message));
-              res.status(200);
-              res.send('Ignoring duplicate');
+              res.status(200).send('Ignoring duplicate');
             } else {
               db.from('capcodes')
                 .select('id', 'ignore')
@@ -319,18 +330,12 @@ router.route('/messages')
                     alias_id = data.pluginData.aliasId;
                   }
 
-                  if (insert == true) {
-                    var insertmsg = { address: address, message: message, timestamp: datetime, source: source, alias_id: alias_id }
-                    db('messages').insert(insertmsg).returning('id')
+                  if (insert === true) {
+                    var insertmsg = { address, message, timestamp, source, alias_id }
+                    db('messages').insert(insertmsg)
                       .then((result) => {
                         // emit the full message
-                        var msgId;
-                        if (Array.isArray(result)) {
-                          msgId = result[0];
-                        } else {
-                          msgId = result;
-                        }
-                        logger.main.debug(result);
+                        const msgId = Object.keys(result[0]).includes('id') ? result[0].id : result[0];
 
                         if (dbtype == 'oracledb') {
                           // oracle requires update of search index after insert, can't be trigger for some reason
@@ -345,7 +350,7 @@ router.route('/messages')
                         }
 
                         db.from('messages')
-                          .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', 'capcodes.pluginconf')
+                          .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', 'capcodes.pluginconf', 'capcodes.onlyShowLoggedIn')
                           .modify(function (queryBuilder) {
                             queryBuilder.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id')
                           })
@@ -355,6 +360,9 @@ router.route('/messages')
                               row = row[0]
                               // send data to pluginHandler after processing
                               row.pluginData = data.pluginData;
+
+                              // Copy timestamp to datetime for backwards compatibility.
+                              row.datetime = row.timestamp;
 
                               if (row.pluginconf) {
                                 row.pluginconf = parseJSON(row.pluginconf);
@@ -367,87 +375,36 @@ router.route('/messages')
                                 logger.main.debug('afterMessage done');
                                 // remove the pluginconf object before firing socket message
                                 delete row.pluginconf;
-                                //begin socket handling - this is the most horrible block of spaghetti code i've seen in my life and i hate myself for being involved in it
-                                if (HideCapcode) {
-                                  if (pdwMode) {
-                                    if (adminShow) {
-                                      //If PDWMode on and AdminShow is on send always
-                                      req.io.of('adminio').emit('messagePost', row);
-                                      if (row.alias_id != null) {
-                                        // send to normal user as well if not null alias_id
-                                        rowuser = {
-                                          "id": row.id,
-                                          "message": row.message,
-                                          "source": row.source,
-                                          "timestamp": row.timestamp,
-                                          "alias_id": row.alias_id,
-                                          "alias": row.alias,
-                                          "agency": row.agency,
-                                          "icon": row.icon,
-                                          "color": row.color,
-                                          "ignore": row.ignore
-                                        };
-                                        req.io.emit('messagePost', rowuser);
-                                      }
-                                    } else {
-                                      // if AdminShow not on only send if not null alias_id
-                                      if (row.alias_id != null) {
-                                        req.io.of('adminio').emit('messagePost', row);
-                                        rowuser = {
-                                          "id": row.id,
-                                          "message": row.message,
-                                          "source": row.source,
-                                          "timestamp": row.timestamp,
-                                          "alias_id": row.alias_id,
-                                          "alias": row.alias,
-                                          "agency": row.agency,
-                                          "icon": row.icon,
-                                          "color": row.color,
-                                          "ignore": row.ignore
-                                        };
-                                        req.io.emit('messagePost', rowuser);
-                                      }
-                                    }
+                                const fields = ['id','message','source','timestamp','datetime','alias_id','alias','agency','icon','color','ignore']
+                                if (!HideCapcode) fields.push('address') // Show address, when hideCapcode is off.
+                                const rowUser = _.pick(row, fields)
+
+                                /*
+                                  If:
+                                  - The admin has no alias
+                                  - And pdw mode is on
+                                  -> Do not send to users
+                                  -> If
+                                    - AdminShow is on
+                                    -> Do send to admins though
+                                */
+                                if (pdwMode) {
+                                  if (row.alias_id === null) {
+                                    if (adminShow) req.io.to('admin').emit('messagePost', row)
                                   } else {
-                                    req.io.of('adminio').emit('messagePost', row);
-                                    rowuser = {
-                                      "id": row.id,
-                                      "message": row.message,
-                                      "source": row.source,
-                                      "timestamp": row.timestamp,
-                                      "alias_id": row.alias_id,
-                                      "alias": row.alias,
-                                      "agency": row.agency,
-                                      "icon": row.icon,
-                                      "color": row.color,
-                                      "ignore": row.ignore
-                                    };
-                                    req.io.emit('messagePost', rowuser);
-                                  }
-                                } else {
-                                  if (pdwMode) {
-                                    if (adminShow) {
-                                      //If PDWMode on and AdminShow is on send always
-                                      req.io.of('adminio').emit('messagePost', row);
-                                      if (row.alias_id != null) {
-                                        // send to normal user as well if not null alias_id
-                                        req.io.emit('messagePost', row);
-                                      }
-                                    } else {
-                                      // if AdminShow not on only send if not null alias_id
-                                      if (row.alias_id != null) {
-                                        req.io.of('adminio').emit('messagePost', row);
-                                        req.io.emit('messagePost', row);
-                                      }
-                                    }
-                                  } else {
-                                    req.io.of('adminio').emit('messagePost', row);
-                                    req.io.emit('messagePost', row);
-                                  }
+                                    req.io.to('admin').emit('messagePost',row);
+                                    req.io.to('user').emit('messagePost',rowUser);
+                                    if(!row.onlyShowLoggedIn) req.io.to('anonymous').emit('messagePost',rowUser);
                                 }
+                                } else {
+                                  req.io.to('admin').emit('messagePost',row);
+                                  req.io.to('user').emit('messagePost',rowUser);
+                                  if(!row.onlyShowLoggedIn) req.io.to('anonymous').emit('messagePost',rowUser);
+                                }
+
                               });
                             }
-                            res.status(200).send('' + result);
+                            res.status(200).send('' + msgId);
                           })
                           .catch((err) => {
                             res.status(500).send(err);
@@ -459,8 +416,7 @@ router.route('/messages')
                         logger.main.error(err)
                       })
                   } else {
-                    res.status(200);
-                    res.send('Ignoring filtered');
+                    res.status(200).send('Ignoring filtered');
                   }
                 })
                 .catch((err) => {
@@ -492,13 +448,20 @@ router.route('/messages/:id')
       .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', db.raw('CASE WHEN NOT capcodes.address = messages.address THEN 1 ELSE 0 END as wildcard'))
       .leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id')
       .where('messages.id', id)
+      .modify(qb => {
+        if (!req.isAuthenticated()) qb.where('capcodes.onlyShowLoggedIn', false);
+      })
       .then((row) => {
+        if (row.length === 0) {
+          return res.status(200).json({});
+        }
         if (HideCapcode) {
           if (!req.isAuthenticated() || (req.isAuthenticated() && req.user.role == 'user')) {
             row = {
               "id": row[0].id,
               "message": row[0].message,
               "source": row[0].source,
+              "datetime": row[0].timestamp, // Add datetime for backwards compatibility
               "timestamp": row[0].timestamp,
               "alias_id": row[0].alias_id,
               "alias": row[0].alias,
@@ -520,6 +483,7 @@ router.route('/messages/:id')
         }
       })
       .catch((err) => {
+        console.log(err);
         res.status(500).send(err);
       })
   });
@@ -606,19 +570,25 @@ router.route('/messageSearch')
             qb.whereIn('messages.alias_id', function (qb2) {
               qb2.select('id').from('capcodes').where('agency', agency).where('ignore', 0);
           })
-          if (alias != '')
-            qb.where('messages.alias_id',alias);
+          if (alias != '') {
+            if (alias === '-1') 
+              qb.whereNull('messages.alias_id');
+            else
+              qb.where('messages.alias_id',alias);
+          }
         }
       }).orderBy('messages.timestamp', 'desc')
       .then((rows) => {
         if (rows) {
           for (row of rows) {
+            row.datetime = row.timestamp // Copy timestamp to datetime for backwards compatibility
             if (HideCapcode) {
               if (!req.isAuthenticated() || (req.isAuthenticated() && req.user.role == 'user')) {
                 row = {
                   "id": row.id,
                   "message": row.message,
                   "source": row.source,
+                  "datetime": row.datetime,
                   "timestamp": row.timestamp,
                   "alias_id": row.alias_id,
                   "alias": row.alias,
@@ -736,38 +706,40 @@ router.route('/capcodes')
       var color = req.body.color || 'black';
       var icon = req.body.icon || 'question';
       var ignore = req.body.ignore || 0;
-      var pluginconf = JSON.stringify(req.body.pluginconf) || "{}";
+      const pluginconf = JSON.stringify(vaccumPluginConf(req.body.pluginconf)) || "{}";
+      const onlyShowLoggedIn = req.body.onlyShowLoggedIn || false;
       db.from('capcodes')
         .where('id', '=', id)
         .modify(function (queryBuilder) {
           if (id == null) {
             queryBuilder.insert({
-              id: id,
-              address: address,
-              alias: alias,
-              agency: agency,
-              color: color,
-              icon: icon,
-              ignore: ignore,
-              pluginconf: pluginconf
+              id,
+              address,
+              alias,
+              agency,
+              color,
+              icon,
+              ignore,
+              pluginconf,
+              onlyShowLoggedIn,
             })
           } else {
             queryBuilder.update({
-              id: id,
-              address: address,
-              alias: alias,
-              agency: agency,
-              color: color,
-              icon: icon,
-              ignore: ignore,
-              pluginconf: pluginconf
+              id,
+              address,
+              alias,
+              agency,
+              color,
+              icon,
+              ignore,
+              pluginconf,
+              onlyShowLoggedIn,
             })
           }
         })
         .returning('id')
         .then((result) => {
-          res.status(200);
-          res.send('' + result);
+          res.status(200).send('' + result);
           if (!updateRequired || updateRequired == 0) {
             nconf.set('database:aliasRefreshRequired', 1);
             nconf.save();
@@ -792,8 +764,7 @@ router.route('/capcodes/agency')
         res.json(rows);
       })
       .catch((err) => {
-        res.status(500);
-        res.send(err);
+        res.status(500).send(err);
       })
   });
 
@@ -824,7 +795,8 @@ router.route('/capcodes/:id')
       "icon": "question",
       "color": "black",
       "ignore": 0,
-      "pluginconf": {}
+      "pluginconf": {},
+      "onlyShowLoggedIn": false,
     };
     if (id == 'new') {
       res.status(200);
@@ -886,8 +858,9 @@ router.route('/capcodes/:id')
         var color = req.body.color || 'black';
         var icon = req.body.icon || 'question';
         var ignore = req.body.ignore || 0;
-        var pluginconf = JSON.stringify(req.body.pluginconf) || "{}";
+        var pluginconf = JSON.stringify(vaccumPluginConf(req.body.pluginconf)) || "{}";
         var updateAlias = req.body.updateAlias || 0;
+        const onlyShowLoggedIn = req.body.onlyShowLoggedIn || 0;
 
         console.time('insert');
         db.from('capcodes')
@@ -896,25 +869,27 @@ router.route('/capcodes/:id')
           .modify(function (queryBuilder) {
             if (id == null) {
               queryBuilder.insert({
-                id: id,
-                address: address,
-                alias: alias,
-                agency: agency,
-                color: color,
-                icon: icon,
-                ignore: ignore,
-                pluginconf: pluginconf
+                id,
+                address,
+                alias,
+                agency,
+                color,
+                icon,
+                ignore,
+                pluginconf,
+                onlyShowLoggedIn
               })
             } else {
               queryBuilder.update({
-                id: id,
-                address: address,
-                alias: alias,
-                agency: agency,
-                color: color,
-                icon: icon,
-                ignore: ignore,
-                pluginconf: pluginconf
+                id,
+                address,
+                alias,
+                agency,
+                color,
+                icon,
+                ignore,
+                pluginconf,
+                onlyShowLoggedIn
               })
             }
           })
@@ -1030,7 +1005,8 @@ router.route('/capcodeCheck/:id')
             "icon": "question",
             "color": "black",
             "ignore": 0,
-            "pluginconf": {}
+            "pluginconf": {},
+            "onlyShowLoggedIn": 0
           };
           res.status(200);
           res.json(row);
@@ -1120,7 +1096,8 @@ router.route('/capcodeImport')
             var color = capcode.color || 'black';
             var icon = capcode.icon || 'question';
             var ignore = capcode.ignore || 0;
-            var pluginconf = JSON.stringify(capcode.pluginconf) || "{}";
+            const  pluginconf = JSON.stringify(vaccumPluginConf(capcode.pluginconf)) || "{}";
+            const onlyShowLoggedIn = capcode.onlyShowLoggedIn || false;
             await db('capcodes')
               .returning('id')
               .where('address', '=', address)
@@ -1131,13 +1108,14 @@ router.route('/capcodeImport')
                   return db('capcodes')
                     .where('id', '=', rows.id)
                     .update({
-                      address: address,
-                      alias: alias,
-                      agency: agency,
-                      color: color,
-                      icon: icon,
-                      ignore: ignore,
-                      pluginconf: pluginconf
+                      address,
+                      alias,
+                      agency,
+                      color,
+                      icon,
+                      ignore,
+                      pluginconf,
+                      onlyShowLoggedIn,
                     })
                     .then((result) => {
                       importresults.push({
@@ -1150,20 +1128,21 @@ router.route('/capcodeImport')
                       importresults.push({
                         address: address,
                         alias: alias,
-                        result: 'failed' + err
+                        result: 'failed ' + err
                       })
                     })
                 } else {
                   //Create new alias if one didn't get returned.
                   return db('capcodes').insert({
                     id: null,
-                    address: address,
-                    alias: alias,
-                    agency: agency,
-                    color: color,
-                    icon: icon,
-                    ignore: ignore,
-                    pluginconf: pluginconf
+                    address,
+                    alias,
+                    agency,
+                    color,
+                    icon,
+                    ignore,
+                    pluginconf,
+                    onlyShowLoggedIn,
                   })
                     .then((result) => {
                       importresults.push({
@@ -1249,7 +1228,7 @@ router.route('/user')
               .then((response) => {
                 //add logging
                 logger.main.debug('created user id: ' + response)
-                res.status(200).send({ 'status': 'ok', 'id': response[0] });
+                res.status(200).send({ 'status': 'ok', 'id': response[0].id });
               })
               .catch((err) => {
                 logger.main.error(err)
@@ -1421,7 +1400,7 @@ router.route('/user/:id')
           .returning('id')
           .then((result) => {
             console.timeEnd('insert');
-            res.status(200).send({ 'status': 'ok', 'id': result[0] })
+            res.status(200).send({ 'status': 'ok', 'id': result[0].id })
           })
           .catch((err) => {
             console.timeEnd('insert');
@@ -1477,4 +1456,16 @@ function parseJSON(json) {
     // ignore errors
   }
   return parsed;
+}
+
+/**
+ * Removes all empty objects from a plugin configuration
+ * @param {Object} pconf An object containing a key for each Plugin, holding it's configuration
+ * @returns A sanitized version of the plugin configuration object holding only plugins with values set
+ */
+function vaccumPluginConf(pconf) {
+  const cleaned = pickBy(pconf, p => {
+      return Object.keys(p).length > 0
+  })
+  return cleaned;
 }

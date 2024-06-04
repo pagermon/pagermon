@@ -2,7 +2,7 @@ var nconf = require('nconf');
 var confFile = './config/config.json';
 var dbtype = nconf.get('database:type')
 
-exports.up = function(db, Promise) {
+exports.up = function(db) {
     if (dbtype == 'sqlite3') {
         return db.raw(`
             CREATE VIRTUAL TABLE IF NOT EXISTS messages_search_index USING fts3(message, alias, agency);
@@ -17,10 +17,12 @@ exports.up = function(db, Promise) {
             `)
         ])
     } else {
-        return Promise.resolve('How did you get here?')
+        return new Promise ((resolve, rejects) => {
+            resolve('Not Required')
+         })
     }
 };
 
-exports.down = function(db, Promise) {
+exports.down = function(db) {
     return db.schema.dropTable('messages_search_index');
 };

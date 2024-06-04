@@ -1,4 +1,4 @@
-var version = "0.3.13-beta";
+var version = "0.4.0-beta";
 
 var debug = require('debug')('pagermon:server');
 var io = require('@pm2/io').init({
@@ -20,7 +20,6 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var fs = require('fs');
 var session = require('express-session');
-var request = require('request');
 var SQLiteStore = require('connect-sqlite3')(session);
 var flash    = require('connect-flash');
 
@@ -102,7 +101,7 @@ var app = express();
 
 
 var server = http.createServer(app);
-var io = require('socket.io').listen(server);
+var io = require('socket.io')(server);
     server.listen(port);
     server.on('error', onError);
     server.on('listening', onListening);
@@ -112,23 +111,20 @@ var io = require('socket.io').listen(server);
     });
     //Lets set setMaxListeners to a decent number - not to high to allow the memory leak warking to still trigger
     io.sockets.setMaxListeners(20);
+    
+    // Lets set setMaxListeners to a decent number - not to high to allow the memory leak warking to still trigger
+/*     io.sockets.setMaxListeners(20);
+    io.sockets.on('connection', function(socket) {
+            logger.main.debug(`User with group connected to socket`);
+            const userGroup = socket.request?.user?.group || 'anonymous';
+            socket.join(userGroup)
+            socket.removeAllListeners();
+    }); */
+
 io.sockets.on('connection', function (socket) {
     socket.removeAllListeners();
-    debug('client connect to normal socket');
-//    socket.on('echo', function (data) {
-//        io.sockets.emit('message', data);
-//        console.log('message', data);
-//    });
-});
-//Admin Socket
-var adminio = io.of('/adminio');
-adminio.on('connection', function (socket) {
-    socket.removeAllListeners();
-    debug('client connect to admin socket');
-//    adminio.on('echo', function (data) {
-//        adminio.emit('message', data);
-//        console.log('message', data);
-//    });
+    const userGroup = socket.request?.user?.role || 'anonymous';
+    socket.join(userGroup);
 });
 
 app.use(favicon(path.join(__dirname,'themes',theme, 'public', 'favicon.ico')));
@@ -176,6 +172,11 @@ app.use(function(req, res, next) {
   next();
 });
 
+const wrapMiddleware = middleware => (socket, next) => middleware(socket.request, {}, next);
+io.use(wrapMiddleware(session(sessSet)));
+io.use(wrapMiddleware(passport.session()));
+io.of('/adminio').use(wrapMiddleware(session(sessSet)));
+io.of('adminio').use(wrapMiddleware(passport.session()));
 
 app.use('/', index);
 app.use('/admin', admin);

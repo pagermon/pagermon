@@ -6,7 +6,7 @@ const moment = require('moment');
 const should = chai.should();
 const chaiHttp = require('chai-http');
 
-const datetime = moment().unix();
+const timestamp = moment().unix();
 
 chai.use(chaiHttp);
 
@@ -47,14 +47,14 @@ describe('POST /api/messages', () => {
                         .send({
                                 address: '000000',
                                 message: '!@#$%^& (This is a test message. 1a2b3c4d5e6e7f) !@#$%^&',
-                                datetime,
+                                timestamp,
                                 source: 'CI-Test',
                         })
                         .end((err, res) => {
                                 should.not.exist(err);
                                 res.status.should.eql(200);
                                 res.type.should.eql('text/html');
-                                res.text.should.be.eql('6');
+                                res.text.should.be.eql('8');
                                 done();
                         });
         });
@@ -69,7 +69,7 @@ describe('POST /api/messages', () => {
                         .send({
                                 address: '000000',
                                 message: '!@#$%^& (This is a test message. 1a2b3c4d5e6e7f) !@#$%^&',
-                                datetime,
+                                timestamp,
                                 source: 'CI-Test',
                         })
                         .end((err, res) => {

@@ -1,5 +1,22 @@
-# TBA
+# 0.4.0 - 2023-06-04
+* Update Readme #552 @eopo
+* Add Ntfy.sh Plugin #570 @Danrw
+* Standardize code datetime and timestamp variables to timestamp and add backwards compatibility #553 @eopo
+* Fix non matching messages when filtering alias #543 @geelongmicrosoldering
+* Fix [ERR_HTTP_HEADERS_SENT] error in /api route by combining res.status and res.send @nic-hanna
+* Revert to FontAwesome 4 to fix performance issues. #574 @Danrw
+* Add MQTT Plugin #584 @ChoffaH
+* Hide Capcode in Small Screen mode Hide Capcode in Small Screen mode #583 @bullseye555
+* Add filtering for messages without alias #594 @eopo
+* Add dockerignore file #595 @eopo
+* Clean up Plugin configuration for aliasses #596 @eopo
+* Improve everything around sockets #597 @eopo
+* Show filter criteria in message view #598 @eopo
+* Add a new feature to hide aliasses from public #599 @eopo
+* introduces showing 'Alias: None' when searching for messages without alias. #601 @eopo
+* Fix MsgInsert issues #603 @eopo 
 * Fix PiBuilder @marshy #604
+
 
 # 0.3.13 - 2023-09-04
 * Add Config option to fix FA icon's no longer loading. @marshyonline

@@ -267,7 +267,7 @@ describe('POST /auth/profile/:id', () => {
                         password: 'changeme',
                 });
                 chai.request(server)
-                        .post('/auth/profile/1')
+                        .post('/auth/profile/2')
                         .send({
                                 username: 'useractive',
                                 givenname: 'User',
@@ -278,7 +278,7 @@ describe('POST /auth/profile/:id', () => {
                                 should.not.exist(err);
                                 res.status.should.eql(200);
                                 res.body.status.should.eql('ok');
-                                res.body.id.should.eql(1);
+                                res.body.id.should.eql(2);
                                 done();
                         });
         });
@@ -288,7 +288,7 @@ describe('POST /auth/profile/:id', () => {
                         password: 'changeme',
                 });
                 chai.request(server)
-                        .post('/auth/profile/1')
+                        .post('/auth/profile/2')
                         .send({
                                 username: 'adminactive',
                                 givenname: 'Admin',
@@ -308,7 +308,7 @@ describe('POST /auth/profile/:id', () => {
                         password: 'changeme',
                 });
                 chai.request(server)
-                        .post('/auth/profile/1')
+                        .post('/auth/profile/2')
                         .send({
                                 username: 'useractive',
                                 givenname: 'User',
@@ -495,7 +495,7 @@ describe('POST /auth/reset', () => {
         it('should reset the password', done => {
                 passportStub.login({
                         // hard set the ID as the query on the route doesn't lookup id's. This should be fixed in auth.js
-                        id: '1',
+                        id: '2',
                         username: 'useractive',
                         password: 'changeme',
                 });
@@ -515,7 +515,7 @@ describe('POST /auth/reset', () => {
         it('should not accept the same password', done => {
                 passportStub.login({
                         // hard set the ID as the query on the route doesn't lookup id's. This should be fixed in auth.js
-                        id: '1',
+                        id: '2',
                         username: 'useractive',
                         password: '$2a$10$neQ/6P4YwrGxlBeFMJzW4OHxYWGI6Xp23mn/sPFfSDcGORR9jiDYu',
                 });
