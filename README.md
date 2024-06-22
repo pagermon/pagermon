@@ -33,7 +33,7 @@ The UI is built around a Node/Express/Angular/Bootstrap stack, while the client 
 * Pretty HTML5
 * Native browser notifications
 * Plugin Support - Current Plugins:
-    * [Pushover](https://pushover.net/) near realtime muti-device notification service
+    * [Pushover](https://pushover.net/) near realtime muti-device notification service 
     * [Prowl](https://prowlapp.com) near realtime iOS notification service with Apple Watch support
     * [Telegram](https://telegram.org/) near realtime cloud based multi-device messaging
     * [Discord](https://discordapp.com/) near realtime cloud based messaging service
@@ -94,6 +94,11 @@ These instructions will get you a copy of the project up and running on your loc
     $ export NODE_ENV=production
     $ pm2 start process.json
 ```
+If after running ```npm install``` you get some errors, run this ```npm install --loglevel verbose```
+if it gives an error on package sqlite3 or similar you can omit it from /pagermon/server/package.json telling npm install to skip it
+however after you have finished installing everything copy the original /pagermon/server/package.json from git 
+back to package.json or you may run into more errors.
+
 3) To start on boot, let pm2 handle it:
 ```
     $ sudo pm2 startup
@@ -272,6 +277,24 @@ Edit config.json with your favorite editor
 }
 
 ```
+### Starting the Client ###
+We are going to Add the Client to pm2 so it starts automatically
+```
+pm2 start /pagermon/client/reader.sh
+```
+now to save it so pm2 starts it automatically at boot
+```
+pm2 save
+```
+Now lets verify its running
+```
+pm2 status
+```
+this should give you a read out of the running process's  ```pagermon``` and ```reader```
+and there current status
+
+you can use ```pm2 log``` to display what the hells going on, ive found it very very handy when diagnosing plugin errors
+
 
 #### Pager Options
 
