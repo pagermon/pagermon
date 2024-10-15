@@ -478,7 +478,7 @@ router.route('/messages/:id')
           if (pdwMode && !row.alias) {
             res.status(200).json({});
           } else {
-            res.status(200).json(row);
+            res.status(200).json(row[0]);
           }
         }
       })
