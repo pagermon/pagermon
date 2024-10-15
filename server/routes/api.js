@@ -461,17 +461,17 @@ router.route('/messages/:id')
         if (HideCapcode) {
           if (!req.isAuthenticated() || (req.isAuthenticated() && req.user.role == 'user')) {
             row = {
-              "id": row[0].id,
-              "message": row[0].message,
-              "source": row[0].source,
-              "datetime": row[0].timestamp, // Add datetime for backwards compatibility
-              "timestamp": row[0].timestamp,
-              "alias_id": row[0].alias_id,
-              "alias": row[0].alias,
-              "agency": row[0].agency,
-              "icon": row[0].icon,
-              "color": row[0].color,
-              "ignore": row[0].ignore
+              "id": row.id,
+              "message": row.message,
+              "source": row.source,
+              "datetime": row.timestamp, // Add datetime for backwards compatibility
+              "timestamp": row.timestamp,
+              "alias_id": row.alias_id,
+              "alias": row.alias,
+              "agency": row.agency,
+              "icon": row.icon,
+              "color": row.color,
+              "ignore": row.ignore
             };
           }
         }
