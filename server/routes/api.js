@@ -455,6 +455,9 @@ router.route('/messages/:id')
         if (row.length === 0) {
           return res.status(200).json({});
         }
+        else {
+          row = row[0]
+        }
         if (HideCapcode) {
           if (!req.isAuthenticated() || (req.isAuthenticated() && req.user.role == 'user')) {
             row = {
@@ -470,9 +473,6 @@ router.route('/messages/:id')
               "color": row[0].color,
               "ignore": row[0].ignore
             };
-          }
-          else {
-            row = row[0]
           }
         }
         if (row.ignore == 1) {
