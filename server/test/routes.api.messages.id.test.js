@@ -66,13 +66,13 @@ describe('GET /api/messages/id', () => {
                                 should.not.exist(err);
                                 res.status.should.eql(200);
                                 res.type.should.eql('application/json');
-                                res.body.should.be.a('array');
-                                res.body[0].should.have.property('id').eql(4);
-                                res.body[0].should.have.property('address').eql('1234569');
-                                res.body[0].should.have
+                                res.body.should.be.a('object');
+                                res.body.should.have.property('id').eql(4);
+                                res.body.should.have.property('address').eql('1234569');
+                                res.body.should.have
                                         .property('message')
                                         .eql('This is a Test Message to Address 1234569');
-                                res.body[0].should.have.property('source').eql('Client 3');
+                                res.body.should.have.property('source').eql('Client 3');
                                 nconf.set('messages:HideCapcode', false);
                                 done();
                         });
@@ -102,15 +102,15 @@ describe('GET /api/messages/id', () => {
                                 should.not.exist(err);
                                 res.status.should.eql(200);
                                 res.type.should.eql('application/json');
-                                res.body.should.be.a('array');
-                                res.body[0].should.have.property('id').eql(7);
-                                res.body[0].should.have.property('address').eql('1234571');
-                                res.body[0].should.have
+                                res.body.should.be.a('object');
+                                res.body.should.have.property('id').eql(7);
+                                res.body.should.have.property('address').eql('1234571');
+                                res.body.should.have
                                         .property('message')
                                         .eql(
                                                 'This is a Test Message to Address 1234571, that should be hidden to unauthorized users'
                                         );
-                                res.body[0].should.have.property('source').eql('Client 4');
+                                res.body.should.have.property('source').eql('Client 4');
                                 nconf.set('messages:HideCapcode', false);
                                 done();
                         });
@@ -141,11 +141,11 @@ describe('GET /api/messages/id', () => {
                                 should.not.exist(err);
                                 res.status.should.eql(200);
                                 res.type.should.eql('application/json');
-                                res.body.should.be.a('array');
-                                res.body[0].should.have
+                                res.body.should.be.a('object');
+                                res.body.should.have
                                         .property('message')
                                         .eql('This is a Test Message to Address 1234570');
-                                res.body[0].should.have.property('source').eql('Client 4');
+                                res.body.should.have.property('source').eql('Client 4');
                                 nconf.set('messages:apiSecurity', false);
                                 done();
                         });
