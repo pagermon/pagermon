@@ -471,6 +471,9 @@ router.route('/messages/:id')
               "ignore": row[0].ignore
             };
           }
+          else {
+            row = row[0]
+          }
         }
         if (row.ignore == 1) {
           res.status(200).json({});
@@ -478,7 +481,7 @@ router.route('/messages/:id')
           if (pdwMode && !row.alias) {
             res.status(200).json({});
           } else {
-            res.status(200).json(row[0]);
+            res.status(200).json(row);
           }
         }
       })
