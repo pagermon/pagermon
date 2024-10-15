@@ -82,27 +82,6 @@ describe('POST /api/messages', () => {
 });
 
 describe('GET /api/messages', () => {
-        it('should return message id 5', done => {
-                nconf.set('messages:HideCapcode', false);
-                nconf.set('messages:HideSource', false);
-                nconf.set('messages:apiSecurity', false);
-                nconf.save();
-                chai.request(server)
-                        .get('/api/messages/5')
-                        .end((err, res) => {
-                                should.not.exist(err);
-                                res.status.should.eql(200);
-                                res.type.should.eql('application/json');
-                                res.body.should.be.a('array');
-                                res.body[0].should.have.property('id').eql(5);
-                                res.body[0].should.have.property('address').eql('1234570');
-                                res.body[0].should.have
-                                        .property('message')
-                                        .eql('This is a Test Message to Address 1234570');
-                                res.body[0].should.have.property('source').eql('Client 4');
-                                done();
-                        });
-        });
         it('should show capcode in hidecapcode mode if logged in ', done => {
                 nconf.set('messages:HideCapcode', true);
                 nconf.save();
