@@ -1,3 +1,6 @@
+# TBA
+* Fix #476 - Fix inconsistent tests. #617 @Danrw
+
 # 0.4.0 - 2023-06-04
 * Update Readme #552 @eopo
 * Add Ntfy.sh Plugin #570 @Danrw
