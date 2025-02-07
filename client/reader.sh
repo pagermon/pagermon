@@ -20,6 +20,7 @@
 ######################################################################
 # node reader.js : the cool thing that makes magic happen
 ######################################################################
-rtl_fm -d 0101 -E dc -F 0 -l 15 -A fast -f 148.5875M -s22050 - | 
-multimon-ng -q -b1 -c -a POCSAG512 -f alpha -t raw /dev/stdin | 
+#rtl_fm -d 0 -f 169.65M -M fm -s 22050 -p 0 - | 
+rtl_fm -d 0 -E dc -F 0 -A fast -f 169.650M -s22050 -M fm - |
+multimon-ng -a FLEX -t raw /dev/stdin | 
 node reader.js
