@@ -82,4 +82,4 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}-armhf
           cache-from: type=gha
-          cache-to: type-gha,mode=max
+          cache-to: type=gha,mode=max
