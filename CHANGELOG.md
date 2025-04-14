@@ -3,6 +3,9 @@
   * Fix PiBuilder @marshy #604
   * Fix an error, where logging out would throw an error but work @eopo #633
   * Fix an error, where visiting sites when not logged in would throw errors @eopo #633
+* Improvements
+  * Improve CI and Docker Image building @eopo #632
+
 
 # 0.3.13 - 2023-09-04
 * Add Config option to fix FA icon's no longer loading. @marshyonline
