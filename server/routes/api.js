@@ -288,16 +288,8 @@ router.route('/messages')
             } else {
               db.from('capcodes')
                 .select('id', 'ignore')
-                // TODO: test this doesn't break other DBs - there's a lot of quote changes here
-                .modify(function (queryBuilder) {
-                  if (dbtype == 'oracledb') {
-                    queryBuilder.whereRaw(`'${address}' LIKE "address"`)
-                    queryBuilder.orderByRaw(`REPLACE("address", '_', '%') DESC`);
-                  } else {
-                    queryBuilder.whereRaw(`"${address}" LIKE address`)
-                    queryBuilder.orderByRaw(`REPLACE(address, '_', '%') DESC`)
-                  }
-                })
+                .whereRaw(`? LIKE ??`, [address, 'address'])
+                .orderByRaw(`REPLACE(??, '_', '%') DESC`, ['address'])
                 .then((row) => {
                   var insert;
                   var alias_id = null;
@@ -711,12 +703,7 @@ router.route('/capcodes')
     var dbtype = nconf.get('database:type');
     db.from('capcodes')
       .select('*')
-      .modify(function (queryBuilder) {
-        if (dbtype == 'oracledb')
-          queryBuilder.orderByRaw(`REPLACE("address", '_', '%')`);
-        else
-          queryBuilder.orderByRaw(`REPLACE(address, '_', '%')`)
-      })
+      .orderByRaw(`REPLACE(??, '_', '%')`, ['address'])
       .then((rows) => {
         res.json(rows);
       })
@@ -802,7 +789,7 @@ router.route('/capcodes/agency/:id')
     var id = req.params.id;
     db.from('capcodes')
       .select('*')
-      .where('agency', 'like', id)
+      .where('agency', 'LIKE', id)
       .then((rows) => {
         res.status(200);
         res.json(rows);
@@ -926,13 +913,8 @@ router.route('/capcodes/:id')
                 .update('alias_id', function () {
                   this.select('id')
                     .from('capcodes')
-                    .where('messages.address', 'like', 'address')
-                    .modify(function (queryBuilder) {
-                      if (dbtype == 'oracledb')
-                        queryBuilder.orderByRaw(`REPLACE("address", '_', '%') DESC`);
-                      else
-                        queryBuilder.orderByRaw(`REPLACE(address, '_', '%') DESC`)
-                    })
+                    .where('messages.address', 'LIKE', 'address')
+                    .orderByRaw(`REPLACE(??, '_', '%') DESC`, 'address')
                     .limit(1)
                 })
                 .catch((err) => {
@@ -950,14 +932,9 @@ router.route('/capcodes/:id')
                 db('messages').update('alias_id', function () {
                   this.select('id')
                     .from('capcodes')
-                    .where(db.ref('messages.address'), 'like', db.ref('capcodes.address'))
-                    .modify(function (queryBuilder) {
-                      if (dbtype == 'oracledb')
-                        queryBuilder.orderByRaw(`REPLACE("address", '_', '%') DESC`);
-                      else
-                        queryBuilder.orderByRaw(`REPLACE(address, '_', '%') DESC`)
-                  })
-                  .limit(1)
+                    .where('messages.address', 'LIKE', db.ref('capcodes.address'))
+                    .orderByRaw(`REPLACE(??, '_', '%') DESC`, ['address']) 
+                    .limit(1)
                 })
                 .where(db.ref('messages.address'), '=', req.body.address)
                 .catch((err) => {
@@ -1050,13 +1027,8 @@ router.route('/capcodeRefresh')
     db('messages').update('alias_id', function () {
       this.select('id')
         .from('capcodes')
-        .where(db.ref('messages.address'), 'like', db.ref('capcodes.address'))
-        .modify(function (queryBuilder) {
-          if (dbtype == 'oracledb')
-            queryBuilder.orderByRaw(`REPLACE("address", '_', '%') DESC`);
-          else
-            queryBuilder.orderByRaw(`REPLACE(address, '_', '%') DESC`)
-        })
+        .where('messages.address', 'LIKE', db.ref('capcodes.address'))
+        .orderByRaw(`REPLACE(??, '_', '%') DESC`, ['address'])
         .limit(1)
     })
       .then((result) => {
@@ -1078,12 +1050,7 @@ router.route('/capcodeExport')
     var filename = 'export.csv'
     db.from('capcodes')
       .select('*')
-      .modify(function (queryBuilder) {
-        if (dbtype == 'oracledb')
-          queryBuilder.orderByRaw(`REPLACE("address", '_', '%')`);
-        else
-          queryBuilder.orderByRaw(`REPLACE(address, '_', '%')`)
-      })
+      .orderByRaw(`REPLACE(??, '_', '%')`, ['address'])
       .then((rows) => {
         converter.json2csv(rows, function (err, data) {
           if (err) {
