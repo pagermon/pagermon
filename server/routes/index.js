@@ -33,6 +33,7 @@ router.get('/', function (req, res, next) {
     if (nconf.get('messages:apiSecurity') && !req.isAuthenticated()) {
         req.flash('loginMessage', 'You need to be logged in to access this page');
         res.redirect('/auth/login');
+        return;
     }
 
     res.render('index', { pageTitle: 'Home' });
