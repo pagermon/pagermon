@@ -1,43 +1,42 @@
-var telegram = require('telegram-bot-api');
-var util = require('util');
-var logger = require('../log');
+const TelegramApi = require('telegram-bot-api');
+const util = require('util');
+const logger = require('../log');
 
-function run(trigger, scope, data, config, callback) {
-    var tConf = data.pluginconf.Telegram;
-    if (tConf && tConf.enable) {
-        var telekey = config.teleAPIKEY;
-        var t = new telegram({
-          token: telekey
-        });
-        if (tConf.chat == 0 || !tConf.chat) {
-            logger.main.error('Telegram: ' + data.address + ' No ChatID key set. Please enter ChatID.');
-            callback();
-        } else {
-            //Notification formatted in Markdown for pretty notifications
-            var notificationText = `<b>${escapeTelegramHTML(data.agency)} - ${escapeTelegramHTML(data.alias)}</b>\n` + 
-                                    `Message: ${escapeTelegramHTML(data.message)}`;
-            
-            t.sendMessage({
-                chat_id: tConf.chat,
-                text: notificationText,
-                parse_mode: "HTML"
-            }).then(function(data) {
-                logger.main.debug('Telegram: ' + util.inspect(data, false, null));
+async function run(trigger, scope, data, config, callback) {
+        try {
+                const tConf = data.pluginconf.Telegram;
+                if (!tConf || !tConf.enable) return callback();
+                const telegramApiKey = config.teleAPIKEY;
+                const telegram = new TelegramApi({
+                        token: telegramApiKey,
+                });
+                if (tConf.chat === 0 || !tConf.chat) {
+                        logger.main.error(`Telegram: ${data.address} No ChatID key set. Please enter ChatID.`);
+                        return callback();
+                }
+                // Notification formatted in Markdown for pretty notifications
+                const notificationText =
+                        `<b>${escapeTelegramHTML(data.agency)} - ${escapeTelegramHTML(data.alias)}</b>\n` +
+                        `Message: ${escapeTelegramHTML(data.message)}`;
+
+                const responseData = await telegram.sendMessage({
+                        chat_id: tConf.chat,
+                        text: notificationText,
+                        parse_mode: 'Markdown',
+                });
+
+                logger.main.debug(`Telegram: ${util.inspect(responseData, false, null)}`);
                 callback();
-            }).catch(function(err) {
-                logger.main.error('Telegram: ' + err);
+        } catch (error) {
+                logger.main.error(`Telegram: ${error}`);
                 callback();
-            });
         }
-    } else {
-        callback();
-    }
 }
 
-function escapeTelegramHTML (string) {
-    return string.replace(/</,'&lt;').replace(/>/,'&gt;'.replace(/&/,'&amp;'));
+function escapeTelegramHTML(string) {
+        return string.replace(/</, '&lt;').replace(/>/, '&gt;'.replace(/&/, '&amp;'));
 }
 
 module.exports = {
-    run: run
-}
+        run,
+};

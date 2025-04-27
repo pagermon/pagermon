@@ -1,123 +1,65 @@
 const winston = require('winston');
+const nconf = require('nconf');
+
 const { format } = winston;
-// const { combine, label, json, cli } = format;
-// load the config file
-var nconf = require('nconf');
-var confFile = './config/config.json';
-nconf.file({file: confFile});
-nconf.load();
 
-var loglevel = nconf.get('global:loglevel');
+const loglevel = nconf.get('global:loglevel');
 
+function createLogger(name, options) {
+        return winston.loggers.add(name, {
+                format: format.combine(
+                        format.colorize(),
+                        format.label({ label: options?.label || name }),
+                        format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+                        format.prettyPrint(),
+                        format.printf(
+                                (info) =>
+                                        options?.format ||
+                                        `${info.label}  ${info.timestamp}  ${info.level} : ${info.message}`
+                        )
+                ),
+                transports: [
+                        new winston.transports.File({
+                                level: options?.logLevel?.file || loglevel,
+                                filename: `./logs/${options?.filename || name}.log`,
+                                handleExceptions: true,
+                                maxsize: 10485760,
+                                maxFiles: 5,
+                        }),
+                        new winston.transports.Console({
+                                level: options?.logLevel?.console || loglevel,
+                                handleExceptions: true,
+                        }),
+                ],
+        });
+}
 
-winston.loggers.add('pagermon', {
-    format: format.combine(
-        format.colorize(),
-        format.label({ label: '[pmon]' }),
-        format.timestamp({format:"YYYY-MM-DD HH:mm:ss"}),
-        format.prettyPrint(),
-        format.printf(
-            info => `${info.label}  ${info.timestamp}  ${info.level} : ${info.message}`
-        )
-    ),
-    transports: [
-        new winston.transports.File({
-            level: loglevel,
-            filename: './logs/pagermon.log',
-            handleExceptions: true,
-            maxsize: 10485760,
-            maxFiles: 5
-        }),
-        new winston.transports.Console({
-            level: loglevel,
-            handleExceptions: true
-        })
-    ]
+createLogger('pagermon', {
+        label: '[pmon]',
 });
 
-winston.loggers.add('http', {
-    format: format.combine(
-        format.colorize(),
-        format.label({ label: '[http]' }),
-        format.timestamp({format:"YYYY-MM-DD HH:MM:SS"}),
-        format.printf(
-            info => `${info.message}`
-        )
-    ),
-    transports: [
-        new winston.transports.File({
-            level: 'debug',
-            filename: './logs/http.log',
-            handleExceptions: true,
-            maxsize: 10485760,
-            maxFiles: 5
-        }),
-        new winston.transports.Console({
-            level: loglevel,
-            handleExceptions: true
-        })
-    ]
+createLogger('http', {
+        format: format.printf((info) => `${info.message}`),
+        logLevel: {
+                file: 'debug',
+        },
 });
 
-winston.loggers.add('db', {
-    format: format.combine(
-        format.colorize(),
-        format.label({ label: '[db]' }),
-        format.timestamp({format:"YYYY-MM-DD HH:mm:ss"}),
-        format.prettyPrint(),
-        format.printf(
-            info => `${info.label}  ${info.timestamp}  ${info.level} : ${info.message}`
-        )
-    ),
-    transports: [
-        new winston.transports.File({
-            level: loglevel,
-            filename: './logs/db.log',
-            handleExceptions: true,
-            maxsize: 10485760,
-            maxFiles: 5
-        }),
-        new winston.transports.Console({
-            level: loglevel,
-            handleExceptions: true
-        })
-    ]
-});
+createLogger('db');
 
-winston.loggers.add('auth', {
-    format: format.combine(
-        format.colorize(),
-        format.label({ label: '[auth]' }),
-        format.timestamp({format:"YYYY-MM-DD HH:mm:ss"}),
-        format.prettyPrint(),
-        format.printf(
-            info => `${info.label}  ${info.timestamp}  ${info.level} : ${info.message}`
-        )
-    ),
-    transports: [
-        new winston.transports.File({
-            level: loglevel,
-            filename: './logs/auth.log',
-            handleExceptions: true,
-            maxsize: 10485760,
-            maxFiles: 5
-        }),
-        new winston.transports.Console({
-            level: loglevel,
-            handleExceptions: true
-        })
-    ]
-});
+createLogger('auth');
 
 module.exports = {
-    main: winston.loggers.get('pagermon'),
-    http: winston.loggers.get('http'),
-    db: winston.loggers.get('db'),
-    auth: winston.loggers.get('auth')
-}
+        main: winston.loggers.get('pagermon'),
+        http: winston.loggers.get('http'),
+        db: winston.loggers.get('db'),
+        auth: winston.loggers.get('auth'),
+        createLogger,
+};
+
 module.exports.http.stream = {
-    write: function(message, encoding){
-        var httpLog = winston.loggers.get('http');
-        httpLog.debug(message.substring(0,message.lastIndexOf('\n')));
-    }
+        write(message) {
+                const httpLog = winston.loggers.get('http');
+                httpLog.debug(message.substring(0, message.lastIndexOf('\n')));
+        },
 };

@@ -21,12 +21,26 @@ passportStub.install(server);
 nconf.file({ file: confFile });
 nconf.load();
 
-beforeEach(() => db.migrate.rollback().then(() => db.migrate.latest().then(() => db.seed.run().then(() => {nconf.set('messages:HideSource', false); nconf.set('messages:apiSecurity', false); nconf.set('messages:HideCapcode', false)}))));
+beforeEach(() =>
+        db.schema
+                .hasTable('knex_migrations_lock')
+                .then((exists) => {
+                        if (exists) return db.del().from(`knex_migrations_lock`);
+                })
+                .then(() => db.migrate.rollback())
+                .then(() => db.migrate.latest())
+                .then(() => db.seed.run())
+                .then(() => {
+                        nconf.set('messages:HideSource', false);
+                        nconf.set('messages:apiSecurity', false);
+                        nconf.set('messages:HideCapcode', false);
+                })
+);
 
 afterEach(() => db.migrate.rollback().then(() => passportStub.logout()));
 
 describe('GET /', () => {
-        it('should return the home page', done => {
+        it('should return the home page', (done) => {
                 nconf.set('messages:apiSecurity', false);
                 nconf.save();
                 chai.request(server)
@@ -39,7 +53,7 @@ describe('GET /', () => {
                         });
         });
         // res.redirect is causing an ECONNRESET in this version of Express here, nfi why but i give up. @Danrw
-        /*it('should return the login if a user is not logged in and apiSecurity enabled', done => {
+        /* it('should return the login if a user is not logged in and apiSecurity enabled', done => {
                 nconf.set('messages:apiSecurity', true);
                 nconf.save();
                 chai.request(server)
@@ -53,8 +67,8 @@ describe('GET /', () => {
                                 nconf.save();
                                 done();
                         });
-        });*/
-        it('should return the index if a user is logged in and apiSecurity enabled', done => {
+        }); */
+        it('should return the index if a user is logged in and apiSecurity enabled', (done) => {
                 nconf.set('messages:apiSecurity', true);
                 nconf.save();
                 passportStub.login({

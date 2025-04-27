@@ -1,28 +1,28 @@
-var nconf = require('nconf');
-var confFile = './config/config.json';
-var dbtype = nconf.get('database:type')
+const nconf = require('nconf');
 
-exports.up = function(db) {
-    if (dbtype == 'sqlite3') {
-        return db.raw(`
-            CREATE VIRTUAL TABLE IF NOT EXISTS messages_search_index USING fts3(message, alias, agency);
-            `)
-    } else if (dbtype == 'mysql'){
-        return Promise.all([
-            db.raw(`
-                ALTER TABLE messages ADD FULLTEXT (message, source, address);
-            `),
-            db.raw(`
-                ALTER TABLE capcodes ADD FULLTEXT (alias, agency);
-            `)
-        ])
-    } else {
-        return new Promise ((resolve, rejects) => {
-            resolve('Not Required')
-         })
-    }
+exports.up = async function (db) {
+        const dbtype = nconf.get('database:type');
+        switch (dbtype) {
+                case 'sqlite3':
+                        return db.schema.raw(`
+                CREATE VIRTUAL TABLE IF NOT EXISTS messages_search_index USING fts3(message, alias, agency);
+            `);
+                case 'mysql':
+                        return Promise.all([
+                                db.schema.raw(`
+                    ALTER TABLE messages ADD FULLTEXT (message, source, address);
+                `),
+                                db.schema.raw(`
+                    ALTER TABLE capcodes ADD FULLTEXT (alias, agency);
+                `),
+                        ]);
+                default:
+                        return 'Not required';
+        }
 };
 
-exports.down = function(db) {
-    return db.schema.dropTable('messages_search_index');
+exports.down = async function (db) {
+        const dbtype = nconf.get('database:type');
+        if (dbtype === 'sqlite3') return db.schema.dropTableIfExists('messages_search_index');
+        return 'Not required';
 };

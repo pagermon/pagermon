@@ -1,7 +1,7 @@
 const express = require('express');
 
 const router = express.Router();
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcrypt');
 const moment = require('moment');
 const nconf = require('nconf');
 
@@ -10,13 +10,13 @@ nconf.file({ file: confFile });
 nconf.load();
 
 // Brute force protection for public dupe checking routes
-const ExpressBrute = require('express-brute');
+const ExpressBrute = require('express-brute'); // TODO: Outdated, use express-rate-limit
 const BruteKnex = require('brute-knex');
 
 const db = require('../knex/knex.js');
 const logger = require('../log');
 const passport = require('../auth/local');
-const authHelper = require('../middleware/authhelper')
+const authHelper = require('../middleware/authhelper');
 
 const store = new BruteKnex({
         createTable: true,
@@ -24,7 +24,7 @@ const store = new BruteKnex({
         tablename: 'protection',
 });
 
-const lockoutCallback = function(req, res, next, nextValidRequestDate) {
+const lockoutCallback = function (req, res, next, nextValidRequestDate) {
         res.status(429).send({ status: 'lockedout', error: 'Too many attempts, please try again later' });
         logger.auth.info(`Lockout: ${req.ip} Next Valid: ${nextValidRequestDate}`);
 };
@@ -46,130 +46,112 @@ const bruteforcelogin = new ExpressBrute(store, {
 // End Bruteforce
 
 router.route('/login')
-        .get(function(req, res) {
-                if (!req.isAuthenticated()) {
-                        let user = '';
-                        if (typeof req.username !== 'undefined') {
-                                user = req.username;
-                        }
-                        res.render('auth', {
-                                pageTitle: 'User',
-                        });
-                } else {
-                        res.redirect('/');
-                }
+        .get(function getLogin(req, res) {
+                if (req.isAuthenticated()) return res.redirect('/');
+                res.render('auth', {
+                        pageTitle: 'User',
+                });
         })
-        .post(bruteforcelogin.prevent, function(req, res, next) {
+        .post(bruteforcelogin.prevent, function postLogin(req, res, next) {
                 passport.authenticate('login-user', (err, user) => {
-                        if (err) {
-                                //this is commented out as it seems to fire when a user is disabled?! even tho the below functions still run
-                                //res.status(500).send({ status: 'failed', error: 'An Error Occured' });
-                                logger.auth.error(err);
-                        } else if (!user) {
-                                res.status(401).send({ status: 'failed', error: 'Check Details and try again' });
+                        if (!user) {
                                 logger.auth.debug(`Login Failed: ${req.body.username}`);
-                        } else if (user) {
-                                if (user.status !== 'disabled') {
-                                        req.logIn(user, function(err) {
-                                                if (err) {
-                                                        res.status(401).send({
-                                                                status: 'failed',
-                                                                error: 'An error occured',
-                                                        });
-                                                        logger.auth.debug(
-                                                                `Failed login ${JSON.stringify(user)} ${err}`
-                                                        );
-                                                } else {
-                                                        // Update last logon timestamp for user
-                                                        const { id } = user;
-                                                        // create the datetime, thanks mysql ┌∩┐(◣_◢)┌∩┐
-                                                        const currentTimestamp = moment().unix(); // in seconds
-                                                        const currentDatetime = moment(currentTimestamp * 1000).format(
-                                                                'YYYY-MM-DD HH:mm:ss'
-                                                        );
-                                                        return db
-                                                                .from('users')
-                                                                .where('id', '=', id)
-                                                                .update({
-                                                                        lastlogondate: currentDatetime,
-                                                                })
-                                                                .then(() => {
-                                                                        // reset the bruteforce timer after successful login
-                                                                        bruteforcelogin.reset(null);
-                                                                        if (user.role !== 'admin') {
-                                                                                res.status(200).send({
-                                                                                        status: 'ok',
-                                                                                        redirect: '/',
-                                                                                });
-                                                                        } else {
-                                                                                res.status(200).send({
-                                                                                        status: 'ok',
-                                                                                        redirect: '/admin',
-                                                                                });
-                                                                        }
-                                                                        logger.auth.debug(
-                                                                                `Successful login ${JSON.stringify(
-                                                                                        user
-                                                                                )}`
-                                                                        );
-                                                                })
-                                                                .catch(err => {
-                                                                        logger.db.error(err);
-                                                                });
-                                                }
-                                        });
-                                } else {
-                                        res.status(401).send({ status: 'failed', error: 'User Disabled' });
-                                        logger.auth.debug(`User Disabled${req.user.username}`);
-                                }
+                                return res.status(401).send({ status: 'failed', error: 'Check Details and try again' });
                         }
+                        if (user.status === 'disabled') {
+                                logger.auth.debug(`User Disabled${req.body.username}`);
+                                return res.status(401).send({ status: 'failed', error: 'User Disabled' });
+                        }
+                        if (err) {
+                                logger.auth.error(err);
+                                return res.status(500).send({ status: 'failed', error: 'An Error Occured' });
+                        }
+                        req.logIn(user, async function (err) {
+                                if (err) {
+                                        logger.auth.debug(`Failed login ${JSON.stringify(user)} ${err}`);
+                                        return res.status(401).send({
+                                                status: 'failed',
+                                                error: 'An error occured',
+                                        });
+                                }
+                                // Update last logon timestamp for user
+                                const { id } = user;
+                                // create the datetime, thanks mysql ┌∩┐(◣_◢)┌∩┐
+                                const currentTimestamp = moment().unix(); // in seconds
+                                const currentDatetime = moment(currentTimestamp * 1000).format('YYYY-MM-DD HH:mm:ss');
+
+                                try {
+                                        await db.from('users').where('id', '=', id).update({
+                                                lastlogondate: currentDatetime,
+                                        });
+                                } catch (error) {
+                                        logger.db.error(error);
+                                }
+
+                                // reset the bruteforce timer after successful login
+                                bruteforcelogin.reset(null);
+                                if (user.role === 'admin')
+                                        return res.status(200).send({
+                                                status: 'ok',
+                                                redirect: '/admin',
+                                        });
+
+                                logger.auth.debug(`Successful login ${JSON.stringify(user)}`);
+                                return res.status(200).send({
+                                        status: 'ok',
+                                        redirect: '/',
+                                });
+                        });
                 })(req, res, next);
         });
 
-router.route('/logout').get(authHelper.isLoggedIn, function(req, res) {
-        req.logout(function(err) {
-                if (err) { return next(err); }
+router.route('/logout').get(authHelper.isLoggedIn, function getLogout(req, res, next) {
+        req.logout(function (err) {
+                if (err) {
+                        return next(err);
+                }
         });
         res.redirect('/');
         logger.auth.debug(`Successful Logout ${req.user.username}`);
 });
 
-router.route('/profile/').get(authHelper.isLoggedIn, function(req, res) {
+router.route('/profile').get(authHelper.isLoggedIn, function getProfile(req, res) {
         res.render('auth', {
                 pageTitle: 'User',
         });
 });
 
 router.route('/profile/:id')
-        .get(authHelper.isLoggedIn, function(req, res, next) {
-                const { username } = req.user;
-                db.from('users')
-                        .select('id', 'givenname', 'surname', 'username', 'email', 'lastlogondate')
-                        .where('username', username)
-                        .then(function(row) {
-                                if (row.length > 0) {
-                                        const rowsend = row[0];
-                                        res.status(200);
-                                        res.json(rowsend);
-                                } else {
-                                        res.status(500).json({ status: 'failed', error: '' });
-                                        logger.auth.error('failed to select user');
-                                }
-                        })
-                        .catch(err => {
-                                logger.main.error(err);
-                                return next(err);
-                        });
+        .get(authHelper.isLoggedIn, async function getProfileId(req, res, next) {
+                try {
+                        const user = await db
+                                .from('users')
+                                .select('id', 'givenname', 'surname', 'username', 'email', 'lastlogondate')
+                                .where('username', req.user.username)
+                                .first();
+
+                        if (!user) res.status(404).json({ status: 'failed', error: 'User not found' });
+
+                        res.json(user);
+                } catch {
+                        res.status(500).json({ status: 'failed', error: '' });
+                        logger.auth.error('failed to select user');
+                }
         })
-        .post(authHelper.isLoggedIn, function(req, res) {
-                if (req.body.username === req.user.username) {
-                        const { username } = req.body;
-                        const { givenname } = req.body;
-                        const surname = req.body.surname || '';
-                        const { email } = req.body;
-                        const lastlogondate = Date.now();
-                        console.time('insert');
-                        db.from('users')
+        .post(authHelper.isLoggedIn, async function postProfileId(req, res) {
+                if (req.body.username !== req.user.username) {
+                        logger.auth.error('Possible attempt to compromise security POST:/auth/profile');
+                        logger.auth.error(`User ${req.user.username} attempted to update ${req.body.username}`);
+                        return res.status(403).json({ message: 'Please update your own details only' });
+                }
+
+                const { username, givenname, email } = req.body;
+                const surname = req.body.surname || '';
+                const lastlogondate = Date.now();
+
+                try {
+                        const update = await db
+                                .from('users')
                                 .returning('id')
                                 .where('username', '=', req.user.username)
                                 .update({
@@ -178,212 +160,188 @@ router.route('/profile/:id')
                                         surname,
                                         email,
                                         lastlogondate,
-                                })
-                                .then(result => {
-                                        console.timeEnd('insert');
-                                        res.status(200).send({ status: 'ok', id: result[0].id });
-                                })
-                                .catch(err => {
-                                        console.timeEnd('insert');
-                                        logger.main.error(err);
-                                        res.status(400).send(err);
                                 });
-                } else {
-                        res.status(401).json({ message: 'Please update your own details only' });
-                        logger.auth.error('Possible attempt to compromise security POST:/auth/profile');
+
+                        return res.status(200).send({ status: 'ok', id: update[0].id });
+                } catch (error) {
+                        logger.main.error(error);
+                        return res.status(400).send(error);
                 }
         });
 
 router.route('/register')
-        .get(function(req, res) {
-                const reg = nconf.get('auth:registration');
-                if (reg) {
-                        res.render('auth', {
-                                title: 'Registration',
-                                message: req.flash('registerMessage'),
-                        });
-                } else {
-                        res.redirect('/');
-                }
+        .get(function getRegister(req, res) {
+                if (!nconf.get('auth:registration')) return res.redirect('/');
+
+                res.render('auth', {
+                        title: 'Registration',
+                        message: req.flash('registerMessage'),
+                });
         })
-        .post(function(req, res, next) {
+        .post(async function postRegister(req, res, next) {
+                if (!req.body.username || !req.body.email || !req.body.password)
+                        return res
+                                .status(400)
+                                .json({ status: 'failed', error: 'Username, Email and Password are required' });
+
                 const reg = nconf.get('auth:registration');
-                if (reg) {
-                        const salt = bcrypt.genSaltSync();
-                        const hash = bcrypt.hashSync(req.body.password, salt);
-                        // dupecheck to prevent a non-literal insert being abused to reset passwords
-                        return db('users')
+                if (!reg) {
+                        logger.auth.error('Registration attempted with registration disabled');
+                        return res.status(403).json({ status: 'failed', error: 'registration disabled' });
+                }
+
+                const salt = bcrypt.genSaltSync();
+                const hash = bcrypt.hashSync(req.body.password, salt);
+
+                try {
+                        const dupecheck = await db('users')
                                 .where('username', '=', req.body.username)
                                 .orWhere('email', '=', req.body.email)
                                 .select('id')
-                                .then(row => {
-                                        if (row.length > 0) {
-                                                logger.auth.error(
-                                                        `Duplicate registration via API${JSON.stringify(row)}`
-                                                );
-                                                res.status(401).json({ error: 'access denied' });
-                                        } else {
-                                                return db('users')
-                                                        .insert({
-                                                                username: req.body.username,
-                                                                password: hash,
-                                                                givenname: req.body.givenname,
-                                                                surname: req.body.surname,
-                                                                email: req.body.email,
-                                                                role: 'user',
-                                                                status: 'active',
-                                                                lastlogondate: Date.now(),
-                                                        })
-                                                        .then(() => {
-                                                                passport.authenticate('login-user', (err, user) => {
-                                                                        if (user) {
-                                                                                req.logIn(user, function(err) {
-                                                                                        if (err) {
-                                                                                                res.status(500).json({
-                                                                                                        status:
-                                                                                                                'failed',
-                                                                                                        error: err,
-                                                                                                        redirect:
-                                                                                                                '/auth/register',
-                                                                                                });
-                                                                                                logger.auth.error(err);
-                                                                                        } else {
-                                                                                                res.status(200).json({
-                                                                                                        status: 'ok',
-                                                                                                        redirect: '/',
-                                                                                                });
-                                                                                                logger.auth.info(
-                                                                                                        `Created Account: ${user}`
-                                                                                                );
-                                                                                        }
-                                                                                });
-                                                                        } else {
-                                                                                logger.auth.error(err);
-                                                                                res.status(500).json({
-                                                                                        status: 'failed',
-                                                                                        error: err,
-                                                                                        redirect: '/auth/register',
-                                                                                });
-                                                                        }
-                                                                })(req, res, next);
-                                                        })
-                                                        .catch(err => {
-                                                                logger.auth.error(err);
-                                                                res.status(400).json({
-                                                                        status: 'failed',
-                                                                        error: 'invalid data',
-                                                                });
-                                                        });
+                                .first();
+
+                        if (dupecheck) {
+                                logger.auth.error(
+                                        `Duplicate registration attempt via API - Conflict with user ${dupecheck.id}`
+                                );
+                                return res.status(401).json({ status: 'failed', error: 'access denied' });
+                        }
+
+                        await db('users').insert({
+                                username: req.body.username,
+                                password: hash,
+                                givenname: req.body.givenname,
+                                surname: req.body.surname,
+                                email: req.body.email,
+                                role: 'user',
+                                status: 'active',
+                                lastlogondate: Date.now(),
+                        });
+
+                        passport.authenticate('login-user', (err, user) => {
+                                if (!user) {
+                                        logger.auth.error(err);
+                                        return res.status(500).json({
+                                                status: 'failed',
+                                                error: err,
+                                                redirect: '/auth/register',
+                                        });
+                                }
+                                req.logIn(user, function (err) {
+                                        if (err) {
+                                                logger.auth.error(err);
+                                                return res.status(500).json({
+                                                        status: 'failed',
+                                                        error: err,
+                                                        redirect: '/auth/register',
+                                                });
                                         }
+                                        logger.auth.info(`Created Account: ${user}`);
+                                        return res.status(200).json({
+                                                status: 'ok',
+                                                redirect: '/',
+                                        });
                                 });
+                        })(req, res, next);
+                } catch (error) {
+                        logger.auth.error(error);
+                        // Todo: Wouldn't that more likely be a 500 error?
+                        return res.status(400).json({
+                                status: 'failed',
+                                error: 'invalid data',
+                        });
                 }
-                logger.auth.error('Registration attempted with registration disabled');
-                res.status(400).json({ error: 'registration disabled' });
         });
 
 router.route('/reset')
-        .get(function(req, res) {
-                let user = '';
-                if (typeof req.username !== 'undefined') {
-                        user = req.username;
-                }
-                if (req.user) {
-                        return res.render('auth', {
-                                title: 'User - Reset Password',
-                                message: req.flash('loginMessage'),
-                                username: user,
-                        });
-                } else {
-                res.redirect('/auth/login');
-                }
+        .get(function getResetPassword(req, res) {
+                if (!req.user) return res.redirect('/auth/login');
+
+                return res.render('auth', {
+                        title: 'User - Reset Password',
+                        message: req.flash('loginMessage'),
+                        username: req.user.username,
+                });
         })
-        .post(authHelper.isLoggedIn, function(req, res) {
+        .post(authHelper.isLoggedIn, async function postResetPassword(req, res) {
                 const { password } = req.body;
-                // bcrypt function
-                if (password.length && !authHelper.comparePass(password, req.user.password)) {
-                        const salt = bcrypt.genSaltSync();
-                        const hash = bcrypt.hashSync(req.body.password, salt);
-                        const { id } = req.user;
-                        //need to update this query to select the user first then update. 
-                        db.from('users')
-                                .returning('id')
-                                .where('id', '=', id)
-                                .update({
-                                        password: hash,
-                                })
-                                .then(() => {
-                                        res.status(200).send({ status: 'ok', redirect: '/' });
-                                        logger.auth.debug(`${req.user.username} Password Reset Successfully`);
-                                })
-                                .catch(err => {
-                                        res.status(500).send({ status: 'failed', error: 'Failed to update password' });
-                                        logger.auth.error(`${req.user.username} error resetting password${err}`);
-                                        console.log(err)
-                                });
-                } else {
-                        res.status(400).send({ status: 'failed', error: 'Password Blank or the Same' });
+
+                if (password.length < 8)
+                        return res
+                                .status(400)
+                                .send({ status: 'failed', error: 'New password has to have at least 8 characters' });
+
+                // TODO: We should remove that! This can be used to brute force the password!
+                if (authHelper.comparePass(password, req.user.password))
+                        return res
+                                .status(400)
+                                .send({ status: 'failed', error: 'New password equals the old password' });
+
+                const salt = bcrypt.genSaltSync();
+                const hash = bcrypt.hashSync(req.body.password, salt);
+                const { id: userId } = req.user;
+                // need to update this query to select the user first then update.
+
+                try {
+                        await db.from('users').returning('id').where('id', '=', userId).update({
+                                password: hash,
+                        });
+
+                        res.status(200).send({ status: 'ok', redirect: '/' });
+                        logger.auth.debug(`${req.user.username} Password Reset Successfully`);
+                } catch (error) {
+                        logger.auth.error(`${req.user.username} error resetting password: ${error}`);
+                        return res.status(500).send({ status: 'failed', error: 'Failed to update password' });
                 }
         });
 
-router.route('/userCheck/username/:id').get(bruteforcedupe.prevent, function(req, res, next) {
-        const { id } = req.params;
-        db.from('users')
-                .select('username')
-                .where('username', id)
-                .then(row => {
-                        if (row.length > 0) {
-                                const rowsend = row[0];
-                                res.status(200);
-                                res.json(rowsend);
-                        } else {
-                                const rowsend = {
-                                        username: '',
-                                        password: '',
-                                        givenname: '',
-                                        surname: '',
-                                        email: '',
-                                        role: 'user',
-                                        status: 'active',
-                                };
-                                res.status(200);
-                                res.json(rowsend);
-                        }
-                })
-                .catch(err => {
-                        logger.main.error(err);
-                        return next(err);
-                });
-});
+router.route('/userCheck/username/:username').get(
+        bruteforcedupe.prevent,
+        async function getUserCheckUsername(req, res, next) {
+                const { username } = req.params;
 
-router.route('/userCheck/email/:id').get(bruteforcedupe.prevent, function(req, res, next) {
-        const { id } = req.params;
-        db.from('users')
-                .select('email')
-                .where('email', id)
-                .then(row => {
-                        if (row.length > 0) {
-                                const rowsend = row[0];
-                                res.status(200);
-                                res.json(rowsend);
-                        } else {
-                                const rowsend = {
-                                        username: '',
-                                        password: '',
-                                        givenname: '',
-                                        surname: '',
-                                        email: '',
-                                        role: 'user',
-                                        status: 'active',
-                                };
-                                res.status(200);
-                                res.json(rowsend);
-                        }
-                })
-                .catch(err => {
-                        logger.main.error(err);
-                        return next(err);
-                });
+                try {
+                        const existingUser = await db.from('users').select('username').where({ username }).first();
+
+                        const rowSend = existingUser || {
+                                username: '',
+                                password: '',
+                                givenname: '',
+                                surname: '',
+                                email: '',
+                                role: 'user',
+                                status: 'active',
+                        };
+
+                        return res.json(rowSend);
+                } catch (error) {
+                        logger.main.error(error);
+                        return next(error);
+                }
+        }
+);
+
+router.route('/userCheck/email/:email').get(bruteforcedupe.prevent, async function getUserCheckEmail(req, res, next) {
+        const { email } = req.params;
+
+        try {
+                const existingUser = await db.from('users').select('email').where('email', email).first();
+
+                const rowSend = existingUser || {
+                        username: '',
+                        password: '',
+                        givenname: '',
+                        surname: '',
+                        email: '',
+                        role: 'user',
+                        status: 'active',
+                };
+
+                return res.json(rowSend);
+        } catch (error) {
+                logger.main.error(error);
+                return next(error);
+        }
 });
 
 module.exports = router;
-

@@ -1,15 +1,12 @@
-var nconf = require('nconf');
-var confFile = './config/config.json';
-var dbtype = nconf.get('database:type');
+const nconf = require('nconf');
 
-exports.up = function(db) {
-    return db.schema.hasTable('messages').then(function(exists) {
-        if (!exists) {
-            return db.schema.createTable('messages', table => {
-              if (dbtype == 'mysql') {
-                table.charset('utf8');
-                table.collate('utf8_general_ci');
-              }
+exports.up = async function (db) {
+        await db.schema.createTable('messages', (table) => {
+                const dbtype = nconf.get('database:type');
+                if (dbtype === 'mysql') {
+                        table.charset('utf8');
+                        table.collate('utf8_general_ci');
+                }
                 table.increments('id').primary().unique().notNullable();
                 table.string('address', [255]).notNullable();
                 table.text('message').notNullable();
@@ -19,19 +16,9 @@ exports.up = function(db) {
                 table.index(['address', 'id'], 'msg_index');
                 table.index(['id', 'alias_id'], 'msg_alias');
                 table.index(['timestamp', 'alias_id'], 'msg_timestamp');
-            })
-        } else {
-          return new Promise ((resolve, rejects) => {
-            resolve('Not Required')
-         })
-        }
-      })
-}
-
-exports.down = function(db) {
-  return db.schema.dropTable('messages');
+        });
 };
 
-
-
-
+exports.down = function (db) {
+        return db.schema.dropTableIfExists('messages');
+};

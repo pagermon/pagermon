@@ -18,25 +18,36 @@ nconf.file({ file: confFile });
 nconf.load();
 
 const passportStub = require('passport-stub');
-// eslint-disable-next-line vars-on-top
-var server = require('../app');
+
+const server = require('../app');
 const db = require('../knex/knex.js');
 // This needs to be sorted out, use a different config file when testing?
 
-// Force someconfigs back to default
-nconf.set('messages:HideCapcode', false);
-nconf.set('messages:HideSource', false);
-nconf.set('messages:apiSecurity', false);
-nconf.save();
-
 passportStub.install(server);
 // set required settings in config file
+beforeEach(() =>
+        db.schema
+                .hasTable('knex_migrations_lock')
+                .then((exists) => {
+                        if (exists) return db.del().from(`knex_migrations_lock`);
+                })
+                .then(() => db.migrate.rollback())
+                .then(() => db.migrate.latest())
+                .then(() => db.seed.run())
+                .then(() => {
+                        nconf.set('messages:HideSource', false);
+                        nconf.set('messages:apiSecurity', false);
+                        nconf.set('messages:HideCapcode', false);
+                        nconf.set('messages:duplicateTime', 0);
+                        nconf.set('messages:duplicateLimit', 0);
+                        nconf.set('messages:duplicateFiltering', true);
+                })
+);
 
-beforeEach(() => db.migrate.rollback().then(() => db.migrate.latest().then(() => db.seed.run().then(() => {nconf.set('messages:HideSource', false); nconf.set('messages:apiSecurity', false); nconf.set('messages:HideCapcode', false)}))));
 afterEach(() => db.migrate.rollback().then(() => passportStub.logout()));
 
 describe('POST /api/messages', () => {
-        it('should POST new message', done => {
+        it('should POST new message', (done) => {
                 chai.request(server)
                         .post('/api/messages')
                         .set({
@@ -58,7 +69,48 @@ describe('POST /api/messages', () => {
                                 done();
                         });
         });
-        it('should not POST new message with incorrect API key', done => {
+        it('should not POST a duplicate message', (done) => {
+                const message = {
+                        address: '000000',
+                        message: '!@#$%^& (This is a duplicate test message. 1a2b3c4d5e6e7f) !@#$%^&',
+                        timestamp,
+                        source: 'CI-Test',
+                };
+
+                chai.request(server)
+                        .post('/api/messages')
+                        .set({
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'User-Agent': 'CI-Test',
+                                apikey: 'reallylongkeythatneedstobechanged',
+                        })
+                        .send(message)
+                        .end((err, res) => {
+                                // Assert that first messsage goes through
+                                should.not.exist(err);
+                                res.status.should.eql(200);
+                                res.type.should.eql('text/html');
+                                res.text.should.be.eql('8');
+
+                                chai.request(server)
+                                        .post('/api/messages')
+                                        .set({
+                                                'X-Requested-With': 'XMLHttpRequest',
+                                                'User-Agent': 'CI-Test',
+                                                apikey: 'reallylongkeythatneedstobechanged',
+                                        })
+                                        .send(message)
+                                        .end((err2, res2) => {
+                                                // Assert that second message does not go through
+                                                should.not.exist(err2);
+                                                res2.status.should.eql(200);
+                                                res2.type.should.eql('text/html');
+                                                res2.text.should.be.eql('Ignoring duplicate');
+                                                done();
+                                        });
+                        });
+        });
+        it('should not POST new message with incorrect API key', (done) => {
                 chai.request(server)
                         .post('/api/messages')
                         .set({
@@ -79,7 +131,7 @@ describe('POST /api/messages', () => {
                                 done();
                         });
         });
-        it('should not POST new message with missing address', done => {
+        it('should not POST new message with missing address', (done) => {
                 chai.request(server)
                         .post('/api/messages')
                         .set({
@@ -99,7 +151,7 @@ describe('POST /api/messages', () => {
                                 done();
                         });
         });
-        it('should not POST new message with missing message', done => {
+        it('should not POST new message with missing message', (done) => {
                 chai.request(server)
                         .post('/api/messages')
                         .set({
@@ -122,7 +174,7 @@ describe('POST /api/messages', () => {
 });
 
 describe('GET /api/messages', () => {
-        it('should show capcode in hidecapcode mode if logged in ', done => {
+        it('should show capcode in hidecapcode mode if logged in ', (done) => {
                 nconf.set('messages:HideSource', false);
                 nconf.set('messages:apiSecurity', false);
                 nconf.set('messages:HideCapcode', true);
@@ -149,7 +201,7 @@ describe('GET /api/messages', () => {
                                 done();
                         });
         });
-        it('should not show capcode in hidecapcode mode if not logged in ', done => {
+        it('should not show capcode in hidecapcode mode if not logged in ', (done) => {
                 nconf.set('messages:HideCapcode', true);
                 nconf.save();
                 chai.request(server)
@@ -169,7 +221,7 @@ describe('GET /api/messages', () => {
                                 done();
                         });
         });
-        it('should 401 if securemode is enabled and not logged in ', done => {
+        it('should 401 if securemode is enabled and not logged in ', (done) => {
                 nconf.set('messages:apiSecurity', true);
                 nconf.save();
                 chai.request(server)
@@ -183,7 +235,7 @@ describe('GET /api/messages', () => {
                                 done();
                         });
         });
-        it('should 200 if securemode is enabled and logged in ', done => {
+        it('should 200 if securemode is enabled and logged in ', (done) => {
                 nconf.set('messages:apiSecurity', true);
                 nconf.save();
                 passportStub.login({

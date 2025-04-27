@@ -1,23 +1,16 @@
-var nconf = require('nconf');
-var confFile = './config/config.json';
-var dbtype = nconf.get('database:type');
+const nconf = require('nconf');
 
-exports.up = function(db) {
-  if (dbtype == 'oracledb') {
-    return db.schema.raw(`CREATE INDEX search_idx ON "messages"("message")
-    INDEXTYPE IS CTXSYS.CONTEXT PARAMETERS
-    ('FILTER CTXSYS.NULL_FILTER')`)
-  } else {
-    return new Promise ((resolve, rejects) => {
-      resolve('Not Required')
-   })
-  }
-}
+exports.up = async function (db) {
+        const dbtype = nconf.get('database:type');
+        if (dbtype !== 'oracledb') return 'Not required';
 
-exports.down = function(db) {
-  
+        return db.schema.raw(`CREATE INDEX search_idx ON "messages"("message")
+                INDEXTYPE IS CTXSYS.CONTEXT PARAMETERS
+                ('FILTER CTXSYS.NULL_FILTER')`);
 };
 
-
-
-
+exports.down = function (db) {
+        const dbtype = nconf.get('database:type');
+        if (dbtype !== 'oracledb') return 'Not Required';
+        return db.schema.raw(`DROP INDEX search_idx`);
+};

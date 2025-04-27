@@ -1,12 +1,12 @@
 {
-  "apikey": "changeme",
-  "hostname": "http://127.0.0.1:3000",
-  "identifier": "TEST",
-  "sendFunctionCode": false,
-  "useTimestamp": true,
-  "EAS": {
-    "excludeEvents": [],
-    "includeFIPS": [],
-    "addressAddType": true
-  }
+        "apikey": "changeme",
+        "hostname": "http://127.0.0.1:3000",
+        "identifier": "TEST",
+        "sendFunctionCode": false,
+        "useTimestamp": true,
+        "EAS": {
+                "excludeEvents": [],
+                "includeFIPS": [],
+                "addressAddType": true
+        }
 }
