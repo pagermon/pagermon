@@ -177,7 +177,7 @@ const wrapMiddleware = middleware => (socket, next) => middleware(socket.request
 io.use(wrapMiddleware(session(sessSet)));
 io.use(wrapMiddleware(passport.session()));
 io.of('/adminio').use(wrapMiddleware(session(sessSet)));
-io.of('adminio').use(wrapMiddleware(passport.session()));
+io.of('/adminio').use(wrapMiddleware(passport.session()));
 
 app.use('/', index);
 app.use('/admin', admin);

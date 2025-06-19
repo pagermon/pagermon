@@ -35,7 +35,7 @@ function run(trigger, scope, data, config, callback) {
 }
 
 function escapeTelegramHTML (string) {
-    return string.replace(/</,'&lt;').replace(/>/,'&gt;'.replace(/&/,'&amp;'));
+    return string.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
 module.exports = {

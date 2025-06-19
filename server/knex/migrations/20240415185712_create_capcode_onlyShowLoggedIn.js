@@ -24,7 +24,7 @@ const up = async function(knex) {
                 await Promise.all(promises);
         }
         if (!(await knex.schema.hasTable('capcodes')))
-                return Promise((resolve, reject) => {
+                return new Promise((resolve, reject) => {
                         reject('Capcode table is missing!');
                 });
 

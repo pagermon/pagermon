@@ -214,7 +214,7 @@ router.route('/messages')
         // no matches, maintain the array
         var dupeArrayLimit = dupeLimit;
         if (dupeArrayLimit == 0) {
-          dupeArrayLimit == 25; // should provide sufficient buffer, consider increasing if duplicates appear when users have no dupeLimit
+          dupeArrayLimit = 25; // should provide sufficient buffer, consider increasing if duplicates appear when users have no dupeLimit
         }
         if (msgBuffer.length > dupeArrayLimit) {
           msgBuffer.shift();
@@ -759,8 +759,8 @@ router.route('/capcodes')
           }
         })
         .catch((err) => {
-          logger.main.error(err)
-            .status(500).send(err);
+          logger.main.error(err);
+          res.status(500).send(err);
         })
       logger.main.debug(util.format('%o', req.body || 'no request body'));
     } else {

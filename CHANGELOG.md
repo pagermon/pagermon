@@ -1,4 +1,12 @@
 # 0.4.1 - TBA
+* Fix critical security and functional issues in develop branch @Danrw
+* Fix authentication bypass vulnerability in API routes (req.isAuthenticated missing parentheses) @Danrw
+* Fix Telegram plugin HTML escaping with proper replace() chain and global flags @Danrw
+* Fix assignment vs comparison bug in duplicate message buffer logic @Danrw
+* Fix method chaining error in capcode creation error handler @Danrw
+* Fix Socket.io namespace missing leading slash for /adminio @Danrw
+* Fix Promise constructor missing 'new' keyword in migration @Danrw
+* Fix database query error for onlyShowLoggedIn column reference before table join @Danrw
 * Update angular-textreplace.js #640 @microsoldering1
 * Fix an error, where logging out would throw an error but work @eopo #633
 * Fix an error, where visiting sites when not logged in would throw errors @eopo #633
