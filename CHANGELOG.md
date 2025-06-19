@@ -1,3 +1,4 @@
+
 # 0.4.1 - TBA
 * Fix critical security and functional issues in develop branch @Danrw
 * Fix authentication bypass vulnerability in API routes (req.isAuthenticated missing parentheses) @Danrw
@@ -13,11 +14,6 @@
 * Fix Inconsistent Tests - Bugs relating to tests in API. #619 @Danrw
 * Fixes #502 Update API and client to return 400 code when invalid data is received from the client. #615 @Danrw
 * Fix Telegram Markdown Errors #611 @eopo
-* Fix PiBuilder @marshy #604
-* Fix an error, where logging out would throw an error but work @eopo #633
-* Fix an error, where visiting sites when not logged in would throw errors @eopo #633
-* Improve CI and Docker Image building @eopo #632
-
 
 # 0.4.0 - Unreleased
 * Update Readme #552 @eopo
