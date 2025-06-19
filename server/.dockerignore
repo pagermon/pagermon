@@ -1,0 +1,5 @@
+config/backup.json
+config/config.json
+node_modules/*
+package_lock.json
+.vscode

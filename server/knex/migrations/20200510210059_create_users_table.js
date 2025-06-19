@@ -4,15 +4,18 @@ var nconf = require('nconf');
 var confFile = './config/config.json';
 nconf.file({ file: confFile });
 
+var dbtype = nconf.get('database:type');
 var user = nconf.get('auth:user')
 var pwd = nconf.get('auth:encPass')
 
-exports.up = function(db, Promise) {
+exports.up = function(db) {
     return db.schema.hasTable('users').then(function(exists) {
         if (!exists) {
             return db.schema.createTable('users', table => {
+              if (dbtype == 'mysql') {
                 table.charset('utf8');
                 table.collate('utf8_general_ci');
+              }
                 table.increments('id').primary().unique().notNullable();
                 table.string('givenname', [255]).notNullable();
                 table.string('surname',[255])
@@ -41,11 +44,13 @@ exports.up = function(db, Promise) {
                      });
             });
         } else {
-          return Promise.resolve('Not Required')
+          return new Promise ((resolve, rejects) => {
+            resolve('Not Required')
+         })
         }
       })
 };
 
-exports.down = function(db, Promise) {
+exports.down = function(db) {
   return db.schema.dropTable('users');
 };

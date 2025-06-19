@@ -14,13 +14,13 @@ function run(trigger, scope, data, config, callback) {
             callback();
         } else {
             //Notification formatted in Markdown for pretty notifications
-            var notificationText = `*${data.agency} - ${data.alias}*\n` + 
-                                    `Message: ${data.message}`;
+            var notificationText = `<b>${escapeTelegramHTML(data.agency)} - ${escapeTelegramHTML(data.alias)}</b>\n` + 
+                                    `Message: ${escapeTelegramHTML(data.message)}`;
             
             t.sendMessage({
                 chat_id: tConf.chat,
                 text: notificationText,
-                parse_mode: "Markdown"
+                parse_mode: "HTML"
             }).then(function(data) {
                 logger.main.debug('Telegram: ' + util.inspect(data, false, null));
                 callback();
@@ -32,6 +32,10 @@ function run(trigger, scope, data, config, callback) {
     } else {
         callback();
     }
+}
+
+function escapeTelegramHTML (string) {
+    return string.replace(/</,'&lt;').replace(/>/,'&gt;'.replace(/&/,'&amp;'));
 }
 
 module.exports = {

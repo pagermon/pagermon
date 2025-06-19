@@ -5,44 +5,49 @@ angular.module('angular-highlight', []).directive('highlight', function() {
 			attrs.highlightClass = 'angular-highlight';
 		}
 		
-		function arrSearch(nameKey, myArray){
-		    for (var i=0; i < myArray.length; i++) {
-		    	var rx = new RegExp(myArray[i].match, "gi");
-		        if (nameKey.search(rx) > -1) {
-		            return myArray[i];
-		        }
-		    }
-		}
+		//scope.highlight has the original message
+		//scope.replacement has all the replacements
 		
-		var rReplacer = function(match, item) {
-			var resultObject = arrSearch(match, scope.replacement);
+		//scope.replacement[i].highlight shows the mode
+		//scope.replacement[i].match contains the match
+		//scope.replacement[i].replace contains the replacement
+		
+		function rexReplacer(inputHtml) {
+			//Store the original HTML for later use
+			var html = inputHtml;
 			
-			//Fix issue with undefined variables, mostly from migrated configs.
-			if (typeof resultObject.highlight !== 'undefined') {
-				var thisMode = resultObject.highlight;
-			} else {
-				var thisMode = false;
-			}
+			//Perform this function for every Text/Regex Match
+			scope.replacement.forEach(function(textreplace) {
+			
+				//Fix issue with undefined variables, mostly from migrated configs.
+				if (typeof textreplace.highlight !== 'undefined') {
+					var thisMode = textreplace.highlight;
+				} else {
+					var thisMode = false;
+				}
+				
 
-			if (thisMode == "replace") {
-				var thisRex = new RegExp(resultObject.match)
-				var html = match.replace(thisRex,resultObject.replace);
-			} else if (thisMode) {
-				var html = '<a href="/?q='+match+'" data-toggle="popover" class="'+attrs.highlightClass+'" title="'+resultObject.replace+'" onmouseenter="$(this).tooltip(\'show\')">'+match+'</a>';
-			} else {
-				var html = '<a href="/?q='+match+'" data-toggle="popover" title="'+resultObject.replace+'" onmouseenter="$(this).tooltip(\'show\')">'+match+'</a>';
-			}
+				
+				if (thisMode == "replace") {
+					//Generate Regex for replacement
+					var thisRex = new RegExp(textreplace.match);
+					html = html.replace(thisRex,textreplace.replace);
+				} else {
+					//Store match for use in label/highlight
+					var match = html.match(textreplace.match);
+					//Generate Regex for label/highlight, dont highlight if we are inside another html tag
+					var thisRex = new RegExp('(?<!<[^>]*)'+textreplace.match+'(?![^<]*<\/a>)');
+					if (thisMode) {
+						html = html.replace(thisRex,'<a href="/?q='+match+'" data-toggle="popover" class="'+attrs.highlightClass+'" title="'+textreplace.replace+'" onmouseenter="$(this).tooltip(\'show\')">'+match+'</a>');
+					} else {
+						html = html.replace(thisRex,'<a href="/?q='+match+'" data-toggle="popover" title="'+textreplace.replace+'" onmouseenter="$(this).tooltip(\'show\')">'+match+'</a>');
+					}
+				}
+			});
+			
+			//Return the elements HTML with the new, replaced html (if any)
 			return html;
-		};
-		var rTokenize = function(keywords) {
-			var i;
-			var l = keywords.length;
-			var keyArr = [];
-			for (i=0;i<l;i++) {
-				keyArr.push(keywords[i].match.replace(new RegExp('^ | $','g'), ''));
-			}
-			return keyArr;
-		};
+		}
 		
 		scope.$watch('replacement', function() {
 			if (!scope.replacement || scope.replacement == '') {
@@ -50,12 +55,8 @@ angular.module('angular-highlight', []).directive('highlight', function() {
 				return false;
 			}
 			
-			var rTokenized	= rTokenize(scope.replacement);
-			var rRegex 		= new RegExp(rTokenized.join('|'), 'gmi');
-			
 			// Find the words
-			var html = scope.highlight.replace(rRegex, rReplacer);
-			element.html(html);
+			element.html(rexReplacer(scope.highlight));
 		});
 	};
 	return {

@@ -146,7 +146,7 @@ On a `before` plugin, the `data` object has not yet been through alias matching,
 ```javascript
 { address: '8120000',
   message: 'Tue 20 Nov 2018 11:11:29 AEDT Test message, disregard',
-  datetime: '1542672689',
+  timestamp: '1542672689',
   source: 'TEST',
   pluginData: {} }
 ```

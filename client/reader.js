@@ -66,7 +66,7 @@ rl.on('line', (line) => {
     //console.log(`Received: ${line.trim()}`);
     var time = moment().format("YYYY-MM-DD HH:mm:ss");
     var timeString = '';
-    var datetime = moment().unix();
+    var timestamp = moment().unix();
     var address;
     var message;
     var trimMessage;
@@ -83,13 +83,13 @@ rl.on('line', (line) => {
                 if (message.match(/\d{2} \w+ \d{4} \d{2}:\d{2}:\d{2}/)) {
                     timeString = message.match(/\d+ \w+ \d+ \d{2}:\d{2}:\d{2}/)[0];
                     if (moment(timeString, 'DD MMMM YYYY HH:mm:ss').isValid()) {
-                        datetime = moment(timeString, 'DD MMMM YYYY HH:mm:ss').unix();
+                        timestamp = moment(timeString, 'DD MMMM YYYY HH:mm:ss').unix();
                         message = message.replace(/\d{2} \w+ \d{4} \d{2}:\d{2}:\d{2}/, '');
                     }
                 } else if (message.match(/\d+-\d+-\d+ \d{2}:\d{2}:\d{2}/)) {
                     timeString = message.match(/\d+-\d+-\d+ \d{2}:\d{2}:\d{2}/)[0];
                     if (moment(timeString).isValid()) {
-                        datetime = moment(timeString).unix();
+                        timestamp = moment(timeString).unix();
                         message = message.replace(/\d+-\d+-\d+ \d{2}:\d{2}:\d{2}/, '');
                     }
                 }
@@ -108,12 +108,12 @@ rl.on('line', (line) => {
             if (line.match(/FLEX[:|] ?\d{2} \w+ \d{4} \d{2}:\d{2}:\d{2}/)) {
                 timeString = line.match(/\d+ \w+ \d+ \d{2}:\d{2}:\d{2}/)[0];
                 if (moment(timeString, 'DD MMMM YYYY HH:mm:ss').isValid()) {
-                    datetime = moment(timeString, 'DD MMMM YYYY HH:mm:ss').unix();
+                    timestamp = moment(timeString, 'DD MMMM YYYY HH:mm:ss').unix();
                 }
             } else if (line.match(/FLEX[:|] ?\d+-\d+-\d+ \d{2}:\d{2}:\d{2}/)) {
                 timeString = line.match(/\d+-\d+-\d+ \d{2}:\d{2}:\d{2}/)[0];
                 if (moment(timeString).isValid()) {
-                    datetime = moment(timeString).unix();
+                    timestamp = moment(timeString).unix();
                 }
             }
         }
@@ -167,7 +167,7 @@ rl.on('line', (line) => {
     var form = {
       address: padAddress,
       message: trimMessage,
-      datetime: datetime,
+      timestamp: timestamp,
       source: identifier
     };
     sendPage(form, 0);
@@ -194,16 +194,20 @@ var sendPage = function(message,retries) {
     // console.log(colors.success('Message delivered. ID: '+body)); 
   })
   .catch(function (err) {
-    console.log(colors.yellow('Message failed to deliver. '+err));
-    if (retries < 10) {
-      var retryTime = Math.pow(2, retries) * 1000;
-      retries++;
-      console.log(colors.yellow(`Retrying in ${retryTime} ms`));
-      setTimeout(sendPage, retryTime, message, retries);
+    if (err.statusCode === 400) {
+        console.log(colors.red('Message failed to deliver. Missing Required field'));
     } else {
-      console.log(colors.yellow('Message failed to deliver after 10 retries, giving up'));
+        console.log(colors.yellow('Message failed to deliver. ' + err));
+        if (retries < 10) {
+            var retryTime = Math.pow(2, retries) * 1000;
+            retries++;
+            console.log(colors.yellow(`Retrying in ${retryTime} ms`));
+            setTimeout(sendPage, retryTime, message, retries);
+        } else {
+            console.log(colors.yellow('Message failed to deliver after 10 retries, giving up'));
+        }
     }
-  });
+});
 };
 
 var padDigits = function(number, digits) {

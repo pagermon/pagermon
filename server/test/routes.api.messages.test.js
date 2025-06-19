@@ -6,7 +6,7 @@ const moment = require('moment');
 const should = chai.should();
 const chaiHttp = require('chai-http');
 
-const datetime = moment().unix();
+const timestamp = moment().unix();
 
 chai.use(chaiHttp);
 
@@ -32,7 +32,7 @@ nconf.save();
 passportStub.install(server);
 // set required settings in config file
 
-beforeEach(() => db.migrate.rollback().then(() => db.migrate.latest().then(() => db.seed.run())));
+beforeEach(() => db.migrate.rollback().then(() => db.migrate.latest().then(() => db.seed.run().then(() => {nconf.set('messages:HideSource', false); nconf.set('messages:apiSecurity', false); nconf.set('messages:HideCapcode', false)}))));
 afterEach(() => db.migrate.rollback().then(() => passportStub.logout()));
 
 describe('POST /api/messages', () => {
@@ -47,14 +47,14 @@ describe('POST /api/messages', () => {
                         .send({
                                 address: '000000',
                                 message: '!@#$%^& (This is a test message. 1a2b3c4d5e6e7f) !@#$%^&',
-                                datetime,
+                                timestamp,
                                 source: 'CI-Test',
                         })
                         .end((err, res) => {
                                 should.not.exist(err);
                                 res.status.should.eql(200);
                                 res.type.should.eql('text/html');
-                                res.text.should.be.eql('6');
+                                res.text.should.be.eql('8');
                                 done();
                         });
         });
@@ -69,7 +69,7 @@ describe('POST /api/messages', () => {
                         .send({
                                 address: '000000',
                                 message: '!@#$%^& (This is a test message. 1a2b3c4d5e6e7f) !@#$%^&',
-                                datetime,
+                                timestamp,
                                 source: 'CI-Test',
                         })
                         .end((err, res) => {
@@ -79,31 +79,52 @@ describe('POST /api/messages', () => {
                                 done();
                         });
         });
-});
-
-describe('GET /api/messages', () => {
-        it('should return message id 5', done => {
-                nconf.set('messages:HideCapcode', false);
-                nconf.set('messages:HideSource', false);
-                nconf.set('messages:apiSecurity', false);
-                nconf.save();
+        it('should not POST new message with missing address', done => {
                 chai.request(server)
-                        .get('/api/messages/5')
+                        .post('/api/messages')
+                        .set({
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'User-Agent': 'CI-Test',
+                                apikey: 'reallylongkeythatneedstobechanged',
+                        })
+                        .send({
+                                message: '!@#$%^& (This is a test message with an address. 1a2b3c4d5e6e7f) !@#$%^&',
+                                timestamp,
+                                source: 'CI-Test',
+                        })
                         .end((err, res) => {
                                 should.not.exist(err);
-                                res.status.should.eql(200);
+                                res.status.should.eql(400);
                                 res.type.should.eql('application/json');
-                                res.body.should.be.a('array');
-                                res.body[0].should.have.property('id').eql(5);
-                                res.body[0].should.have.property('address').eql('1234570');
-                                res.body[0].should.have
-                                        .property('message')
-                                        .eql('This is a Test Message to Address 1234570');
-                                res.body[0].should.have.property('source').eql('Client 4');
                                 done();
                         });
         });
+        it('should not POST new message with missing message', done => {
+                chai.request(server)
+                        .post('/api/messages')
+                        .set({
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'User-Agent': 'CI-Test',
+                                apikey: 'reallylongkeythatneedstobechanged',
+                        })
+                        .send({
+                                address: '000000',
+                                timestamp,
+                                source: 'CI-Test',
+                        })
+                        .end((err, res) => {
+                                should.not.exist(err);
+                                res.status.should.eql(400);
+                                res.type.should.eql('application/json');
+                                done();
+                        });
+        });
+});
+
+describe('GET /api/messages', () => {
         it('should show capcode in hidecapcode mode if logged in ', done => {
+                nconf.set('messages:HideSource', false);
+                nconf.set('messages:apiSecurity', false);
                 nconf.set('messages:HideCapcode', true);
                 nconf.save();
                 passportStub.login({

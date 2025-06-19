@@ -4,6 +4,7 @@
  */
 
 const axios = require('axios').default;
+const _ = require('underscore');
 var logger = require('../log')
 
 function run (trigger, scope, data, config, callback) {
@@ -22,13 +23,8 @@ function run (trigger, scope, data, config, callback) {
     }
 
     if (do_not_forward == false){
-      var message = {
-        address: data.address,
-        message: data.message,
-        source: data.source,
-        datetime: data.datetime,
-        UUID: config.repeatUUID,
-      };
+      const message = _.pick(data, ['address', 'message', 'source', 'timestamp']);
+      message.UUID = config.repeatUUID;
 
       logger.main.debug('MessageRepeat: Sending to ' + config.repeatURI + ': ' + JSON.stringify(message));
 
