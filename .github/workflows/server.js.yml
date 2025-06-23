@@ -11,6 +11,7 @@ jobs:
   Run_Tests:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         node-version: ['18.x', '20.x', '22.x', 'latest']
         
