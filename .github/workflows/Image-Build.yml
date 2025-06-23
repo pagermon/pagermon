@@ -14,6 +14,7 @@ on:
 
 jobs:
   test:
+    name: Run node 22 tests before building Docker image
     runs-on: ubuntu-latest
         
     steps:
