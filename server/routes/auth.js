@@ -65,9 +65,11 @@ router.route('/login')
                                 //this is commented out as it seems to fire when a user is disabled?! even tho the below functions still run
                                 //res.status(500).send({ status: 'failed', error: 'An Error Occured' });
                                 logger.auth.error(err);
+                                return;
                         } else if (!user) {
                                 res.status(401).send({ status: 'failed', error: 'Check Details and try again' });
                                 logger.auth.debug(`Login Failed: ${req.body.username}`);
+                                return;
                         } else if (user) {
                                 if (user.status !== 'disabled') {
                                         req.logIn(user, function(err) {
@@ -79,6 +81,7 @@ router.route('/login')
                                                         logger.auth.debug(
                                                                 `Failed login ${JSON.stringify(user)} ${err}`
                                                         );
+                                                        return;
                                                 } else {
                                                         // Update last logon timestamp for user
                                                         const { id } = user;
@@ -121,6 +124,7 @@ router.route('/login')
                                 } else {
                                         res.status(401).send({ status: 'failed', error: 'User Disabled' });
                                         logger.auth.debug(`User Disabled${req.user.username}`);
+                                        return;
                                 }
                         }
                 })(req, res, next);

@@ -1,5 +1,6 @@
 # TBA
 * Fix PiBuilder @marshy #604
+* Fix Cannot set headers after they are sent to the client @RIKIKU #650
 
 # 0.3.13 - 2023-09-04
 * Add Config option to fix FA icon's no longer loading. @marshyonline

@@ -284,7 +284,7 @@ router.route('/messages')
             if (row.length > 0 && filterDupes) {
               logger.main.info(util.format('Ignoring duplicate: %o', message));
               res.status(200);
-              res.send('Ignoring duplicate');
+              return res.send('Ignoring duplicate');
             } else {
               db.from('capcodes')
                 .select('id', 'ignore')
@@ -447,35 +447,35 @@ router.route('/messages')
                                 }
                               });
                             }
-                            res.status(200).send('' + result);
+                            return res.status(200).send('' + result);
                           })
                           .catch((err) => {
-                            res.status(500).send(err);
                             logger.main.error(err)
+                            return res.status(500).send(err);
                           })
                       })
                       .catch((err) => {
-                        res.status(500).send(err);
                         logger.main.error(err)
+                        return res.status(500).send(err);
                       })
                   } else {
                     res.status(200);
-                    res.send('Ignoring filtered');
+                    return res.send('Ignoring filtered');
                   }
                 })
                 .catch((err) => {
-                  res.status(500).send(err);
                   logger.main.error(err)
+                  return res.status(500).send(err);
                 })
             }
           })
           .catch((err) => {
-            res.status(500).send(err);
             logger.main.error(err)
+            return res.status(500).send(err);
           })
       })
     } else {
-      res.status(500).json({ message: 'Error - address or message missing' });
+      return res.status(500).json({ message: 'Error - address or message missing' });
     }
   });
 
@@ -718,7 +718,7 @@ router.route('/capcodes')
           queryBuilder.orderByRaw(`REPLACE(address, '_', '%')`)
       })
       .then((rows) => {
-        res.json(rows);
+        return res.json(rows);
       })
       .catch((err) => {
         logger.main.error(err);
@@ -772,14 +772,16 @@ router.route('/capcodes')
             nconf.set('database:aliasRefreshRequired', 1);
             nconf.save();
           }
+          return;
         })
         .catch((err) => {
           logger.main.error(err)
             .status(500).send(err);
+          return;
         })
       logger.main.debug(util.format('%o', req.body || 'no request body'));
     } else {
-      res.status(500).json({ message: 'Error - address or alias missing' });
+      return res.status(500).json({ message: 'Error - address or alias missing' });
     }
   });
 
@@ -789,11 +791,11 @@ router.route('/capcodes/agency')
       .distinct('agency')
       .then((rows) => {
         res.status(200);
-        res.json(rows);
+        return res.json(rows);
       })
       .catch((err) => {
         res.status(500);
-        res.send(err);
+        return res.send(err);
       })
   });
 
@@ -805,7 +807,7 @@ router.route('/capcodes/agency/:id')
       .where('agency', 'like', id)
       .then((rows) => {
         res.status(200);
-        res.json(rows);
+        return res.json(rows);
       })
       .catch((err) => {
         logger.main.error(err);
@@ -828,7 +830,7 @@ router.route('/capcodes/:id')
     };
     if (id == 'new') {
       res.status(200);
-      res.json(defaults);
+      return res.json(defaults);
     } else {
       db.from('capcodes')
         .select('*')
@@ -838,10 +840,10 @@ router.route('/capcodes/:id')
             row = row[0]
             row.pluginconf = parseJSON(row.pluginconf);
             res.status(200);
-            res.json(row);
+            return res.json(row);
           } else {
             res.status(200);
-            res.json(defaults);
+            return res.json(defaults);
           }
         })
         .catch((err) => {
@@ -869,11 +871,14 @@ router.route('/capcodes/:id')
               nconf.set('database:aliasRefreshRequired', 1);
               nconf.save();
             }
-          }).catch((err) => {
+            return;
+          })
+          .catch((err) => {
             res.status(500).send(err);
+            return;
           })
       } else {
-        res.status(500).send({ 'status': 'id list contained non-numbers' });
+        return res.status(500).send({ 'status': 'id list contained non-numbers' });
       }
     } else {
       if (req.body.address && req.body.alias) {
@@ -975,15 +980,17 @@ router.route('/capcodes/:id')
               }
             }
             res.status(200).send({ 'status': 'ok', 'id': result })
+            return;
           })
           .catch((err) => {
             console.timeEnd('insert');
             logger.main.error(err)
             res.status(500).send(err);
+            return;
           })
         logger.main.debug(util.format('%o', req.body || 'request body empty'));
       } else {
-        res.status(500).json({ message: 'Error - address or alias missing' });
+        return res.status(500).json({ message: 'Error - address or alias missing' });
       }
     }
   })
@@ -1002,9 +1009,11 @@ router.route('/capcodes/:id')
           nconf.set('database:aliasRefreshRequired', 1);
           nconf.save();
         }
+        return;
       })
       .catch((err) => {
         res.status(500).send(err);
+        return;
       })
     logger.main.debug(util.format('%o', req.body || 'request body empty'));
   });
@@ -1020,7 +1029,7 @@ router.route('/capcodeCheck/:id')
           row = row[0]
           row.pluginconf = parseJSON(row.pluginconf);
           res.status(200);
-          res.json(row);
+          return res.json(row);
         } else {
           row = {
             "id": "",
@@ -1033,7 +1042,7 @@ router.route('/capcodeCheck/:id')
             "pluginconf": {}
           };
           res.status(200);
-          res.json(row);
+          return res.json(row);
         }
       })
       .catch((err) => {
@@ -1087,9 +1096,9 @@ router.route('/capcodeExport')
       .then((rows) => {
         converter.json2csv(rows, function (err, data) {
           if (err) {
-            res.status(500).send(err);
+            return res.status(500).send(err);
           } else {
-            res.status(200).send({ 'status': 'ok', 'data': data })
+            return res.status(200).send({ 'status': 'ok', 'data': data })
           }
         })
       })
@@ -1145,6 +1154,7 @@ router.route('/capcodeImport')
                         alias: alias,
                         result: 'updated'
                       })
+                      return;
                     })
                     .catch((err) => {
                       importresults.push({
@@ -1152,6 +1162,7 @@ router.route('/capcodeImport')
                         alias: alias,
                         result: 'failed' + err
                       })
+                      return;
                     })
                 } else {
                   //Create new alias if one didn't get returned.
@@ -1171,6 +1182,7 @@ router.route('/capcodeImport')
                         alias: alias,
                         result: 'created'
                       })
+                      return;
                     })
                     .catch((err) => {
                       importresults.push({
@@ -1187,6 +1199,7 @@ router.route('/capcodeImport')
                   'alias': alias,
                   'result': 'failed' + err
                 })
+                return;
               });
           };
           //Gather all the results, format for the frontend and send it back.
@@ -1196,6 +1209,7 @@ router.route('/capcodeImport')
           logger.main.debug('Import:' + JSON.stringify(importresults))
           nconf.set('database:aliasRefreshRequired', 1);
           nconf.save();
+          return;
         } else {
           throw 'Error parasing CSV header'
         }
@@ -1203,6 +1217,7 @@ router.route('/capcodeImport')
       .catch((err) => {
         res.status(500).send(err)
         logger.main.error(err)
+        return;
       })
   });
 
@@ -1211,7 +1226,7 @@ router.route('/user')
     db.from('users')
       .select('id','givenname','surname','username','email','role','status','lastlogondate')
       .then((rows) => {
-        res.json(rows);
+        return res.json(rows);
       })
       .catch((err) => {
         logger.main.error(err);
@@ -1230,6 +1245,7 @@ router.route('/user')
           if (row) {
             //add logging
             res.status(400).send({ 'status': 'error', 'error': 'Username or Email exists' });
+            return;
           } else {
             const salt = bcrypt.genSaltSync();
             const hash = bcrypt.hashSync(req.body.password, salt);
@@ -1250,15 +1266,17 @@ router.route('/user')
                 //add logging
                 logger.main.debug('created user id: ' + response)
                 res.status(200).send({ 'status': 'ok', 'id': response[0] });
+                return;
               })
               .catch((err) => {
                 logger.main.error(err)
                 res.status(500).send({ 'status': 'error' });
+                return;
               });
           }
         })
     } else {
-      res.status(400).send({ 'status': 'error', 'error': 'Invalid request body' });
+      return res.status(400).send({ 'status': 'error', 'error': 'Invalid request body' });
     }
   });
 
@@ -1272,7 +1290,7 @@ router.route('/userCheck/username/:id')
         if (row.length > 0) {
           row = row[0]
           res.status(200);
-          res.json(row);
+          return res.json(row);
         } else {
           row = {
             "username": "",
@@ -1284,7 +1302,7 @@ router.route('/userCheck/username/:id')
             "status": "active"
           };
           res.status(200);
-          res.json(row);
+          return res.json(row);
         }
       })
       .catch((err) => {
@@ -1303,7 +1321,7 @@ router.route('/userCheck/username/:id')
         if (row.length > 0) {
           row = row[0]
           res.status(200);
-          res.json(row);
+          return res.json(row);
         } else {
           row = {
             "username": "",
@@ -1315,7 +1333,7 @@ router.route('/userCheck/username/:id')
             "status": "active"
           };
           res.status(200);
-          res.json(row);
+          return res.json(row);
         }
       })
       .catch((err) => {
@@ -1338,7 +1356,7 @@ router.route('/user/:id')
     };
     if (id == 'new') {
       res.status(200);
-      res.json(defaults);
+      return res.json(defaults);
     } else {
       db.from('users')
         .select('id','givenname','surname','username','email','role','status','lastlogondate')
@@ -1347,10 +1365,10 @@ router.route('/user/:id')
           if (row.length > 0) {
             row = row[0]
             res.status(200);
-            res.json(row);
+            return res.json(row);
           } else {
             res.status(200);
-            res.json(defaults);
+            return res.json(defaults);
           }
         })
         .catch((err) => {
@@ -1372,12 +1390,13 @@ router.route('/user/:id')
           .where('id', 'in', idList)
           .then((result) => {
             res.status(200).send({ 'status': 'ok' });
-
+            return;
           }).catch((err) => {
             res.status(500).send(err);
+            return;
           })
       } else {
-        res.status(400).send({ 'status': 'error', 'error': 'id list contained non-numbers' });
+        return res.status(400).send({ 'status': 'error', 'error': 'id list contained non-numbers' });
       }
     } else {
       if (req.body.username && req.body.email && req.body.givenname) {
@@ -1422,14 +1441,16 @@ router.route('/user/:id')
           .then((result) => {
             console.timeEnd('insert');
             res.status(200).send({ 'status': 'ok', 'id': result[0] })
+            return;
           })
           .catch((err) => {
             console.timeEnd('insert');
             logger.main.error(err)
             res.status(500).send(err);
+            return;
           })
       } else {
-        res.status(400).send({'status': 'error', 'error': 'Error - required field missing' });
+        return res.status(400).send({'status': 'error', 'error': 'Error - required field missing' });
       }
     }
   })
@@ -1442,14 +1463,17 @@ router.route('/user/:id')
         .where('id', id)
         .then((result) => {
           res.status(200).send({ 'status': 'ok' });
+          return;
         })
         .catch((err) => {
           res.status(500).send(err);
           logger.main.error(err)
+          return;
         })
     } else {
       res.status(400).json({ 'error': 'User ID 1 is protected' });
       logger.main.error('Unable to delete user ID 1')
+      return;
     }
   });
 

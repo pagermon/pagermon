@@ -57,8 +57,10 @@ router.route('/settingsData')
             fs.writeFileSync(confFile, JSON.stringify(req.body, null, 2));
             nconf.load();
             res.status(200).send({ 'status': 'ok' });
+            return;
         } else {
             res.status(400).send({ error: 'request body empty' });
+            return;
         }
     });
 
