@@ -203,9 +203,7 @@ See [additional parameters](https://github.com/SloCompTech/docker-baseimage).
 
 **Tip:** You probably want to setup docker log rotation before, more can be found [here](https://success.docker.com/article/how-to-setup-log-rotation-post-installation).
 
-## Running the client
-
-### Local setup
+## Client Setup
 
 
 #### Prerequisites
@@ -272,6 +270,119 @@ Edit config.json with your favorite editor
 }
 
 ```
+# Running Pagermon Client
+Using **PM2** ensures the SDR reader stays running in the background, automatically restarts if it crashes, and starts on system boot.  
+Follow the steps below carefully.
+bash
+### Running `reader.sh` with PM2 (Recommended)
+
+
+
+### Install PM2 (if not already installed)
+```bash
+npm install -g pm2
+```
+
+This installs PM2 globally so you can manage long-running processes.
+
+---
+
+### Navigate to the Pagermon client directory
+
+```bash
+cd /pagermon/client/
+```
+
+All commands below should be run from this folder.
+
+---
+
+### Make `reader.sh` executable
+
+This ensures Linux can run it as a script.
+
+```bash
+chmod +x reader.sh
+```
+
+---
+
+### Test run (optional but recommended)
+
+Run the reader normally to make sure it works:
+
+```bash
+./reader.sh
+```
+
+If it successfully detects your RTL-SDR and prints live data, press **CTRL + C** to stop and continue.
+
+---
+
+### Start the reader using PM2
+
+PM2 will run it in the background and monitor it.
+
+```bash
+pm2 start reader.sh --name pagermon-reader
+```
+
+`--name` gives the process a friendly label for easier management.
+
+---
+
+### Verify it’s running
+
+```bash
+pm2 status
+```
+
+You should see `pagermon-reader` listed with a green status.
+
+---
+
+### Save the PM2 process list
+```bash
+# This ensures PM2 remembers your services across reboot.
+pm2 save
+```
+
+---
+
+### Enable PM2 startup on boot
+
+This installs PM2’s boot service and reloads your saved processes at startup.
+
+```bash
+pm2 startup
+```
+
+PM2 will output a command, copy/paste it into your terminal.
+
+---
+
+### Useful PM2 Commands
+```bash
+# Stop the reader:
+pm2 stop pagermon-reader
+
+# Restart the reader:
+pm2 restart pagermon-reader
+
+# View live logs:
+pm2 logs pagermon-reader
+
+# Remove from PM2:
+pm2 delete pagermon-reader
+```
+
+
+Your RTL-SDR reader is now running under PM2 and will automatically start on reboot or if the process crashes.
+This is the recommended way to run Pagermon’s SDR backend in production.
+
+
+---
+
 
 #### Pager Options
 
