@@ -592,11 +592,7 @@ router.route('/messageSearch')
           qb.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id');
         }
         if (dbtype == 'sqlite3' && query != '') {
-          //This wraps the query with the wildcard symbol so SQLite searches for strings, rather than whole words
-          query = '%' + query + '%'
-          qb.whereRaw('messages_search_index.message LIKE ?', query)
-          qb.orWhereRaw('messages_search_index.alias LIKE ?', query)
-          qb.orWhereRaw('messages_search_index.agency LIKE ?', query)
+          qb.whereRaw('messages_search_index MATCH ?', query)
         } else if (dbtype == 'mysql' && query != '') {
           //This wraps the search query in quotes so MySQL searches for the complete term rather than individual words.
           query = '"' + query + '"'
