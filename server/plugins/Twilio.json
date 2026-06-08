@@ -1,0 +1,45 @@
+{
+    "name": "Twilio",
+    "description": "Send messages via SMS with Twilio",
+    "disable": false,
+    "trigger": "message",
+    "scope": "after",
+    "config": [
+        {
+            "name": "accountSid",
+            "label": "Account SID",
+            "description": "Twilio Account SID",
+            "type": "text",
+            "required": true
+        },
+        {
+            "name": "authToken",
+            "label": "Auth Token",
+            "description": "Twilio Auth Token",
+            "type": "password",
+            "required": true
+        },
+        {
+            "name": "from",
+            "label": "From Number",
+            "description": "Twilio phone number or messaging service SID",
+            "type": "text",
+            "required": true
+        }
+    ],
+    "aliasConfig": [
+        {
+            "name": "enable",
+            "label": "Enable",
+            "description": "Enable sending matching messages via Twilio SMS",
+            "type": "checkbox"
+        },
+        {
+            "name": "to",
+            "label": "Recipient Number",
+            "description": "Destination phone number in E.164 format",
+            "type": "text",
+            "required": true
+        }
+    ]
+}

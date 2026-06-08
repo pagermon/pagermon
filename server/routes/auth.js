@@ -2,8 +2,10 @@ const express = require('express');
 
 const router = express.Router();
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const moment = require('moment');
 const nconf = require('nconf');
+const nodemailer = require('nodemailer');
 
 const confFile = './config/config.json';
 nconf.file({ file: confFile });
@@ -27,6 +29,42 @@ const store = new BruteKnex({
 const lockoutCallback = function(req, res, next, nextValidRequestDate) {
         res.status(429).send({ status: 'lockedout', error: 'Too many attempts, please try again later' });
         logger.auth.info(`Lockout: ${req.ip} Next Valid: ${nextValidRequestDate}`);
+};
+
+const generateTempPassword = () =>
+        crypto
+                .randomBytes(9)
+                .toString('base64')
+                .replace(/[+/=]/g, '')
+                .slice(0, 12);
+
+const loadSmtpConfig = () => {
+        const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_SECURE, SMTP_FROM, SMTP_FROM_NAME } = process.env;
+
+        if (!SMTP_HOST || !SMTP_PORT || !SMTP_FROM) {
+                return null;
+        }
+
+        const baseConfig = {
+                host: SMTP_HOST,
+                port: Number(SMTP_PORT),
+                secure: String(SMTP_SECURE).toLowerCase() === 'true',
+                tls: {
+                        rejectUnauthorized: false,
+                },
+        };
+
+        if (SMTP_USER && SMTP_PASS) {
+                baseConfig.auth = {
+                        user: SMTP_USER,
+                        pass: SMTP_PASS,
+                };
+        }
+
+        return {
+                transport: baseConfig,
+                from: SMTP_FROM_NAME ? `${SMTP_FROM_NAME} <${SMTP_FROM}>` : SMTP_FROM,
+        };
 };
 
 const bruteforcedupe = new ExpressBrute(store, {
@@ -126,6 +164,64 @@ router.route('/login')
                 })(req, res, next);
         });
 
+router.route('/forgot')
+        .get(function(req, res) {
+                if (!req.isAuthenticated()) {
+                        res.render('auth', {
+                                pageTitle: 'User',
+                        });
+                } else {
+                        res.redirect('/');
+                }
+        })
+        .post(bruteforcelogin.prevent, async function(req, res) {
+                const { email } = req.body;
+
+                if (!email) {
+                        return res.status(400).send({ status: 'failed', error: 'Email is required' });
+                }
+
+                const smtpConfig = loadSmtpConfig();
+
+                if (!smtpConfig) {
+                        return res.status(500).send({
+                                status: 'failed',
+                                error: 'SMTP is not configured. Please set SMTP_HOST, SMTP_PORT and SMTP_FROM environment variables.',
+                        });
+                }
+
+                try {
+                        const user = await db('users')
+                                .whereRaw('LOWER(email) = LOWER(?)', [email])
+                                .first();
+
+                        if (user) {
+                                const tempPassword = generateTempPassword();
+                                const salt = bcrypt.genSaltSync();
+                                const hash = bcrypt.hashSync(tempPassword, salt);
+
+                                await db('users')
+                                        .where({ id: user.id })
+                                        .update({ password: hash });
+
+                                const transporter = nodemailer.createTransport(smtpConfig.transport, []);
+
+                                await transporter.sendMail({
+                                        from: smtpConfig.from,
+                                        to: user.email,
+                                        subject: 'Your PagerMon temporary password',
+                                        text: `Hi ${user.username},\n\nYour password has been reset. Use the temporary password below to sign in and update your credentials.\n\nTemporary password: ${tempPassword}\n\nFor security, please log in and change this password immediately.`,
+                                });
+                                logger.auth.info(`Temporary password emailed for ${user.username}`);
+                        }
+
+                        res.status(200).send({ status: 'ok' });
+                } catch (err) {
+                        logger.auth.error(err);
+                        res.status(500).send({ status: 'failed', error: 'Unable to process request' });
+                }
+        });
+
 router.route('/logout').get(authHelper.isLoggedIn, function(req, res) {
         req.logout();
         res.redirect('/');
@@ -141,12 +237,22 @@ router.route('/profile/').get(authHelper.isLoggedIn, function(req, res) {
 router.route('/profile/:id')
         .get(authHelper.isLoggedIn, function(req, res, next) {
                 const { username } = req.user;
-                db.from('users')
-                        .select('id', 'givenname', 'surname', 'username', 'email', 'lastlogondate')
-                        .where('username', username)
-                        .then(function(row) {
+                const { id } = req.user;
+                const userSelect = db.from('users')
+                        .select('id', 'givenname', 'surname', 'username', 'email', 'mobile', 'pushover', 'browser_toast', 'browser_sound', 'lastlogondate')
+                        .where('username', username);
+
+                const aliasSelect = db.from('user_aliases')
+                        .pluck('alias_id')
+                        .where('user_id', id);
+
+                Promise.all([userSelect, aliasSelect])
+                        .then(function(results) {
+                                const row = results[0];
+                                const aliases = results[1];
                                 if (row.length > 0) {
                                         const rowsend = row[0];
+                                        rowsend.alertAliases = aliases || [];
                                         res.status(200);
                                         res.json(rowsend);
                                 } else {
@@ -165,17 +271,52 @@ router.route('/profile/:id')
                         const { givenname } = req.body;
                         const surname = req.body.surname || '';
                         const { email } = req.body;
+                        const mobile = req.body.mobile || null;
+                        const pushover = req.body.pushover || null;
+                        const browser_toast = req.body.browser_toast === true || req.body.browser_toast === 'true' || req.body.browser_toast === 1 || req.body.browser_toast === '1';
+                        const browser_sound = req.body.browser_sound === true || req.body.browser_sound === 'true' || req.body.browser_sound === 1 || req.body.browser_sound === '1';
+                        const alertAliases = Array.isArray(req.body.alertAliases)
+                                ? Array.from(new Set(req.body.alertAliases
+                                        .map(item => parseInt(item, 10))
+                                        .filter(item => !isNaN(item))))
+                                : [];
                         const lastlogondate = Date.now();
                         console.time('insert');
-                        db.from('users')
-                                .returning('id')
-                                .where('username', '=', req.user.username)
-                                .update({
-                                        username,
-                                        givenname,
-                                        surname,
-                                        email,
-                                        lastlogondate,
+                        db('capcodes')
+                                .pluck('id')
+                                .whereIn('id', alertAliases)
+                                .then((validAliasIds) => {
+                                        return db.transaction(function(trx) {
+                                                return trx.from('users')
+                                                        .returning('id')
+                                                        .where('username', '=', req.user.username)
+                                                        .update({
+                                                                username,
+                                                                givenname,
+                                                                surname,
+                                                                email,
+                                                                mobile,
+                                                                pushover,
+                                                                browser_toast,
+                                                                browser_sound,
+                                                                lastlogondate,
+                                                        })
+                                                        .then(() => {
+                                                                return trx('user_aliases')
+                                                                        .where('user_id', req.user.id)
+                                                                        .del()
+                                                                        .then(() => {
+                                                                                if (validAliasIds.length === 0) {
+                                                                                        return null;
+                                                                                }
+                                                                                const insertRows = validAliasIds.map(aliasId => ({
+                                                                                        user_id: req.user.id,
+                                                                                        alias_id: aliasId,
+                                                                                }));
+                                                                                return trx('user_aliases').insert(insertRows);
+                                                                        });
+                                                        });
+                                        });
                                 })
                                 .then(result => {
                                         console.timeEnd('insert');
@@ -190,6 +331,21 @@ router.route('/profile/:id')
                         res.status(401).json({ message: 'Please update your own details only' });
                         logger.auth.error('Possible attempt to compromise security POST:/auth/profile');
                 }
+        });
+
+router.route('/aliases')
+        .get(authHelper.isLoggedIn, function(req, res, next) {
+                db.from('capcodes')
+                        .select('id', 'alias', 'agency', 'address')
+                        .where('user_subscribable', 1)
+                        .orderBy('alias', 'asc')
+                        .then(function(rows) {
+                                res.status(200).json(rows);
+                        })
+                        .catch(err => {
+                                logger.main.error(err);
+                                return next(err);
+                        });
         });
 
 router.route('/register')

@@ -1,0 +1,21 @@
+<div class="row" style="padding-top: 11px;"></div>
+<div ng-if="loading" class="loading"><i class="fa fa-spinner fa-spin"></i></div>
+<div class="alert {{forgotMessage.type}} alert-dismissable alert-fixed fade in" ng-if="forgotMessage.show">
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="forgotMessage.show = false">&times;</button>
+  <strong>{{forgotMessage.text}}</strong>
+</div>
+<div class="row" style="padding-top: 10px">
+  <div class="col-xs-12">
+    <h4 style="padding-left: 15px;">Forgot Password</h4>
+    <hr />
+    <div class="col-xs-12 col-md-offset-2 col-md-8">
+      <form ng-submit="forgotSubmit()" name="forgot">
+        <div class="form-group">
+          <label for="forgot.email" class="control-label">Email address</label>
+          <input class="form-control" type="email" name="forgot.email" ng-model="forgot.email" required>
+        </div>
+        <button type="submit" class="btn btn-warning btn-lg" ng-disabled="loading">Send temporary password</button>
+      </form>
+    </div>
+  </div>
+</div>

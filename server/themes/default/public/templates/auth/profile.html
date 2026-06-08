@@ -41,6 +41,46 @@
                 <span ng-if="existingEmail" class="text-danger pull-left">Email already exists! </span>
               </div>
             </div>
+            <div class="form-group">
+              <label for="user.mobile" class="col-xs-4 col-sm-3 control-label">Mobile Number</label>
+              <div class="col-xs-8 col-sm-9">
+                <input class="form-control" type="text" name="user.mobile" ng-model="user.mobile">
+                <span id="helpBlock" class="help-block">Optional. Used for alerts tied to your selected aliases.</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="user.pushover" class="col-xs-4 col-sm-3 control-label">Pushover User Key</label>
+              <div class="col-xs-8 col-sm-9">
+                <input class="form-control" type="text" name="user.pushover" ng-model="user.pushover">
+                <span id="helpBlock" class="help-block">Optional. Alerts for selected aliases will use this key.</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="col-xs-12 control-label">Browser Notifications</label>
+              <div class="col-xs-12">
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" ng-model="user.browser_toast"> Toast message notifications
+                  </label>
+                </div>
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" ng-model="user.browser_sound"> Sound notifications
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="col-xs-12 control-label">Alert Aliases</label>
+              <div class="col-xs-12">
+                <p>Select the aliases you want to receive alerts for. Alias details cannot be edited here.</p>
+                <div class="checkbox" ng-repeat="aliasItem in aliases">
+                  <label>
+                    <input type="checkbox" ng-checked="aliasItem.selected" ng-click="toggleAlias(aliasItem)"> {{aliasItem.alias}} <span class="text-muted" ng-if="aliasItem.agency">({{aliasItem.agency}})</span>
+                  </label>
+                </div>
+              </div>
+            </div>
             <div class="btn-group-vertical" id="buttons-aliasDetail">
               <button type="submit" class="btn btn-success">Save</button>
             </div>

@@ -79,6 +79,94 @@ describe('POST /api/messages', () => {
                                 done();
                         });
         });
+        it('should ignore duplicate messages sent from different sources', done => {
+                nconf.set('messages:duplicateFiltering', true);
+                nconf.set('messages:duplicateLimit', 10);
+                nconf.set('messages:duplicateTime', 60);
+                nconf.save();
+
+                const payload = {
+                        address: '000123',
+                        message: 'Duplicate message from two sources',
+                };
+
+                chai.request(server)
+                        .post('/api/messages')
+                        .set({
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'User-Agent': 'CI-Test',
+                                apikey: 'reallylongkeythatneedstobechanged',
+                        })
+                        .send({
+                                ...payload,
+                                source: 'SRC-A',
+                        })
+                        .end((err, res) => {
+                                should.not.exist(err);
+                                res.status.should.eql(200);
+
+                                chai.request(server)
+                                        .post('/api/messages')
+                                        .set({
+                                                'X-Requested-With': 'XMLHttpRequest',
+                                                'User-Agent': 'CI-Test',
+                                                apikey: 'reallylongkeythatneedstobechanged',
+                                        })
+                                        .send({
+                                                ...payload,
+                                                source: 'SRC-B',
+                                        })
+                                        .end((err2, res2) => {
+                                                should.not.exist(err2);
+                                                res2.status.should.eql(200);
+                                                res2.text.should.eql('Ignoring duplicate');
+                                                done();
+                                        });
+                        });
+        });
+
+        it('should ignore duplicate messages with different line endings and whitespace', done => {
+                nconf.set('messages:duplicateFiltering', true);
+                nconf.set('messages:duplicateLimit', 10);
+                nconf.set('messages:duplicateTime', 60);
+                nconf.save();
+
+                chai.request(server)
+                        .post('/api/messages')
+                        .set({
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'User-Agent': 'CI-Test',
+                                apikey: 'reallylongkeythatneedstobechanged',
+                        })
+                        .send({
+                                address: '1900159',
+                                message: 'Watchdog Messages\r\nmhs-watchdog 260225212305  ',
+                                source: 'RTLSDR-Pi',
+                        })
+                        .end((err, res) => {
+                                should.not.exist(err);
+                                res.status.should.eql(200);
+
+                                chai.request(server)
+                                        .post('/api/messages')
+                                        .set({
+                                                'X-Requested-With': 'XMLHttpRequest',
+                                                'User-Agent': 'CI-Test',
+                                                apikey: 'reallylongkeythatneedstobechanged',
+                                        })
+                                        .send({
+                                                address: '1900159',
+                                                message: 'Watchdog Messages\nmhs-watchdog 260225212305',
+                                                source: 'ShanePi',
+                                        })
+                                        .end((err2, res2) => {
+                                                should.not.exist(err2);
+                                                res2.status.should.eql(200);
+                                                res2.text.should.eql('Ignoring duplicate');
+                                                done();
+                                        });
+                        });
+        });
 });
 
 describe('GET /api/messages', () => {

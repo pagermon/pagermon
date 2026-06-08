@@ -12,6 +12,9 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
                 Reset: $resource('/auth/reset/', null, {
                     'post': { method: 'POST', isArray: false }
                 }),
+                Forgot: $resource('/auth/forgot/', null, {
+                    'post': { method: 'POST', isArray: false }
+                }),
                 UserDetail: $resource('/api/user/:id', { id: '@id' }, {
                     'post': { method: 'POST', isArray: false }
                 }),
@@ -23,7 +26,8 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
                 }),
                 Profile: $resource('/auth/profile/me', null, {
                     'post': { method: 'POST', isArray: false }
-                })
+                }),
+                Aliases: $resource('/auth/aliases')
             };
         }])
 
@@ -54,6 +58,36 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
             });
         };
 
+    }])
+
+    .controller('ForgotController', ['$scope', '$routeParams', 'Api', '$uibModal', '$filter', '$location', '$timeout', '$window', function ($scope, $routeParams, Api, $uibModal, $filter, $location, $timeout, $window) {
+        $scope.loading = false;
+        $scope.forgotMessage = {};
+        $scope.forgot = {};
+
+        $scope.forgotSubmit = function () {
+            $scope.loading = true;
+            Api.Forgot.post(null, $scope.forgot).$promise.then(function (response) {
+                $scope.loading = false;
+                if (response.status == 'ok') {
+                    $scope.forgotMessage.text = 'If an account exists for that email address, a temporary password has been sent.';
+                    $scope.forgotMessage.type = 'alert-success';
+                    $scope.forgotMessage.show = true;
+                    $timeout(function () { $scope.forgotMessage.show = false; }, 5000);
+                } else {
+                    $scope.forgotMessage.text = 'Unable to process request: ' + response.data.error;
+                    $scope.forgotMessage.type = 'alert-danger';
+                    $scope.forgotMessage.show = true;
+                    $timeout(function () { $scope.forgotMessage.show = false; }, 5000);
+                }
+            }, function (response) {
+                $scope.loading = false;
+                $scope.forgotMessage.text = 'Unable to process request: ' + response.data.error;
+                $scope.forgotMessage.type = 'alert-danger';
+                $scope.forgotMessage.show = true;
+                $timeout(function () { $scope.forgotMessage.show = false; }, 5000);
+            });
+        };
     }])
 
     .controller('RegisterController', ['$scope', '$routeParams', 'Api', '$uibModal', '$filter', '$location', '$timeout', '$window', function ($scope, $routeParams, Api, $uibModal, $filter, $location, $timeout, $window) {
@@ -180,8 +214,28 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
     .controller('ProfileController', ['$scope', '$routeParams', 'Api', '$uibModal', '$filter', '$location', '$timeout', function ($scope, $routeParams, Api, $uibModal, $filter, $location, $timeout) {
         $scope.alertMessage = {};
         $scope.loading = true;
+        $scope.aliases = [];
+
+        $scope.syncSelectedAliases = function () {
+            if (!$scope.aliases || !$scope.user) {
+                return;
+            }
+            var selected = new Set(($scope.user.alertAliases || []).map(function (aliasId) {
+                return parseInt(aliasId, 10);
+            }).filter(function (aliasId) {
+                return !isNaN(aliasId);
+            }));
+            $scope.aliases.forEach(function (alias) {
+                alias.selected = selected.has(parseInt(alias.id, 10));
+            });
+        };
+
+        $scope.toggleAlias = function (alias) {
+            alias.selected = !alias.selected;
+        };
         $scope.userSubmit = function () {
             $scope.loading = true;
+            $scope.user.alertAliases = $scope.aliases.filter(function (alias) { return alias.selected; }).map(function (alias) { return alias.id; });
             Api.Profile.save(null, $scope.user).$promise.then(function (response) {
                 console.log(response);
                 if (response.status == 'ok') {
@@ -206,12 +260,20 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
                 $scope.loading = false;
             });
         };
+        Api.Aliases.query(function (results) {
+            $scope.aliases = results;
+            $scope.syncSelectedAliases();
+        });
         Api.Profile.get( function (results) {
             $scope.user = results;
+            $scope.user.alertAliases = results.alertAliases || [];
+            $scope.user.browser_toast = results.browser_toast !== false;
+            $scope.user.browser_sound = results.browser_sound !== false;
             $scope.userLoading = false;
             $scope.existingUsername = false;
             $scope.existingEmail = false;
             $scope.loading = false;
+            $scope.syncSelectedAliases();
 
             if (results.username) {
                 $scope.user.originalUsername = results.username;
@@ -235,6 +297,10 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
             .when('/register', {
                 templateUrl: '/templates/auth/register.html',
                 controller: 'RegisterController'
+            })
+            .when('/forgot', {
+                templateUrl: '/templates/auth/forgot.html',
+                controller: 'ForgotController'
             })
             .when('/reset', {
                 templateUrl: '/templates/auth/reset.html',

@@ -44,6 +44,20 @@
                 <span ng-if="existingEmail" class="text-danger pull-left">Email already exists! </span>
               </div>
             </div>
+            <div class="form-group">
+              <label for="user.mobile" class="col-xs-4 col-sm-3 control-label">Mobile Number</label>
+              <div class="col-xs-8 col-sm-9">
+                <input class="form-control" type="text" name="user.mobile" ng-model="user.mobile">
+                <span id="helpBlock" class="help-block">Optional contact number for alerts.</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="user.pushover" class="col-xs-4 col-sm-3 control-label">Pushover User Key</label>
+              <div class="col-xs-8 col-sm-9">
+                <input class="form-control" type="text" name="user.pushover" ng-model="user.pushover">
+                <span id="helpBlock" class="help-block">Used for user-selected alias alerts.</span>
+              </div>
+            </div>
             <div class="form-group has-feedback" ng-class="!user.password ? 'has-error' : 'has-success'" ng-if="isNew">
               <label for="user.password" class="col-xs-4 col-sm-3 control-label">Password</label>
               <div class="col-xs-8 col-sm-9">

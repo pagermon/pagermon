@@ -88,7 +88,7 @@ These instructions will get you a copy of the project up and running on your loc
 ```
     $ sudo apt-get install npm sqlite3
     $ npm install npm@latest -g
-    $ npm install pm2 -g
+    $ npm install pm2@latest -g
     $ cd server
     $ npm install
     $ export NODE_ENV=production
@@ -107,6 +107,17 @@ These instructions will get you a copy of the project up and running on your loc
 5) Now login via the website, default port is 3000, default credentials are 'admin' / 'changeme'
 6) Head to /admin, change your password, and generate some API keys
 6) Grab your API keys and drop them in the PagerMon client, then you're good to go!
+
+#### Self-service password reset
+
+If a user needs a new password without visiting the web UI, run the helper script from the `server` folder. The script generates a temporary password, stores it for the account, and emails it to the address on file. Configure SMTP access via environment variables before running (SMTP_HOST, SMTP_PORT, SMTP_FROM, optional SMTP_USER/SMTP_PASS/SMTP_SECURE/SMTP_FROM_NAME).
+
+```
+cd server
+npm run reset-user-password
+```
+
+The script prompts for the username, confirms the target email, then sends the temporary credentials.
 
 Alternatively a production ready setup guide is available here
 https://github.com/pagermon/pagermon/wiki/Tutorial---Production-Ready-Ubuntu,-PM2,-Nginx-Reverse-Proxy,-Let's-Encrypt-SSL,-Pagermon-server

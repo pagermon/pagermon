@@ -4,11 +4,12 @@
   "private": true,
   "license": "Unlicense",
   "scripts": {
-    "start": "node ./bin/www",
+    "start": "node app.js",
     "test": "nyc --reporter=lcov mocha --exit -t 60000",
     "test-text": "nyc mocha --exit -t 60000",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "reset-user-password": "node ./scripts/user-password-reset.js"
   },
   "dependencies": {
     "@pm2/io": "^4.3.5",
@@ -49,6 +50,7 @@
     "node-prowl": "latest",
     "node-uuid": "^1.4.8",
     "nodemailer": "latest",
+    "oracledb": "^4.2.0",
     "passport": "^0.3.2",
     "passport-local": "^1.0.0",
     "passport-localapikey-update": "^0.5.0",
@@ -63,7 +65,8 @@
     "underscore": "^1.8.3",
     "util": "^0.10.3",
     "winston": "^3.1.0",
-    "zone.js": "^0.8.12"
+    "zone.js": "^0.8.12",
+    "twilio": "^5.4.4"
   },
   "repository": {
     "type": "git",

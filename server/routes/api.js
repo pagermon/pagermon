@@ -44,8 +44,34 @@ var HideCapcode = nconf.get('messages:HideCapcode');
 var apiSecurity = nconf.get('messages:apiSecurity');
 var dbtype = nconf.get('database:type');
 
+function getAliasSubscribers(aliasId) {
+  if (!aliasId) {
+    return Promise.resolve([]);
+  }
+
+  return db('user_aliases')
+    .leftJoin('users', 'user_aliases.user_id', '=', 'users.id')
+    .select('users.id', 'users.username', 'users.email', 'users.mobile', 'users.pushover')
+    .where('user_aliases.alias_id', aliasId)
+    .andWhere('users.status', 'active')
+    .catch((err) => {
+      logger.main.error('Failed to load alias subscribers', err);
+      return [];
+    });
+}
+
 // dupe init
 var msgBuffer = [];
+
+function normalizeDuplicateMessage(message) {
+  return String(message || '')
+    .replace(/\r\n?/g, '\n')
+    .trim();
+}
+
+function normalizeDuplicateAddress(address) {
+  return String(address || '').trim();
+}
 
 
 router.route('/messages')
@@ -182,13 +208,15 @@ router.route('/messages')
       var adminShow = nconf.get('messages:adminShow');
       var data = req.body;
       data.pluginData = {};
+      var duplicateMessage = normalizeDuplicateMessage(data.message);
+      var duplicateAddress = normalizeDuplicateAddress(data.address);
 
       if (filterDupes) {
         // this is a bad solution and tech debt that will bite us in the ass if we ever go HA, but that's a problem for future me and that guy's a dick
-        var datetime = data.datetime || 1;
+        var datetime = data.datetime || Math.floor(Date.now() / 1000);
         var timeDiff = datetime - dupeTime;
         // if duplicate filtering is enabled, we want to populate the message buffer and check for duplicates within the limits
-        var matches = _.where(msgBuffer, { message: data.message, address: data.address });
+        var matches = _.where(msgBuffer, { message: duplicateMessage, address: duplicateAddress });
         if (matches.length > 0) {
           if (dupeTime != 0) {
             // search the matching messages and see if any match the time constrain
@@ -208,12 +236,12 @@ router.route('/messages')
         // no matches, maintain the array
         var dupeArrayLimit = dupeLimit;
         if (dupeArrayLimit == 0) {
-          dupeArrayLimit == 25; // should provide sufficient buffer, consider increasing if duplicates appear when users have no dupeLimit
+          dupeArrayLimit = 25; // should provide sufficient buffer, consider increasing if duplicates appear when users have no dupeLimit
         }
         if (msgBuffer.length > dupeArrayLimit) {
           msgBuffer.shift();
         }
-        msgBuffer.push({ message: data.message, datetime: data.datetime, address: data.address });
+        msgBuffer.push({ message: duplicateMessage, datetime: datetime, address: duplicateAddress });
       }
 
       // send data to pluginHandler before proceeding
@@ -232,9 +260,11 @@ router.route('/messages')
         }
         var address = data.address || '0000000';
         var message = data.message || 'null';
-        var datetime = data.datetime || 1;
+        var datetime = data.datetime || Math.floor(Date.now() / 1000);
         var timeDiff = datetime - dupeTime;
         var source = data.source || 'UNK';
+        var normalizedMessage = normalizeDuplicateMessage(message);
+        var normalizedAddress = normalizeDuplicateAddress(address);
         db.from('messages')
           .select('*')
           .modify(function (queryBuilder) {
@@ -250,9 +280,7 @@ router.route('/messages')
                       .limit(dupeLimit)
                       .as('temp_tab')
                   })
-              })
-                .andWhere('message', '=', message)
-                .andWhere('address', '=', address)
+              });
             } else if ((dupeLimit != 0) && (dupeTime == 0)) {
               queryBuilder.where('id', 'in', function () {
                 this.select('*')
@@ -264,24 +292,23 @@ router.route('/messages')
                       .limit(dupeLimit)
                       .as('temp_tab')
                   })
-              })
-                .andWhere('message', '=', message)
-                .andWhere('address', '=', address)
+              });
             } else if ((dupeLimit == 0) && (dupeTime != 0)) {
               queryBuilder.where('id', 'in', function () {
                 this.select('id')
                   .from('messages')
                   .where('timestamp', '>', timeDiff)
-              })
-                .andWhere('message', '=', message)
-                .andWhere('address', '=', address)
+              });
             } else {
               queryBuilder.where('message', '=', message)
                 .andWhere('address', '=', address)
             }
           })
           .then((row) => {
-            if (row.length > 0 && filterDupes) {
+            var dupeInDb = _.find(row, function (msgRow) {
+              return normalizeDuplicateMessage(msgRow.message) === normalizedMessage && normalizeDuplicateAddress(msgRow.address) === normalizedAddress;
+            });
+            if (dupeInDb && filterDupes) {
               logger.main.info(util.format('Ignoring duplicate: %o', message));
               res.status(200);
               res.send('Ignoring duplicate');
@@ -353,45 +380,66 @@ router.route('/messages')
                           .then((row) => {
                             if (row.length > 0) {
                               row = row[0]
-                              // send data to pluginHandler after processing
-                              row.pluginData = data.pluginData;
+                              getAliasSubscribers(row.alias_id)
+                                .then((subscribers) => {
+                                  row.subscribers = subscribers;
+                                  // send data to pluginHandler after processing
+                                  row.pluginData = data.pluginData;
 
-                              if (row.pluginconf) {
-                                row.pluginconf = parseJSON(row.pluginconf);
-                              } else {
-                                row.pluginconf = {};
-                              }
-                              logger.main.debug('afterMessage start');
-                              pluginHandler.handle('message', 'after', row, function (response) {
-                                logger.main.debug(util.format('%o', response));
-                                logger.main.debug('afterMessage done');
-                                // remove the pluginconf object before firing socket message
-                                delete row.pluginconf;
-                                //begin socket handling - this is the most horrible block of spaghetti code i've seen in my life and i hate myself for being involved in it
-                                if (HideCapcode) {
-                                  if (pdwMode) {
-                                    if (adminShow) {
-                                      //If PDWMode on and AdminShow is on send always
-                                      req.io.of('adminio').emit('messagePost', row);
-                                      if (row.alias_id != null) {
-                                        // send to normal user as well if not null alias_id
-                                        rowuser = {
-                                          "id": row.id,
-                                          "message": row.message,
-                                          "source": row.source,
-                                          "timestamp": row.timestamp,
-                                          "alias_id": row.alias_id,
-                                          "alias": row.alias,
-                                          "agency": row.agency,
-                                          "icon": row.icon,
-                                          "color": row.color,
-                                          "ignore": row.ignore
-                                        };
-                                        req.io.emit('messagePost', rowuser);
-                                      }
-                                    } else {
-                                      // if AdminShow not on only send if not null alias_id
-                                      if (row.alias_id != null) {
+                                  if (row.pluginconf) {
+                                    row.pluginconf = parseJSON(row.pluginconf);
+                                  } else {
+                                    row.pluginconf = {};
+                                  }
+                                  logger.main.debug('afterMessage start');
+                                  pluginHandler.handle('message', 'after', row, function (response) {
+                                    logger.main.debug(util.format('%o', response));
+                                    logger.main.debug('afterMessage done');
+                                    // remove the pluginconf object before firing socket message
+                                    delete row.pluginconf;
+                                    delete row.subscribers;
+                                    //begin socket handling - this is the most horrible block of spaghetti code i've seen in my life and i hate myself for being involved in it
+                                    if (HideCapcode) {
+                                      if (pdwMode) {
+                                        if (adminShow) {
+                                          //If PDWMode on and AdminShow is on send always
+                                          req.io.of('adminio').emit('messagePost', row);
+                                          if (row.alias_id != null) {
+                                            // send to normal user as well if not null alias_id
+                                            rowuser = {
+                                              "id": row.id,
+                                              "message": row.message,
+                                              "source": row.source,
+                                              "timestamp": row.timestamp,
+                                              "alias_id": row.alias_id,
+                                              "alias": row.alias,
+                                              "agency": row.agency,
+                                              "icon": row.icon,
+                                              "color": row.color,
+                                              "ignore": row.ignore
+                                            };
+                                            req.io.emit('messagePost', rowuser);
+                                          }
+                                        } else {
+                                          // if AdminShow not on only send if not null alias_id
+                                          if (row.alias_id != null) {
+                                            req.io.of('adminio').emit('messagePost', row);
+                                            rowuser = {
+                                              "id": row.id,
+                                              "message": row.message,
+                                              "source": row.source,
+                                              "timestamp": row.timestamp,
+                                              "alias_id": row.alias_id,
+                                              "alias": row.alias,
+                                              "agency": row.agency,
+                                              "icon": row.icon,
+                                              "color": row.color,
+                                              "ignore": row.ignore
+                                            };
+                                            req.io.emit('messagePost', rowuser);
+                                          }
+                                        }
+                                      } else {
                                         req.io.of('adminio').emit('messagePost', row);
                                         rowuser = {
                                           "id": row.id,
@@ -407,45 +455,32 @@ router.route('/messages')
                                         };
                                         req.io.emit('messagePost', rowuser);
                                       }
-                                    }
-                                  } else {
-                                    req.io.of('adminio').emit('messagePost', row);
-                                    rowuser = {
-                                      "id": row.id,
-                                      "message": row.message,
-                                      "source": row.source,
-                                      "timestamp": row.timestamp,
-                                      "alias_id": row.alias_id,
-                                      "alias": row.alias,
-                                      "agency": row.agency,
-                                      "icon": row.icon,
-                                      "color": row.color,
-                                      "ignore": row.ignore
-                                    };
-                                    req.io.emit('messagePost', rowuser);
-                                  }
-                                } else {
-                                  if (pdwMode) {
-                                    if (adminShow) {
-                                      //If PDWMode on and AdminShow is on send always
-                                      req.io.of('adminio').emit('messagePost', row);
-                                      if (row.alias_id != null) {
-                                        // send to normal user as well if not null alias_id
-                                        req.io.emit('messagePost', row);
-                                      }
                                     } else {
-                                      // if AdminShow not on only send if not null alias_id
-                                      if (row.alias_id != null) {
+                                      if (pdwMode) {
+                                        if (adminShow) {
+                                          //If PDWMode on and AdminShow is on send always
+                                          req.io.of('adminio').emit('messagePost', row);
+                                          if (row.alias_id != null) {
+                                            // send to normal user as well if not null alias_id
+                                            req.io.emit('messagePost', row);
+                                          }
+                                        } else {
+                                          // if AdminShow not on only send if not null alias_id
+                                          if (row.alias_id != null) {
+                                            req.io.of('adminio').emit('messagePost', row);
+                                            req.io.emit('messagePost', row);
+                                          }
+                                        }
+                                      } else {
                                         req.io.of('adminio').emit('messagePost', row);
                                         req.io.emit('messagePost', row);
                                       }
                                     }
-                                  } else {
-                                    req.io.of('adminio').emit('messagePost', row);
-                                    req.io.emit('messagePost', row);
-                                  }
-                                }
-                              });
+                                  });
+                                })
+                                .catch((err) => {
+                                  logger.main.error(err);
+                                })
                             }
                             res.status(200).send('' + result);
                           })
@@ -736,6 +771,7 @@ router.route('/capcodes')
       var color = req.body.color || 'black';
       var icon = req.body.icon || 'question';
       var ignore = req.body.ignore || 0;
+      var user_subscribable = req.body.user_subscribable === 0 || req.body.user_subscribable === false ? 0 : 1;
       var pluginconf = JSON.stringify(req.body.pluginconf) || "{}";
       db.from('capcodes')
         .where('id', '=', id)
@@ -749,6 +785,7 @@ router.route('/capcodes')
               color: color,
               icon: icon,
               ignore: ignore,
+              user_subscribable: user_subscribable,
               pluginconf: pluginconf
             })
           } else {
@@ -760,6 +797,7 @@ router.route('/capcodes')
               color: color,
               icon: icon,
               ignore: ignore,
+              user_subscribable: user_subscribable,
               pluginconf: pluginconf
             })
           }
@@ -824,6 +862,7 @@ router.route('/capcodes/:id')
       "icon": "question",
       "color": "black",
       "ignore": 0,
+      "user_subscribable": 1,
       "pluginconf": {}
     };
     if (id == 'new') {
@@ -886,6 +925,7 @@ router.route('/capcodes/:id')
         var color = req.body.color || 'black';
         var icon = req.body.icon || 'question';
         var ignore = req.body.ignore || 0;
+        var user_subscribable = req.body.user_subscribable === 0 || req.body.user_subscribable === false ? 0 : 1;
         var pluginconf = JSON.stringify(req.body.pluginconf) || "{}";
         var updateAlias = req.body.updateAlias || 0;
 
@@ -903,6 +943,7 @@ router.route('/capcodes/:id')
                 color: color,
                 icon: icon,
                 ignore: ignore,
+                user_subscribable: user_subscribable,
                 pluginconf: pluginconf
               })
             } else {
@@ -914,6 +955,7 @@ router.route('/capcodes/:id')
                 color: color,
                 icon: icon,
                 ignore: ignore,
+                user_subscribable: user_subscribable,
                 pluginconf: pluginconf
               })
             }
@@ -1030,6 +1072,7 @@ router.route('/capcodeCheck/:id')
             "icon": "question",
             "color": "black",
             "ignore": 0,
+            "user_subscribable": 1,
             "pluginconf": {}
           };
           res.status(200);
@@ -1209,7 +1252,7 @@ router.route('/capcodeImport')
 router.route('/user')
   .get(authHelper.isAdmin, function (req, res, next) {
     db.from('users')
-      .select('id','givenname','surname','username','email','role','status','lastlogondate')
+      .select('id','givenname','surname','username','email','mobile','pushover','role','status','lastlogondate')
       .then((rows) => {
         res.json(rows);
       })
@@ -1241,6 +1284,8 @@ router.route('/user')
                 givenname: req.body.givenname,
                 surname: req.body.surname,
                 email: req.body.email,
+                mobile: req.body.mobile || null,
+                pushover: req.body.pushover || null,
                 role: req.body.role,
                 status: req.body.status,
                 lastlogondate: null
@@ -1266,7 +1311,7 @@ router.route('/userCheck/username/:id')
   .get(authHelper.isAdmin, function (req, res, next) {
     var id = req.params.id;
     db.from('users')
-      .select('id','givenname','surname','username','email','role','status','lastlogondate')
+      .select('id','givenname','surname','username','email','mobile','pushover','role','status','lastlogondate')
       .where('username', id)
       .then((row) => {
         if (row.length > 0) {
@@ -1280,6 +1325,8 @@ router.route('/userCheck/username/:id')
             "givenname": "",
             "surname": "",
             "email": "",
+            "mobile": "",
+            "pushover": "",
             "role": "user",
             "status": "active"
           };
@@ -1297,7 +1344,7 @@ router.route('/userCheck/username/:id')
   .get(authHelper.isAdmin, function (req, res, next) {
     var id = req.params.id;
     db.from('users')
-      .select('id','givenname','surname','username','email','role','status','lastlogondate')
+      .select('id','givenname','surname','username','email','mobile','pushover','role','status','lastlogondate')
       .where('email', id)
       .then((row) => {
         if (row.length > 0) {
@@ -1311,6 +1358,8 @@ router.route('/userCheck/username/:id')
             "givenname": "",
             "surname": "",
             "email": "",
+            "mobile": "",
+            "pushover": "",
             "role": "user",
             "status": "active"
           };
@@ -1333,6 +1382,8 @@ router.route('/user/:id')
       "givenname": "",
       "surname": "",
       "email": "",
+      "mobile": "",
+      "pushover": "",
       "role": "user",
       "status": "active"
     };
@@ -1341,7 +1392,7 @@ router.route('/user/:id')
       res.json(defaults);
     } else {
       db.from('users')
-        .select('id','givenname','surname','username','email','role','status','lastlogondate')
+        .select('id','givenname','surname','username','email','mobile','pushover','role','status','lastlogondate')
         .where('id', id)
         .then(function (row) {
           if (row.length > 0) {
@@ -1401,6 +1452,8 @@ router.route('/user/:id')
               givenname: req.body.givenname,
               surname: req.body.surname || '',
               email: req.body.email,
+              mobile: req.body.mobile || null,
+              pushover: req.body.pushover || null,
               role: req.body.role || 'user',
               status: req.body.status || 'disabled',
             }

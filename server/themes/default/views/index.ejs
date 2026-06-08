@@ -74,8 +74,10 @@
             <th colspan="2">
                 <div class="btn-group" data-toggle="buttons">
                   <button type="button" class="btn btn-default btn-sm" ng-click="updateData();" aria-label="Refresh" title="Refresh Messages"><i class="fa fa-refresh {{spinner}}" aria-hidden="true"></i></button>
-                  <button type="button" ng-if="notificationSupport == true" class="btn btn-default btn-sm" ng-class="{active: notificationEnabled == 'true'}" ng-click="toggleNotifications();" aria-label="Notifications" title="Toggle Browser Notifications">
+                  <button type="button" class="btn btn-default btn-sm" ng-class="{active: notificationToastEnabled == 'true'}" ng-click="toggleNotificationSetting('toast');" aria-label="Toast Notifications" title="Toggle Toast Notifications">
                     <i class="fa fa-bell" aria-hidden="true"></i></button>
+                  <button type="button" class="btn btn-default btn-sm" ng-class="{active: notificationSoundEnabled == 'true'}" ng-click="toggleNotificationSetting('sound');" aria-label="Sound Notifications" title="Toggle Sound Notifications">
+                    <i class="fa fa-volume-up" aria-hidden="true"></i></button>
                 <span class="dropdown">
                   <button class="btn btn-default btn-sm dropdown-toggle" type="button" data-toggle="dropdown" title="Message Limit">{{init.limit}} <span class="caret"></span></button>
                   <ul class="dropdown-menu" role="menu" style="margin-top: 9px;">
@@ -284,7 +286,7 @@
     
     // Controller
     // TODO: optimise this whole section, consider popping this entire controller out to a separate file
-    .controller('MessageController', ['$scope', '$routeParams', 'Api', 'socket', 'adminSocket', '$cookies', '$location', '$window', function ($scope, $routeParams, Api, socket, adminSocket, $cookies, $location, $window) {
+    .controller('MessageController', ['$scope', '$routeParams', 'Api', 'socket', 'adminSocket', '$cookies', '$location', '$window', '$http', function ($scope, $routeParams, Api, socket, adminSocket, $cookies, $location, $window, $http) {
       // I hate ejs
       <% if(typeof user != 'undefined'){ %>
         $scope.user="<%=user%>";
@@ -293,7 +295,44 @@
         $scope.user="";
       <% } %>
       // get new message on socket event
+      $scope.notificationAliasIds = null;
+
+      $scope.shouldNotifyForAlias = function (message) {
+        if (!Array.isArray($scope.notificationAliasIds)) {
+          return true;
+        }
+
+        if ($scope.notificationAliasIds.length === 0) {
+          return false;
+        }
+
+        var aliasId = parseInt(message.alias_id, 10);
+        if (isNaN(aliasId)) {
+          return false;
+        }
+
+        return $scope.notificationAliasIds.indexOf(aliasId) !== -1;
+      };
+
       $scope.$on('$viewContentLoaded', function() {
+    <% if (login) { %>
+    $http.get('/auth/profile/me').then(function (response) {
+      var alertAliases = response.data && Array.isArray(response.data.alertAliases)
+        ? response.data.alertAliases
+        : [];
+
+      $scope.notificationAliasIds = alertAliases
+        .map(function (aliasId) {
+          return parseInt(aliasId, 10);
+        })
+        .filter(function (aliasId) {
+          return !isNaN(aliasId);
+        });
+    }).catch(function () {
+      // fallback to previous behavior if aliases cannot be loaded
+      $scope.notificationAliasIds = null;
+    });
+    <% } %>
       
     // register a new socket when scope changes and set Socket Typle
 
@@ -345,22 +384,22 @@
         // Send Browser Notifications  
     <% if (apisecurity) { %>
       <% if (login) { %>
-        if ($scope.notificationEnabled == 'true') {
+        if (($scope.notificationToastEnabled == 'true' || $scope.notificationSoundEnabled == 'true') && $scope.shouldNotifyForAlias(message)) {
         if (!message.agency) {
           //Not showing messages for things that we don't know
         } else {
         
-          notify("PagerMon - " +message.agency + " - " + message.alias,message.message);
+          notify("PagerMon - " +message.agency + " - " + message.alias, message.message, $scope.notificationToastEnabled == 'true', $scope.notificationSoundEnabled == 'true');
         }
         }
         <% } %>
       <% } else { %>
-        if ($scope.notificationEnabled == 'true') {
+        if (($scope.notificationToastEnabled == 'true' || $scope.notificationSoundEnabled == 'true') && $scope.shouldNotifyForAlias(message)) {
         if (!message.agency) {
           //Not showing messages for things that we don't know
         } else {
         
-          notify("PagerMon - " +message.agency + " - " + message.alias,message.message);
+          notify("PagerMon - " +message.agency + " - " + message.alias, message.message, $scope.notificationToastEnabled == 'true', $scope.notificationSoundEnabled == 'true');
         }
         }
        <% } %>
@@ -418,7 +457,13 @@
                 // get limit from cookiestore
                 var curPage = page || $routeParams.page || '1';
                 var limit = $cookies.get('messageLimit') || '';
-                $scope.notificationEnabled = $cookies.get('notificationEnabled') || 'true';
+                                <% if (login) { %>
+                $scope.notificationToastEnabled = '<%= user.browser_toast ? 'true' : 'false' %>';
+                $scope.notificationSoundEnabled = '<%= user.browser_sound ? 'true' : 'false' %>';
+                <% } else { %>
+                $scope.notificationToastEnabled = $cookies.get('notificationToastEnabled') || 'true';
+                $scope.notificationSoundEnabled = $cookies.get('notificationSoundEnabled') || 'true';
+                <% } %>
 
                 var queryObj = {};
                 queryObj.page = curPage;
@@ -582,19 +627,18 @@
                 $scope.updateData($scope.init.currentPage);
               };
 
-              $scope.toggleNotifications = function () {
-                if ($scope.notificationEnabled == 'true') {
-                  $scope.setCookie('notificationEnabled', 'false');
-                } else {
-                  $scope.setCookie('notificationEnabled', 'true');
-                  Notification.requestPermission(function (permission) {
-                    if (!('permission' in Notification)) {
-                      Notification.permission = permission;
-                }
+              $scope.toggleNotificationSetting = function (type) {
+                var cookieName = type === 'sound' ? 'notificationSoundEnabled' : 'notificationToastEnabled';
+                var scopeKey = type === 'sound' ? 'notificationSoundEnabled' : 'notificationToastEnabled';
+                var nextValue = $scope[scopeKey] == 'true' ? 'false' : 'true';
 
-            });
-          }
-      };
+                $scope[scopeKey] = nextValue;
+                <% if (!login) { %>
+                var expireDate = new Date();
+                expireDate.setDate(expireDate.getDate() + 30);
+                $cookies.put(cookieName, nextValue, { 'expires': expireDate });
+                <% } %>
+              };
       
       $scope.clearSearch = function(){
         $scope.query = '';
@@ -621,33 +665,48 @@
     $locationProvider.html5Mode({ enabled: true, requireBase: false, rewriteLinks: false });
   }]);
 
-function notify(notifyTitle,notifyMessage) {
-    if (!("Notification" in window)) {
-        console.log("This browser does not support desktop notification");
-      } else if (Notification.permission === "granted") {
-        var options = {
-          body: notifyMessage,
-          icon: '/favicon.ico'
-        };
-        var notification = new Notification(notifyTitle, options);
-      }
-    else if (Notification.permission !== 'denied') {
-        Notification.requestPermission(function (permission) {
-            if (!('permission' in Notification)) {
-                Notification.permission = permission;
-            }
 
-            if (permission === "granted") {
-                var options = {
-                    body: notifyMessage,
-                    icon: '/favicon.ico',
-                };
-                var notification = new Notification(notifyTitle,options);
-            }
-        });
+function playNotificationSound() {
+    try {
+      var audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      var oscillator = audioContext.createOscillator();
+      var gainNode = audioContext.createGain();
+
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
+      gainNode.gain.setValueAtTime(0.001, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.2, audioContext.currentTime + 0.01);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.25);
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      oscillator.start();
+      oscillator.stop(audioContext.currentTime + 0.25);
+    } catch (error) {
+      console.log('Unable to play browser notification sound', error);
     }
 }
-  </script>
+
+function showNotificationToast(notifyTitle, notifyMessage) {
+  var toastEl = angular.element('<div class="alert alert-info alert-fixed fade in" style="z-index: 2000; max-width: 420px; right: 15px; left: auto; top: 70px;">' +
+    '<button type="button" class="close" data-dismiss="alert" aria-label="Close">&times;</button>' +
+    '<strong>' + notifyTitle + '</strong><br><span>' + notifyMessage + '</span></div>');
+
+  angular.element(document.body).append(toastEl);
+  setTimeout(function () {
+    toastEl.alert('close');
+  }, 5000);
+}
+
+function notify(notifyTitle,notifyMessage, toastEnabled, soundEnabled) {
+    if (toastEnabled) {
+      showNotificationToast(notifyTitle, notifyMessage);
+    }
+    if (soundEnabled) {
+      playNotificationSound();
+    }
+}
+</script>
 
 </div>
 
