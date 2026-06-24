@@ -1,4 +1,5 @@
 # 0.4.1 - TBA
+* Treat hyphens as literal text in SQLite message searches #550
 * Update sqlite3 dependencies for current Node.js and Debian releases #652
 * Package.json now used as source of truth for all version statements. #646 @Danrw
 * Fix critical security and functional issues in develop branch @Danrw
