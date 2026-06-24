@@ -1,59 +1,61 @@
-var spawn = require("child_process").spawn;
+var { spawn } = require('child_process');
 var fs = require('fs');
 var logger = require('../log');
 
-
 function run(trigger, scope, data, config, callback) {
+        if (!data.plubincon.Shell || !data.pluginconf.Shell.enable) return callback(data);
 
-  if(data.pluginconf.Shell && data.pluginconf.Shell.enable){
-    
-    var file_name = data.alias_id;
+        // Override ID if needed
+        const fileName = data.pluginconf.Shell.overrideAlias > 0 ? data.pluginconf.Shell.overrideAlias : data.alias_id;
+        if (data.pluginconf.Shell.overrideAlias > 0) logger.main.debug('Override filename');
 
-    // Override ID if needed
-    if(data.pluginconf.Shell.overrideAlias > 0){
-      logger.main.debug('Override filename');
-      var file_name = data.pluginconf.Shell.overrideAlias;
-    }
+        const filePath =
+                process.platform === 'win32' ? `${process.cwd()}\\plugins\\Shell\\` : `${process.cwd()}/plugins/Shell/`;
+        const fullFileName = process.platform === 'win32' ? `${fileName}.ps1` : `${fileName}.sh`;
 
-    if(process.platform === "win32"){
-      // Windows platform, Win 64bits too
-      var file_path = process.cwd()+'\\plugins\\Shell\\';
-      var full_file_name = file_name+'.ps1';
-    }else{
-      // Others, 'aix', 'darwin', 'freebsd', 'linux', 'openbsd', 'sunos'
-      var file_path = process.cwd()+'/plugins/Shell/';
-      var full_file_name = file_name+'.sh';
-    }
-
-    // Check file exist
-    if(fs.existsSync(file_path+full_file_name)){
-        logger.main.info('Exec shell command for selected alias')
-
-        if(process.platform === "win32"){
-          var child = spawn("powershell.exe", [file_path+full_file_name, '"'+data.address+'"', "@'\r\n"+data.message+"\r\n'@", "@'\r\n"+JSON.stringify(data)+"\r\n'@"]); //
-        }else{
-          var child = spawn("sh", [file_path+full_file_name, data.address, data.message, JSON.stringify(data)]);
+        const shell = data.pluginconf.Shell.shell || process.platform === 'win32' ? 'powershell.exe' : 'sh';
+        if (process.platform === 'win32' && shell !== 'powershell.exe') {
+                logger.main.error('Shell must be powershell.exe on Windows');
+                return callback(data);
+        }
+        if (process.platform !== 'win32' && shell === 'powershell.exe') {
+                logger.main.error('Powershell is only available on Windows');
+                return callback(data);
         }
 
-        child.stdout.on("data",function(data){
-            logger.main.debug("ShellScript Data: " + data);
-        });
-        child.stderr.on("data",function(data){
-            logger.main.error("ShellScript Errors: " + data);
-        });
-        child.on("exit",function(code){ // Exit code, ok = 0
-            logger.main.info("ShellScript finished");
-        });
-        child.stdin.end(); //end input
+        // Check file exist
+        if (!fs.existsSync(filePath + fullFileName)) {
+                logger.main.info(`File ${fullFileName} not exist`);
+                return callback(data);
+        }
 
-    }else{
-      logger.main.info('File '+full_file_name+' not exist');
-    }
-  }
-  
-  callback(data);
+        logger.main.info('Exec shell command for selected alias');
+
+        const child =
+                shell === 'powershell.exe'
+                        ? spawn('powershell.exe', [
+                                  filePath + fullFileName,
+                                  `"${data.address}"`,
+                                  `@'\r\n${data.message}\r\n'@`,
+                                  `@'\r\n${JSON.stringify(data)}\r\n'@`,
+                          ])
+                        : spawn(shell, [filePath + fullFileName, data.address, data.message, JSON.stringify(data)]);
+
+        child.stdout.on('data', function(innerData) {
+                logger.main.debug(`ShellScript Data: ${innerData}`);
+        });
+        child.stderr.on('data', function(innerData) {
+                logger.main.error(`ShellScript Errors: ${innerData}`);
+        });
+        child.on('exit', function(code) {
+                // Exit code, ok = 0
+                logger.main.info('ShellScript finished');
+        });
+        child.stdin.end(); // end input
+
+        callback(data);
 }
 
 module.exports = {
-    run: run
-}
+        run,
+};

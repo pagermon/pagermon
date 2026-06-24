@@ -18,6 +18,17 @@
             "label": "Override Alias",
             "description": "Overwrite filename. Use another aliases script for this alias - enter the ID of the corresponding alias.",
             "type": "number"
+        },
+        {
+            "name": "shell",
+            "label": "Shell",
+            "description": "Choose, which shell to use for this alias. Default is \"sh\".",
+            "type": "select",
+            "options": [
+                {"value": "sh", "text": "Shell"},
+                {"value": "bash", "text": "Bash"},
+                {"value": "powershell", "text": "PowerShell (Only available on Windows systems)"}
+            ]
         }
     ]
 }
