@@ -12,6 +12,9 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
                 Reset: $resource('/auth/reset/', null, {
                     'post': { method: 'POST', isArray: false }
                 }),
+                Forgot: $resource('/auth/forgot/', null, {
+                    'post': { method: 'POST', isArray: false }
+                }),
                 UserDetail: $resource('/api/user/:id', { id: '@id' }, {
                     'post': { method: 'POST', isArray: false }
                 }),
@@ -55,6 +58,39 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         };
 
     }])
+
+    
+ .controller('ForgotController', ['$scope', '$routeParams', 'Api', '$uibModal', '$filter', '$location', '$timeout', '$window', function ($scope, $routeParams, Api, $uibModal, $filter, $location, $timeout, $window) {
+        $scope.loading = false;
+        $scope.forgotMessage = {};
+        $scope.forgot = {};
+
+        $scope.forgotSubmit = function () {
+            $scope.loading = true;
+            Api.Forgot.post(null, $scope.forgot).$promise.then(function (response) {
+                $scope.loading = false;
+                if (response.status == 'ok') {
+                    $scope.forgotMessage.text = 'If an account exists for that email address, a temporary password has been sent.';
+                    $scope.forgotMessage.type = 'alert-success';
+                    $scope.forgotMessage.show = true;
+                    $timeout(function () { $scope.forgotMessage.show = false; }, 5000);
+                } else {
+                    $scope.forgotMessage.text = 'Unable to process request: ' + response.data.error;
+                    $scope.forgotMessage.type = 'alert-danger';
+                    $scope.forgotMessage.show = true;
+                    $timeout(function () { $scope.forgotMessage.show = false; }, 5000);
+                }
+            }, function (response) {
+                $scope.loading = false;
+                $scope.forgotMessage.text = 'Unable to process request: ' + response.data.error;
+                $scope.forgotMessage.type = 'alert-danger';
+                $scope.forgotMessage.show = true;
+                $timeout(function () { $scope.forgotMessage.show = false; }, 5000);
+            });
+        };
+    }])
+
+
 
     .controller('RegisterController', ['$scope', '$routeParams', 'Api', '$uibModal', '$filter', '$location', '$timeout', '$window', function ($scope, $routeParams, Api, $uibModal, $filter, $location, $timeout, $window) {
         $scope.userLoading = false;
@@ -235,6 +271,10 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
             .when('/register', {
                 templateUrl: '/templates/auth/register.html',
                 controller: 'RegisterController'
+            })
+            .when('/forgot', {
+                templateUrl: '/templates/auth/forgot.html',
+                controller: 'ForgotController'
             })
             .when('/reset', {
                 templateUrl: '/templates/auth/reset.html',

@@ -87,7 +87,7 @@ These instructions will get you a copy of the project up and running on your loc
 ```
     $ sudo apt-get install build-essential python3 pkg-config libsqlite3-dev
     $ npm install npm@latest -g
-    $ npm install pm2 -g
+    $ npm install pm2@latest -g
     $ cd server
     $ npm install
     $ export NODE_ENV=production
