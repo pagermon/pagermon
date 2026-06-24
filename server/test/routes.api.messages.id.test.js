@@ -112,6 +112,34 @@ describe('GET /api/messages/id', () => {
                                 done();
                         });
         });
+        it('should not return message for hidden alias if not logged in ', done => {
+                chai.request(server)
+                        .get('/api/messages/8')
+                        .end((err, res) => {
+                                should.not.exist(err);
+                                res.status.should.eql(200);
+                                res.type.should.eql('application/json');
+                                res.body.should.be.a('object');
+                                res.body.should.eql({});
+                                done();
+                        });
+        });
+        it('should not return message for hidden alias if logged in', done => {
+                passportStub.login({
+                        username: 'useractive',
+                        password: 'changeme',
+                });
+                chai.request(server)
+                .get('/api/messages/8')
+                .end((err, res) => {
+                        should.not.exist(err);
+                        res.status.should.eql(200);
+                        res.type.should.eql('application/json');
+                        res.body.should.be.a('object');
+                        res.body.should.eql({});
+                        done();
+                });
+        });
         it('should 401 if securemode is enabled and not logged in ', done => {
                 nconf.set('messages:apiSecurity', true);
                 nconf.save();

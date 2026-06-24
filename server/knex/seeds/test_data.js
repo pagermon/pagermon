@@ -11,6 +11,7 @@ exports.seed = function(db, Promise) {
                                 icon: 'fire',
                                 color: 'red',
                                 ignore: '0',
+                                hideMessages: '0',
                                 onlyShowLoggedIn: false,
                         })
                 )
@@ -22,6 +23,7 @@ exports.seed = function(db, Promise) {
                                 icon: 'ambulance',
                                 color: 'green',
                                 ignore: '0',
+                                hideMessages: '0',
                                 onlyShowLoggedIn: false,
                         })
                 )
@@ -33,6 +35,7 @@ exports.seed = function(db, Promise) {
                                 icon: 'gavel',
                                 color: 'blue',
                                 ignore: '0',
+                                hideMessages: '0',
                                 onlyShowLoggedIn: false,
                         })
                 )
@@ -44,6 +47,7 @@ exports.seed = function(db, Promise) {
                                 icon: '',
                                 color: '',
                                 ignore: '1',
+                                hideMessages: '0',
                                 onlyShowLoggedIn: false,
                         })
                 )
@@ -55,18 +59,32 @@ exports.seed = function(db, Promise) {
                                 icon: '',
                                 color: '',
                                 ignore: '0',
+                                hideMessages: '0',
                                 onlyShowLoggedIn: false,
                         })
                 )
                 .then(() =>
                         db('capcodes').insert({
                                 address: '1234571',
-                                alias: 'Hidden Capcode',
-                                agency: 'HIDE',
+                                alias: 'Capcode hidden to not logged in',
+                                agency: 'HIDEANON',
                                 icon: '',
                                 color: '',
                                 ignore: '0',
+                                hideMessages: '0',
                                 onlyShowLoggedIn: true,
+                        })
+                )
+                .then(() =>
+                        db('capcodes').insert({
+                                address: '1234572',
+                                alias: 'Capcode hidden to all users',
+                                agency: 'HIDEALL',
+                                icon: '',
+                                color: '',
+                                ignore: '0',
+                                hideMessages: '1',
+                                onlyShowLoggedIn: false,
                         })
                 )
                 .then(() =>
@@ -117,8 +135,8 @@ exports.seed = function(db, Promise) {
                 )
                 .then(() =>
                         db('messages').insert({
-                                address: '1234572',
-                                message: 'This is a Test Message to non-stored Address 1234572',
+                                address: '1234573',
+                                message: 'This is a Test Message to non-stored Address 1234573',
                                 source: 'Client 5',
                                 timestamp: '1529494322',
                                 alias_id: undefined,
@@ -132,6 +150,16 @@ exports.seed = function(db, Promise) {
                                 source: 'Client 4',
                                 timestamp: '1529494321',
                                 alias_id: 6,
+                        })
+                )
+                .then(() =>
+                        db('messages').insert({
+                                address: '1234572',
+                                message:
+                                        'This is a Test Message to Address 1234572, that should be hidden to all users',
+                                source: 'Client 4',
+                                timestamp: '1529494321',
+                                alias_id: 7,
                         })
                 )
                 .then(() => db('users').del())

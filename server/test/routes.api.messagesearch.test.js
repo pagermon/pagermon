@@ -88,10 +88,10 @@ describe('GET /api/messageSearch', () => {
                                 res.status.should.eql(200);
                                 res.type.should.eql('application/json');
                                 res.body.should.be.a('object');
-                                res.body.messages[0].should.have.property('address').eql('1234572');
+                                res.body.messages[0].should.have.property('address').eql('1234573');
                                 res.body.messages[0].should.have
                                         .property('message')
-                                        .eql('This is a Test Message to non-stored Address 1234572');
+                                        .eql('This is a Test Message to non-stored Address 1234573');
                                 res.body.messages[0].should.have.property('source').eql('Client 5');
                                 done();
                         });

@@ -49,7 +49,8 @@ describe('GET /api/capcodes', () => {
                 res.body[0].should.have.property('color')
                 res.body[0].should.have.property('pluginconf')
                 res.body[0].should.have.property('ignore')
-                res.body.length.should.eql(6)
+                res.body[0].should.have.property('hideMessages')
+                res.body.length.should.eql(7)
                 done();
             });
     });
@@ -70,7 +71,8 @@ describe('GET /api/capcodes', () => {
                 res.body[0].should.have.property('color')
                 res.body[0].should.have.property('pluginconf')
                 res.body[0].should.have.property('ignore')
-                res.body.length.should.eql(6)
+                res.body[0].should.have.property('hideMessages')
+                res.body.length.should.eql(7)
                 done();
             });
     });
@@ -142,6 +144,8 @@ describe('GET /api/capcodes/:id', () => {
                                 res.body.should.have.property('pluginconf');
                                 res.body.should.have.property('ignore');
                                 res.body.ignore.should.eql(0);
+                                res.body.should.have.property('hideMessages');
+                                res.body.hideMessages.should.eql(0);
                                 done();
                         });
         });
@@ -172,6 +176,8 @@ describe('GET /api/capcodes/:id', () => {
                                 res.body.should.have.property('pluginconf');
                                 res.body.should.have.property('ignore');
                                 res.body.ignore.should.eql(0);
+                                res.body.should.have.property('hideMessages');
+                                res.body.hideMessages.should.eql(0);
                                 done();
                         });
         });
@@ -198,6 +204,8 @@ describe('GET /api/capcodes/:id', () => {
                                 res.body.should.have.property('pluginconf');
                                 res.body.should.have.property('ignore');
                                 res.body.ignore.should.eql(0);
+                                res.body.should.have.property('hideMessages');
+                                res.body.hideMessages.should.eql(0);
                                 done();
                         });
         });
@@ -224,6 +232,8 @@ describe('GET /api/capcodes/:id', () => {
                                 res.body.should.have.property('pluginconf');
                                 res.body.should.have.property('ignore');
                                 res.body.ignore.should.eql(0);
+                                res.body.should.have.property('hideMessages');
+                                res.body.hideMessages.should.eql(0);
                                 done();
                         });
         });
@@ -345,7 +355,7 @@ describe('GET /api/capcodes/agency', () => {
                 res.type.should.eql('application/json');
                 res.body.should.be.a('array');
                 res.body[0].should.have.property('agency')
-                res.body.length.should.eql(6)
+                res.body.length.should.eql(7)
                 done();
             });
     });
@@ -359,7 +369,7 @@ describe('GET /api/capcodes/agency', () => {
                 res.type.should.eql('application/json');
                 res.body.should.be.a('array');
                 res.body[0].should.have.property('agency')
-                res.body.length.should.eql(6)
+                res.body.length.should.eql(7)
                 done();
             });
     });
@@ -528,6 +538,8 @@ describe('GET /api/capcodeCheck/:id', () => {
                                 res.body.should.have.property('pluginconf');
                                 res.body.should.have.property('ignore');
                                 res.body.ignore.should.eql(0);
+                                res.body.should.have.property('hideMessages');
+                                res.body.hideMessages.should.eql(0);
                                 done();
                         });
         });
@@ -558,6 +570,8 @@ describe('GET /api/capcodeCheck/:id', () => {
                                 res.body.should.have.property('pluginconf');
                                 res.body.should.have.property('ignore');
                                 res.body.ignore.should.eql(0);
+                                res.body.should.have.property('hideMessages');
+                                res.body.hideMessages.should.eql(0);
                                 done();
                         });
         });
@@ -584,6 +598,8 @@ describe('GET /api/capcodeCheck/:id', () => {
                                 res.body.should.have.property('pluginconf');
                                 res.body.should.have.property('ignore');
                                 res.body.ignore.should.eql(0);
+                                res.body.should.have.property('hideMessages');
+                                res.body.hideMessages.should.eql(0);
                                 done();
                         });
         });
@@ -610,6 +626,8 @@ describe('GET /api/capcodeCheck/:id', () => {
                                 res.body.should.have.property('pluginconf');
                                 res.body.should.have.property('ignore');
                                 res.body.ignore.should.eql(0);
+                                res.body.should.have.property('hideMessages');
+                                res.body.hideMessages.should.eql(0);
                                 done();
                         });
         });

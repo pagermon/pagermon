@@ -54,7 +54,7 @@ describe('POST /api/messages', () => {
                                 should.not.exist(err);
                                 res.status.should.eql(200);
                                 res.type.should.eql('text/html');
-                                res.text.should.be.eql('8');
+                                res.text.should.be.eql('9');
                                 done();
                         });
         });

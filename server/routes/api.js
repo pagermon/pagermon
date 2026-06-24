@@ -73,25 +73,17 @@ router.route('/messages')
     } else {
       initData.limit = parseInt(defaultLimit, 10);
     }
-    if (pdwMode) {
-      if (adminShow && req.isAuthenticated() && req.user.role == 'admin') {
-        var subquery = db.from('capcodes').where('ignore', '=', 1).select('id')
-      } else {
-        var subquery = db.from('capcodes').where('ignore', '=', 0).select('id')
-      }
-    } else {
-      var subquery = db.from('capcodes').where('ignore', '=', 1).select('id')
-    }
+
     db.from('messages').where(function () {
       if( !req.isAuthenticated) this.where('capcodes.onlyShowLoggedIn',false);
       if (pdwMode) {
         if (adminShow && req.isAuthenticated() && req.user.role == 'admin') {
-          this.from('messages').where('alias_id', 'not in', subquery).orWhereNull('alias_id')
+          this.from('messages').where('alias_id', 'not in', db.from('capcodes').where('ignore', '=', 1).orWhere('hideMessages', 1).select('id')).orWhereNull('alias_id')
         } else {
-          this.from('messages').where('alias_id', 'in', subquery)
+          this.from('messages').where('alias_id', 'in', db.from('capcodes').where('ignore', '=', 0).andWhere('hideMessages',0).select('id'))
         }
       } else {
-        this.from('messages').where('alias_id', 'not in', subquery).orWhereNull('alias_id')
+        this.from('messages').where('alias_id', 'not in', db.from('capcodes').where('ignore', '=', 1).orWhere('hideMessages',1).select('id')).orWhereNull('alias_id')
       }
     }).count('* as msgcount')
       .then(function (initcount) {
@@ -119,12 +111,12 @@ router.route('/messages')
               if (!req.isAuthenticated()) queryBuilder.where('capcodes.onlyShowLoggedIn',false);
               if (pdwMode) {
                 if (adminShow && req.isAuthenticated() && req.user.role == 'admin') {
-                  queryBuilder.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id').where('capcodes.ignore', 0).orWhereNull('capcodes.ignore')
+                  queryBuilder.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id').where(qb => qb.where('capcodes.ignore', 0).orWhereNull('capcodes.ignore')).andWhere(qb => qb.where('capcodes.hideMessages', 0).orWhereNull('capcodes.hideMessages', 0))
                 } else {
-                  queryBuilder.innerJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id').where('capcodes.ignore', 0)
+                  queryBuilder.innerJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id').where('capcodes.ignore', 0).andWhere('capcodes.hideMessages', 0)
                 }
               } else {
-                queryBuilder.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id').where('capcodes.ignore', 0).orWhereNull('capcodes.ignore')
+                queryBuilder.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id').where(qb => qb.where('capcodes.ignore', 0).orWhereNull('capcodes.ignore')).andWhere(qb => qb.where('capcodes.hideMessages', 0).orWhereNull('capcodes.hideMessages', 0))
               }
             })
             .orderBy('messages.timestamp', 'desc')
@@ -456,6 +448,7 @@ router.route('/messages')
       )
       .leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id')
       .where('messages.id', id)
+      .where(qb => qb.where('capcodes.hideMessages', 0).orWhereNull('capcodes.hideMessages'))
       .modify((qb) => {
         if (!req.isAuthenticated()) qb.where('capcodes.onlyShowLoggedIn', false);
       })
@@ -465,24 +458,20 @@ router.route('/messages')
         }
 
         let responseData;
-        if (HideCapcode) {
-          if (!req.isAuthenticated() || (req.isAuthenticated() && req.user.role === 'user')) {
-            responseData = {
-              id: row[0].id,
-              message: row[0].message,
-              source: row[0].source,
-              datetime: row[0].timestamp,
-              timestamp: row[0].timestamp,
-              alias_id: row[0].alias_id,
-              alias: row[0].alias,
-              agency: row[0].agency,
-              icon: row[0].icon,
-              color: row[0].color,
-              ignore: row[0].ignore
-            };
-          } else {
-            responseData = row[0]; // Default behavior if HideCapcode is false
-          }
+        if (HideCapcode && (!req.isAuthenticated() || (req.isAuthenticated() && req.user.role === 'user'))) {
+          responseData = {
+            id: row[0].id,
+            message: row[0].message,
+            source: row[0].source,
+            datetime: row[0].timestamp,
+            timestamp: row[0].timestamp,
+            alias_id: row[0].alias_id,
+            alias: row[0].alias,
+            agency: row[0].agency,
+            icon: row[0].icon,
+            color: row[0].color,
+            ignore: row[0].ignore,
+          };
         } else {
           responseData = row[0];
         }
@@ -551,7 +540,7 @@ router.route('/messageSearch')
 
     var data = []
     console.time('sql')
-    db.select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', db.raw('CASE WHEN NOT capcodes.address = messages.address THEN 1 ELSE 0 END as wildcard'))
+    db.select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', 'capcodes.hideMessages', db.raw('CASE WHEN NOT capcodes.address = messages.address THEN 1 ELSE 0 END as wildcard'))
       .modify(function (qb) {
         if (dbtype == 'sqlite3' && query != '') {
           qb.from('messages_search_index')
@@ -608,19 +597,20 @@ router.route('/messageSearch')
                   "agency": row.agency,
                   "icon": row.icon,
                   "color": row.color,
-                  "ignore": row.ignore
+                  "ignore": row.ignore,
+                  "hiddeMessages": row.hideMessages,
                 };
               }
             }
             if (pdwMode) {
-              if (adminShow && req.isAuthenticated() && req.user.role == 'admin' && !row.ignore || row.ignore == 0) {
+              if (adminShow && req.isAuthenticated() && req.user.role == 'admin' && (!row.ignore || row.ignore == 0) && (!row.hideMessages || row.hideMessages == 0)) {
                 data.push(row);
               } else {
-                if (row.ignore == 0)
+                if (row.ignore == 0 && row.hideMessages == 0)
                   data.push(row);
               }
             } else {
-              if (!row.ignore || row.ignore == 0)
+              if ((!row.ignore || row.ignore == 0) && (!row.hideMessages || row.hideMessages == 0))
                 data.push(row);
             }
           }
@@ -719,6 +709,7 @@ router.route('/capcodes')
       var color = req.body.color || 'black';
       var icon = req.body.icon || 'question';
       var ignore = req.body.ignore || 0;
+      var hideMessages = req.body.hideMessages || 0;
       const pluginconf = JSON.stringify(vaccumPluginConf(req.body.pluginconf)) || "{}";
       const onlyShowLoggedIn = req.body.onlyShowLoggedIn || false;
       db.from('capcodes')
@@ -733,6 +724,7 @@ router.route('/capcodes')
               color,
               icon,
               ignore,
+              hideMessages,
               pluginconf,
               onlyShowLoggedIn,
             })
@@ -745,6 +737,7 @@ router.route('/capcodes')
               color,
               icon,
               ignore,
+              hideMessages,
               pluginconf,
               onlyShowLoggedIn,
             })
@@ -808,6 +801,7 @@ router.route('/capcodes/:id')
       "icon": "question",
       "color": "black",
       "ignore": 0,
+      "hideMessages": 0,
       "pluginconf": {},
       "onlyShowLoggedIn": false,
     };
@@ -871,6 +865,7 @@ router.route('/capcodes/:id')
         var color = req.body.color || 'black';
         var icon = req.body.icon || 'question';
         var ignore = req.body.ignore || 0;
+        var hideMessages = req.body.hideMessages || 0;
         var pluginconf = JSON.stringify(vaccumPluginConf(req.body.pluginconf)) || "{}";
         var updateAlias = req.body.updateAlias || 0;
         const onlyShowLoggedIn = req.body.onlyShowLoggedIn || 0;
@@ -889,6 +884,7 @@ router.route('/capcodes/:id')
                 color,
                 icon,
                 ignore,
+                hideMessages,
                 pluginconf,
                 onlyShowLoggedIn
               })
@@ -901,6 +897,7 @@ router.route('/capcodes/:id')
                 color,
                 icon,
                 ignore,
+                hideMessages,
                 pluginconf,
                 onlyShowLoggedIn
               })
@@ -1018,6 +1015,7 @@ router.route('/capcodeCheck/:id')
             "icon": "question",
             "color": "black",
             "ignore": 0,
+            "hideMessages": 0,
             "pluginconf": {},
             "onlyShowLoggedIn": 0
           };
@@ -1109,6 +1107,7 @@ router.route('/capcodeImport')
             var color = capcode.color || 'black';
             var icon = capcode.icon || 'question';
             var ignore = capcode.ignore || 0;
+            var hideMessages = capcode.hideMessages || 0;
             const  pluginconf = JSON.stringify(vaccumPluginConf(capcode.pluginconf)) || "{}";
             const onlyShowLoggedIn = capcode.onlyShowLoggedIn || false;
             await db('capcodes')
@@ -1127,6 +1126,7 @@ router.route('/capcodeImport')
                       color,
                       icon,
                       ignore,
+                      hideMessages,
                       pluginconf,
                       onlyShowLoggedIn,
                     })
@@ -1154,6 +1154,7 @@ router.route('/capcodeImport')
                     color,
                     icon,
                     ignore,
+                    hideMessages,
                     pluginconf,
                     onlyShowLoggedIn,
                   })
