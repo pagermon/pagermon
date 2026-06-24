@@ -32,7 +32,7 @@ function run(trigger, scope, data, config, callback) {
         if(process.platform === "win32"){
           var child = spawn("powershell.exe", [file_path+full_file_name, '"'+data.address+'"', "@'\r\n"+data.message+"\r\n'@", "@'\r\n"+JSON.stringify(data)+"\r\n'@"]); //
         }else{
-          var child = spawn("sh", [file_path+full_file_name, data.address, data.message, JSON.stringify(data)]);
+          var child = spawn("bash", [file_path+full_file_name, data.address, data.message, JSON.stringify(data)]);
         }
 
         child.stdout.on("data",function(data){
