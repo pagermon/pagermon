@@ -121,8 +121,19 @@ var io = require('socket.io')(server);
 
 io.sockets.on('connection', function (socket) {
     socket.removeAllListeners();
-    const userGroup = socket.request?.user?.role || 'anonymous';
-    socket.join(userGroup);
+    const userRole = socket.request?.user?.role || 'anonymous';
+    socket.join(userRole);
+    logger.main.debug(`User with role ${userRole} connected to main socket`);
+});
+
+// Admin socket namespace
+io.of('/adminio').on('connection', function (socket) {
+    socket.removeAllListeners();
+    // Only admins can reach here due to middleware
+    const user = socket.request.user;
+    logger.main.info(`Admin ${user.username} connected to admin socket`);
+    
+    // Admin-specific event handlers can be added here
 });
 
 app.use(favicon(path.join(__dirname,'themes',theme, 'public', 'favicon.ico')));
@@ -175,6 +186,58 @@ io.use(wrapMiddleware(session(sessSet)));
 io.use(wrapMiddleware(passport.session()));
 io.of('/adminio').use(wrapMiddleware(session(sessSet)));
 io.of('/adminio').use(wrapMiddleware(passport.session()));
+
+// Socket authentication middleware factory
+const createSocketAuthMiddleware = (options = {}) => {
+    return (socket, next) => {
+        const { requireAuth = true, requireAdmin = false, checkApiSecurity = false } = options;
+        
+        // Check apiSecurity setting if needed
+        if (checkApiSecurity) {
+            const apiSecurity = nconf.get('messages:apiSecurity');
+            if (!apiSecurity) {
+                return next(); // Allow anonymous if apiSecurity is off
+            }
+        }
+        
+        // Check authentication
+        if (requireAuth) {
+            // Check if user is authenticated via passport
+            const isAuthenticated = socket.request.isAuthenticated && typeof socket.request.isAuthenticated === 'function' 
+                ? socket.request.isAuthenticated() 
+                : !!socket.request.user;
+                
+            if (!isAuthenticated) {
+                return next(new Error('Authentication required'));
+            }
+        }
+        
+        // Check admin role - only if authentication is required and user exists
+        if (requireAdmin) {
+            if (!socket.request.user) {
+                return next(new Error('Authentication required'));
+            }
+            if (socket.request.user.role !== 'admin') {
+                return next(new Error('Admin access required'));
+            }
+        }
+        
+        next();
+    };
+};
+
+// Apply authentication middleware to main socket - respects apiSecurity setting
+io.use(createSocketAuthMiddleware({ 
+    checkApiSecurity: true,
+    requireAuth: true,
+    requireAdmin: false 
+}));
+
+// Apply authentication middleware to admin socket - always requires admin role
+io.of('/adminio').use(createSocketAuthMiddleware({ 
+    requireAuth: true,
+    requireAdmin: true 
+}));
 
 app.use('/', index);
 app.use('/admin', admin);

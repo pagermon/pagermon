@@ -167,5 +167,7 @@ exports.seed = function(db, Promise) {
                                 role: 'admin',
                                 status: 'disabled',
                         })
+                )
+                .then(() =>(db('protection').del())
                 );
 };

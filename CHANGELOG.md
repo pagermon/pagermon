@@ -19,6 +19,10 @@
 * Fix an error, where logging out would throw an error but work @eopo #633
 * Fix an error, where visiting sites when not logged in would throw errors @eopo #633
 * Improve CI and Docker Image building @eopo #632
+* Add Socket.IO authentication middleware for main and admin namespaces @Danrw
+* Implement role-based access control for admin socket namespace @Danrw
+* Add comprehensive Socket.IO authentication tests @Danrw
+* Refactor rate limit test to use async/await pattern @Danrw
 
 
 # 0.4.0 - Unreleased

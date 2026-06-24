@@ -22,7 +22,7 @@ nconf.file({ file: confFile });
 nconf.load();
 // set required settings in config file
 
-beforeEach(() => db.migrate.rollback().then(() => db.migrate.latest().then(() => db.seed.run().then(() => {nconf.set('messages:HideSource', false); nconf.set('messages:apiSecurity', false); nconf.set('messages:HideCapcode', false)}))));
+beforeEach(() => db.migrate.rollback().then(() => db.migrate.latest().then(() => db.seed.run().then(() => { nconf.set('messages:HideSource', false); nconf.set('messages:apiSecurity', false); nconf.set('messages:HideCapcode', false) }))));
 
 afterEach(() => db.migrate.rollback().then(() => passportStub.logout()));
 
@@ -130,28 +130,28 @@ describe('POST /auth/login', () => {
                                 done();
                         });
         });
-        it('should return a 429 with too many invalid attempts', done => {
-                chai.request(server)
+        it('should return a 429 with too many invalid attempts', async () => {
+                // The bruteforce limit is 5 free retries, so we need 6 attempts to trigger lockout
+                const loginData = {
+                        username: 'admindisabled',
+                        password: 'changeme',
+                };
+
+                // Make 6 failed login attempts (disabled user always fails)
+                for (let i = 0; i < 6; i++) {
+                        await chai.request(server)
+                                .post('/auth/login')
+                                .send(loginData);
+                }
+
+                // The 7th attempt should be rate limited
+                const res = await chai.request(server)
                         .post('/auth/login')
-                        .send({
-                                username: 'admindisabled',
-                                password: 'changeme',
-                        })
-                        .then(function() {
-                                chai.request(server)
-                                        .post('/auth/login')
-                                        .send({
-                                                username: 'admindisabled',
-                                                password: 'changeme',
-                                        })
-                                        .end((err, res) => {
-                                                should.not.exist(err);
-                                                res.status.should.eql(429);
-                                                res.body.status.should.eql('lockedout');
-                                                res.body.error.should.eql('Too many attempts, please try again later');
-                                                done();
-                                        });
-                        });
+                        .send(loginData);
+
+                res.status.should.eql(429);
+                res.body.status.should.eql('lockedout');
+                res.body.error.should.eql('Too many attempts, please try again later');
         });
 });
 
