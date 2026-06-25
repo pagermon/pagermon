@@ -149,4 +149,33 @@ describe('GET /api/messageSearch', () => {
                                 done();
                         });
         });
+        it('should treat hyphens as part of the search phrase', done => {
+                db('messages')
+                        .insert([
+                                {
+                                        address: '1234571',
+                                        message: 'Intern-1',
+                                        source: 'Client 5',
+                                        timestamp: '1529495673',
+                                },
+                                {
+                                        address: '1234572',
+                                        message: 'Intern-2',
+                                        source: 'Client 6',
+                                        timestamp: '1529495674',
+                                },
+                        ])
+                        .then(() => {
+                                chai.request(server)
+                                        .get('/api/messageSearch?q=Intern-1')
+                                        .end((err, res) => {
+                                                should.not.exist(err);
+                                                res.status.should.eql(200);
+                                                res.body.messages.should.have.length(1);
+                                                res.body.messages[0].should.have.property('message').eql('Intern-1');
+                                                done();
+                                        });
+                        })
+                        .catch(done);
+        });
 });

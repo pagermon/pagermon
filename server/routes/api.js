@@ -569,7 +569,9 @@ router.route('/messageSearch')
           qb.leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id');
         }
         if (dbtype == 'sqlite3' && query != '') {
-          qb.whereRaw('messages_search_index MATCH ?', query)
+          // FTS3 treats a hyphen as the NOT operator unless the query is a phrase.
+          var sqliteQuery = query.indexOf('-') !== -1 ? '"' + query.replace(/"/g, '""') + '"' : query;
+          qb.whereRaw('messages_search_index MATCH ?', sqliteQuery)
         } else if (dbtype == 'mysql' && query != '') {
           //This wraps the search query in quotes so MySQL searches for the complete term rather than individual words.
           query = '"' + query + '"'
